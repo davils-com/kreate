@@ -6,6 +6,6 @@ import org.gradle.api.Project
 
 internal object ProjectModule : Module {
     override fun apply(project: Project, extension: KreateExtension) {
-        TODO("Not yet implemented")
+
     }
 }
