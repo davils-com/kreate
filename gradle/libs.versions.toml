@@ -1,2 +1,13 @@
 [versions]
 kotlin = "2.3.20"
+
+[libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
+[plugins]
+kreate = { id = "com.davils.kreate" }
+
+[bundles]
+kreate-plugin = [
+    "kotlin-gradle-plugin",
+]
