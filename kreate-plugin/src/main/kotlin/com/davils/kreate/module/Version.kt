@@ -1,3 +1,15 @@
 package com.davils.kreate.module
 
-public fun getProjectVersion(key: String): String = System.getenv(key) ?: "1.0.0"
+import org.gradle.api.Project
+
+public fun Project.getProjectVersion(): String {
+    val ciTag = System.getenv("CI_COMMIT_TAG")
+    if (ciTag != null) return ciTag
+
+    val versionProp = findProperty("version")?.toString()
+    if (versionProp != null && versionProp != "unspecified") {
+        return versionProp
+    }
+
+    return "1.0.0"
+}
