@@ -1,7 +1,12 @@
+import com.davils.buildsrc.Project
+
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
 }
+
+group = Project.Identity.GROUP.lowercase()
+
 
 repositories {
     mavenCentral()
@@ -9,13 +14,20 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
+    implementation(libs.bundles.kreate.plugin)
 }
 
 gradlePlugin {
+    vcsUrl = Project.VersionControl.SCM_URL
+    website = Project.Organization.WEBSITE_URL
+
     plugins {
-        create("kreate") {
-            id = "com.davils.kreate"
-            implementationClass = "com.davils.kreate.Kreate"
+        create(Project.Identity.NAME.lowercase()) {
+            id = "${Project.Identity.GROUP.lowercase()}.${Project.Identity.NAME.lowercase()}"
+            description = Project.Identity.DESCRIPTION
+            displayName = Project.Identity.NAME
+            implementationClass = "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.${Project.Identity.NAME}"
+            tags = listOf("creation", "davils", "setup", "compatibility", "constants", "kotlin", "cinterop", "multiplatform")
         }
     }
 }
