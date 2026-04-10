@@ -1,4 +1,4 @@
-package com.davils.kreate.module.project.plugin
+package com.davils.kreate.module.project
 
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
