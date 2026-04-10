@@ -2,6 +2,7 @@ package com.davils.kreate.module.project.tests
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.project.tests.logging.configureLogging
+import com.davils.kreate.module.project.tests.report.configureReport
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.withType
@@ -25,6 +26,7 @@ internal fun Project.initializeTesting(extension: KreateExtension) {
         useJUnitPlatform()
         maxParallelForks = testingExtension.maxParallelForks.get()
         configureLogging(testingExtension.logging)
+        configureReport(testingExtension.report)
     }
 
     fun KotlinTest.configureCommonKmpTesting() {
@@ -32,6 +34,8 @@ internal fun Project.initializeTesting(extension: KreateExtension) {
         ignoreFailures = testingExtension.ignoreFailures.get()
         failOnNoDiscoveredTests.set(testingExtension.failOnNoDiscoveredTests.get())
         outputs.upToDateWhen { !testingExtension.alwaysRunTests.get() }
+        configureLogging(testingExtension.logging)
+        configureReport(testingExtension.report)
     }
 
     plugins.withId("org.jetbrains.kotlin.jvm") {
