@@ -2,6 +2,7 @@ package com.davils.kreate.module.project
 
 import com.davils.kreate.module.project.constants.BuildConstantsExtension
 import com.davils.kreate.module.project.docs.DocsExtension
+import com.davils.kreate.module.project.tests.TestsExtension
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -18,11 +19,18 @@ public abstract class ProjectExtension @Inject constructor(factory: ObjectFactor
     @get:Nested
     public abstract val docs: DocsExtension
 
+    @get:Nested
+    public abstract val tests: TestsExtension
+
     public fun buildConstant(action: Action<BuildConstantsExtension>) {
         action.execute(buildConstants)
     }
 
     public fun docs(action: Action<DocsExtension>) {
         action.execute(docs)
+    }
+
+    public fun tests(action: Action<TestsExtension>) {
+        action.execute(tests)
     }
 }
