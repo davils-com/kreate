@@ -8,6 +8,10 @@ kreate {
         javaVersion = JavaVersion.VERSION_25
         explicitApi = true
         allWarningsAsErrors = false
+
+        multiplatform {
+
+        }
     }
 
     project {
@@ -41,6 +45,12 @@ kreate {
                 logPassedTests = true
                 logSkippedTests = true
                 logTestStarted = true
+            }
+
+            report {
+                enabled = true
+                xml = true
+                html = true
             }
         }
     }
