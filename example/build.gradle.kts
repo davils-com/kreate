@@ -28,5 +28,20 @@ kreate {
             outputDirectory = "docs"
             moduleName = "Example"
         }
+
+        tests {
+            enabled = true
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+            timeoutMinutes = 10L
+            ignoreFailures = false
+            alwaysRunTests = false
+            failOnNoDiscoveredTests = false
+
+            logging {
+                logPassedTests = true
+                logSkippedTests = true
+                logTestStarted = true
+            }
+        }
     }
 }
