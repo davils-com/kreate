@@ -4,6 +4,7 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import com.davils.kreate.module.project.constants.initializeBuildConstants
 import com.davils.kreate.module.project.docs.initializeDocs
+import com.davils.kreate.module.project.tests.initializeTesting
 import org.gradle.api.Project
 
 internal object ProjectModule : Module {
@@ -21,6 +22,7 @@ internal object ProjectModule : Module {
             initializeProject(extension.project)
             initializeBuildConstants(extension)
             initializeDocs(extension)
+            initializeTesting(extension)
         }
     }
 }
