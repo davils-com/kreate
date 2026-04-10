@@ -1,10 +1,12 @@
 package com.davils.kreate.module.project.tests.logging
 
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.tasks.KotlinTest
 
-internal fun Test.configureLogging(loggingExtension: TestsLoggingExtension) {
+internal fun AbstractTestTask.configureLogging(loggingExtension: TestsLoggingExtension) {
     testLogging {
         showExceptions = true
         showCauses = true
@@ -19,3 +21,4 @@ internal fun Test.configureLogging(loggingExtension: TestsLoggingExtension) {
         this.events = events
     }
 }
+
