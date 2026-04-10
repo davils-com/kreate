@@ -1,8 +1,8 @@
 package com.davils.kreate.module.platform.multiplatform.cinterop.tasks
 
 import com.davils.kreate.jobs.Task
-import com.davils.kreate.system.OsTarget
-import com.davils.kreate.system.getOs
+import com.davils.kreate.module.platform.multiplatform.cinterop.resolveCargoCommand
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -17,35 +17,19 @@ public abstract class AddRustDependencies @Inject constructor(
 
     @TaskAction
     override fun execute() {
-        val os by getOs()
+        val cargoCmd = resolveCargoCommand()
         try {
-            when(os) {
-                OsTarget.MACOS -> {
-                    exec.exec {
-                        workingDir = workDir.get().asFile
-                        commandLine("${System.getProperty("user.home")}/.cargo/bin/cargo", "add", "libc")
-                    }
+            exec.exec {
+                workingDir = workDir.get().asFile
+                commandLine(cargoCmd, "add", "libc")
+            }
 
-                    exec.exec {
-                        workingDir = workDir.get().asFile
-                        commandLine("${System.getProperty("user.home")}/.cargo/bin/cargo", "add", "--build", "cbindgen")
-                    }
-                }
-
-                else -> {
-                    exec.exec {
-                        workingDir = workDir.get().asFile
-                        commandLine("cargo", "add", "libc")
-                    }
-
-                    exec.exec {
-                        workingDir = workDir.get().asFile
-                        commandLine("cargo", "add", "--build", "cbindgen")
-                    }
-                }
+            exec.exec {
+                workingDir = workDir.get().asFile
+                commandLine(cargoCmd, "add", "--build", "cbindgen")
             }
         } catch (e: Exception) {
-            logger.error("Failed to add rust dependencies.", e)
+            throw GradleException("Failed to add rust dependencies.", e)
         }
     }
 }
