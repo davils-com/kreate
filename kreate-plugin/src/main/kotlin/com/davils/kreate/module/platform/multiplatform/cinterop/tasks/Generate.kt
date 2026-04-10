@@ -5,6 +5,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -33,6 +34,10 @@ public abstract class GenerateRustBuildScript : Task("Generates the build script
                     .write_to_file("include/${projectName.get()}.h");
             }
         """.trimIndent()
+
+    @get:OutputFile
+    public val outputFile: File
+        get() = workDir.get().asFile.resolve(BUILD_RUST_FILE_NAME)
 
     @TaskAction
     override fun execute() {

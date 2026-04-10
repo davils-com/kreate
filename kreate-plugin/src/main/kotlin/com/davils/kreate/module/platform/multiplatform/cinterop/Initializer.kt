@@ -8,10 +8,6 @@ import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.ConfigureC
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.GenerateDefinitionFiles
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.GenerateRustBuildScript
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.InitializeRustProject
-import com.davils.kreate.system.Architecture
-import com.davils.kreate.system.OsTarget
-import com.davils.kreate.system.getArchitecture
-import com.davils.kreate.system.getOs
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -78,8 +74,9 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     val generateDefinitionFiles by tasks.register<GenerateDefinitionFiles>("generateDefinitionFiles") {
         workDir.set(rustProject)
         this.rootDir.set(projectRootDir)
-        this.cInteropConfig.set(cInteropConfig)
         this.projectName.set(projectName)
+        this.defFileName.set(cInteropConfig.defFiles.fileName)
+        this.defDirName.set(cInteropConfig.defFiles.dirName)
         if (cInteropConfig.rustTargets.isPresent) {
             rustTargets.set(cInteropConfig.rustTargets)
         }
@@ -93,40 +90,40 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
 }
 
 private fun Project.applyNativeTargets(cInteropConfig: CInteropExtension) {
-    val arch by getArchitecture()
-    val os by getOs()
+    val targets = resolveRustTargets(cInteropConfig.rustTargets)
     configure<KotlinMultiplatformExtension> {
-        when (os) {
-            OsTarget.WINDOWS -> {
-                mingwX64 {
-                    configureCInterop(this@applyNativeTargets)
-                    cInteropConfig.mingwConfiguration.invoke(this)
-                }
-            }
-
-            OsTarget.MACOS -> {
-                macosArm64 {
-                    configureCInterop(this@applyNativeTargets)
-                    cInteropConfig.macosConfiguration.invoke(this)
-                }
-            }
-
-            OsTarget.LINUX -> {
-                when (arch) {
-                    Architecture.X64 -> linuxX64 {
+        for (rustTarget in targets) {
+            when {
+                rustTarget.contains("x86_64-pc-windows") || rustTarget.contains("mingw") -> {
+                    mingwX64 {
                         configureCInterop(this@applyNativeTargets)
-                        cInteropConfig.linuxConfiguration.invoke(this)
+                        cInteropConfig.mingwConfiguration.invoke(this)
                     }
+                }
 
-                    else -> linuxArm64 {
+                rustTarget.contains("aarch64-apple-darwin") -> {
+                    macosArm64 {
+                        configureCInterop(this@applyNativeTargets)
+                        cInteropConfig.macosConfiguration.invoke(this)
+                    }
+                }
+
+                rustTarget.contains("x86_64-unknown-linux") -> {
+                    linuxX64 {
                         configureCInterop(this@applyNativeTargets)
                         cInteropConfig.linuxConfiguration.invoke(this)
                     }
                 }
 
-            }
+                rustTarget.contains("aarch64-unknown-linux") -> {
+                    linuxArm64 {
+                        configureCInterop(this@applyNativeTargets)
+                        cInteropConfig.linuxConfiguration.invoke(this)
+                    }
+                }
 
-            else -> Unit
+                else -> throw GradleException("Unsupported Rust target for Kotlin/Native mapping: $rustTarget")
+            }
         }
     }
 }

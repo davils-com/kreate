@@ -1,7 +1,6 @@
 package com.davils.kreate.module.platform.multiplatform.cinterop.tasks
 
 import com.davils.kreate.jobs.Task
-import com.davils.kreate.module.platform.multiplatform.cinterop.CInteropExtension
 import com.davils.kreate.module.platform.multiplatform.cinterop.resolveRustTargets
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -10,6 +9,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -24,11 +24,18 @@ public abstract class GenerateDefinitionFiles : Task("Generates cinterop definit
     public abstract val projectName: Property<String>
 
     @get:Input
-    public abstract val cInteropConfig: Property<CInteropExtension>
+    public abstract val defFileName: Property<String>
+
+    @get:Input
+    public abstract val defDirName: Property<String>
 
     @get:Input
     @get:Optional
     public abstract val rustTargets: ListProperty<String>
+
+    @get:OutputDirectory
+    public val outputDir: File
+        get() = workDir.get().asFile.resolve(defDirName.get())
 
     @TaskAction
     override fun execute() {
@@ -38,7 +45,7 @@ public abstract class GenerateDefinitionFiles : Task("Generates cinterop definit
     }
 
     private fun validateCInteropDir(): File {
-        val dir = workDir.get().asFile.resolve(cInteropConfig.get().defFiles.dirName.get())
+        val dir = workDir.get().asFile.resolve(defDirName.get())
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 throw GradleException("Failed to create cinterop directory: ${dir.absolutePath}")
@@ -48,7 +55,7 @@ public abstract class GenerateDefinitionFiles : Task("Generates cinterop definit
     }
 
     private fun validateDefinitionFile(cinteropDir: File): File {
-        val defFile = cinteropDir.resolve(cInteropConfig.get().defFiles.fileName.get())
+        val defFile = cinteropDir.resolve(defFileName.get())
         if (!defFile.exists()) {
             try {
                 defFile.createNewFile()

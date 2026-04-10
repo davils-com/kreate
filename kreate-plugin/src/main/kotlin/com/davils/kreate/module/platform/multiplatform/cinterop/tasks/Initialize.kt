@@ -7,7 +7,9 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
@@ -19,6 +21,10 @@ public abstract class InitializeRustProject @Inject constructor(
 
     @get:Input
     public abstract val projectName: Property<String>
+
+    @get:OutputDirectory
+    public val outputDir: File
+        get() = workDir.get().asFile.resolve(projectName.get())
 
     @TaskAction
     override fun execute() {

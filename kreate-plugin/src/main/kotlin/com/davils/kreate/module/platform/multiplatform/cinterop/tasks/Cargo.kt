@@ -3,6 +3,7 @@ package com.davils.kreate.module.platform.multiplatform.cinterop.tasks
 import com.davils.kreate.jobs.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
@@ -15,6 +16,10 @@ public abstract class ConfigureCargo : Task("Configure Cargo Toml file for stati
             [lib]
             crate-type = ["staticlib"]
         """.trimIndent()
+
+    @get:OutputFile
+    public val outputFile: File
+        get() = workDir.get().asFile.resolve(CARGO_TOML_FILE_NAME)
 
     @TaskAction
     override fun execute() {
