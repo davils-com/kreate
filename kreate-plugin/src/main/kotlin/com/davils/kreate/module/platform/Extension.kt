@@ -7,4 +7,6 @@ import javax.inject.Inject
 
 public abstract class PlatformExtension @Inject constructor(factory: ObjectFactory) {
     public val javaVersion: Property<JavaVersion> = factory.property(JavaVersion::class.java).convention(JavaVersion.VERSION_25)
+    public val explicitApi: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+    public val allWarningsAsErrors: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 }
