@@ -22,5 +22,11 @@ kreate {
             constant("example", "value")
             constant("example2", 1)
         }
+
+        docs {
+            enabled = true
+            outputDirectory = "docs"
+            moduleName = "Example"
+        }
     }
 }
