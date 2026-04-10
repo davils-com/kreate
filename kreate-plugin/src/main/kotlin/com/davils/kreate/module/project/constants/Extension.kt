@@ -7,9 +7,7 @@ import javax.inject.Inject
 
 public abstract class BuildConstantsExtension @Inject constructor(factory: ObjectFactory) {
     private val properties: MapProperty<String, String> = factory.mapProperty(String::class.java, String::class.java).convention(emptyMap())
-
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
-
     public val packageNameOverride: Property<String> = factory.property(String::class.java)
     public val className: Property<String> = factory.property(String::class.java).convention("BuildConstants")
     public val path: Property<String> = factory.property(String::class.java).convention("generated/compile")
