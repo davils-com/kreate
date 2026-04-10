@@ -2,6 +2,8 @@
 kotlin = "2.3.20"
 poet = "2.3.0"
 dokka = "2.2.0"
+kotest = "6.1.11"
+ksp = "2.3.6"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
@@ -10,6 +12,8 @@ poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+kotest-gradle-plugin = { module = "io.kotest:io.kotest.gradle.plugin", version.ref = "kotest" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
@@ -19,5 +23,7 @@ kreate-plugin = [
     "poet-core",
     "kotlin-gradle-plugin",
     "dokka-gradle-plugin",
-    "serialization-gradle-plugin"
+    "serialization-gradle-plugin",
+    "kotest-gradle-plugin",
+    "ksp-gradle-plugin"
 ]
