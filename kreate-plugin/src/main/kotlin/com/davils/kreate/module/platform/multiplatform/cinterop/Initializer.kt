@@ -12,6 +12,7 @@ import com.davils.kreate.system.Architecture
 import com.davils.kreate.system.OsTarget
 import com.davils.kreate.system.getArchitecture
 import com.davils.kreate.system.getOs
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getValue
@@ -29,12 +30,10 @@ public fun Project.initializeCInterop(extension: KreateExtension) {
     applyNativeTargets(cInteropConfig)
 }
 
-private fun Project.validateRootDir(rootDir: File) {
+private fun validateRootDir(rootDir: File) {
     if (!rootDir.exists()) {
-        try {
-            rootDir.mkdirs()
-        } catch (e: Exception) {
-            logger.error("Failed to create root directory: ${rootDir.absolutePath}", e)
+        if (!rootDir.mkdirs()) {
+            throw GradleException("Failed to create root directory: ${rootDir.absolutePath}")
         }
     }
 }
@@ -70,6 +69,9 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
 
     val compileRust by tasks.register<CompileRust>("compileRust") {
         workDir.set(rustProject)
+        if (cInteropConfig.rustTargets.isPresent) {
+            rustTargets.set(cInteropConfig.rustTargets)
+        }
         dependsOn(generateRustBuildScript)
     }
 
@@ -78,6 +80,9 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
         this.rootDir.set(projectRootDir)
         this.cInteropConfig.set(cInteropConfig)
         this.projectName.set(projectName)
+        if (cInteropConfig.rustTargets.isPresent) {
+            rustTargets.set(cInteropConfig.rustTargets)
+        }
         dependsOn(compileRust)
     }
 
