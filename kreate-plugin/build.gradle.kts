@@ -32,7 +32,7 @@ gradlePlugin {
     }
 }
 
-val targetJavaVersion = JavaVersion.VERSION_21
+val targetJavaVersion = JavaVersion.VERSION_25
 java {
     sourceCompatibility = targetJavaVersion
     targetCompatibility = targetJavaVersion
