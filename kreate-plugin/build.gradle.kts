@@ -10,6 +10,7 @@ group = Project.Identity.GROUP.lowercase()
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
