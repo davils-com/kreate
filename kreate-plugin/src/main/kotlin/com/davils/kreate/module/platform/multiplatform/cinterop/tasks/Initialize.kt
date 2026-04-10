@@ -1,8 +1,8 @@
 package com.davils.kreate.module.platform.multiplatform.cinterop.tasks
 
 import com.davils.kreate.jobs.Task
-import com.davils.kreate.system.OsTarget
-import com.davils.kreate.system.getOs
+import com.davils.kreate.module.platform.multiplatform.cinterop.resolveCargoCommand
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -30,24 +30,14 @@ public abstract class InitializeRustProject @Inject constructor(
             return
         }
 
-        val os by getOs()
+        val cargoCmd = resolveCargoCommand()
         try {
-            when(os) {
-                OsTarget.MACOS -> {
-                    exec.exec {
-                        workingDir = workDirFile
-                        commandLine("${System.getProperty("user.home")}/.cargo/bin/cargo", "new", "--lib", projectName)
-                    }
-                }
-                else -> {
-                    exec.exec {
-                        workingDir = workDirFile
-                        commandLine("cargo", "new", "--lib", projectName)
-                    }
-                }
+            exec.exec {
+                workingDir = workDirFile
+                commandLine(cargoCmd, "new", "--lib", projectName)
             }
         } catch (e: Exception) {
-            logger.error("Failed to initialize rust project.", e)
+            throw GradleException("Failed to initialize rust project.", e)
         }
     }
 }
