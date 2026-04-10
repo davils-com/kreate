@@ -1,6 +1,7 @@
 package com.davils.kreate.module.project.tests
 
 import com.davils.kreate.module.project.tests.logging.TestsLoggingExtension
+import com.davils.kreate.module.project.tests.report.TestsReportExtension
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -18,7 +19,14 @@ public abstract class TestsExtension @Inject constructor(factory: ObjectFactory)
     @get:Nested
     public abstract val logging: TestsLoggingExtension
 
+    @get:Nested
+    public abstract val report: TestsReportExtension
+
     public fun logging(action: Action<TestsLoggingExtension>) {
         action.execute(logging)
+    }
+
+    public fun report(action: Action<TestsReportExtension>) {
+        action.execute(report)
     }
 }
