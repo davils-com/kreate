@@ -1,0 +1,54 @@
+package com.davils.kreate.module.project.tests
+
+import com.davils.kreate.KreateExtension
+import com.davils.kreate.module.project.tests.logging.configureLogging
+import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinTest
+import java.time.Duration
+
+internal fun Project.initializeTesting(extension: KreateExtension) {
+    val testingExtension = extension.project.tests
+    if (!testingExtension.enabled.get()) return
+
+    validateKotestPlugin()
+
+    fun Test.configureCommonJvmTesting() {
+        timeout.set(Duration.ofMinutes(testingExtension.timeoutMinutes.get()))
+        ignoreFailures = testingExtension.ignoreFailures.get()
+        failOnNoDiscoveredTests.set(testingExtension.failOnNoDiscoveredTests.get())
+        outputs.upToDateWhen { !testingExtension.alwaysRunTests.get() }
+    }
+
+    fun Test.configureJvmTestEngine() {
+        useJUnitPlatform()
+        maxParallelForks = testingExtension.maxParallelForks.get()
+        configureLogging(testingExtension.logging)
+    }
+
+    fun KotlinTest.configureCommonKmpTesting() {
+        timeout.set(Duration.ofMinutes(testingExtension.timeoutMinutes.get()))
+        ignoreFailures = testingExtension.ignoreFailures.get()
+        failOnNoDiscoveredTests.set(testingExtension.failOnNoDiscoveredTests.get())
+        outputs.upToDateWhen { !testingExtension.alwaysRunTests.get() }
+    }
+
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        tasks.withType<Test>().configureEach {
+            configureCommonJvmTesting()
+            configureJvmTestEngine()
+        }
+    }
+
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        tasks.withType<Test>().configureEach {
+            configureCommonJvmTesting()
+            configureJvmTestEngine()
+        }
+
+        tasks.withType<KotlinTest>().configureEach {
+            configureCommonKmpTesting()
+        }
+    }
+}
