@@ -1,6 +1,7 @@
 [versions]
 kotlin = "2.3.20"
 poet = "2.3.0"
+dokka = "2.2.0"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
@@ -8,6 +9,7 @@ poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
 # actual plugins, but needed as dependencies in buildSrc's
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
@@ -16,5 +18,6 @@ kreate = { id = "com.davils.kreate" }
 kreate-plugin = [
     "poet-core",
     "kotlin-gradle-plugin",
+    "dokka-gradle-plugin",
     "serialization-gradle-plugin"
 ]
