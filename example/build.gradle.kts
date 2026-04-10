@@ -17,6 +17,7 @@ kreate {
                 nameOverride = "example"
                 projectDirectory = file("cinterop")
                 packageName = "com.davils.example.cinterop"
+                rustTargets = listOf("x86_64-unknown-linux-gnu")
 
                 defFile {
                     fileName = "cinterop.def"
