@@ -3,6 +3,7 @@ import com.davils.buildsrc.Project
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
+    `kreate-publish`
 }
 
 group = Project.Identity.GROUP.lowercase()
@@ -38,7 +39,6 @@ java {
     sourceCompatibility = targetJavaVersion
     targetCompatibility = targetJavaVersion
     withSourcesJar()
-    withJavadocJar()
 }
 
 kotlin {

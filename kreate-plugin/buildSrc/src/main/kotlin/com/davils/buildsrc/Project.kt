@@ -88,107 +88,23 @@ public object Project {
          */
         public const val TIMEZONE: String = "Europe/Berlin"
     }
-
-    /**
-     * Contains constants related to version control.
-     *
-     * @since 1.0.0
-     */
+    
     public object VersionControl {
-        /**
-         * The name of the CI system used.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val CI_SYSTEM: String = "Github Actions"
-
-        /**
-         * The URL for the CI system.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val CI_URL: String = "https://github.com/davils-com/kreate/actions"
-
-        /**
-         * The SCM connection URL.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val SCM_CONNECTION: String = "scm:git:https://github.com/davils-com/kreate.git"
-
-        /**
-         * The SCM developer connection URL.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val SCM_DEVELOPER_CONNECTION: String = "scm:git:ssh://git@github.com:davils-com/kreate.git"
-
-        /**
-         * The SCM URL.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val SCM_URL: String = "https://github.com/davils-com/kreate.git"
     }
 
-    /**
-     * Contains constants related to legal information.
-     *
-     * @since 1.0.0
-     * @author Nils Jaekel
-     */
     public object Legal {
-        /**
-         * The name of the license.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val LICENSE_NAME: String = "Apache 2.0"
-
-        /**
-         * The URL for the license.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val LICENSE_URL: String = "https://github.com/davils-com/kreate/blob/main/LICENSE"
-
-        /**
-         * The distribution type for the license.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
         public const val LICENSE_DISTRIBUTION: String = "repo"
     }
 
-    /**
-     * Contains constants related to issue management.
-     *
-     * @since 1.0.0
-     * @author Nils Jaekel
-     */
     public object IssueManagement {
-        /**
-         * The name of the issue management system.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
-        public const val SYSTEM: String = "Gitlab Issues"
-
-        /**
-         * The URL for the issue management system.
-         *
-         * @since 1.0.0
-         * @author Nils Jaekel
-         */
+        public const val SYSTEM: String = "Github Issues"
         public const val URL: String = "https://github.com/davils-com/kreate/issues"
     }
 }
