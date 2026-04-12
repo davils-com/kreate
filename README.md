@@ -121,15 +121,15 @@ kreate {
 
 ## ⚙️ Configuration Reference
 
-| Block | Property | Description | Default |
-| :--- | :--- | :--- | :--- |
-| `platform` | `javaVersion` | Target Java version (21, 25, etc.) | `VERSION_21` |
-| `platform` | `explicitApi` | Enforces Kotlin Explicit API mode | `false` |
-| `platform` | `allWarningsAsErrors` | Treats all compiler warnings as errors | `true` |
-| `project` | `buildConstant` | Generate type-safe Kotlin constants | `Disabled` |
-| `project` | `docs` | Configure Dokka documentation generation | `Disabled` |
-| `project` | `tests` | Advanced Kotest configuration & reporting | `Enabled` |
-| `project` | `publish` | Maven Central / GitLab publishing setup | `Disabled` |
+| Block      | Property              | Description                               | Default      |
+|:-----------|:----------------------|:------------------------------------------|:-------------|
+| `platform` | `javaVersion`         | Target Java version (21, 25, etc.)        | `VERSION_21` |
+| `platform` | `explicitApi`         | Enforces Kotlin Explicit API mode         | `false`      |
+| `platform` | `allWarningsAsErrors` | Treats all compiler warnings as errors    | `true`       |
+| `project`  | `buildConstant`       | Generate type-safe Kotlin constants       | `Disabled`   |
+| `project`  | `docs`                | Configure Dokka documentation generation  | `Disabled`   |
+| `project`  | `tests`               | Advanced Kotest configuration & reporting | `Enabled`    |
+| `project`  | `publish`             | Maven Central / GitLab publishing setup   | `Disabled`   |
 
 ---
 
