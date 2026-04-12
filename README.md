@@ -80,13 +80,36 @@ To generate the documentation locally, run:
 
 ## 🛠️ Quick Start
 
-Apply the plugin in your `build.gradle.kts`:
+### Installation
+
+Add the plugin to your `settings.gradle.kts` (recommended) or `build.gradle.kts`:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("com.davils.kreate") version "<latest>"
+}
+```
+
+Or apply it in your `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    id("com.davils.kreate") version "1.0.0"
+    id("com.davils.kreate") version "<latest>"
 }
+```
 
+### Configuration
+
+Apply the plugin in your `build.gradle.kts`:
+
+```kotlin
 kreate {
     platform {
         javaVersion = JavaVersion.VERSION_25
