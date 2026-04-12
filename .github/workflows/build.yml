@@ -25,14 +25,11 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --no-daemon
 
   publish:
     if: github.ref_type == 'tag'
@@ -59,11 +56,8 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Publish to Maven Central
-        run: ./gradlew :kreate-plugin:publishToMavenCentral
+        run: ./gradlew :kreate-plugin:publishToMavenCentral --no-daemon
