@@ -78,6 +78,64 @@ kreate {
                 html = true
             }
         }
+
+        publish {
+            enabled = true
+            inceptionYear = 2026
+            website = "https://example.com"
+
+            pom {
+                issueManagement {
+                    system = "Github Issues"
+                    url = "https://github.com/example/issues"
+                }
+
+                ciManagement {
+                    system = "Github Actions"
+                    url = "https://github.com/example/actions"
+                }
+
+                licenses {
+                    license {
+                        name = "Apache 2.0"
+                        url = "https://github.com/example/example-project/blob/main/LICENSE"
+                        distribution = "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "example"
+                        name = "Example"
+                        email = "example@example.com"
+                        organization = "Example"
+                        timezone = "Europe/Berlin"
+                    }
+                }
+
+                scm {
+                    url = "https://github.com/example/example-project.git"
+                    connection = "scm:git:https://github.com/example/example-project.git"
+                    developerConnection = "scm:git:ssh://git@github.com:example/example-project.git"
+                }
+            }
+
+            repositories {
+                gitlab {
+                    enabled = true
+                    name = "ExampleInstance"
+                    tokenEnv = "CI_JOB_TOKEN"
+                    projectIdEnv = "CI_PROJECT_ID"
+                    apiUrlEnv = "CI_API_V4_URL"
+                }
+
+                mavenCentral {
+                    enabled = true
+                    automaticRelease = true
+                    signPublications = true
+                }
+            }
+        }
     }
 }
 
