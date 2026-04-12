@@ -10,6 +10,7 @@ version = "1.0.0-dev1"
 
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
+    signAllPublications()
 
     coordinates(Project.Identity.GROUP, Project.Identity.NAME.lowercase(), version.toString())
 
