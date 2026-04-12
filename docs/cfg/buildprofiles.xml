@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE buildprofiles SYSTEM "https://resources.jetbrains.com/writerside/1.0/build-profiles.dtd">
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <variables>
+        <primary-color>purple</primary-color>
+        <showDownloadButton>true</showDownloadButton>
+        <download-page>https://gitlab.davils.com/davils/projects/kyvox/-/packages</download-page>
+        <download-title>Getting Started</download-title>
+    </variables>
+
+    <footer>
+        <social type="discord" href="https://discord.com/invite/W25gFXDVFb"/>
+        <social type="twitter" href="https://x.com/davils_official"/>
+        <social type="bugtracker" href="https://youtrack.davils.com/projects/DVS"/>
+        <social type="email" href="development@davils.com"/>
+        <social type="gitlab" href="https://gitlab.davils.com/davils/projects/kyvox"/>
+        <social type="github" href="https://github.com/davils-com"/>
+        <social type="github" href="https://github.com/davils-com"/>
+        <social type="instagram" href="https://www.instagram.com/davils.official"/>
+        <social type="reddit" href="https://www.reddit.com/user/davils_official"/>
+        <social type="youtube" href="https://www.youtube.com/@davils.official"/>
+        <social type="blog" href="https://www.davils.com"/>
+
+        <link href="mailto:development@davils.com">Contact</link>
+        <copyright>2024 - 2026 Davils</copyright>
+    </footer>
+
+
+    <build-profile instance="d">
+        <variables>
+            <noindex-content>false</noindex-content>
+            <product-web-url>https://github.com/davils-com/kreate</product-web-url>
+        </variables>
+    </build-profile>
+
+</buildprofiles>

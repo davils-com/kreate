@@ -3,8 +3,8 @@
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
 
 <instance-profile id="d"
-                 name="docs"
-                 start-page="starter-topic.md">
+                 name="Kreate"
+                 start-page="overview.md">
 
-    <toc-element topic="starter-topic.md"/>
+    <toc-element topic="overview.md"/>
 </instance-profile>
