@@ -6,7 +6,7 @@ plugins {
     signing
 }
 
-version = "1.0.0-dev1"
+version = System.getenv("CI_COMMIT_TAG") ?: "1.0.0"
 
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
