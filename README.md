@@ -160,5 +160,5 @@ For detailed instructions on how to set up your environment and submit a pull re
 ---
 
 <p align="center">
-  Maintained by <a href="https://github.com/davils"><b>Davils</b></a>
+  Maintained by <a href="https://github.com/davils-com"><b>Davils</b></a>
 </p>
