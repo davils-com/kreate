@@ -13,7 +13,7 @@ kreate {
 
         multiplatform {
             cInterop {
-                enabled = true
+                enabled = false
                 nameOverride = "example"
                 projectDirectory = file("cinterop")
                 packageNameOverride.set("com.davils.example.cinterop")
@@ -122,7 +122,7 @@ kreate {
 
             repositories {
                 gitlab {
-                    enabled = true
+                    enabled = false
                     name = "ExampleInstance"
                     tokenEnv = "CI_JOB_TOKEN"
                     projectIdEnv = "CI_PROJECT_ID"
@@ -130,7 +130,7 @@ kreate {
                 }
 
                 mavenCentral {
-                    enabled = true
+                    enabled = false
                     automaticRelease = true
                     signPublications = true
                 }
