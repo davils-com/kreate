@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kreate)
     kotlin("multiplatform") version "2.3.20"
     id("com.google.devtools.ksp") version "2.3.6"
-    id("io.kotest") version "6.1.4"
+    id("io.kotest") version "6.1.11"
 }
 
 kreate {
