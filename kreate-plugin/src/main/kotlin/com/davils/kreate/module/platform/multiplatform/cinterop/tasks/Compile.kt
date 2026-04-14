@@ -31,20 +31,51 @@ import java.io.File
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
+/**
+ * Task to compile Rust code for C-interop.
+ *
+ * This task executes the `cargo build` command for each specified Rust target,
+ * producing static libraries that can be used by Kotlin/Native.
+ *
+ * @param exec The executive operations used to run external commands.
+ * @since 1.0.0
+ */
 public abstract class CompileRust @Inject constructor(
+    /**
+     * The executive operations instance.
+     * @since 1.0.0
+     */
     private val exec: ExecOperations
 ) : Task("Compile Rust code for C interop") {
+    /**
+     * The working directory containing the Rust project.
+     * @since 1.0.0
+     */
     @get:InputDirectory
     public abstract val workDir: DirectoryProperty
 
+    /**
+     * The list of Rust targets to compile for.
+     * @since 1.0.0
+     */
     @get:Input
     @get:Optional
     public abstract val rustTargets: ListProperty<String>
 
+    /**
+     * The output directory where compiled artifacts are stored.
+     * @since 1.0.0
+     */
     @get:OutputDirectory
     public val outputDir: File
         get() = workDir.get().asFile.resolve("target")
 
+    /**
+     * Executes the task to compile Rust code for the configured targets.
+     *
+     * @throws GradleException If compilation fails for any target.
+     * @since 1.0.0
+     */
     @TaskAction
     override fun execute() {
         val targets = resolveRustTargets(rustTargets)

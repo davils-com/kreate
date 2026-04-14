@@ -20,9 +20,44 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class DocsExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring documentation generation in Kreate.
+ *
+ * This extension provides properties for controlling Dokka-based documentation,
+ * including module name, copyright notice, and output directory.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class DocsExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Whether documentation generation is enabled.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * The name of the module to be used in the documentation.
+     * @since 1.0.0
+     */
     public val moduleName: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The copyright notice to be included in the documentation.
+     * @since 1.0.0
+     */
     public val copyright: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The output directory for the generated documentation.
+     * @since 1.0.0
+     */
     public val outputDirectory: Property<String> = factory.property(String::class.java)
 }

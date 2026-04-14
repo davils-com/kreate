@@ -19,6 +19,15 @@ package com.davils.kreate.module.project.publish
 import com.davils.kreate.KreateExtension
 import org.gradle.api.Project
 
+/**
+ * Initializes publishing configuration for the project.
+ *
+ * If publishing is enabled in the extension, this function configures
+ * Maven Central and/or GitLab repositories for deployment.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.initializePublish(extension: KreateExtension) {
     val publishConfig = extension.project.publish
     if (!publishConfig.enabled.get()) return

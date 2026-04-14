@@ -20,6 +20,11 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.dokka.gradle.DokkaPlugin
 
+/**
+ * Applies the Dokka plugin to the project.
+ *
+ * @since 1.0.0
+ */
 internal fun Project.applyDokkaPlugin() {
     pluginManager.apply(DokkaPlugin::class)
 }

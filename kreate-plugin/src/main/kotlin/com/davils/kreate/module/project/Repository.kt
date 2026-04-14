@@ -18,6 +18,13 @@ package com.davils.kreate.module.project
 
 import org.gradle.api.Project
 
+/**
+ * Adds default repositories to the project.
+ *
+ * This includes Maven Central, Gradle Plugin Portal, and Google.
+ *
+ * @since 1.0.0
+ */
 internal fun Project.addRepositories() {
     repositories.apply {
         mavenCentral()

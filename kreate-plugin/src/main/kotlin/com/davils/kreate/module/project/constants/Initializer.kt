@@ -19,6 +19,15 @@ package com.davils.kreate.module.project.constants
 import com.davils.kreate.KreateExtension
 import org.gradle.api.Project
 
+/**
+ * Initializes the build constants generation for the project.
+ *
+ * If enabled in the extension, this function registers the task to generate
+ * the build constants Kotlin class.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.initializeBuildConstants(extension: KreateExtension) {
     val buildConstantsExtension = extension.project.buildConstants
     if (!buildConstantsExtension.enabled.get()) {

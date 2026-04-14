@@ -21,6 +21,15 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.configure
 
+/**
+ * Configures the Java plugin extension for the project.
+ *
+ * This function sets the source and target compatibility based on the
+ * [PlatformExtension] configuration.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.configureJava(extension: KreateExtension) {
     val platformExtension = extension.platform
 

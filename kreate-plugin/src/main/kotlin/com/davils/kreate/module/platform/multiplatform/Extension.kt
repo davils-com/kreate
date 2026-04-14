@@ -22,10 +22,34 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-public abstract class MultiplatformExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring Kotlin Multiplatform settings.
+ *
+ * This extension provides nested configuration for C-interop.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class MultiplatformExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Configuration for C-interop.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val cInterop: CInteropExtension
 
+    /**
+     * Configures the [CInteropExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun cInterop(action: Action<CInteropExtension>) {
         action.execute(cInterop)
     }

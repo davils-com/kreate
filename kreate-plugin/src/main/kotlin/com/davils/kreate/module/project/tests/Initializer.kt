@@ -25,12 +25,26 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinTest
 import java.time.Duration
 
+/**
+ * Initializes testing configuration for the project.
+ *
+ * If testing is enabled in the extension, this function configures common
+ * testing settings such as timeouts, parallelism, logging, and reporting
+ * for both JVM and Multiplatform projects.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.initializeTesting(extension: KreateExtension) {
     val testingExtension = extension.project.tests
     if (!testingExtension.enabled.get()) return
 
     validateKotestPlugin()
 
+    /**
+     * Configures common JVM testing settings on a [Test] task.
+     * @since 1.0.0
+     */
     fun Test.configureCommonJvmTesting() {
         timeout.set(Duration.ofMinutes(testingExtension.timeoutMinutes.get()))
         ignoreFailures = testingExtension.ignoreFailures.get()
@@ -38,6 +52,10 @@ internal fun Project.initializeTesting(extension: KreateExtension) {
         outputs.upToDateWhen { !testingExtension.alwaysRunTests.get() }
     }
 
+    /**
+     * Configures the JVM test engine, parallelism, logging, and reporting on a [Test] task.
+     * @since 1.0.0
+     */
     fun Test.configureJvmTestEngine() {
         useJUnitPlatform()
         maxParallelForks = testingExtension.maxParallelForks.get()
@@ -45,6 +63,10 @@ internal fun Project.initializeTesting(extension: KreateExtension) {
         configureReport(testingExtension.report)
     }
 
+    /**
+     * Configures common Multiplatform testing settings on a [KotlinTest] task.
+     * @since 1.0.0
+     */
     fun KotlinTest.configureCommonKmpTesting() {
         timeout.set(Duration.ofMinutes(testingExtension.timeoutMinutes.get()))
         ignoreFailures = testingExtension.ignoreFailures.get()

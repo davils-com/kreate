@@ -34,6 +34,15 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import java.io.File
 
+/**
+ * Initializes the C-interop configuration for the project.
+ *
+ * This function sets up the necessary tasks and applies native targets
+ * if C-interop is enabled in the extension.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 public fun Project.initializeCInterop(extension: KreateExtension) {
     val cInteropConfig = extension.platform.multiplatform.cInterop
     if (!cInteropConfig.enabled.get()) return
@@ -42,6 +51,13 @@ public fun Project.initializeCInterop(extension: KreateExtension) {
     applyNativeTargets(cInteropConfig)
 }
 
+/**
+ * Validates the existence of the root directory and creates it if missing.
+ *
+ * @param rootDir The root directory to validate.
+ * @throws GradleException If directory creation fails.
+ * @since 1.0.0
+ */
 private fun validateRootDir(rootDir: File) {
     if (!rootDir.exists()) {
         if (!rootDir.mkdirs()) {
@@ -50,6 +66,16 @@ private fun validateRootDir(rootDir: File) {
     }
 }
 
+/**
+ * Registers and configures all tasks required for C-interop.
+ *
+ * This includes initializing the Rust project, adding dependencies,
+ * configuring Cargo, generating build scripts, compiling Rust code,
+ * and generating definition files.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 private fun Project.addCInteropTasks(extension: KreateExtension) {
     val projectName = resolveProjectName(extension)
 
@@ -105,6 +131,13 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     executeTaskBeforeCompile(generateDefinitionFiles)
 }
 
+/**
+ * Applies native targets to the Kotlin Multiplatform extension based on Rust targets.
+ *
+ * @param cInteropConfig The C-interop configuration extension.
+ * @throws GradleException If a Rust target is unsupported for Kotlin/Native mapping.
+ * @since 1.0.0
+ */
 private fun Project.applyNativeTargets(cInteropConfig: CInteropExtension) {
     val targets = resolveRustTargets(cInteropConfig.rustTargets)
     configure<KotlinMultiplatformExtension> {

@@ -20,8 +20,40 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class MavenCentralExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring Maven Central publishing.
+ *
+ * This extension controls whether publishing is enabled, whether releases
+ * should be automatic, and whether publications should be signed.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class MavenCentralExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Whether Maven Central publishing is enabled.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * Whether to release artifacts automatically.
+     * Defaults to `true`.
+     * @since 1.0.0
+     */
     public val automaticRelease: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether to sign all publications.
+     * Defaults to `true`.
+     * @since 1.0.0
+     */
     public val signPublications: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 }

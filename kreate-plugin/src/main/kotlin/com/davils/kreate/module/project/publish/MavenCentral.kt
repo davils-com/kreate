@@ -21,6 +21,15 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.MavenPublishBasePlugin
 import org.gradle.api.Project
 
+/**
+ * Configures publishing to Maven Central using the vanniktech plugin.
+ *
+ * This function sets up coordinates, signing, and automatic release settings,
+ * and configures the Maven POM with project metadata.
+ *
+ * @param kreateExtension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.configureMavenCentral(
     kreateExtension: KreateExtension,
 ) {

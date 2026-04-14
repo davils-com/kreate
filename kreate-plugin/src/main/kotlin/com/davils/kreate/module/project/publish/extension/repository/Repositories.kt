@@ -20,18 +20,45 @@ import org.gradle.api.Action
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
+/**
+ * Extension for configuring Maven publishing repositories.
+ *
+ * This extension provides nested configurations for GitLab and Maven Central.
+ *
+ * @since 1.0.0
+ */
 public abstract class MavenRepositoriesExtension @Inject constructor() {
+    /**
+     * Configuration for GitLab publishing.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val gitlab: GitlabExtension
 
+    /**
+     * Configuration for Maven Central publishing.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val mavenCentral: MavenCentralExtension
 
+    /**
+     * Configures the [GitlabExtension] using the provided action and enables it.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun gitlab(action: Action<GitlabExtension>) {
         gitlab.enabled.set(true)
         action.execute(gitlab)
     }
 
+    /**
+     * Configures the [MavenCentralExtension] using the provided action and enables it.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun mavenCentral(action: Action<MavenCentralExtension>) {
         mavenCentral.enabled.set(true)
         action.execute(mavenCentral)

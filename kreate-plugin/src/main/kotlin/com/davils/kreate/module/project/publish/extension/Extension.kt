@@ -24,21 +24,72 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-public abstract class PublishExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring publishing settings in Kreate.
+ *
+ * This extension provides properties for inception year and website,
+ * as well as nested configurations for POM metadata and target repositories.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PublishExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Whether publishing is enabled.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * The inception year of the project.
+     * Defaults to 2024.
+     * @since 1.0.0
+     */
     public val inceptionYear: Property<Int> = factory.property(Int::class.java).convention(2024)
+
+    /**
+     * The official website URL of the project.
+     * @since 1.0.0
+     */
     public val website: Property<String> = factory.property(String::class.java)
 
+    /**
+     * Configuration for POM metadata.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val pom: PomExtension
 
+    /**
+     * Configuration for target repositories.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val repositories: MavenRepositoriesExtension
 
+    /**
+     * Configures the [PomExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun pom(action: Action<PomExtension>) {
         action.execute(pom)
     }
 
+    /**
+     * Configures the [MavenRepositoriesExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun repositories(action: Action<MavenRepositoriesExtension>) {
         action.execute(repositories)
     }

@@ -19,6 +19,18 @@ package com.davils.kreate.module.project.publish
 import com.davils.kreate.module.project.publish.extension.PublishExtension
 import org.gradle.api.publish.maven.MavenPom
 
+/**
+ * Configures a Maven POM with project and publishing information.
+ *
+ * This function maps various properties from the [PublishExtension] to the
+ * [MavenPom], including project name, description, website, issue management,
+ * CI management, licenses, developers, and SCM details.
+ *
+ * @param publishConfig The publishing configuration extension.
+ * @param projectName The optional name of the project.
+ * @param projectDescription The optional description of the project.
+ * @since 1.0.0
+ */
 internal fun MavenPom.configurePom(
     publishConfig: PublishExtension,
     projectName: String?,

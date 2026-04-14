@@ -18,6 +18,18 @@ package com.davils.kreate.module
 
 import org.gradle.api.Project
 
+/**
+ * Determines the version for a project.
+ *
+ * This function retrieves the version from an environment variable if it exists.
+ * Otherwise, it attempts to find it in the project properties. If neither is
+ * found or is "unspecified", it defaults to "1.0.0".
+ *
+ * @param env The environment variable name to check for the version.
+ * @param prop The project property name to check for the version.
+ * @return The resolved version string.
+ * @since 1.0.0
+ */
 public fun Project.getProjectVersion(env: String, prop: String): String {
     val ciTag = System.getenv(env)
     if (ciTag != null) return ciTag

@@ -22,19 +22,77 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-public abstract class PomDevelopersExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring POM developers metadata.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PomDevelopersExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Configuration for a single developer.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val developer: PomDeveloperExtension
 
+    /**
+     * Configures the [PomDeveloperExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun developer(action: Action<PomDeveloperExtension>) {
         action.execute(developer)
     }
 }
 
-public abstract class PomDeveloperExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring a single POM developer.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PomDeveloperExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The unique identifier of the developer.
+     * @since 1.0.0
+     */
     public val id: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The full name of the developer.
+     * @since 1.0.0
+     */
     public val name: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The email address of the developer.
+     * @since 1.0.0
+     */
     public val email: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The organization the developer belongs to.
+     * @since 1.0.0
+     */
     public val organization: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The timezone of the developer.
+     * @since 1.0.0
+     */
     public val timezone: Property<String> = factory.property(String::class.java)
 }

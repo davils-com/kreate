@@ -26,6 +26,15 @@ import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.kotlin.dsl.*
 import java.net.URI
 
+/**
+ * Configures publishing to GitLab Package Registry.
+ *
+ * This function sets up a Maven repository for GitLab, using CI job tokens
+ * for authentication, and configures the Maven publications with POM metadata.
+ *
+ * @param kreateExtension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.configureGitlab(
     kreateExtension: KreateExtension,
 ) {

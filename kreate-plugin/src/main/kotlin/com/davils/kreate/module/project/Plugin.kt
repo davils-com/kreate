@@ -20,6 +20,13 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.kotlinx.serialization.gradle.SerializationGradleSubplugin
 
+/**
+ * Applies default Gradle plugins to the project.
+ *
+ * This includes the Kotlinx Serialization plugin.
+ *
+ * @since 1.0.0
+ */
 internal fun Project.applyDefaultGradlePlugins() {
     pluginManager.apply(SerializationGradleSubplugin::class)
 }

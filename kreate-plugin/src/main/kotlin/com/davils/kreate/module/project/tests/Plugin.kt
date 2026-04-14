@@ -21,6 +21,15 @@ import org.gradle.kotlin.dsl.hasPlugin
 import io.kotest.framework.gradle.KotestPlugin
 import com.google.devtools.ksp.gradle.KspGradleSubplugin
 
+/**
+ * Validates the presence of the Kotest plugin and its dependencies.
+ *
+ * In multiplatform projects, this function ensures that both 'ksp' and 'kotest'
+ * plugins are applied by the user if they intend to use Kotest for testing.
+ *
+ * @throws IllegalStateException If required plugins are missing in a multiplatform project.
+ * @since 1.0.0
+ */
 internal fun Project.validateKotestPlugin() {
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         if (!plugins.hasPlugin(KspGradleSubplugin::class)) {

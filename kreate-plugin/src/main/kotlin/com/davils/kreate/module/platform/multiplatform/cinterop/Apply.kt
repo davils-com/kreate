@@ -21,6 +21,15 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
+/**
+ * Configures C-interop for a Kotlin native target.
+ *
+ * This function sets up the C-interop compilation, specifying the package name
+ * and the definition file to be used, based on the Kreate configuration.
+ *
+ * @param project The Gradle project instance.
+ * @since 1.0.0
+ */
 internal fun KotlinNativeTarget.configureCInterop(project: Project) {
     val extension = project.extensions.getByType<KreateExtension>()
     val cInteropConfig = extension.platform.multiplatform.cInterop

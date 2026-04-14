@@ -20,7 +20,28 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class PomIssueManagementExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring POM issue management metadata.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PomIssueManagementExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The name of the issue management system (e.g., "GitHub Issues").
+     * @since 1.0.0
+     */
     public val system: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The URL to the issue management system.
+     * @since 1.0.0
+     */
     public val url: Property<String> = factory.property(String::class.java)
 }

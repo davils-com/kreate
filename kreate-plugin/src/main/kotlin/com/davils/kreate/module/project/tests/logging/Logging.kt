@@ -20,6 +20,15 @@ import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
+/**
+ * Configures test logging for an [AbstractTestTask].
+ *
+ * This function sets up exception formatting and logs events based on the
+ * [TestsLoggingExtension] configuration.
+ *
+ * @param loggingExtension The test logging configuration.
+ * @since 1.0.0
+ */
 internal fun AbstractTestTask.configureLogging(loggingExtension: TestsLoggingExtension) {
     testLogging {
         showExceptions = true

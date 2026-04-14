@@ -23,7 +23,22 @@ import com.davils.kreate.module.platform.multiplatform.cinterop.initializeCInter
 import com.davils.kreate.module.platform.multiplatform.initializeMultiplatformCompiler
 import org.gradle.api.Project
 
+/**
+ * Module for configuring platform-specific settings.
+ *
+ * This module handles the configuration for Kotlin Multiplatform and Kotlin JVM
+ * projects, including Java settings and compiler initializations.
+ *
+ * @since 1.0.0
+ */
 internal object PlatformModule : Module {
+    /**
+     * Applies the platform module configuration to the project.
+     *
+     * @param project The Gradle project to configure.
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     override fun apply(project: Project, extension: KreateExtension) {
         project.plugins.withId("org.jetbrains.kotlin.multiplatform") {
             project.configureCommon(extension)
@@ -36,14 +51,32 @@ internal object PlatformModule : Module {
         }
     }
 
+    /**
+     * Configures common settings for all platform types.
+     *
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     private fun Project.configureCommon(extension: KreateExtension) = afterEvaluate {
         configureJava(extension)
     }
 
+    /**
+     * Configures JVM-specific settings.
+     *
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     private fun Project.configureJvm(extension: KreateExtension): Unit = afterEvaluate {
         initializeJvmCompiler(extension)
     }
 
+    /**
+     * Configures multiplatform-specific settings.
+     *
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     private fun Project.configureMultiplatform(extension: KreateExtension): Unit = afterEvaluate {
         initializeMultiplatformCompiler(extension)
         initializeCInterop(extension)

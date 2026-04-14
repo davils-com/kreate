@@ -20,8 +20,40 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class TestsLoggingExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring test logging in Kreate.
+ *
+ * This extension allows controlling which test events are logged to the console
+ * during the build process.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class TestsLoggingExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * Whether to log passed tests.
+     * Defaults to `true`.
+     * @since 1.0.0
+     */
     public val logPassedTests: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether to log skipped tests.
+     * Defaults to `true`.
+     * @since 1.0.0
+     */
     public val logSkippedTests: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether to log when a test starts.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val logTestStarted: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 }

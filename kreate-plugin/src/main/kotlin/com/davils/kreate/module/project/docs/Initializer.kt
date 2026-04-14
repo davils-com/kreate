@@ -19,6 +19,15 @@ package com.davils.kreate.module.project.docs
 import com.davils.kreate.KreateExtension
 import org.gradle.api.Project
 
+/**
+ * Initializes documentation generation for the project.
+ *
+ * If enabled in the extension, this function applies the Dokka plugin
+ * and configures its extension based on the Kreate settings.
+ *
+ * @param extension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.initializeDocs(extension: KreateExtension) {
     val docsConfig = extension.project.docs
     if (!docsConfig.enabled.get()) {

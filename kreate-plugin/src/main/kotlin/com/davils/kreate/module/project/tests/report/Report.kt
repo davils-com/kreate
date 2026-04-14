@@ -18,6 +18,15 @@ package com.davils.kreate.module.project.tests.report
 
 import org.gradle.api.tasks.testing.AbstractTestTask
 
+/**
+ * Configures test reporting for an [AbstractTestTask].
+ *
+ * This function enables XML and/or HTML reports based on the
+ * [TestsReportExtension] configuration.
+ *
+ * @param reportExtension The test reporting configuration.
+ * @since 1.0.0
+ */
 internal fun AbstractTestTask.configureReport(reportExtension: TestsReportExtension) {
     if (!reportExtension.enabled.get()) {
         return

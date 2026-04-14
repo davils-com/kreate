@@ -24,11 +24,33 @@ import com.davils.kreate.module.project.publish.initializePublish
 import com.davils.kreate.module.project.tests.initializeTesting
 import org.gradle.api.Project
 
+/**
+ * Module for configuring project-level settings.
+ *
+ * This module applies default Gradle plugins, adds repositories, and
+ * initializes various project components like versioning, documentation,
+ * testing, and publishing.
+ *
+ * @since 1.0.0
+ */
 internal object ProjectModule : Module {
+    /**
+     * Applies the project module configuration to the project.
+     *
+     * @param project The Gradle project to configure.
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     override fun apply(project: Project, extension: KreateExtension) {
         project.configureCommon(extension)
     }
 
+    /**
+     * Configures common project-level settings.
+     *
+     * @param extension The Kreate configuration extension.
+     * @since 1.0.0
+     */
     private fun Project.configureCommon(extension: KreateExtension) {
         applyDefaultGradlePlugins()
         addRepositories()

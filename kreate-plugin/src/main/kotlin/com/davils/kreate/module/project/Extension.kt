@@ -26,47 +26,152 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-public abstract class ProjectExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring project-level settings in Kreate.
+ *
+ * This extension provides properties for project name, description, group,
+ * and nested configurations for versioning, build constants, documentation,
+ * testing, and publishing.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class ProjectExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The name of the project.
+     * @since 1.0.0
+     */
     public val name: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The description of the project.
+     * Defaults to "A Kreate project."
+     * @since 1.0.0
+     */
     public val description: Property<String> = factory.property(String::class.java).convention("A Kreate project.")
+
+    /**
+     * The project group (e.g., "com.example").
+     * @since 1.0.0
+     */
     public val projectGroup: Property<String> = factory.property(String::class.java)
 
+    /**
+     * Configuration for project versioning.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val version: ProjectExtensionVersion
 
+    /**
+     * Configuration for build constants generation.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val buildConstants: BuildConstantsExtension
+
+    /**
+     * Configuration for documentation generation.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val docs: DocsExtension
 
+    /**
+     * Configuration for testing.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val tests: TestsExtension
 
+    /**
+     * Configuration for publishing.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val publish: PublishExtension
 
+    /**
+     * Configures the [ProjectExtensionVersion] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun version(action: Action<ProjectExtensionVersion>) {
         action.execute(version)
     }
 
+    /**
+     * Configures the [BuildConstantsExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun buildConstant(action: Action<BuildConstantsExtension>) {
         action.execute(buildConstants)
     }
 
+    /**
+     * Configures the [DocsExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun docs(action: Action<DocsExtension>) {
         action.execute(docs)
     }
 
+    /**
+     * Configures the [TestsExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun tests(action: Action<TestsExtension>) {
         action.execute(tests)
     }
 
+    /**
+     * Configures the [PublishExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun publish(action: Action<PublishExtension>) {
         action.execute(publish)
     }
 }
 
-public abstract class ProjectExtensionVersion @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring versioning settings.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class ProjectExtensionVersion @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The environment variable name to check for the version.
+     * Defaults to "VERSION".
+     * @since 1.0.0
+     */
     public val environment: Property<String> = factory.property(String::class.java).convention("VERSION")
+
+    /**
+     * The project property name to check for the version.
+     * Defaults to "version".
+     * @since 1.0.0
+     */
     public val property: Property<String> = factory.property(String::class.java).convention("version")
 }

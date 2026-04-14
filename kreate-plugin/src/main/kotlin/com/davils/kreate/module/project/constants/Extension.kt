@@ -21,13 +21,63 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class BuildConstantsExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring build constants generation in Kreate.
+ *
+ * This extension allows defining key-value pairs that will be generated as a
+ * Kotlin class (typically `BuildConstants`) available at compile time.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class BuildConstantsExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The properties to be generated as constants.
+     * @since 1.0.0
+     */
     private val properties: MapProperty<String, String> = factory.mapProperty(String::class.java, String::class.java).convention(emptyMap())
+
+    /**
+     * Whether build constants generation is enabled.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * Optional override for the package name of the generated class.
+     * @since 1.0.0
+     */
     public val packageNameOverride: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The name of the generated Kotlin class.
+     * Defaults to "BuildConstants".
+     * @since 1.0.0
+     */
     public val className: Property<String> = factory.property(String::class.java).convention("BuildConstants")
+
+    /**
+     * The output path for the generated source file.
+     * Defaults to "generated/compile".
+     * @since 1.0.0
+     */
     public val path: Property<String> = factory.property(String::class.java).convention("generated/compile")
 
+    /**
+     * Adds a constant to the generated class.
+     *
+     * @param key The name of the constant. Must not be blank.
+     * @param value The value of the constant.
+     * @throws IllegalArgumentException If the key is blank.
+     * @since 1.0.0
+     */
     public fun constant(key: String, value: String) {
         if (key.isBlank()) {
             throw IllegalArgumentException("Key cannot be blank.")
@@ -36,10 +86,24 @@ public abstract class BuildConstantsExtension @Inject constructor(factory: Objec
         properties.put(key, value)
     }
 
+    /**
+     * Adds a constant to the generated class, converting the value to a string.
+     *
+     * @param key The name of the constant. Must not be blank.
+     * @param value The value of the constant.
+     * @throws IllegalArgumentException If the key is blank.
+     * @since 1.0.0
+     */
     public fun constant(key: String, value: Any) {
         constant(key, value.toString())
     }
 
+    /**
+     * Retrieves the map of all defined constants.
+     *
+     * @return A map of constant names to their values.
+     * @since 1.0.0
+     */
     public fun getConstants(): Map<String, String> {
         return properties.get().toMap()
     }

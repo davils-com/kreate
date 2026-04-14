@@ -21,6 +21,15 @@ import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
+/**
+ * Adds the generated build constants path to the project's Kotlin source sets.
+ *
+ * This function handles both Kotlin Multiplatform (adding to `commonMain`)
+ * and Kotlin JVM (adding to `main`) projects.
+ *
+ * @param path The absolute path to the generated source directory.
+ * @since 1.0.0
+ */
 internal fun Project.addBuildConstantsToSourceSets(path: String) {
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         configure<KotlinMultiplatformExtension> {

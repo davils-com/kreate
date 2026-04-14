@@ -21,30 +21,80 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import org.gradle.api.Project
 
+/**
+ * Builder for creating a [KreateModuleRegistryData].
+ *
+ * This builder provides a DSL for registering [Module]s to be applied to a project.
+ *
+ * @param project The Gradle project to which the modules will be applied.
+ * @param extension The Kreate extension containing the configuration.
+ * @since 1.0.0
+ */
 @KreateDsl
 internal class KreateModuleRegistryBuilder(
+    /**
+     * The project instance.
+     * @since 1.0.0
+     */
     private val project: Project,
+    /**
+     * The extension instance.
+     * @since 1.0.0
+     */
     private val extension: KreateExtension
 ) {
+    /**
+     * List of modules to be registered.
+     * @since 1.0.0
+     */
     private val modules = mutableListOf<Module>()
 
+    /**
+     * Adds a module to the registry if it hasn't been added yet.
+     *
+     * @param module The module to add.
+     * @since 1.0.0
+     */
     fun add(module: Module) {
         if (modules.contains(module)) return
         modules.add(module)
     }
 
+    /**
+     * Adds a collection of modules to the registry.
+     *
+     * @param modules The collection of modules to add.
+     * @since 1.0.0
+     */
     fun addAll(modules: Iterable<Module>) {
         this.modules.addAll(modules)
     }
 
+    /**
+     * Adds multiple modules to the registry.
+     *
+     * @param modules The modules to add.
+     * @since 1.0.0
+     */
     fun addAll(vararg modules: Module) {
         addAll(modules.asList())
     }
 
+    /**
+     * Operator function to add a module via the unary plus operator.
+     *
+     * @since 1.0.0
+     */
     operator fun Module.unaryPlus() {
         add(this)
     }
 
+    /**
+     * Builds and returns a [KreateModuleRegistryData] instance.
+     *
+     * @return A new instance of [KreateModuleRegistryData].
+     * @since 1.0.0
+     */
     fun build(): KreateModuleRegistryData {
         return KreateModuleRegistryData(
             extension = extension,

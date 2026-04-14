@@ -20,8 +20,34 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class PomScmExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring POM source control management (SCM) metadata.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PomScmExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The URL to the SCM web interface.
+     * @since 1.0.0
+     */
     public val url: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The read-only connection URL for SCM.
+     * @since 1.0.0
+     */
     public val connection: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The read-write connection URL for SCM.
+     * @since 1.0.0
+     */
     public val developerConnection: Property<String> = factory.property(String::class.java)
 }

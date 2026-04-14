@@ -19,6 +19,13 @@ package com.davils.kreate.module.project
 import com.davils.kreate.module.getProjectVersion
 import org.gradle.api.Project
 
+/**
+ * Configures the project version based on environment variables or properties.
+ *
+ * @param env The environment variable name to check.
+ * @param prop The project property name to check.
+ * @since 1.0.0
+ */
 internal fun Project.configureVersion(env: String, prop: String) {
     val projectVersion = getProjectVersion(env, prop)
     if (projectVersion != version.toString()) {
@@ -26,6 +33,12 @@ internal fun Project.configureVersion(env: String, prop: String) {
     }
 }
 
+/**
+ * Initializes project basic settings from the extension.
+ *
+ * @param projectExtension The project extension containing configuration.
+ * @since 1.0.0
+ */
 internal fun Project.initializeProject(projectExtension: ProjectExtension) {
     description = projectExtension.description.get()
 }

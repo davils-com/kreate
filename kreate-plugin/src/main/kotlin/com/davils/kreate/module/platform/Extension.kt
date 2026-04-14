@@ -24,14 +24,56 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
-public abstract class PlatformExtension @Inject constructor(factory: ObjectFactory) {
+/**
+ * Extension for configuring platform-specific settings in Kreate.
+ *
+ * This extension provides properties for Java version, Kotlin API mode,
+ * and warning handling, as well as nested configuration for multiplatform.
+ *
+ * @param factory The object factory used for creating properties.
+ * @since 1.0.0
+ */
+public abstract class PlatformExtension @Inject constructor(
+    /**
+     * The object factory instance.
+     * @since 1.0.0
+     */
+    factory: ObjectFactory
+) {
+    /**
+     * The Java version to be used for the project.
+     * Defaults to [JavaVersion.VERSION_25].
+     * @since 1.0.0
+     */
     public val javaVersion: Property<JavaVersion> = factory.property(JavaVersion::class.java).convention(JavaVersion.VERSION_25)
+
+    /**
+     * Whether to enable explicit API mode in Kotlin.
+     * Defaults to `true`.
+     * @since 1.0.0
+     */
     public val explicitApi: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
+     * Whether to treat all compiler warnings as errors.
+     * Defaults to `false`.
+     * @since 1.0.0
+     */
     public val allWarningsAsErrors: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
+    /**
+     * Configuration for Kotlin Multiplatform.
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val multiplatform: MultiplatformExtension
 
+    /**
+     * Configures the [MultiplatformExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.0.0
+     */
     public fun multiplatform(action: Action<MultiplatformExtension>) {
         action.execute(multiplatform)
     }

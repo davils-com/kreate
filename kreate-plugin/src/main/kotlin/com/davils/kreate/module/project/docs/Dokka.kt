@@ -23,6 +23,15 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.plugins.DokkaHtmlPluginParameters
 
+/**
+ * Configures the Dokka extension based on Kreate documentation settings.
+ *
+ * This function sets the module name, output directory, and copyright notice
+ * for the generated HTML documentation.
+ *
+ * @param kreateExtension The Kreate configuration extension.
+ * @since 1.0.0
+ */
 internal fun Project.configureDokkaExtension(kreateExtension: KreateExtension) {
     val docsExtension = kreateExtension.project.docs
 

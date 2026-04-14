@@ -20,8 +20,28 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import org.gradle.api.Project
 
+/**
+ * Data class holding the registry of Kreate modules for a project.
+ *
+ * It contains the configuration extension, the project instance, and the list
+ * of registered modules to be applied.
+ *
+ * @since 1.0.0
+ */
 internal data class KreateModuleRegistryData(
+    /**
+     * The Kreate configuration extension.
+     * @since 1.0.0
+     */
     val extension: KreateExtension,
+    /**
+     * The Gradle project instance.
+     * @since 1.0.0
+     */
     val project: Project,
+    /**
+     * The list of registered modules.
+     * @since 1.0.0
+     */
     val modules: List<Module>
 )

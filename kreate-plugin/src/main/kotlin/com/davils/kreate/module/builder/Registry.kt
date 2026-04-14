@@ -20,13 +20,44 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import org.gradle.api.Project
 
-internal class KreateModuleRegistry(private val data: KreateModuleRegistryData) {
+/**
+ * Registry for Kreate modules.
+ *
+ * This class manages a set of [Module]s and provides functionality to apply
+ * them to the associated Gradle project.
+ *
+ * @param data The data containing the project, extension, and modules.
+ * @since 1.0.0
+ */
+internal class KreateModuleRegistry(
+    /**
+     * The registry data.
+     * @since 1.0.0
+     */
+    private val data: KreateModuleRegistryData
+) {
+    /**
+     * Flag indicating if the modules have already been applied.
+     * @since 1.0.0
+     */
     private var isApplied = false
 
+    /**
+     * Retrieves a copy of the registered modules.
+     *
+     * @return A list of [Module]s.
+     * @since 1.0.0
+     */
     fun getModules(): List<Module> {
         return data.modules.toList()
     }
 
+    /**
+     * Applies all registered modules to the project.
+     *
+     * This method ensures that modules are only applied once.
+     * @since 1.0.0
+     */
     fun applyAll() {
         if (isApplied) {
             return
@@ -39,6 +70,14 @@ internal class KreateModuleRegistry(private val data: KreateModuleRegistryData) 
     }
 }
 
+/**
+ * Creates and configures a [KreateModuleRegistry] for the project.
+ *
+ * @param extension The Kreate configuration extension.
+ * @param builder The DSL block for registering modules.
+ * @return A configured [KreateModuleRegistry].
+ * @since 1.0.0
+ */
 internal fun Project.modules(extension: KreateExtension, builder: KreateModuleRegistryBuilder.() -> Unit): KreateModuleRegistry {
     val registryBuilder = KreateModuleRegistryBuilder(this, extension)
     registryBuilder.builder()

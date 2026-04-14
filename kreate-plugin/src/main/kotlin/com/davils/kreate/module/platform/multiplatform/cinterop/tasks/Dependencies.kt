@@ -28,20 +28,52 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
+/**
+ * Task to add Rust dependencies to the `Cargo.toml` file.
+ *
+ * This task uses the `cargo add` command to register dependencies and build
+ * dependencies for the Rust project, ensuring that required crates like
+ * `libc` and `cbindgen` are available.
+ *
+ * @param exec The executive operations used to run external commands.
+ * @since 1.0.0
+ */
 public abstract class AddRustDependencies @Inject constructor(
+    /**
+     * The executive operations instance.
+     * @since 1.0.0
+     */
     private val exec: ExecOperations
 ) : Task("Adds rust dependencies to the project.") {
+    /**
+     * The working directory containing the Rust project.
+     * @since 1.0.0
+     */
     @get:InputDirectory
     public abstract val workDir: DirectoryProperty
 
+    /**
+     * Map of Rust dependencies to add (name to version).
+     * @since 1.0.0
+     */
     @get:Input
     @get:Optional
     public abstract val rustDependencies: MapProperty<String, String>
 
+    /**
+     * Map of Rust build dependencies to add (name to version).
+     * @since 1.0.0
+     */
     @get:Input
     @get:Optional
     public abstract val rustBuildDependencies: MapProperty<String, String>
 
+    /**
+     * Executes the task to add dependencies to `Cargo.toml`.
+     *
+     * @throws GradleException If `Cargo.toml` is missing or `cargo add` fails.
+     * @since 1.0.0
+     */
     @TaskAction
     override fun execute() {
         val cargoToml = workDir.get().asFile.resolve("Cargo.toml")
@@ -75,10 +107,28 @@ public abstract class AddRustDependencies @Inject constructor(
         }
     }
 
+    /**
+     * Checks if a dependency is already present in the `Cargo.toml` content.
+     *
+     * @param cargoContent The content of `Cargo.toml`.
+     * @param name The name of the dependency.
+     * @return `true` if present, `false` otherwise.
+     * @since 1.0.0
+     */
     private fun isDependencyPresent(cargoContent: String, name: String): Boolean {
         return cargoContent.contains(name)
     }
 
+    /**
+     * Adds a dependency using the `cargo add` command.
+     *
+     * @param cargoCmd The cargo command path.
+     * @param name The name of the dependency.
+     * @param version The version of the dependency.
+     * @param build Whether it's a build dependency.
+     * @throws GradleException If the command fails.
+     * @since 1.0.0
+     */
     private fun addDependency(cargoCmd: String, name: String, version: String, build: Boolean) {
         try {
             exec.exec {

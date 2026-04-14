@@ -26,6 +26,16 @@ import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import java.io.File
 
+/**
+ * Resolves the name for the C-interop project.
+ *
+ * It uses the override from [CInteropExtension] if present, otherwise it
+ * defaults to the project name from the extension or the Gradle project name.
+ *
+ * @param extension The Kreate configuration extension.
+ * @return The resolved and sanitized project name.
+ * @since 1.0.0
+ */
 internal fun Project.resolveProjectName(extension: KreateExtension): String {
     val cInteropConfig = extension.platform.multiplatform.cInterop
     val name = when {
@@ -37,7 +47,13 @@ internal fun Project.resolveProjectName(extension: KreateExtension): String {
     return name.lowercase().replace("-", "_")
 }
 
-
+/**
+ * Resolves the root directory for C-interop files.
+ *
+ * @param cInteropConfig The C-interop configuration extension.
+ * @return The resolved root directory.
+ * @since 1.0.0
+ */
 internal fun Project.resolveRootDir(cInteropConfig: CInteropExtension): File {
     if (cInteropConfig.projectDirectory.isPresent) {
         return projectDir.resolve(cInteropConfig.projectDirectory.get().asFile)
@@ -45,6 +61,17 @@ internal fun Project.resolveRootDir(cInteropConfig: CInteropExtension): File {
     return projectDir.resolve("cinterop")
 }
 
+/**
+ * Resolves the list of Rust targets for compilation.
+ *
+ * If targets are explicitly provided in the configuration, they are used.
+ * Otherwise, the targets are inferred from the current OS and architecture.
+ *
+ * @param rustTargets The property containing the list of Rust targets.
+ * @return The resolved list of Rust target strings.
+ * @throws GradleException If the current OS is unsupported.
+ * @since 1.0.0
+ */
 internal fun resolveRustTargets(rustTargets: ListProperty<String>): List<String> {
     if (rustTargets.isPresent && rustTargets.get().isNotEmpty()) {
         return rustTargets.get()
@@ -64,6 +91,12 @@ internal fun resolveRustTargets(rustTargets: ListProperty<String>): List<String>
     }
 }
 
+/**
+ * Resolves the path to the Cargo executable.
+ *
+ * @return The resolved Cargo command string.
+ * @since 1.0.0
+ */
 internal fun resolveCargoCommand(): String {
     val os by getOs()
     return when (os) {

@@ -23,6 +23,15 @@ import com.davils.kreate.system.getOs
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
+/**
+ * Configures the Kotlin native target based on the current operating system.
+ *
+ * This function detects the host OS and architecture and applies the corresponding
+ * Kotlin/Native target (e.g., `macosArm64`, `mingwX64`, `linuxX64` or `linuxArm64`).
+ *
+ * @param configure The configuration block for the native target.
+ * @since 1.0.0
+ */
 @JvmOverloads
 public fun KotlinMultiplatformExtension.currentOs(configure: KotlinNativeTarget.() -> Unit = {}) {
     val arch by getArchitecture()
