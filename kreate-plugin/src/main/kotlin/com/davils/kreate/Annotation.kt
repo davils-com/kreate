@@ -16,6 +16,13 @@
 
 package com.davils.kreate
 
+/**
+ * Marker for the Kreate DSL.
+ *
+ * This annotation is used to restrict the scope of DSL calls to the intended receiver.
+ *
+ * @since 1.0.0
+ */
 @DslMarker
 @Target(AnnotationTarget.TYPE, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)

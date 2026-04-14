@@ -21,6 +21,16 @@ import org.gradle.api.Task
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
+/**
+ * Configures the project to execute a specific task before any Kotlin compilation task.
+ *
+ * This function iterates through all [KotlinCompilationTask] instances in the project
+ * and adds the provided task as a dependency to each.
+ *
+ * @param task The task that must be executed before compilation.
+ * @throws IllegalArgumentException If the task is not registered in the project.
+ * @since 1.0.0
+ */
 internal fun Project.executeTaskBeforeCompile(task: Task) {
     require(tasks.contains(task)) { "Task ${task.name} is not registered in the project" }
 

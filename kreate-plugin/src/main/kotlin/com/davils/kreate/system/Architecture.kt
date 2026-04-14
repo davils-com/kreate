@@ -16,11 +16,35 @@
 
 package com.davils.kreate.system
 
+/**
+ * Enumeration of supported hardware architectures.
+ *
+ * @since 1.0.0
+ */
 internal enum class Architecture {
+    /**
+     * ARM 64-bit architecture (e.g., Apple Silicon, Raspberry Pi 4).
+     *
+     * @since 1.0.0
+     */
     ARM64,
+
+    /**
+     * x86 64-bit architecture.
+     *
+     * @since 1.0.0
+     */
     X64
 }
 
+/**
+ * Detects the current system architecture.
+ *
+ * This function checks the "os.arch" system property to determine the hardware architecture.
+ *
+ * @return A [Lazy] property containing the detected [Architecture].
+ * @since 1.0.0
+ */
 internal fun getArchitecture(): Lazy<Architecture> = lazy {
     val arch = System.getProperty("os.arch")?.lowercase() ?: return@lazy Architecture.X64
 

@@ -23,13 +23,33 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
 
+/**
+ * The main plugin class for Kreate.
+ *
+ * This plugin sets up the "kreate" extension and applies necessary modules
+ * to the project.
+ *
+ * @since 1.0.0
+ */
 public class Kreate : Plugin<Project> {
+    /**
+     * Applies the plugin to the given project.
+     *
+     * @param project The project to which the plugin is applied.
+     * @since 1.0.0
+     */
     override fun apply(project: Project) {
         val kreateExtension = project.extensions.create<KreateExtension>("kreate")
         project.addModules(kreateExtension)
     }
 }
 
+/**
+ * Adds and applies modules to the project based on the extension configuration.
+ *
+ * @param extension The [KreateExtension] used for configuration.
+ * @since 1.0.0
+ */
 private fun Project.addModules(extension: KreateExtension) {
     val modules = modules(extension) {
         add(ProjectModule)

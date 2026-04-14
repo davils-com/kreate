@@ -16,19 +16,70 @@
 
 package com.davils.kreate.system
 
+/**
+ * Enumeration of supported operating system targets.
+ *
+ * @since 1.0.0
+ */
 internal enum class OsTarget {
+    /**
+     * Microsoft Windows operating system.
+     *
+     * @since 1.0.0
+     */
     WINDOWS,
+
+    /**
+     * Linux-based operating systems.
+     *
+     * @since 1.0.0
+     */
     LINUX,
+
+    /**
+     * Apple macOS operating system.
+     *
+     * @since 1.0.0
+     */
     MACOS,
+
+    /**
+     * An unidentified or unsupported operating system.
+     *
+     * @since 1.0.0
+     */
     UNKNOWN
 }
 
+/**
+ * Keywords used to identify Windows operating systems.
+ *
+ * @since 1.0.0
+ */
 private val WINDOWS_KEYWORDS = setOf("wind", "winnt")
 
+/**
+ * Keywords used to identify Linux and other Unix-like operating systems.
+ *
+ * @since 1.0.0
+ */
 private val LINUX_KEYWORDS = setOf("nux", "sun", "bsd", "ubu", "cent", "deb")
 
+/**
+ * Keywords used to identify macOS operating systems.
+ *
+ * @since 1.0.0
+ */
 private val MACOS_KEYWORDS = setOf("mac", "dar")
 
+/**
+ * Detects the current operating system.
+ *
+ * This function checks the "os.name" system property to determine the operating system.
+ *
+ * @return A [Lazy] property containing the detected [OsTarget].
+ * @since 1.0.0
+ */
 internal fun getOs(): Lazy<OsTarget> = lazy {
     val os = System.getProperty("os.name")?.lowercase() ?: return@lazy OsTarget.UNKNOWN
 

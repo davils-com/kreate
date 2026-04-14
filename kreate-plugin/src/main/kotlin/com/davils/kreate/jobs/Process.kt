@@ -19,10 +19,31 @@ package com.davils.kreate.jobs
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Exec
 
+/**
+ * Represents a process that can be executed.
+ *
+ * This interface defines the contract for any executable logic within the plugin.
+ *
+ * @since 1.0.0
+ */
 internal interface Process {
+    /**
+     * Executes the logic associated with this process.
+     *
+     * @since 1.0.0
+     */
     fun execute()
 }
 
+/**
+ * A base class for Kreate-specific Gradle tasks.
+ *
+ * This class extends [DefaultTask] and implements [Process].
+ * It automatically assigns the task to the "kreate" group.
+ *
+ * @param desc A description of what this task does.
+ * @since 1.0.0
+ */
 public abstract class Task(desc: String) : DefaultTask(), Process {
     init {
         group = "kreate"
@@ -30,6 +51,15 @@ public abstract class Task(desc: String) : DefaultTask(), Process {
     }
 }
 
+/**
+ * A base class for Kreate-specific executable Gradle tasks.
+ *
+ * This class extends [Exec] and implements [Process].
+ * It automatically assigns the task to the "kreate" group.
+ *
+ * @param desc A description of what this executable task does.
+ * @since 1.0.0
+ */
 public abstract class Executable(desc: String) : Exec(), Process {
     init {
         group = "kreate"

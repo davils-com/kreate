@@ -23,17 +23,47 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
+/**
+ * The main extension class for configuring the Kreate plugin.
+ *
+ * This class provides access to project-level and platform-level configurations.
+ *
+ * @param factory The [ObjectFactory] used to create instances of configuration objects.
+ * @since 1.0.0
+ */
 public abstract class KreateExtension @Inject constructor(factory: ObjectFactory) {
+    /**
+     * Configuration for project-level settings.
+     *
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val project: ProjectExtension
 
+    /**
+     * Configuration for platform-level settings.
+     *
+     * @since 1.0.0
+     */
     @get:Nested
     public abstract val platform: PlatformExtension
 
+    /**
+     * Configures the project-level settings.
+     *
+     * @param action The configuration action for [ProjectExtension].
+     * @since 1.0.0
+     */
     public fun project(action: Action<ProjectExtension>) {
         action.execute(project)
     }
 
+    /**
+     * Configures the platform-level settings.
+     *
+     * @param action The configuration action for [PlatformExtension].
+     * @since 1.0.0
+     */
     public fun platform(action: Action<PlatformExtension>) {
         action.execute(platform)
     }
