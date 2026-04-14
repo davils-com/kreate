@@ -4,6 +4,23 @@ These guidelines define how to write **clear, consistent, and professional KDoc 
 
 ---
 
+## 0. File-Level Rules
+
+* ❌ **Do NOT add file-level KDoc describing the file**
+* ❌ **Do NOT document the package**
+* ❌ **Do NOT add unnecessary headers at the top of files**
+* ✅ A **copyright header is allowed** if required by the project
+
+### ✅ Example (Allowed)
+
+```kotlin
+// Copyright (c) 2026 Company Name
+
+package com.example.user
+```
+
+---
+
 ## 1. General Principles
 
 * Every **public class, function, and property MUST have KDoc**
@@ -39,7 +56,7 @@ Every function **MUST** include:
 
 ### ✅ Example
 
-```kotlin id="h1htq9"
+```kotlin
 /**
  * Calculates the total price including tax.
  *
@@ -78,7 +95,7 @@ Each property should describe:
 
 ### ✅ Example
 
-```kotlin id="8cn8v6"
+```kotlin
 /**
  * The unique identifier of the user.
  *
@@ -121,7 +138,7 @@ Each class should describe:
 
 ### ✅ Example (Correct)
 
-```kotlin id="02pj4e"
+```kotlin
 /**
  * Represents a user in the system.
  *
@@ -158,7 +175,7 @@ class User(
 
 ### ❌ Invalid Example
 
-```kotlin id="lgtz4h"
+```kotlin
 /**
  * Represents a user in the system.
  *
@@ -179,19 +196,6 @@ class User(
 * Even trivial return values must be documented
 * Document edge cases (e.g., `null`, empty results, fallback values)
 
-### ✅ Example
-
-```kotlin id="jq61fj"
-/**
- * Finds a user by their ID.
- *
- * @param userId The unique identifier of the user.
- * @return The matching user, or null if no user exists with the given ID.
- * @since 1.1.0
- */
-fun findUser(userId: String): User?
-```
-
 ---
 
 ## 6. Exceptions (`@throws`)
@@ -200,20 +204,6 @@ Use `@throws` when:
 
 * The exception is part of the expected behavior
 * The caller must be aware of it
-
-### ✅ Example
-
-```kotlin id="m4r9d3"
-/**
- * Parses a string into an integer.
- *
- * @param input The string to parse.
- * @return The parsed integer value.
- * @throws NumberFormatException If the input is not a valid integer.
- * @since 1.0.0
- */
-fun parseInt(input: String): Int = input.toInt()
-```
 
 ---
 
@@ -224,27 +214,6 @@ Examples should be included when:
 * The usage is not obvious
 * The API is reusable or exposed
 * Misuse is likely without clarification
-
-### ✅ Example
-
-````kotlin id="6rm3f4"
-/**
- * Formats a username into a display-friendly format.
- *
- * @param username The raw username.
- * @return A formatted username with the first letter capitalized.
- *
- * Example:
- * ```
- * formatUsername("john") // returns "John"
- * ```
- *
- * @since 1.0.0
- */
-fun formatUsername(username: String): String {
-    return username.replaceFirstChar { it.uppercase() }
-}
-````
 
 ---
 
@@ -261,6 +230,8 @@ fun formatUsername(username: String): String {
 
 ## 9. What to Avoid ❌
 
+* File-level documentation describing the file
+* Package documentation
 * Missing `@param`
 * Missing `@return`
 * Missing `@since`
