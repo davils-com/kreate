@@ -1,23 +1,68 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.davils.kreate.jobs
 
-import com.davils.kreate.Davils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Exec
 
+/**
+ * Represents a process that can be executed.
+ *
+ * This interface defines the contract for any executable logic within the plugin.
+ *
+ * @since 1.0.0
+ */
 internal interface Process {
+    /**
+     * Executes the logic associated with this process.
+     *
+     * @since 1.0.0
+     */
     fun execute()
 }
 
+/**
+ * A base class for Kreate-specific Gradle tasks.
+ *
+ * This class extends [DefaultTask] and implements [Process].
+ * It automatically assigns the task to the "kreate" group.
+ *
+ * @param desc A description of what this task does.
+ * @since 1.0.0
+ */
 public abstract class Task(desc: String) : DefaultTask(), Process {
     init {
-        group = Davils.Organization.NAME.lowercase()
+        group = "kreate"
         description = desc
     }
 }
 
+/**
+ * A base class for Kreate-specific executable Gradle tasks.
+ *
+ * This class extends [Exec] and implements [Process].
+ * It automatically assigns the task to the "kreate" group.
+ *
+ * @param desc A description of what this executable task does.
+ * @since 1.0.0
+ */
 public abstract class Executable(desc: String) : Exec(), Process {
     init {
-        group = Davils.Organization.NAME.lowercase()
+        group = "kreate"
         description = desc
     }
 }

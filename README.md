@@ -1,7 +1,7 @@
 # 🏗️ Kreate
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-Redtronics?style=for-the-badge&logo=apache&labelColor=white&color=blue)](https://opensource.org/licenses/Apache-2.0)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple)](https://kotlinlang.org)
 [![Gradle](https://img.shields.io/badge/Gradle-9.4.0-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A)](https://gradle.org)
 
 **Kreate** is an opinionated Gradle helper plugin for building Kotlin Multiplatform (KMP) and JVM projects. It provides a unified DSL to manage platform configurations, native C-Interop (Rust), documentation, testing, and publishing workflows with minimal boilerplate.

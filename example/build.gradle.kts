@@ -1,9 +1,13 @@
+import java.time.Year
+
 plugins {
     alias(libs.plugins.kreate)
     kotlin("multiplatform") version "2.3.20"
     id("com.google.devtools.ksp") version "2.3.6"
     id("io.kotest") version "6.1.11"
 }
+
+group = "com.example"
 
 kreate {
     platform {
@@ -42,6 +46,12 @@ kreate {
     project {
         name = "Example"
         description = "Example project"
+        projectGroup = group.toString()
+
+        version {
+            environment = "CI_COMMIT_TAG"
+            property = "version"
+        }
 
         buildConstant {
             enabled = true
@@ -56,6 +66,7 @@ kreate {
             enabled = true
             outputDirectory = "docs"
             moduleName = "Example"
+            copyright = "Copyright ${Year.now()} Example"
         }
 
         tests {
