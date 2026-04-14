@@ -7,7 +7,7 @@ import org.gradle.api.Project
 
 internal fun Project.configureMavenCentral(
     publishConfig: PublishExtension,
-    projectName: String?,
+    projectName: String,
     projectDescription: String?
 ) {
     val mavenCentralConfig = publishConfig.repositories.mavenCentral
@@ -22,6 +22,8 @@ internal fun Project.configureMavenCentral(
         if (mavenCentralConfig.signPublications.get()) {
             signAllPublications()
         }
+
+        coordinates(group.toString(), projectName, version.toString())
 
         pom {
             configurePom(publishConfig, projectName, projectDescription)

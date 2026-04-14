@@ -12,7 +12,7 @@ import java.net.URI
 
 internal fun Project.configureGitlab(
     publishConfig: PublishExtension,
-    projectName: String?,
+    projectName: String,
     projectDescription: String?
 ) {
     val gitlabConfig = publishConfig.repositories.gitlab
