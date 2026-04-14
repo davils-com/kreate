@@ -12,30 +12,39 @@ These guidelines define how to write **clear, consistent, and professional KDoc 
 * Use **clear, precise, and professional language**
 * Avoid redundant phrases like “Gets the value of…”
 * Write in **complete sentences**
-* Documentation may and should be **detailed when necessary** (e.g., for complex logic, domain rules, or edge cases)
-* Prefer clarity over brevity when the behavior is non-trivial
+* Documentation may and should be **detailed when necessary** (especially for complex logic, domain rules, or edge cases)
+* Prefer clarity over brevity when behavior is non-trivial
 
 ---
 
-## 2. Function Documentation
+## 2. Function Documentation (STRICT RULES)
 
-Every function must include:
+### 🔴 Mandatory Requirements
 
-* A short description of what it does
-* `@param` for **every parameter (mandatory)**
-* `@return` if the function returns a value
-* `@throws` if exceptions are relevant
-* Optional `@since` for versioning
-* Optional example if helpful
+Every function **MUST** include:
+
+* A description of behavior
+* `@param` for **every parameter (NO EXCEPTIONS)**
+* `@return` for **every non-Unit function (MANDATORY)**
+* `@throws` when exceptions are part of the contract
+* `@since` for **every function (MANDATORY)**
+
+### ⚠️ Important
+
+* **`@return` MUST NEVER be omitted**, even if the return value seems obvious
+* **`@since` MUST ALWAYS be present** and reflect the version the function was introduced
+* Missing `@param`, `@return`, or `@since` is considered **invalid documentation**
+
+---
 
 ### ✅ Example
 
-```kotlin
+```kotlin id="h1htq9"
 /**
  * Calculates the total price including tax.
  *
  * Applies the given tax rate to the base price and returns the final amount.
- * This method performs validation to ensure that only valid numeric inputs are processed.
+ * This method validates input values before performing the calculation.
  *
  * @param basePrice The original price before tax. Must be non-negative.
  * @param taxRate The tax rate as a decimal (e.g., 0.19 for 19%).
@@ -53,26 +62,30 @@ fun calculateTotalPrice(basePrice: Double, taxRate: Double): Double {
 
 ## 3. Property Documentation
 
-### 🔴 Rule
+### 🔴 Mandatory Rules
 
-**Every property MUST have its own KDoc block.**
-**Do NOT use `@property` for documentation.**
+* **Every property MUST have its own KDoc block**
+* **`@property` is strictly forbidden**
+* `@since` is **MANDATORY for every property**
+* Documentation must be placed **directly above the property**
 
 Each property should describe:
 
 * Purpose and meaning
 * Constraints (if any)
 * Format or units (if applicable)
-* Default behavior (if relevant)
+* Side effects or lifecycle behavior (if relevant)
 
 ### ✅ Example
 
-```kotlin
+```kotlin id="8cn8v6"
 /**
  * The unique identifier of the user.
  *
  * This value is immutable and assigned during creation.
- * It is used as the primary reference across the system and must remain stable.
+ * It must remain stable and globally unique.
+ *
+ * @since 1.0.0
  */
 val userId: String
 
@@ -80,7 +93,9 @@ val userId: String
  * The email address of the user.
  *
  * Must be a valid email format. Used for authentication and communication.
- * Changing this value may trigger verification workflows.
+ * Updating this value may trigger verification workflows.
+ *
+ * @since 1.0.0
  */
 var email: String
 ```
@@ -96,45 +111,54 @@ Each class should describe:
 * Important constraints or lifecycle notes
 * Optional usage examples
 
-### 🔴 Important Rule
+### 🔴 Mandatory Rules
 
-**Do NOT use `@property` in class-level KDoc.**
-Properties must be documented individually.
+* **DO NOT use `@property` in class-level KDoc**
+* Properties are documented **individually only**
+* `@since` is **MANDATORY for every class**
 
-### ✅ Example (Preferred)
+---
 
-```kotlin
+### ✅ Example (Correct)
+
+```kotlin id="02pj4e"
 /**
  * Represents a user in the system.
  *
- * This class encapsulates user-related data and basic validation logic.
- * It is part of the domain layer and should not contain persistence logic.
+ * This class encapsulates user-related data and validation logic.
+ * It belongs to the domain layer and should not contain persistence concerns.
  *
- * Instances are typically created via the UserService to ensure invariants are enforced.
+ * Instances should be created through a dedicated service to enforce invariants.
+ *
+ * @since 1.0.0
  */
 class User(
 
     /**
      * The unique identifier of the user.
      *
-     * This value is immutable and assigned during creation.
-     * It must be globally unique within the system.
+     * Immutable and assigned during creation. Must be globally unique.
+     *
+     * @since 1.0.0
      */
     val userId: String,
 
     /**
      * The email address of the user.
      *
-     * Must be a valid email format. Used for authentication and communication.
-     * Updates may require re-verification depending on business rules.
+     * Must follow a valid email format. Used for authentication and notifications.
+     *
+     * @since 1.0.0
      */
     var email: String
 )
 ```
 
-### ❌ Avoid This
+---
 
-```kotlin
+### ❌ Invalid Example
+
+```kotlin id="lgtz4h"
 /**
  * Represents a user in the system.
  *
@@ -149,22 +173,21 @@ class User(
 
 ---
 
-## 5. Return Values
+## 5. Return Values (STRICT)
 
-Document return values when:
-
-* The result is not obvious
-* There are edge cases
-* Special values may be returned (e.g., `null`, empty list)
+* **Every non-Unit function MUST have `@return`**
+* Even trivial return values must be documented
+* Document edge cases (e.g., `null`, empty results, fallback values)
 
 ### ✅ Example
 
-```kotlin
+```kotlin id="jq61fj"
 /**
  * Finds a user by their ID.
  *
  * @param userId The unique identifier of the user.
  * @return The matching user, or null if no user exists with the given ID.
+ * @since 1.1.0
  */
 fun findUser(userId: String): User?
 ```
@@ -173,54 +196,38 @@ fun findUser(userId: String): User?
 
 ## 6. Exceptions (`@throws`)
 
-Document exceptions when they are:
+Use `@throws` when:
 
-* Part of the expected contract
-* Not obvious from the function signature
+* The exception is part of the expected behavior
+* The caller must be aware of it
 
 ### ✅ Example
 
-```kotlin
+```kotlin id="m4r9d3"
 /**
  * Parses a string into an integer.
  *
  * @param input The string to parse.
  * @return The parsed integer value.
  * @throws NumberFormatException If the input is not a valid integer.
+ * @since 1.0.0
  */
 fun parseInt(input: String): Int = input.toInt()
 ```
 
 ---
 
-## 7. Versioning (`@since`)
+## 7. Examples (Recommended)
 
-Use `@since` for:
+Examples should be included when:
 
-* Public APIs
-* Features that evolve over time
-
-### Example
-
-```kotlin
-/**
- * @since 2.0.0
- */
-```
-
----
-
-## 8. Examples (Recommended)
-
-Include examples when:
-
-* Usage is not obvious
-* The API is reusable
-* It helps prevent misuse
+* The usage is not obvious
+* The API is reusable or exposed
+* Misuse is likely without clarification
 
 ### ✅ Example
 
-````kotlin
+````kotlin id="6rm3f4"
 /**
  * Formats a username into a display-friendly format.
  *
@@ -231,6 +238,8 @@ Include examples when:
  * ```
  * formatUsername("john") // returns "John"
  * ```
+ *
+ * @since 1.0.0
  */
 fun formatUsername(username: String): String {
     return username.replaceFirstChar { it.uppercase() }
@@ -239,39 +248,40 @@ fun formatUsername(username: String): String {
 
 ---
 
-## 9. Consistency Rules
+## 8. Consistency Rules
 
-* Always use:
-
-  * `@param` for all parameters (**mandatory**)
-  * `@return` when applicable
-  * `@since` for versioned APIs
+* `@param` → **ALWAYS required**
+* `@return` → **ALWAYS required for non-Unit**
+* `@since` → **ALWAYS required (no exceptions)**
 * Never mix documentation styles
 * Keep formatting consistent across the project
-* Ensure documentation stays in sync with implementation
+* Keep documentation in sync with implementation
 
 ---
 
-## 10. What to Avoid ❌
+## 9. What to Avoid ❌
 
 * Missing `@param`
+* Missing `@return`
+* Missing `@since`
 * Non-English documentation
-* Overly vague descriptions
-* Redundant comments
-* Outdated documentation
-* Copy-paste KDocs that don’t match the code
-* Using KDoc instead of writing clean, self-explanatory code
+* Using `@property`
+* Vague or superficial descriptions
+* Outdated or incorrect documentation
+* Copy-paste KDocs that do not match the code
 
 ---
 
-## 11. Summary
+## 10. Summary
 
-Professional KDoc should be:
+Professional KDoc must be:
 
-* **Complete** → all parameters and behavior documented
-* **Accurate** → reflects actual implementation
-* **Clear** → written in precise English
+* **Strict** → all required tags are present
+* **English-only** → no mixed language
+* **Complete** → parameters and return values documented
+* **Versioned** → every element has `@since`
+* **Accurate** → reflects real behavior
 * **Detailed when necessary** → especially for complex logic
-* **Consistent** → same structure across the project
+* **Consistent** → same rules applied everywhere
 
 ---
