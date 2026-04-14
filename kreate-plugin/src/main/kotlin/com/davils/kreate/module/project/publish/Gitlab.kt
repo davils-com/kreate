@@ -16,7 +16,7 @@
 
 package com.davils.kreate.module.project.publish
 
-import com.davils.kreate.module.project.publish.extension.PublishExtension
+import com.davils.kreate.KreateExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -27,10 +27,9 @@ import org.gradle.kotlin.dsl.*
 import java.net.URI
 
 internal fun Project.configureGitlab(
-    publishConfig: PublishExtension,
-    projectName: String,
-    projectDescription: String?
+    kreateExtension: KreateExtension,
 ) {
+    val publishConfig = kreateExtension.project.publish
     val gitlabConfig = publishConfig.repositories.gitlab
     if (!gitlabConfig.enabled.get()) return
 
@@ -65,6 +64,8 @@ internal fun Project.configureGitlab(
             }
         }
 
+        val projectName = kreateExtension.project.name.orNull ?: project.name
+        val projectDescription = kreateExtension.project.description.orNull
         publications.withType<MavenPublication>().configureEach {
             pom {
                 configurePom(publishConfig, projectName, projectDescription)

@@ -23,5 +23,6 @@ import javax.inject.Inject
 public abstract class DocsExtension @Inject constructor(factory: ObjectFactory) {
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
     public val moduleName: Property<String> = factory.property(String::class.java)
+    public val copyright: Property<String> = factory.property(String::class.java)
     public val outputDirectory: Property<String> = factory.property(String::class.java)
 }

@@ -16,16 +16,11 @@
 
 package com.davils.kreate.module.project
 
-import com.davils.kreate.Davils
 import com.davils.kreate.module.getProjectVersion
 import org.gradle.api.Project
 
-internal fun Project.configureGroup() {
-    group = Davils.Organization.GROUP
-}
-
-internal fun Project.configureVersion() {
-    val projectVersion = getProjectVersion()
+internal fun Project.configureVersion(env: String, prop: String) {
+    val projectVersion = getProjectVersion(env, prop)
     if (projectVersion != version.toString()) {
         version = projectVersion
     }

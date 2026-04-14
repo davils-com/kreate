@@ -28,11 +28,14 @@ import javax.inject.Inject
 
 public abstract class ProjectExtension @Inject constructor(factory: ObjectFactory) {
     public val name: Property<String> = factory.property(String::class.java)
-    public val description: Property<String> = factory.property(String::class.java).convention("A Davils project.")
+    public val description: Property<String> = factory.property(String::class.java).convention("A Kreate project.")
+    public val projectGroup: Property<String> = factory.property(String::class.java)
+
+    @get:Nested
+    public abstract val version: ProjectExtensionVersion
 
     @get:Nested
     public abstract val buildConstants: BuildConstantsExtension
-
     @get:Nested
     public abstract val docs: DocsExtension
 
@@ -41,6 +44,10 @@ public abstract class ProjectExtension @Inject constructor(factory: ObjectFactor
 
     @get:Nested
     public abstract val publish: PublishExtension
+
+    public fun version(action: Action<ProjectExtensionVersion>) {
+        action.execute(version)
+    }
 
     public fun buildConstant(action: Action<BuildConstantsExtension>) {
         action.execute(buildConstants)
@@ -57,4 +64,9 @@ public abstract class ProjectExtension @Inject constructor(factory: ObjectFactor
     public fun publish(action: Action<PublishExtension>) {
         action.execute(publish)
     }
+}
+
+public abstract class ProjectExtensionVersion @Inject constructor(factory: ObjectFactory) {
+    public val environment: Property<String> = factory.property(String::class.java).convention("VERSION")
+    public val property: Property<String> = factory.property(String::class.java).convention("version")
 }

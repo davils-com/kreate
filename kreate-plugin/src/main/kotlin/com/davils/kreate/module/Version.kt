@@ -18,11 +18,11 @@ package com.davils.kreate.module
 
 import org.gradle.api.Project
 
-public fun Project.getProjectVersion(): String {
-    val ciTag = System.getenv("CI_COMMIT_TAG")
+public fun Project.getProjectVersion(env: String, prop: String): String {
+    val ciTag = System.getenv(env)
     if (ciTag != null) return ciTag
 
-    val versionProp = findProperty("version")?.toString()
+    val versionProp = findProperty(prop)?.toString()
     if (versionProp != null && versionProp != "unspecified") {
         return versionProp
     }

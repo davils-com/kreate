@@ -23,9 +23,6 @@ internal fun Project.initializePublish(extension: KreateExtension) {
     val publishConfig = extension.project.publish
     if (!publishConfig.enabled.get()) return
 
-    val projectName = extension.project.name.orNull ?: project.name
-    val projectDescription = extension.project.description.orNull
-
-    configureMavenCentral(publishConfig, projectName, projectDescription)
-    configureGitlab(publishConfig, projectName, projectDescription)
+    configureMavenCentral(extension)
+    configureGitlab(extension)
 }

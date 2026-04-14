@@ -16,30 +16,32 @@
 
 package com.davils.kreate.module.project.publish
 
-import com.davils.kreate.module.project.publish.extension.PublishExtension
+import com.davils.kreate.KreateExtension
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.MavenPublishBasePlugin
 import org.gradle.api.Project
 
 internal fun Project.configureMavenCentral(
-    publishConfig: PublishExtension,
-    projectName: String,
-    projectDescription: String?
+    kreateExtension: KreateExtension,
 ) {
+    val publishConfig = kreateExtension.project.publish
     val mavenCentralConfig = publishConfig.repositories.mavenCentral
     if (!mavenCentralConfig.enabled.get()) {
         return
     }
 
-    pluginManager.apply(MavenPublishBasePlugin::class.java)
+    val projectName = kreateExtension.project.name.orNull ?: project.name
+    val projectDescription = kreateExtension.project.description.orNull
+    val projectGroup = kreateExtension.project.projectGroup.orNull ?: project.group.toString()
 
+    pluginManager.apply(MavenPublishBasePlugin::class.java)
     extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
         publishToMavenCentral(automaticRelease = mavenCentralConfig.automaticRelease.get())
         if (mavenCentralConfig.signPublications.get()) {
             signAllPublications()
         }
 
-        coordinates(group.toString(), projectName, version.toString())
+        coordinates(projectGroup, projectName, version.toString())
 
         pom {
             configurePom(publishConfig, projectName, projectDescription)

@@ -32,10 +32,9 @@ internal object ProjectModule : Module {
     private fun Project.configureCommon(extension: KreateExtension) {
         applyDefaultGradlePlugins()
         addRepositories()
-        configureGroup()
-        configureVersion()
 
         afterEvaluate {
+            configureVersion(extension.project.version.environment.get(), extension.project.version.property.get())
             initializeProject(extension.project)
             initializeBuildConstants(extension)
             initializeDocs(extension)

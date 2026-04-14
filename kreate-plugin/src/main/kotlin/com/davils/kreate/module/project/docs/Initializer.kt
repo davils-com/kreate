@@ -26,5 +26,5 @@ internal fun Project.initializeDocs(extension: KreateExtension) {
     }
 
     applyDokkaPlugin()
-    configureDokkaExtension(extension.project.docs)
+    configureDokkaExtension(extension)
 }
