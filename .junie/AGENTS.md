@@ -7,11 +7,13 @@ These guidelines define how to write **clear, consistent, and professional KDoc 
 ## 1. General Principles
 
 * Every **public class, function, and property MUST have KDoc**
+* **All KDoc MUST be written in English**
 * Documentation should explain **what and why**, not just repeat the code
-* Use **clear, concise, and professional English**
+* Use **clear, precise, and professional language**
 * Avoid redundant phrases like “Gets the value of…”
 * Write in **complete sentences**
-* Document **non-trivial logic, constraints, and edge cases**
+* Documentation may and should be **detailed when necessary** (e.g., for complex logic, domain rules, or edge cases)
+* Prefer clarity over brevity when the behavior is non-trivial
 
 ---
 
@@ -20,7 +22,7 @@ These guidelines define how to write **clear, consistent, and professional KDoc 
 Every function must include:
 
 * A short description of what it does
-* `@param` for **every parameter**
+* `@param` for **every parameter (mandatory)**
 * `@return` if the function returns a value
 * `@throws` if exceptions are relevant
 * Optional `@since` for versioning
@@ -33,6 +35,7 @@ Every function must include:
  * Calculates the total price including tax.
  *
  * Applies the given tax rate to the base price and returns the final amount.
+ * This method performs validation to ensure that only valid numeric inputs are processed.
  *
  * @param basePrice The original price before tax. Must be non-negative.
  * @param taxRate The tax rate as a decimal (e.g., 0.19 for 19%).
@@ -69,6 +72,7 @@ Each property should describe:
  * The unique identifier of the user.
  *
  * This value is immutable and assigned during creation.
+ * It is used as the primary reference across the system and must remain stable.
  */
 val userId: String
 
@@ -76,6 +80,7 @@ val userId: String
  * The email address of the user.
  *
  * Must be a valid email format. Used for authentication and communication.
+ * Changing this value may trigger verification workflows.
  */
 var email: String
 ```
@@ -103,7 +108,9 @@ Properties must be documented individually.
  * Represents a user in the system.
  *
  * This class encapsulates user-related data and basic validation logic.
- * Instances are typically created via the UserService.
+ * It is part of the domain layer and should not contain persistence logic.
+ *
+ * Instances are typically created via the UserService to ensure invariants are enforced.
  */
 class User(
 
@@ -111,6 +118,7 @@ class User(
      * The unique identifier of the user.
      *
      * This value is immutable and assigned during creation.
+     * It must be globally unique within the system.
      */
     val userId: String,
 
@@ -118,6 +126,7 @@ class User(
      * The email address of the user.
      *
      * Must be a valid email format. Used for authentication and communication.
+     * Updates may require re-verification depending on business rules.
      */
     var email: String
 )
@@ -234,9 +243,9 @@ fun formatUsername(username: String): String {
 
 * Always use:
 
-    * `@param` for all parameters
-    * `@return` when applicable
-    * `@since` for versioned APIs
+  * `@param` for all parameters (**mandatory**)
+  * `@return` when applicable
+  * `@since` for versioned APIs
 * Never mix documentation styles
 * Keep formatting consistent across the project
 * Ensure documentation stays in sync with implementation
@@ -246,6 +255,8 @@ fun formatUsername(username: String): String {
 ## 10. What to Avoid ❌
 
 * Missing `@param`
+* Non-English documentation
+* Overly vague descriptions
 * Redundant comments
 * Outdated documentation
 * Copy-paste KDocs that don’t match the code
@@ -259,8 +270,8 @@ Professional KDoc should be:
 
 * **Complete** → all parameters and behavior documented
 * **Accurate** → reflects actual implementation
-* **Concise** → no unnecessary wording
-* **Helpful** → explains intent, not just mechanics
+* **Clear** → written in precise English
+* **Detailed when necessary** → especially for complex logic
 * **Consistent** → same structure across the project
 
 ---
