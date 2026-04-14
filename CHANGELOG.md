@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.1
+
+### Added
+- **KDoc Documentation**: Added comprehensive KDoc documentation across the entire project for improved clarity and professionalism.
+- **Project Configuration**: Added `.gitignore` and copyright configuration files for project management.
+- **Dependency Management**: Added Dependabot configuration for automated Gradle and GitHub Actions updates.
+- **C-Interop Docs**: Added detailed documentation and examples for integrating Rust with Kotlin Multiplatform via C-Interop.
+
+### Fixed
+- **Versioning**: Corrected Kotlin and KSP versions in `libs.versions.toml` to 2.3.0.
+- **Legal**: Updated copyright year to 2026 in multiple files and LICENSE.
+- **DSL**: Updated `projectName` parameter to be non-nullable in GitLab and MavenCentral configuration functions for better reliability.
+- **Build**: Updated Gradle build commands in documentation to use `--no-daemon`.
+
+### Changed
+- **Architecture**: Simplified project and publication configuration by removing the `Davils` object.
+- **Docs**: Updated README with more detailed installation and configuration instructions.
+- **Build**: Updated various dependencies (Kotest, Gradle Wrapper, GitHub Actions, KSP).
+
 ## 1.0.0
 
 ### Added
@@ -51,4 +70,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.0.1]: https://github.com/davils/kreate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/davils/kreate/releases/tag/v1.0.0
