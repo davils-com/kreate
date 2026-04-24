@@ -1,10 +1,25 @@
-# 🏗️ Kreate
+<p align="center">
+  <img src="docs/images/kreate.svg" alt="Kreate Logo" width="250">
+</p>
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-Redtronics?style=for-the-badge&logo=apache&labelColor=white&color=blue)](https://opensource.org/licenses/Apache-2.0)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple)](https://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/Gradle-9.4.0-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A)](https://gradle.org)
+<h1 align="center">🏗️ Kreate</h1>
 
-**Kreate** is an opinionated Gradle helper plugin for building Kotlin Multiplatform (KMP) and JVM projects. It provides a unified DSL to manage platform configurations, native C-Interop (Rust), documentation, testing, and publishing workflows with minimal boilerplate.
+<p align="center">
+  <a href="https://opensource.org/licenses/Apache-2.0">
+    <img src="https://img.shields.io/badge/License-Apache_2.0-Redtronics?style=for-the-badge&logo=apache&labelColor=white&color=blue" alt="License">
+  </a>
+  <a href="https://kotlinlang.org">
+    <img src="https://img.shields.io/badge/Kotlin-2.3.21-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
+  </a>
+  <a href="https://gradle.org">
+    <img src="https://img.shields.io/badge/Gradle-9.4.1-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
+  </a>
+</p>
+
+<p align="center">
+  <strong>Kreate</strong> is an opinionated Gradle helper plugin for building Kotlin Multiplatform (KMP) and JVM projects.
+  It provides a unified DSL to manage platform configurations, native C-Interop (Rust), JNI, documentation, testing, and publishing workflows with minimal boilerplate.
+</p>
 
 ---
 
@@ -17,16 +32,16 @@
 - [Documentation](#-documentation)
 - [Third-Party Software](#-third-party-software)
 - [Contributing](#-contributing)
-- [License](#-license--ethics)
+- [License & Ethics](#-license--ethics)
 
 ---
 
 ## 🔍 Overview
 
-Managing Kotlin Multiplatform configurations can be complex. **Kreate** simplifies this by:
+Managing Kotlin Multiplatform and JVM configurations can be complex. **Kreate** simplifies this by:
 
 *   **Standardizing Platform Setup**: A consistent DSL for JVM, Linux, macOS, and Windows.
-*   **Integrating Rust**: Automated bridge between Rust and Kotlin via C-Interop.
+*   **Integrating Native Code**: Automated bridge for Rust (via C-Interop) and C/C++ (via JNI).
 *   **Enforcing Quality Standards**: Sensible defaults like `explicitApi()` and `allWarningsAsErrors`.
 *   **Declarative Infrastructure**: Focus on project requirements while the plugin handles the underlying Gradle configuration.
 
@@ -41,25 +56,29 @@ Kreate detects the project type (JVM, Android, or KMP) and applies appropriate o
 - **Consistent Toolchains**: Ensures Java and Kotlin versions are synchronized across modules.
 
 ### 🦀 Rust C-Interop
-Automates the integration of Rust libraries into Kotlin:
+Automates the integration of Rust libraries into Kotlin Multiplatform:
 - **Toolchain Integration**: Manages `cargo` and cross-compilation targets.
 - **Project Scaffolding**: Can generate Rust library structures if missing.
 - **Header Synchronization**: Manages C headers and Kotlin bindings.
 - **Multi-Arch Support**: Targets `x86_64`, `aarch64`, and others.
+
+### 🔌 JNI Support (Java Native Interface)
+Simplified integration for native C/C++ code in JVM projects:
+- **CMake Integration**: Automatically handles CMake-based native builds.
+- **Runtime Library Path**: Automatically configures `java.library.path` for testing and execution.
+- **Consistent Layout**: Follows a structured layout for native sources (mirroring C-Interop style).
 
 ### 🧪 Testing Pipeline
 Pre-configured **Kotest** integration for robust validation:
 - **Parallel Execution**: Scales based on CPU availability.
 - **Standardized Logging**: Clear output for test states (Passed, Skipped, Started).
 - **Automated Reporting**: Generates HTML and XML reports for CI/CD.
-- **Execution Controls**: Configurable timeouts and failure thresholds.
 
 ### 📦 Publishing & POM Management
 Standardizes the release process for libraries:
 - **Registry Support**: Built-in configurations for Maven Central and GitLab.
-- **Publication Signing**: Integrated GPG signing for Maven Central requirements.
+- **Signing**: Integrated GPG signing for Maven Central requirements.
 - **POM Metadata**: Declarative DSL for licenses, developers, and SCM information.
-- **CI Integration**: Automatically utilizes GitLab environment variables for authentication.
 
 ---
 
@@ -68,7 +87,7 @@ Standardizes the release process for libraries:
 Detailed documentation for Kreate is available in the following locations:
 
 - **[Project Docs](./docs)**: Comprehensive guides and topic-specific information.
-- **[API Reference](https://davils.github.io/kreate/api)**: Dokka-generated API documentation (if hosted).
+- **[API Reference](https://davils.github.io/kreate/api)**: Dokka-generated API documentation.
 - **[Examples](./example)**: A reference implementation demonstrating various configuration scenarios.
 
 To generate the documentation locally, run:
@@ -97,14 +116,6 @@ plugins {
 }
 ```
 
-Or apply it in your `build.gradle.kts`:
-
-```kotlin
-plugins {
-    id("com.davils.kreate") version "<latest>"
-}
-```
-
 ### Configuration
 
 Apply the plugin in your `build.gradle.kts`:
@@ -114,6 +125,13 @@ kreate {
     platform {
         javaVersion = JavaVersion.VERSION_25
         explicitApi = true
+        
+        jvm {
+            jni {
+                enabled = true
+                // Optional: projectDirectory = file("custom-jni-path")
+            }
+        }
         
         multiplatform {
             cInterop {
@@ -149,6 +167,7 @@ kreate {
 | `platform` | `javaVersion`         | Target Java version (21, 25, etc.)        | `VERSION_21` |
 | `platform` | `explicitApi`         | Enforces Kotlin Explicit API mode         | `false`      |
 | `platform` | `allWarningsAsErrors` | Treats all compiler warnings as errors    | `true`       |
+| `jvm.jni`  | `enabled`             | Enables JNI support (CMake-based)         | `false`      |
 | `project`  | `buildConstant`       | Generate type-safe Kotlin constants       | `Disabled`   |
 | `project`  | `docs`                | Configure Dokka documentation generation  | `Disabled`   |
 | `project`  | `tests`               | Advanced Kotest configuration & reporting | `Enabled`    |
@@ -158,26 +177,25 @@ kreate {
 
 ## 📦 Third-Party Software
 
-Kreate leverages several open-source technologies to provide its comprehensive feature set
-For a full list of third-party libraries and their respective licenses, please refer to our [Third-Party Software](./THIRDPARTY.md) document.
+Kreate leverages various open-source technologies. For a full list of libraries and licenses, please refer to the [Third-Party Software](./THIRDPARTY.md) document.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome and appreciate all contributions! To maintain project quality, please follow these core principles:
+We welcome all contributions! To maintain quality, please note:
 
-- **Documentation**: If your change affects the API or behavior, you **must** update the corresponding docs.
-- **Tests**: Ensure your changes are covered by tests and pass the existing suite.
+- **Documentation**: Changes to API or behavior must be documented.
+- **Tests**: Ensure your changes are covered by tests.
 - **Standards**: Follow the established Kotlin style and project conventions.
 
-For detailed instructions on how to set up your environment and submit a pull request, please read our [Contributing Guidelines](CONTRIBUTING.md).
+Detailed instructions can be found in our [Contributing Guidelines](CONTRIBUTING.md).
 
 ---
 
 ## ⚖️ License & Ethics
 
-- **License**: Distributed under the **Apache License 2.0**. See `LICENSE` for details.
+- **License**: Published under the **Apache License 2.0**. See `LICENSE` for details.
 - **Code of Conduct**: We adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
