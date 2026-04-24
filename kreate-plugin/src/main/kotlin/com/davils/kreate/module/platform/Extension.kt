@@ -16,6 +16,7 @@
 
 package com.davils.kreate.module.platform
 
+import com.davils.kreate.module.platform.jvm.JvmExtension
 import com.davils.kreate.module.platform.multiplatform.MultiplatformExtension
 import org.gradle.api.Action
 import org.gradle.api.JavaVersion
@@ -69,6 +70,13 @@ public abstract class PlatformExtension @Inject constructor(
     public abstract val multiplatform: MultiplatformExtension
 
     /**
+     * Configuration for JVM targets.
+     * @since 1.1.0
+     * */
+    @get:Nested
+    public abstract val jvm: JvmExtension
+
+    /**
      * Configures the [MultiplatformExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -76,5 +84,13 @@ public abstract class PlatformExtension @Inject constructor(
      */
     public fun multiplatform(action: Action<MultiplatformExtension>) {
         action.execute(multiplatform)
+    }
+
+    /**
+     * Configures the [JvmExtension] using the provided action.
+     * @since 1.1.0
+     * */
+    public fun jvm(action: Action<JvmExtension>) {
+        action.execute(jvm)
     }
 }
