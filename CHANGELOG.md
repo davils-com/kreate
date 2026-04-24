@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.0
+
+### Added
+- **JNI Support**: Added comprehensive support for Java Native Interface (JNI) in JVM modules.
+  - **Automated C++ Integration**: Seamlessly bridge C/C++ libraries with JVM projects using CMake.
+  - **Project Scaffolding**: Built-in task to initialize new CMake-based C++ projects for JNI.
+  - **Automated Build Pipeline**: Native builds are automatically hooked into the Kotlin compilation process.
+  - **Runtime Configuration**: Automatic configuration of `java.library.path` for tests and execution tasks to resolve native libraries.
+- **Improved Platform DSL**: Added `jvm` configuration block to the platform DSL for better organization of JVM-specific settings.
+
+### Changed
+- **Naming Convention**: Standardized internal naming resolution for native features (JNI, C-Interop) to ensure compatibility across different platforms and toolchains.
+- **Documentation**: Updated KDoc across all new JNI components to follow strict professional standards.
+
 ## 1.0.1
 
 ### Added
@@ -70,5 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.1.0]: https://github.com/davils/kreate/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/davils/kreate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/davils/kreate/releases/tag/v1.0.0
