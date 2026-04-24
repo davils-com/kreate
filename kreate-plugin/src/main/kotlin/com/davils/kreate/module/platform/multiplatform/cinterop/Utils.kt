@@ -17,6 +17,7 @@
 package com.davils.kreate.module.platform.multiplatform.cinterop
 
 import com.davils.kreate.KreateExtension
+import com.davils.kreate.module.platform.resolveFeatureProjectName
 import com.davils.kreate.system.Architecture
 import com.davils.kreate.system.OsTarget
 import com.davils.kreate.system.getArchitecture
@@ -38,13 +39,7 @@ import java.io.File
  */
 internal fun Project.resolveProjectName(extension: KreateExtension): String {
     val cInteropConfig = extension.platform.multiplatform.cInterop
-    val name = when {
-        cInteropConfig.nameOverride.isPresent -> cInteropConfig.nameOverride.get()
-        extension.project.name.isPresent -> extension.project.name.get()
-        else -> project.name
-    }
-
-    return name.lowercase().replace("-", "_")
+    return resolveFeatureProjectName(extension, cInteropConfig.nameOverride)
 }
 
 /**
