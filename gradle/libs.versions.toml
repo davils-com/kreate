@@ -3,7 +3,7 @@ kotlin = "2.3.21"
 poet = "2.3.0"
 dokka = "2.2.0"
 kotest = "6.1.11"
-ksp = "2.3.6"
+ksp = "2.3.7"
 publish = "0.36.0"
 
 [libraries]
