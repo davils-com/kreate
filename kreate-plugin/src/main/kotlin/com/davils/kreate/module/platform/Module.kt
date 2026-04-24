@@ -19,6 +19,7 @@ package com.davils.kreate.module.platform
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import com.davils.kreate.module.platform.jvm.initializeJvmCompiler
+import com.davils.kreate.module.platform.jvm.jni.initializeJni
 import com.davils.kreate.module.platform.multiplatform.cinterop.initializeCInterop
 import com.davils.kreate.module.platform.multiplatform.initializeMultiplatformCompiler
 import org.gradle.api.Project
@@ -69,6 +70,7 @@ internal object PlatformModule : Module {
      */
     private fun Project.configureJvm(extension: KreateExtension): Unit = afterEvaluate {
         initializeJvmCompiler(extension)
+        initializeJni(extension)
     }
 
     /**
