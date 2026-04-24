@@ -2,9 +2,7 @@ import java.time.Year
 
 plugins {
     alias(libs.plugins.kreate)
-    kotlin("multiplatform") version "2.3.21"
-    id("com.google.devtools.ksp") version "2.3.6"
-    id("io.kotest") version "6.1.11"
+    kotlin("jvm") version "2.3.21"
 }
 
 group = "com.example"
@@ -39,6 +37,15 @@ kreate {
                 macos {
                     // Configure macOS-specific settings here
                 }
+            }
+        }
+
+        jvm {
+            jni {
+                enabled = true
+                projectDirectory = layout.projectDirectory.dir("jni")
+                nameOverride = "example"
+
             }
         }
     }
@@ -150,6 +157,3 @@ kreate {
     }
 }
 
-kotlin {
-    jvm()
-}
