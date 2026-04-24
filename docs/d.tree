@@ -11,6 +11,7 @@
     <toc-element topic="platform-configuration.md"/>
     <toc-element topic="project-configuration.md"/>
     <toc-element topic="c-interop.md"/>
+    <toc-element topic="jni-support.md"/>
     <toc-element topic="publishing.md"/>
     <toc-element topic="testing-and-docs.md"/>
 </instance-profile>
