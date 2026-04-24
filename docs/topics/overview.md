@@ -1,19 +1,57 @@
 # Overview
 
-Kreate is a powerful Gradle plugin designed to streamline Kotlin Multiplatform development. It provides a structured and opinionated way to manage multi-module projects, platform configurations, and automated workflows.
+Managing Kotlin Multiplatform (KMP) and JVM projects typically requires significant Gradle boilerplate — juggling
+platform targets, native interop, toolchain versions, and publishing pipelines across multiple modules.
+**Kreate** eliminates that overhead with a single, opinionated DSL that handles all of it declaratively.
 
-## Key Features
+## How It Works
 
-- **Structured Configuration**: Use a clean, hierarchical DSL to configure your projects.
-- **Kotlin Multiplatform Support**: Simplified setup for JVM and Multiplatform targets.
-- **Rust/Cargo C-Interop**: Out-of-the-box support for integrating Rust code into Kotlin Multiplatform projects.
-- **Automated Publishing**: Pre-configured support for GitLab Package Registry and Maven Central (via OSSRH).
-- **Test Management**: Enhanced test logging and automated HTML/XML reporting.
-- **Documentation**: Integrated Dokka setup for generating project documentation.
-- **Build Constants**: Easily generate Kotlin classes containing build-time constants.
+Instead of manually wiring together Gradle plugins and configuration blocks for each platform, Kreate automatically
+detects your project type — JVM, Android, or Multiplatform — and applies the correct defaults out of the box.
 
-## Why Kreate?
+This includes:
 
-Managing complex Kotlin Multiplatform projects often leads to repetitive and boilerplate-heavy Gradle scripts. Kreate aims to reduce this complexity by providing high-level abstractions for common tasks like publishing, testing, and platform-specific configurations.
+- Java toolchain synchronization across all modules
+- Kotlin compiler flags (`explicitApi()`, `allWarningsAsErrors`) enforced by default
+- Cross-platform target registration for Linux, macOS, and Windows
 
-By using Kreate, you can focus on writing code while the plugin handles the heavy lifting of Gradle plumbing.
+## Native Integration
+
+For projects that go beyond pure Kotlin, Kreate provides first-class native code integration.
+
+### Rust via C-Interop
+
+- Automates the full Rust → C-Interop bridge using `cargo`
+- Manages multi-architecture compilation targets (`x86_64`, `aarch64`, and more)
+- Can scaffold Rust library structures if they are missing
+- Handles C header synchronization and Kotlin binding generation
+
+### C/C++ via JNI
+
+- CMake-based native builds with zero manual wiring
+- Automatic `java.library.path` configuration for test and runtime execution
+- Follows a structured source layout consistent with C-Interop conventions
+
+## Publishing
+
+Publishing is a first-class concern in Kreate.
+
+| Registry | Feature |
+|---|---|
+| Maven Central | GPG signing + automatic release |
+| GitLab | Built-in registry configuration |
+
+A declarative DSL covers all POM metadata: licenses, developer information, and SCM links.
+
+## Testing
+
+Kreate ships a pre-configured **Kotest** integration — no setup required.
+
+- Parallel test execution scaled to available CPU cores
+- Standardized logging output for Passed, Skipped, and Started states
+- Automatic HTML and XML report generation for CI/CD pipelines
+
+<tip>
+All features are opt-in via the <code>kreate { }</code> block in your <code>build.gradle.kts</code>.
+Sensible defaults are applied automatically so you only configure what you need.
+</tip>

@@ -8,7 +8,30 @@
 
     <toc-element topic="overview.md"/>
     <toc-element topic="getting-started.md"/>
-    <toc-element topic="platform-configuration.md"/>
+    <toc-element toc-title="Platform">
+        <toc-element topic="Java-Version.md"/>
+        <toc-element topic="Explicit-API.md"/>
+        <toc-element topic="Warning-as-errors.md"/>
+        <toc-element toc-title="JVM">
+            <toc-element toc-title="JNI">
+                <toc-element topic="Support.md"/>
+                <toc-element topic="Configuration.md"/>
+                <toc-element topic="Scaffolding.md"/>
+                <toc-element topic="Build-Pipeline.md"/>
+            </toc-element>
+        </toc-element>
+        <toc-element toc-title="Multiplatform">
+            <toc-element toc-title="C-Interopration"/>
+        </toc-element>
+    </toc-element>
+    <toc-element toc-title="Project">
+        <toc-element topic="Metadata.md"/>
+        <toc-element topic="Versioning.md"/>
+        <toc-element toc-title="Build Constants"/>
+        <toc-element toc-title="Documentation"/>
+        <toc-element toc-title="Testing"/>
+        <toc-element toc-title="Publishing"/>
+    </toc-element>
     <toc-element topic="project-configuration.md"/>
     <toc-element topic="c-interop.md"/>
     <toc-element topic="jni-support.md"/>
