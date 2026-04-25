@@ -14,53 +14,25 @@ Both task types receive the same `timeout`, `ignoreFailures`, `failOnNoDiscovere
 `alwaysRunTests`, `logging`, and `report` settings. Only `maxParallelForks` and
 `useJUnitPlatform()` are exclusive to JVM `Test` tasks.
 
-## Required Plugins
-
-Kreate validates at configuration time that the following plugins are applied before
-`tests { enabled.set(true) }` can proceed in a multiplatform project:
-
-```kotlin
-plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp) // com.google.devtools.ksp
-    alias(libs.plugins.kotest.multiplatform) // io.kotest.multiplatform
-    alias(libs.plugins.kreate)
-}
-```
-
-If `ksp` is absent:
-
-```
-IllegalStateException: You need to apply the 'ksp' plugin by yourself in multiplatform projects if you want to use kotest.
-```
-
-If `kotest` is absent:
-```
-IllegalStateException: You need to apply the 'kotest' plugin by yourself in multiplatform projects if you want to use kotest.
-```
-
-
-Both checks run immediately during the `afterEvaluate` phase — before any test task
-configuration is applied.
-
 ## JVM Target
 
 For the JVM target in a multiplatform project, Kreate configures `Test` tasks identically
 to a pure Kotlin JVM project: `useJUnitPlatform()` is applied, and `maxParallelForks` takes
 effect.
 
-Write JVM-specific Kotest specs in `jvmTest/kotlin/`:
+Write JVM-specific tests in `jvmTest/kotlin/`:
 
 ```kotlin
-// jvmTest/kotlin/com/example/MySpec.kt
-import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.shouldBe
+// jvmTest/kotlin/com/example/MyTest.kt
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 
-class MySpec : FunSpec({
-    test("addition works") {
-        (1 + 1) shouldBe 2
+class MyTest {
+    @Test
+    fun `addition works`() {
+        assertEquals(2, 1 + 1)
     }
-})
+}
 ```
 
 Run with:
@@ -78,15 +50,16 @@ runner is embedded directly in the compiled binary.
 Write shared tests in `commonTest/kotlin/`:
 
 ```kotlin
-// commonTest/kotlin/com/example/CommonSpec.kt
-import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.shouldBe
+// commonTest/kotlin/com/example/CommonTest.kt
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-class CommonSpec : FunSpec({
-    test("string length") {
-        "hello".length shouldBe 5
+class CommonTest {
+    @Test
+    fun `string length`() {
+        assertEquals(5, "hello".length)
     }
-})
+}
 ```
 
 Run native tests with:
