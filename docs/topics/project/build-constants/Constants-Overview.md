@@ -86,3 +86,8 @@ println(BuildConstants.NAME)
 > Constant keys are automatically converted to `UPPER_SNAKE_CASE` in the generated class.
 >
 {style="tip"}
+
+## Next Steps
+
+- **[](Constans-Configuration.md)**: Customize package names, class names, and target source sets
+- **[](Constants-Examples.md)**: Advanced usage, including environment variables and dynamic values

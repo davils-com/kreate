@@ -44,8 +44,7 @@ plugins {
 ```
 
 <note>
-When using the plugin in a multiplatform project, replace <code>kotlin("jvm")</code>
-with <code>kotlin("multiplatform")</code>. Kreate detects the project type automatically
+When using the plugin in a multiplatform project, replace <code>kotlin("jvm")</code> with <code>kotlin("multiplatform")</code>. Kreate detects the project type automatically
 and applies the appropriate defaults.
 </note>
 
@@ -122,9 +121,9 @@ The table below shows the available top-level feature blocks and their defaults:
 
 Once the plugin is applied and the basic configuration is in place, explore the following topics:
 
-- **[](platform-configuration.md)**: Configure Java versions, `explicitApi`, and Kotlin Multiplatform targets (Linux, macOS, Windows).
-- **[](platform/multiplatform/c-interoperation/C-Interoperation-Overview.md)**: Integrate Rust libraries into KMP projects via `cinterop` and `cargo`.
-- **[JNI Support](jni.md)**: Bridge C/C++ code into JVM projects using CMake-based native builds.
-- **[Build Constants](build-constants.md)**: Generate type-safe Kotlin constants from Gradle properties at compile time.
-- **[](testing-and-docs.md)**: Configure Kotest parallel execution, test logging, reporting, and Dokka.
-- **[](publishing.md)**: Set up automated GPG-signed publishing to Maven Central or GitLab Package Registry.
+- **[Platform Configuration](Platform-Java-Version.md)**: Configure Java versions, `explicitApi`, and Kotlin Multiplatform targets (Linux, macOS, Windows).
+- **[C-Interop Overview](C-Interoperation-Overview.md)**: Integrate Rust libraries into KMP projects via `cinterop` and `cargo`.
+- **[JNI Support](JNI-Support.md)**: Bridge C/C++ code into JVM projects using CMake-based native builds.
+- **[Build Constants](Constants-Overview.md)**: Generate type-safe Kotlin constants from Gradle properties at compile time.
+- **[Testing Overview](Testing-Overview.md)**: Configure Kotest parallel execution, test logging, reporting, and Dokka.
+- **[Publishing Overview](Publishing-Overview.md)**: Set up automated GPG-signed publishing to Maven Central or GitLab Package Registry.

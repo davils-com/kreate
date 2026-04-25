@@ -10,13 +10,13 @@ registered only when `enabled` is `true`.
 Runs `cargo new --lib <projectName>` inside `projectDirectory`. If the target directory already
 exists, the task is a no-op — it will not overwrite your existing Rust source files.
 
-| Input | Description |
-|-------|-------------|
-| `workDir` | The resolved `projectDirectory` |
-| `projectName` | The resolved project name |
+| Input         | Description                     |
+|---------------|---------------------------------|
+| `workDir`     | The resolved `projectDirectory` |
+| `projectName` | The resolved project name       |
 
-| Output | Description |
-|--------|-------------|
+| Output      | Description                |
+|-------------|----------------------------|
 | `outputDir` | `<workDir>/<projectName>/` |
 
 ## `addRustDependencies`
@@ -27,10 +27,10 @@ Adds runtime and build dependencies to `Cargo.toml` via `cargo add`. Defaults to
 a runtime dependency and `cbindgen` as a build dependency. Already-present dependencies are
 skipped automatically by checking the current `Cargo.toml` content before invoking `cargo add`.
 
-| Input | Description |
-|-------|-------------|
-| `workDir` | The Rust project directory |
-| `rustDependencies` | Map of `name → version`; defaults to `{"libc": ""}` |
+| Input                   | Description                                             |
+|-------------------------|---------------------------------------------------------|
+| `workDir`               | The Rust project directory                              |
+| `rustDependencies`      | Map of `name → version`; defaults to `{"libc": ""}`     |
 | `rustBuildDependencies` | Map of `name → version`; defaults to `{"cbindgen": ""}` |
 
 > The `rustDependencies` and `rustBuildDependencies` maps are currently populated by the plugin
@@ -52,12 +52,12 @@ crate-type = ["staticlib"]
 This ensures Cargo produces a static library (`.a` / `.lib`) suitable for linking into
 Kotlin/Native. If the block is already present, the task is a no-op.
 
-| Input | Description |
-|-------|-------------|
+| Input     | Description                                        |
+|-----------|----------------------------------------------------|
 | `workDir` | The Rust project directory containing `Cargo.toml` |
 
-| Output | Description |
-|--------|-------------|
+| Output       | Description            |
+|--------------|------------------------|
 | `outputFile` | `<workDir>/Cargo.toml` |
 
 ## `generateRustBuildScript`
@@ -67,13 +67,13 @@ Kotlin/Native. If the block is already present, the task is a no-op.
 Creates `build.rs` in the Rust project root. The script uses `cbindgen` to generate a C header
 at `include/<projectName>.h`. If `build.rs` already exists and is non-empty, the task is skipped.
 
-| Input | Description |
-|-------|-------------|
-| `workDir` | The Rust project directory |
+| Input         | Description                                              |
+|---------------|----------------------------------------------------------|
+| `workDir`     | The Rust project directory                               |
 | `projectName` | Used as the header file name inside the generated script |
 
-| Output | Description |
-|--------|-------------|
+| Output       | Description          |
+|--------------|----------------------|
 | `outputFile` | `<workDir>/build.rs` |
 
 ## `compileRust`
@@ -84,13 +84,13 @@ Executes `cargo build --target <target> --release` for each resolved Rust target
 If compilation fails for any target, a `GradleException` is thrown immediately with the failing
 target name.
 
-| Input | Description |
-|-------|-------------|
-| `workDir` | The Rust project directory |
+| Input         | Description                                                       |
+|---------------|-------------------------------------------------------------------|
+| `workDir`     | The Rust project directory                                        |
 | `rustTargets` | Optional; resolved from config or auto-detected from host OS/arch |
 
-| Output | Description |
-|--------|-------------|
+| Output      | Description         |
+|-------------|---------------------|
 | `outputDir` | `<workDir>/target/` |
 
 ## `generateDefinitionFiles`
@@ -101,17 +101,17 @@ Creates the directory specified by `defDirName` and writes the `.def` file consu
 `CInteropProcess`. The file references the compiled static library and the generated C header.
 This task **always rewrites** the `.def` file — it is not incrementally skipped.
 
-| Input | Description |
-|-------|-------------|
-| `workDir` | The Rust project directory |
-| `rootDir` | The `projectDirectory` (parent of the Rust project) |
-| `projectName` | Used in header and library names |
-| `defFileName` | File name for the `.def` file |
-| `defDirName` | Directory name for the `.def` file |
+| Input         | Description                                            |
+|---------------|--------------------------------------------------------|
+| `workDir`     | The Rust project directory                             |
+| `rootDir`     | The `projectDirectory` (parent of the Rust project)    |
+| `projectName` | Used in header and library names                       |
+| `defFileName` | File name for the `.def` file                          |
+| `defDirName`  | Directory name for the `.def` file                     |
 | `rustTargets` | Optional; used to construct the `libraryPaths` entries |
 
-| Output | Description |
-|--------|-------------|
+| Output      | Description               |
+|-------------|---------------------------|
 | `outputDir` | `<workDir>/<defDirName>/` |
 
 ## Task Dependency Graph

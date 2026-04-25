@@ -47,6 +47,6 @@ keeping native source structures consistent across both features.
 
 ## Next Steps
 
-- **[Configuration](jni-configuration.md)**: DSL reference and all available options
-- **[Project Scaffolding](jni-scaffolding.md)**: How the `initializeJniProject` task works
-- **[Build Pipeline](jni-build-pipeline.md)**: CMake build and runtime library path wiring
+- **[](JNI-Configuration.md)**: DSL reference and all available options
+- **[](JNI-Scaffolding.md)**: How the `initializeJniProject` task works
+- **[](JNI-Build-Pipeline.md)**: CMake build and runtime library path wiring

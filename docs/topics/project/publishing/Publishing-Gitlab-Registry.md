@@ -45,13 +45,13 @@ kreate {
 
 ## GitLab Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `enabled` | `Property<Boolean>` | `false` | Activates the GitLab publish target |
-| `name` | `Property<String>` | `GitlabPackageRegistry` | Logical name of the Maven repository in Gradle |
-| `tokenEnv` | `Property<String>` | `CI_JOB_TOKEN` | Environment variable name for the CI job token |
-| `projectIdEnv` | `Property<String>` | `CI_PROJECT_ID` | Environment variable name for the GitLab project ID |
-| `apiUrlEnv` | `Property<String>` | `CI_API_V4_URL` | Environment variable name for the GitLab API v4 base URL |
+| Property       | Type                | Default                 | Description                                              |
+|----------------|---------------------|-------------------------|----------------------------------------------------------|
+| `enabled`      | `Property<Boolean>` | `false`                 | Activates the GitLab publish target                      |
+| `name`         | `Property<String>`  | `GitlabPackageRegistry` | Logical name of the Maven repository in Gradle           |
+| `tokenEnv`     | `Property<String>`  | `CI_JOB_TOKEN`          | Environment variable name for the CI job token           |
+| `projectIdEnv` | `Property<String>`  | `CI_PROJECT_ID`         | Environment variable name for the GitLab project ID      |
+| `apiUrlEnv`    | `Property<String>`  | `CI_API_V4_URL`         | Environment variable name for the GitLab API v4 base URL |
 
 ### Custom Environment Variable Names
 

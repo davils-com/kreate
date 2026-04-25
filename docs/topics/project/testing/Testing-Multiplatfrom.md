@@ -5,10 +5,10 @@ separately, because they are implemented by different Gradle task types with dif
 
 ## Task Types
 
-| Task Type | Kotlin Plugin | Targets | Configured By |
-|-----------|---------------|---------|---------------|
-| `org.gradle.api.tasks.testing.Test` | `kotlin.multiplatform` + `kotlin.jvm` | JVM targets | `tasks.withType<Test>()` |
-| `org.jetbrains.kotlin.gradle.tasks.KotlinTest` | `kotlin.multiplatform` | Native, JS targets | `tasks.withType<KotlinTest>()` |
+| Task Type                                      | Kotlin Plugin                         | Targets            | Configured By                  |
+|------------------------------------------------|---------------------------------------|--------------------|--------------------------------|
+| `org.gradle.api.tasks.testing.Test`            | `kotlin.multiplatform` + `kotlin.jvm` | JVM targets        | `tasks.withType<Test>()`       |
+| `org.jetbrains.kotlin.gradle.tasks.KotlinTest` | `kotlin.multiplatform`                | Native, JS targets | `tasks.withType<KotlinTest>()` |
 
 Both task types receive the same `timeout`, `ignoreFailures`, `failOnNoDiscoveredTests`,
 `alwaysRunTests`, `logging`, and `report` settings. Only `maxParallelForks` and
@@ -22,8 +22,8 @@ Kreate validates at configuration time that the following plugins are applied be
 ```kotlin
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)                   // com.google.devtools.ksp
-    alias(libs.plugins.kotest.multiplatform)  // io.kotest.multiplatform
+    alias(libs.plugins.ksp) // com.google.devtools.ksp
+    alias(libs.plugins.kotest.multiplatform) // io.kotest.multiplatform
     alias(libs.plugins.kreate)
 }
 ```

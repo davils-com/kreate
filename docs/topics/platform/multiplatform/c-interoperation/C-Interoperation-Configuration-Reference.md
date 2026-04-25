@@ -31,12 +31,12 @@ For cross-compilation or multi-target releases, set `rustTargets` explicitly.
 
 Each Rust target triple is mapped to a Kotlin/Native target automatically:
 
-| Rust Target Triple | Kotlin/Native Target |
-|--------------------|----------------------|
-| `x86_64-pc-windows-*` / `*mingw*` | `mingwX64` |
-| `aarch64-apple-darwin` | `macosArm64` |
-| `x86_64-unknown-linux-*` | `linuxX64` |
-| `aarch64-unknown-linux-*` | `linuxArm64` |
+| Rust Target Triple                | Kotlin/Native Target |
+|-----------------------------------|----------------------|
+| `x86_64-pc-windows-*` / `*mingw*` | `mingwX64`           |
+| `aarch64-apple-darwin`            | `macosArm64`         |
+| `x86_64-unknown-linux-*`          | `linuxX64`           |
+| `aarch64-unknown-linux-*`         | `linuxArm64`         |
 
 Any other triple causes a `GradleException` at configuration time.
 
@@ -54,10 +54,10 @@ cInterop {
 }
 ```
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `fileName` | `Property<String>` | `cinterop.def` | Name of the generated `.def` file |
-| `dirName` | `Property<String>` | `defs` | Directory name (inside the Rust project) where the `.def` file is placed |
+| Property   | Type               | Default        | Description                                                              |
+|------------|--------------------|----------------|--------------------------------------------------------------------------|
+| `fileName` | `Property<String>` | `cinterop.def` | Name of the generated `.def` file                                        |
+| `dirName`  | `Property<String>` | `defs`         | Directory name (inside the Rust project) where the `.def` file is placed |
 
 ## Per-Platform Native Target Configuration
 

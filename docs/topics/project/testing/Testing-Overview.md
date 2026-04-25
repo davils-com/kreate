@@ -79,3 +79,9 @@ When `enabled` is `true`, Kreate applies the following to every matching test ta
 
 For Kotlin Multiplatform projects, both `Test` tasks (JVM target) and `KotlinTest` tasks
 (native/JS targets) are configured independently.
+
+## Next Steps
+
+- **[Configuration Reference](Testing-Configuration-Reference.md)**: Detailed DSL options for parallelism and logging
+- **[Kotlin Multiplatform Testing](Testing-Multiplatfrom.md)**: Platform-specific considerations for KMP
+- **[Examples](Testing-Example.md)**: Practical testing scenarios and configurations

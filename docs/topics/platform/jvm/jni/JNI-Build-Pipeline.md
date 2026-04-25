@@ -46,13 +46,13 @@ cmake --build <projectDir>/build --config Release
 The build type defaults to `Release`. The compiled shared library (`.so` / `.dylib` / `.dll`)
 is placed in `<projectDirectory>/<projectName>/build/`.
 
-| Property | Value |
-|---|---|
-| Task type | `BuildNative` |
-| Input | `workDir` (native project dir), `buildType` |
-| Output | `<workDir>/build/` |
-| Default build type | `Release` |
-| Runs | Before every `compileKotlin` task |
+| Property           | Value                                       |
+|--------------------|---------------------------------------------|
+| Task type          | `BuildNative`                               |
+| Input              | `workDir` (native project dir), `buildType` |
+| Output             | `<workDir>/build/`                          |
+| Default build type | `Release`                                   |
+| Runs               | Before every `compileKotlin` task           |
 
 <note>
 On macOS, Kreate resolves the CMake executable by searching common installation paths
@@ -91,6 +91,5 @@ object NativeLib {
 
 <tip>
 The library name passed to <code>System.loadLibrary()</code> must match the CMake
-<code>add_library</code> target name, which equals the resolved <code>projectName</code>
-(or <code>nameOverride</code> if set).
+<code>add_library</code> target name, which equals the resolved <code>projectName</code> (or <code>nameOverride</code> if set).
 </tip>

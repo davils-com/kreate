@@ -39,6 +39,5 @@ main branch pipeline.
 
 <note>
 If you are integrating a third-party library that triggers warnings outside your control,
-you can suppress individual warnings with <code>@Suppress("WARNING_NAME")</code>
-rather than disabling this flag globally.
+you can suppress individual warnings with <code>@Suppress("WARNING_NAME")</code> rather than disabling this flag globally.
 </note>

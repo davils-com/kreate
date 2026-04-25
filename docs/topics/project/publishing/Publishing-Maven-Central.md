@@ -43,11 +43,11 @@ kreate {
 
 ## Maven Central Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `enabled` | `Property<Boolean>` | `false` | Activates the Maven Central publish target (set automatically when using the `mavenCentral { }` block) |
-| `automaticRelease` | `Property<Boolean>` | `true` | When `true`, runs `publishAndReleaseToMavenCentral`; when `false`, only uploads — manual release required on the portal |
-| `signPublications` | `Property<Boolean>` | `true` | Calls `signAllPublications()` — required by Maven Central for releases |
+| Property           | Type                | Default | Description                                                                                                             |
+|--------------------|---------------------|---------|-------------------------------------------------------------------------------------------------------------------------|
+| `enabled`          | `Property<Boolean>` | `false` | Activates the Maven Central publish target (set automatically when using the `mavenCentral { }` block)                  |
+| `automaticRelease` | `Property<Boolean>` | `true`  | When `true`, runs `publishAndReleaseToMavenCentral`; when `false`, only uploads — manual release required on the portal |
+| `signPublications` | `Property<Boolean>` | `true`  | Calls `signAllPublications()` — required by Maven Central for releases                                                  |
 
 ### `automaticRelease`
 

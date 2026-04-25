@@ -53,6 +53,13 @@ kreate {
 Once enabled, all six pipeline tasks are registered automatically and execute in order before the
 first `CInteropProcess` task runs.
 
+## Next Steps
+
+- **[](C-Interoperation-Configuration-Reference.md)**: DSL reference and all available options
+- **[Gradle Tasks](C-Interoperation-Gradle-Task.md)**: Details on the individual pipeline tasks
+- **[](C-Interoperation-Examples.md)**: Practical examples and usage patterns
+- **[](C-Interoperation-Troubleshooting.md)**: Common issues and solutions
+
 ## Generated Project Layout
 
 After the pipeline runs, the following structure is created inside your Gradle module:

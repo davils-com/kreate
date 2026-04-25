@@ -56,3 +56,10 @@ publish { enabled = true }
 
 All POM metadata is shared between both Maven Central and GitLab publish targets. Configure
 it once in `pom { }` and Kreate applies it to both.
+
+## Next Steps
+
+- **[Maven Central Publishing](Publishing-Maven-Central.md)**: GPG signing and automatic releases
+- **[GitLab Package Registry](Publishing-Gitlab-Registry.md)**: CI integration and job token auth
+- **[POM Configuration](Publishing-POM-Configuration.md)**: Licenses, SCM, and developer metadata
+- **[Examples](Publishing-Examples.md)**: Practical publishing setups and snippets

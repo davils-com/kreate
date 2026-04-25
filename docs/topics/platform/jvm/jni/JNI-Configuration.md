@@ -36,11 +36,11 @@ kreate {
 
 ## DSL Reference
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `enabled` | `Boolean` | `false` | Enables the JNI feature and registers all related tasks |
-| `nameOverride` | `String?` | _(project name)_ | Overrides the native project name used for CMake target and directory resolution |
-| `projectDirectory` | `Directory?` | `<projectDir>/jni` | Root directory that contains the native project folder |
+| Property           | Type         | Default            | Description                                                                      |
+|--------------------|--------------|--------------------|----------------------------------------------------------------------------------|
+| `enabled`          | `Boolean`    | `false`            | Enables the JNI feature and registers all related tasks                          |
+| `nameOverride`     | `String?`    | _(project name)_   | Overrides the native project name used for CMake target and directory resolution |
+| `projectDirectory` | `Directory?` | `<projectDir>/jni` | Root directory that contains the native project folder                           |
 
 ### `enabled`
 

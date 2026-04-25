@@ -43,7 +43,7 @@ be blank, otherwise an `IllegalArgumentException` is thrown immediately.
 ```kotlin
 buildConstant {
     enabled.set(true)
-    constant("version", project.version)       // Any value via toString()
+    constant("version", project.version) // Any value via toString()
     constant("buildTime", System.currentTimeMillis())
     constant("name", "MyLibrary")
 }
@@ -51,10 +51,10 @@ buildConstant {
 
 Both overloads are available:
 
-| Overload | Description |
-|----------|-------------|
-| `constant(key: String, value: String)` | Registers the value as-is |
-| `constant(key: String, value: Any)` | Calls `.toString()` on the value before registering |
+| Overload                               | Description                                         |
+|----------------------------------------|-----------------------------------------------------|
+| `constant(key: String, value: String)` | Registers the value as-is                           |
+| `constant(key: String, value: Any)`    | Calls `.toString()` on the value before registering |
 
 > If no constants are registered and `enabled` is `true`, the task runs but logs a
 > warning: `No properties found for build constants.`

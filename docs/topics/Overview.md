@@ -36,10 +36,10 @@ For projects that go beyond pure Kotlin, Kreate provides first-class native code
 
 Publishing is a first-class concern in Kreate.
 
-| Registry | Feature |
-|---|---|
+| Registry      | Feature                         |
+|---------------|---------------------------------|
 | Maven Central | GPG signing + automatic release |
-| GitLab | Built-in registry configuration |
+| GitLab        | Built-in registry configuration |
 
 A declarative DSL covers all POM metadata: licenses, developer information, and SCM links.
 
