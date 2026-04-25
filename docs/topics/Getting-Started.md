@@ -123,7 +123,7 @@ The table below shows the available top-level feature blocks and their defaults:
 Once the plugin is applied and the basic configuration is in place, explore the following topics:
 
 - **[](platform-configuration.md)**: Configure Java versions, `explicitApi`, and Kotlin Multiplatform targets (Linux, macOS, Windows).
-- **[](c-interop.md)**: Integrate Rust libraries into KMP projects via `cinterop` and `cargo`.
+- **[](platform/multiplatform/c-interoperation/C-Interoperation-Overview.md)**: Integrate Rust libraries into KMP projects via `cinterop` and `cargo`.
 - **[JNI Support](jni.md)**: Bridge C/C++ code into JVM projects using CMake-based native builds.
 - **[Build Constants](build-constants.md)**: Generate type-safe Kotlin constants from Gradle properties at compile time.
 - **[](testing-and-docs.md)**: Configure Kotest parallel execution, test logging, reporting, and Dokka.

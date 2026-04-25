@@ -18,7 +18,7 @@ ensuring the shared library is always rebuilt before Kotlin compilation begins.
 ## `initializeJniProject`
 
 Scaffolds the native C++ project if it does not exist. See
-[](Scaffolding.md) for the full details on what is generated.
+[](JNI-Scaffolding.md) for the full details on what is generated.
 
 | Property  | Value                                            |
 |-----------|--------------------------------------------------|
