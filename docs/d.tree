@@ -8,15 +8,54 @@
 
     <toc-element topic="overview.md"/>
     <toc-element topic="getting-started.md"/>
-    <toc-element topic="platform-configuration.md"/>
-    <toc-element topic="project-configuration.md"/>
-    <toc-element topic="c-interop.md">
-        <toc-element topic="c-interop-configuration.md"/>
-        <toc-element topic="c-interop-tasks.md"/>
-        <toc-element topic="c-interop-examples.md"/>
-        <toc-element topic="c-interop-troubleshooting.md"/>
+    <toc-element toc-title="Platform">
+        <toc-element topic="Java-Version.md"/>
+        <toc-element topic="Explicit-API.md"/>
+        <toc-element topic="Warning-as-errors.md"/>
+        <toc-element toc-title="JVM">
+            <toc-element toc-title="JNI">
+                <toc-element topic="Support.md"/>
+                <toc-element topic="Configuration.md"/>
+                <toc-element topic="Scaffolding.md"/>
+                <toc-element topic="Build-Pipeline.md"/>
+            </toc-element>
+        </toc-element>
+        <toc-element toc-title="Multiplatform">
+            <toc-element toc-title="C-Interopration">
+                <toc-element topic="c-interop.md"/>
+                <toc-element topic="c-interop-configuration.md"/>
+                <toc-element topic="c-interop-tasks.md"/>
+                <toc-element topic="c-interop-troubleshooting.md"/>
+                <toc-element topic="c-interop-examples.md"/>
+            </toc-element>
+        </toc-element>
     </toc-element>
-    <toc-element topic="jni-support.md"/>
-    <toc-element topic="publishing.md"/>
-    <toc-element topic="testing-and-docs.md"/>
+    <toc-element toc-title="Project">
+        <toc-element topic="Metadata.md"/>
+        <toc-element topic="Versioning.md"/>
+        <toc-element toc-title="Build Constants">
+            <toc-element topic="Constants.md">
+            </toc-element>
+            <toc-element topic="Constans-Configuration.md"/>
+            <toc-element topic="Constants-Examples.md"/>
+        </toc-element>
+        <toc-element toc-title="Documentation">
+            <toc-element topic="Documentation-Overview.md"/>
+            <toc-element topic="Documentation-Configuration.md"/>
+            <toc-element topic="Documentation-Examples.md"/>
+        </toc-element>
+        <toc-element toc-title="Testing">
+            <toc-element topic="Testing-Overview.md"/>
+            <toc-element topic="Testing-Configuration-Reference.md"/>
+            <toc-element topic="Testing-Multiplatfrom.md"/>
+            <toc-element topic="Testing-Example.md"/>
+        </toc-element>
+        <toc-element toc-title="Publishing">
+            <toc-element topic="Publishing-Overview.md"/>
+            <toc-element topic="Publishing-Maven-Central.md"/>
+            <toc-element topic="Gitlab-Registry.md"/>
+            <toc-element topic="POM-Conbfiguration.md"/>
+            <toc-element topic="Publishing-Examples.md"/>
+        </toc-element>
+    </toc-element>
 </instance-profile>

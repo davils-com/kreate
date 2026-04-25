@@ -5,25 +5,25 @@ pipeline.
 
 ## Top-Level Properties
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `enabled` | `Property<Boolean>` | `false` | Master switch — must be `true` for any C-Interop tasks to run |
-| `nameOverride` | `Property<String>` | *(project name)* | Overrides the name used for the Rust project directory and C-Interop compilation unit |
-| `projectDirectory` | `DirectoryProperty` | `cinterop/` | Directory (relative to the Gradle module) where the Rust project is created |
-| `packageNameOverride` | `Property<String>` | `<group>.<name>.cinterop` | Overrides the Kotlin package name under which the native bindings are exposed |
-| `rustTargets` | `ListProperty<String>` | *(auto-detected)* | Explicit list of Rust target triples to compile for; if empty the host OS/arch is used |
+| Property              | Type                   | Default                   | Description                                                                            |
+|-----------------------|------------------------|---------------------------|----------------------------------------------------------------------------------------|
+| `enabled`             | `Property<Boolean>`    | `false`                   | Master switch — must be `true` for any C-Interop tasks to run                          |
+| `nameOverride`        | `Property<String>`     | *(project name)*          | Overrides the name used for the Rust project directory and C-Interop compilation unit  |
+| `projectDirectory`    | `DirectoryProperty`    | `cinterop/`               | Directory (relative to the Gradle module) where the Rust project is created            |
+| `packageNameOverride` | `Property<String>`     | `<group>.<name>.cinterop` | Overrides the Kotlin package name under which the native bindings are exposed          |
+| `rustTargets`         | `ListProperty<String>` | *(auto-detected)*         | Explicit list of Rust target triples to compile for; if empty the host OS/arch is used |
 
 ## Target Auto-Detection
 
 When `rustTargets` is not set, Kreate detects the current host and selects a single target
 automatically:
 
-| Host OS | Host Architecture | Resolved Target |
-|---------|-------------------|-----------------|
-| Windows | x86_64 | `x86_64-pc-windows-gnu` |
-| Linux | x86_64 | `x86_64-unknown-linux-gnu` |
-| Linux | aarch64 | `aarch64-unknown-linux-gnu` |
-| macOS | aarch64 | `aarch64-apple-darwin` |
+| Host OS | Host Architecture | Resolved Target             |
+|---------|-------------------|-----------------------------|
+| Windows | x86_64            | `x86_64-pc-windows-gnu`     |
+| Linux   | x86_64            | `x86_64-unknown-linux-gnu`  |
+| Linux   | aarch64           | `aarch64-unknown-linux-gnu` |
+| macOS   | aarch64           | `aarch64-apple-darwin`      |
 
 For cross-compilation or multi-target releases, set `rustTargets` explicitly.
 

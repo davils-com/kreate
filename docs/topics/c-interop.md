@@ -1,4 +1,4 @@
-# C-Interop
+# Overview
 
 The C-Interop feature of the Kreate Gradle plugin provides a fully automated pipeline for bridging
 Kotlin/Native multiplatform projects with native Rust libraries. When enabled, Kreate orchestrates
@@ -21,14 +21,14 @@ manual setup.
 The C-Interop pipeline consists of six ordered Gradle tasks that run automatically before any
 Kotlin/Native compilation:
 
-| Step | Task | Description |
-|------|------|-------------|
-| 1 | `initializeRustProject` | Creates a new Rust library project with `cargo new --lib` |
-| 2 | `addRustDependencies` | Adds `libc` and `cbindgen` (or custom crates) via `cargo add` |
-| 3 | `configureCargo` | Appends `[lib] crate-type = ["staticlib"]` to `Cargo.toml` |
-| 4 | `generateRustBuildScript` | Generates a `build.rs` that runs `cbindgen` to produce C headers |
-| 5 | `compileRust` | Runs `cargo build --release --target <target>` for each target |
-| 6 | `generateDefinitionFiles` | Writes the Kotlin/Native `.def` file pointing to the compiled artifacts |
+| Step | Task                      | Description                                                             |
+|------|---------------------------|-------------------------------------------------------------------------|
+| 1    | `initializeRustProject`   | Creates a new Rust library project with `cargo new --lib`               |
+| 2    | `addRustDependencies`     | Adds `libc` and `cbindgen` (or custom crates) via `cargo add`           |
+| 3    | `configureCargo`          | Appends `[lib] crate-type = ["staticlib"]` to `Cargo.toml`              |
+| 4    | `generateRustBuildScript` | Generates a `build.rs` that runs `cbindgen` to produce C headers        |
+| 5    | `compileRust`             | Runs `cargo build --release --target <target>` for each target          |
+| 6    | `generateDefinitionFiles` | Writes the Kotlin/Native `.def` file pointing to the compiled artifacts |
 
 After step 6 completes, all `CInteropProcess` tasks automatically depend on
 `generateDefinitionFiles`, so your normal `build` or `assemble` invocation drives the entire chain.

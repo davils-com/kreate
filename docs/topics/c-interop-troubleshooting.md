@@ -21,12 +21,12 @@ GradleException: Unsupported Rust target for Kotlin/Native mapping: <target>
 
 Supported patterns and their Kotlin/Native equivalents:
 
-| Pattern | Kotlin/Native Target |
-|---------|----------------------|
-| `x86_64-pc-windows-*` / `*mingw*` | `mingwX64` |
-| `aarch64-apple-darwin` | `macosArm64` |
-| `x86_64-unknown-linux-*` | `linuxX64` |
-| `aarch64-unknown-linux-*` | `linuxArm64` |
+| Pattern                           | Kotlin/Native Target |
+|-----------------------------------|----------------------|
+| `x86_64-pc-windows-*` / `*mingw*` | `mingwX64`           |
+| `aarch64-apple-darwin`            | `macosArm64`         |
+| `x86_64-unknown-linux-*`          | `linuxX64`           |
+| `aarch64-unknown-linux-*`         | `linuxArm64`         |
 
 If you need a target not listed here, it is not yet supported by the Kreate C-Interop pipeline.
 
