@@ -39,8 +39,6 @@ internal fun Project.initializeTesting(extension: KreateExtension) {
     val testingExtension = extension.project.tests
     if (!testingExtension.enabled.get()) return
 
-    validateKotestPlugin()
-
     /**
      * Configures common JVM testing settings on a [Test] task.
      * @since 1.0.0

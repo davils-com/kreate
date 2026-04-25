@@ -2,7 +2,7 @@
 
 ## Minimal Setup — Kotlin JVM
 
-Enable testing with all defaults. Kotest runs on the JUnit Platform with half the available
+Enable testing with all defaults. Tests run on the JUnit Platform for JVM targets with half the available
 CPU cores, a 10-minute timeout, and passed/skipped events logged to the console.
 
 ```kotlin
@@ -20,8 +20,6 @@ kreate {
 ```kotlin
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.kotest.multiplatform)
     alias(libs.plugins.kreate)
 }
 
