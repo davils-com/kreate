@@ -18,14 +18,14 @@ ensuring the shared library is always rebuilt before Kotlin compilation begins.
 ## `initializeJniProject`
 
 Scaffolds the native C++ project if it does not exist. See
-[Project Scaffolding](jni-scaffolding.md) for the full details on what is generated.
+[](Scaffolding.md) for the full details on what is generated.
 
-| Property | Value |
-|---|---|
-| Task type | `InitializeCppProject` |
-| Input | `projectDirectory` (root JNI dir), `projectName` |
-| Output | `<projectDirectory>/<projectName>/` |
-| Runs | Before `buildNative` |
+| Property  | Value                                            |
+|-----------|--------------------------------------------------|
+| Task type | `InitializeCppProject`                           |
+| Input     | `projectDirectory` (root JNI dir), `projectName` |
+| Output    | `<projectDirectory>/<projectName>/`              |
+| Runs      | Before `buildNative`                             |
 
 ## `buildNative`
 

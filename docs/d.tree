@@ -21,7 +21,9 @@
             </toc-element>
         </toc-element>
         <toc-element toc-title="Multiplatform">
-            <toc-element toc-title="C-Interopration"/>
+            <toc-element toc-title="C-Interopration">
+                <toc-element topic="C-Interopration.md"/>
+            </toc-element>
         </toc-element>
     </toc-element>
     <toc-element toc-title="Project">
