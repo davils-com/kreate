@@ -57,12 +57,6 @@ public abstract class ProjectExtension @Inject constructor(
     public val description: Property<String> = factory.property(String::class.java).convention("A Kreate project.")
 
     /**
-     * The project group (e.g., "com.example").
-     * @since 1.0.0
-     */
-    public val projectGroup: Property<String> = factory.property(String::class.java)
-
-    /**
      * Configuration for project versioning.
      * @since 1.0.0
      */

@@ -9,7 +9,6 @@ kreate {
     project {
         name = "Example"
         description = "Example project"
-        projectGroup = group.toString()
     }
 }
 ```
@@ -49,31 +48,3 @@ project {
     description = "A high-performance Kotlin/Native library."
 }
 ```
-
-### `projectGroup`
-
-**Type:** `Property<String>`  
-**Required:** yes
-
-The Maven group identifier (e.g. `com.example`). It is conventional to derive this from the
-Gradle `group` property so both stay in sync:
-
-```kotlin
-project {
-    projectGroup = group.toString()
-}
-```
-
-You can also set it to a literal string if the group differs from what Gradle infers:
-
-```kotlin
-project {
-    projectGroup = "com.davils.mylib"
-}
-```
-
-> Kreate uses `projectGroup` together with `name` to construct the default C-Interop package name
-> (`<projectGroup>.<name>.cinterop`) and publishing coordinates. Keep both consistent with your
-> `settings.gradle.kts` and `gradle.properties`.
->
-{style="tip"}
