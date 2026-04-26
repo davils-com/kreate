@@ -38,7 +38,7 @@ import java.io.File
  *
  * @since 1.0.0
  */
-public abstract class GenerateDefinitionFiles : Task("Generates cinterop definition files for native targets") {
+public abstract class GenerateDefinitionFiles : Task("Generates cinterop definition files for native targets", "kreate c-interoperation") {
     /**
      * The working directory for the task.
      * @since 1.0.0

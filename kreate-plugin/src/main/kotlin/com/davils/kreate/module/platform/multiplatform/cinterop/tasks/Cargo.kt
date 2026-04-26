@@ -32,7 +32,7 @@ import java.io.File
  *
  * @since 1.0.0
  */
-public abstract class ConfigureCargo : Task("Configure Cargo Toml file for static library output.") {
+public abstract class ConfigureCargo : Task("Configure Cargo Toml file for static library output.", "kreate c-interoperation") {
     /**
      * The working directory containing the `Cargo.toml` file.
      * @since 1.0.0

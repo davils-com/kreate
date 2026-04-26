@@ -3,7 +3,7 @@
 All tasks live in the default Gradle task group and run in strict dependency order. They are
 registered only when `enabled` is `true`.
 
-## `initializeRustProject`
+## `kreate-c-interop-initialize`
 
 **Class:** `InitializeRustProject`
 
@@ -19,7 +19,7 @@ exists, the task is a no-op — it will not overwrite your existing Rust source 
 |-------------|----------------------------|
 | `outputDir` | `<workDir>/<projectName>/` |
 
-## `addRustDependencies`
+## `kreate-c-interop-dependencies`
 
 **Class:** `AddRustDependencies`
 
@@ -38,7 +38,7 @@ skipped automatically by checking the current `Cargo.toml` content before invoki
 >
 {style="note"}
 
-## `configureCargo`
+## `kreate-c-interop-configure`
 
 **Class:** `ConfigureCargo`
 
@@ -60,7 +60,7 @@ Kotlin/Native. If the block is already present, the task is a no-op.
 |--------------|------------------------|
 | `outputFile` | `<workDir>/Cargo.toml` |
 
-## `generateRustBuildScript`
+## `kreate-c-interop-script`
 
 **Class:** `GenerateRustBuildScript`
 
@@ -76,7 +76,7 @@ at `include/<projectName>.h`. If `build.rs` already exists and is non-empty, the
 |--------------|----------------------|
 | `outputFile` | `<workDir>/build.rs` |
 
-## `compileRust`
+## `kreate-c-interop-compile`
 
 **Class:** `CompileRust`
 
@@ -93,7 +93,7 @@ target name.
 |-------------|---------------------|
 | `outputDir` | `<workDir>/target/` |
 
-## `generateDefinitionFiles`
+## `kreate-c-interop-definitions`
 
 **Class:** `GenerateDefinitionFiles`
 
@@ -117,22 +117,22 @@ This task **always rewrites** the `.def` file — it is not incrementally skippe
 ## Task Dependency Graph
 
 ```
-initializeRustProject
+kreate-c-interop-initialize
         │
         ▼
-addRustDependencies
+kreate-c-interop-dependencies
         │
         ▼
-  configureCargo
+  kreate-c-interop-configure
         │
         ▼
-generateRustBuildScript
+kreate-c-interop-script
         │
         ▼
-   compileRust
+   kreate-c-interop-compile
         │
         ▼
-generateDefinitionFiles
+kreate-c-interop-definitions
         │
         ▼
  CInteropProcess (all)

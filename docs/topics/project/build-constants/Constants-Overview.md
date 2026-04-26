@@ -25,7 +25,7 @@ kreate {
 
 ## How It Works
 
-When enabled, Kreate registers a `generateBuildConstants` Gradle task that runs
+When enabled, Kreate registers a `kreate-build-constants` Gradle task that runs
 automatically before compilation. The task uses [KotlinPoet](https://square.github.io/kotlinpoet/)
 to write a `.kt` source file into the build directory and wires it into the project's
 source sets so it is compiled alongside your regular code.

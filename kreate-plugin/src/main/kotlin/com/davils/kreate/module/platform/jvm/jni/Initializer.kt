@@ -74,7 +74,7 @@ private fun validateRootDir(rootDir: File) {
  * This includes initializing the native C++ project, building the shared
  * library via CMake, and generating JNI headers from the compiled class files.
  *
- * The native build (`buildNative`) is hooked into the Kotlin compile pipeline
+ * The native build (`kreate-jni-build`) is hooked into the Kotlin compile pipeline
  * so that the shared library is always up to date whenever the Kotlin sources
  * are rebuilt. Header generation is attached to the standard `classes`
  * lifecycle since it depends on already-compiled class files.
@@ -91,12 +91,12 @@ private fun Project.addJniTasks(extension: KreateExtension) {
     validateRootDir(rootDir)
     val nativeProjectDir = rootDir.resolve(projectName)
 
-    val initializeJniProject by tasks.register<InitializeCppProject>("initializeJniProject") {
+    val initializeJniProject by tasks.register<InitializeCppProject>("kreate-jni-initialize") {
         this.workDir.set(rootDir)
         this.projectName.set(projectName)
     }
 
-    val buildNative by tasks.register<BuildNative>("buildNative") {
+    val buildNative by tasks.register<BuildNative>("kreate-jni-build") {
         this.workDir.set(nativeProjectDir)
         dependsOn(initializeJniProject)
     }
@@ -119,11 +119,11 @@ private fun Project.applyRuntimeLibraryPath(extension: KreateExtension) {
     val nativeLibDir = resolveRootDir(jniConfig).resolve(projectName).resolve("build")
 
     tasks.withType<Test>().configureEach {
-        dependsOn("buildNative")
+        dependsOn("kreate-jni-build")
         jvmArgs("-Djava.library.path=${nativeLibDir.absolutePath}")
     }
     tasks.withType<JavaExec>().configureEach {
-        dependsOn("buildNative")
+        dependsOn("kreate-jni-build")
         jvmArgs("-Djava.library.path=${nativeLibDir.absolutePath}")
     }
 }
