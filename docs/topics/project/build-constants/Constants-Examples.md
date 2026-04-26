@@ -78,7 +78,7 @@ The source set is still wired automatically — no manual `srcDir` call is neede
 
 ## Using Constants in Code
 
-After the `generateBuildConstants` task runs (automatically before compilation), import
+After the `kreate-build-constants` task runs (automatically before compilation), import
 the generated object:
 
 ```kotlin

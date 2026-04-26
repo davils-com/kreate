@@ -42,7 +42,7 @@ import java.time.format.DateTimeFormatter
  *
  * @since 1.0.0
  */
-public abstract class GenerateBuildConstantsTask : Task("Generates build constants as a Kotlin file.") {
+public abstract class GenerateBuildConstantsTask : Task("Generates build constants as a Kotlin file.", "kreate build-constants") {
     /**
      * The map of properties to generate as constants.
      * @since 1.0.0
@@ -204,7 +204,7 @@ internal fun Project.registerBuildConstantsTask(extension: KreateExtension) {
 
     addBuildConstantsToSourceSets(layout.buildDirectory.dir(constantsPath).get().asFile.absolutePath)
 
-    val task = tasks.register("generateBuildConstants", GenerateBuildConstantsTask::class.java) {
+    val task = tasks.register("kreate-build-constants", GenerateBuildConstantsTask::class.java) {
         properties.set(buildConstants.getConstants())
         packageName.set(resolvedPackageName)
         this.className.set(className)

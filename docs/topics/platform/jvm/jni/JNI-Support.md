@@ -10,9 +10,9 @@ JNI support was introduced in Kreate **1.1.0** and lives inside the `platform.jv
 
 When JNI is enabled, Kreate registers and wires up the following automatically:
 
-1. **`initializeJniProject`** — Scaffolds the native C++ project structure if it does not exist yet
-2. **`buildNative`** — Configures and builds the shared library via CMake (`cmake -S . -B build` → `cmake --build`)
-3. **Compile hook** — `buildNative` runs before every Kotlin compilation task so the native library is always up to date
+1. **`kreate-jni-initialize`** — Scaffolds the native C++ project structure if it does not exist yet
+2. **`kreate-jni-build`** — Configures and builds the shared library via CMake (`cmake -S . -B build` → `cmake --build`)
+3. **Compile hook** — `kreate-jni-build` runs before every Kotlin compilation task so the native library is always up to date
 4. **Runtime path** — All `Test` and `JavaExec` tasks receive `-Djava.library.path` pointing to the CMake build output directory
 
 <note>
@@ -48,5 +48,5 @@ keeping native source structures consistent across both features.
 ## Next Steps
 
 - **[](JNI-Configuration.md)**: DSL reference and all available options
-- **[](JNI-Scaffolding.md)**: How the `initializeJniProject` task works
+- **[](JNI-Scaffolding.md)**: How the `kreate-jni-initialize` task works
 - **[](JNI-Build-Pipeline.md)**: CMake build and runtime library path wiring

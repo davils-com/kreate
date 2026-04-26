@@ -44,7 +44,7 @@ public abstract class AddRustDependencies @Inject constructor(
      * @since 1.0.0
      */
     private val exec: ExecOperations
-) : Task("Adds rust dependencies to the project.") {
+) : Task("Adds rust dependencies to the project.", "kreate c-interoperation") {
     /**
      * The working directory containing the Rust project.
      * @since 1.0.0

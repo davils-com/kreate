@@ -24,43 +24,9 @@ kreate {
 
 ## Test Framework
 
-Kreate's testing support is built around [Kotest](https://kotest.io/) as the test framework
-and uses the JUnit Platform as the test engine for JVM targets. No additional `useJUnitPlatform()`
+Kreate uses the JUnit Platform as the test engine for JVM targets. No additional `useJUnitPlatform()`
 call is needed — Kreate wires this automatically on all `Test` tasks when the Kotlin JVM plugin
 is present.
-
-### Kotlin Multiplatform Requirements
-
-In Kotlin Multiplatform projects, Kreate validates at configuration time that two plugins are
-applied **by the user** before `tests { enabled.set(true) }` takes effect:
-
-- The `ksp` plugin (`com.google.devtools.ksp`)
-- The `kotest` plugin (`io.kotest.multiplatform`)
-
-If either is missing, Kreate throws an `IllegalStateException` immediately during configuration.
-
-
-A minimal multiplatform `build.gradle.kts` that satisfies this requirement:
-
-```kotlin
-plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.kotest.multiplatform)
-    alias(libs.plugins.kreate)
-}
-
-kreate {
-    project {
-        tests {
-            enabled.set(true)
-        }
-    }
-}
-```
-
-For Kotlin JVM projects, no additional plugins are required — Kreate applies `useJUnitPlatform()`
-directly on the `Test` task.
 
 ## What Kreate Configures
 

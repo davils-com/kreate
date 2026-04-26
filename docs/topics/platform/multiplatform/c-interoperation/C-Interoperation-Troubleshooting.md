@@ -75,7 +75,7 @@ already exists at those paths.
 
 ## Definition File Not Updated After Config Changes
 
-The `generateDefinitionFiles` task always rewrites the `.def` file on execution. However,
+The `kreate-c-interop-definitions` task always rewrites the `.def` file on execution. However,
 Gradle's incremental build cache may prevent the task from re-running if its declared inputs have
 not changed. If you change `rustTargets`, `defFileName`, `dirName`, or directory settings and the
 `.def` file appears stale, run a clean build:
@@ -86,11 +86,11 @@ not changed. If you change `rustTargets`, `defFileName`, `dirName`, or directory
 
 ## Compilation Fails for a Specific Target
 
-If `compileRust` fails with a `GradleException` for a specific target, the full Cargo error
+If `kreate-c-interop-compile` fails with a `GradleException` for a specific target, the full Cargo error
 output is printed to the Gradle build log. Run with `--info` or `--debug` for more detail:
 
 ```bash
-./gradlew compileRust --info
+./gradlew kreate-c-interop-compile --info
 ```
 
 Common causes are missing target toolchains, incorrect `Cargo.toml` configuration, or Rust

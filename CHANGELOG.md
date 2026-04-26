@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.1
+
+### Changed
+- **Task Naming Convention**: Standardized all Gradle tasks to use a consistent `kreate-<module>-<task>` prefix (e.g., `kreate-jni-build`, `kreate-c-interop-compile`).
+- **Task Organization**: Organized plugin tasks into specific Gradle groups (`kreate c-interoperation`, `kreate jni`, `kreate build-constants`) for better visibility and navigation.
+
 ## 1.1.0
 
 ### Added
@@ -84,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.1.1]: https://github.com/davils/kreate/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/davils/kreate/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/davils/kreate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/davils/kreate/releases/tag/v1.0.0

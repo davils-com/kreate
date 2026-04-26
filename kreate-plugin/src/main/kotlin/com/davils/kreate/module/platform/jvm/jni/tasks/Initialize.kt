@@ -35,7 +35,7 @@ import java.io.File
  *
  * @since 1.1.0
  */
-public abstract class InitializeCppProject : Task("Generates a new native C++ JNI project.") {
+public abstract class InitializeCppProject : Task("Generates a new native C++ JNI project.", "kreate jni") {
     /**
      * The root working directory where the native project will be created.
      * @since 1.1.0

@@ -8,14 +8,14 @@ is made available at runtime.
 
 ```
 compileKotlin
-    └── buildNative
-            └── initializeJniProject
+    └── kreate-jni-build
+            └── kreate-jni-initialize
 ```
 
-`buildNative` is hooked into the Kotlin compile pipeline via `executeTaskBeforeCompile`,
+`kreate-jni-build` is hooked into the Kotlin compile pipeline via `executeTaskBeforeCompile`,
 ensuring the shared library is always rebuilt before Kotlin compilation begins.
 
-## `initializeJniProject`
+## `kreate-jni-initialize`
 
 Scaffolds the native C++ project if it does not exist. See
 [](JNI-Scaffolding.md) for the full details on what is generated.
@@ -25,9 +25,9 @@ Scaffolds the native C++ project if it does not exist. See
 | Task type | `InitializeCppProject`                           |
 | Input     | `projectDirectory` (root JNI dir), `projectName` |
 | Output    | `<projectDirectory>/<projectName>/`              |
-| Runs      | Before `buildNative`                             |
+| Runs      | Before `kreate-jni-build`                         |
 
-## `buildNative`
+## `kreate-jni-build`
 
 Invokes CMake in two steps to configure and build the shared library.
 
@@ -74,7 +74,7 @@ The following JVM argument is injected:
 -Djava.library.path=<projectDirectory>/<projectName>/build
 ```
 
-Both task types also gain an explicit `dependsOn("buildNative")` dependency,
+Both task types also gain an explicit `dependsOn("kreate-jni-build")` dependency,
 ensuring the library is compiled before any test or run task executes.
 
 ### Loading the Library in Kotlin

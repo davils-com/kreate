@@ -33,7 +33,7 @@ import java.io.File
  *
  * @since 1.0.0
  */
-public abstract class GenerateRustBuildScript : Task("Generates the build script for the Rust project.") {
+public abstract class GenerateRustBuildScript : Task("Generates the build script for the Rust project.", "kreate c-interoperation") {
     /**
      * The working directory containing the Rust project.
      * @since 1.0.0
