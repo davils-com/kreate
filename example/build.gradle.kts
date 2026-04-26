@@ -53,7 +53,6 @@ kreate {
     project {
         name = "Example"
         description = "Example project"
-        projectGroup = group.toString()
 
         version {
             environment = "CI_COMMIT_TAG"

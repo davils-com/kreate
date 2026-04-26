@@ -24,7 +24,7 @@ import org.gradle.api.Project
 /**
  * Configures publishing to Maven Central using the vanniktech plugin.
  *
- * This function sets up coordinates, signing, and automatic release settings,
+ * This function sets up coordinates, signing, and automatic release settings
  * and configures the Maven POM with project metadata.
  *
  * @param kreateExtension The Kreate configuration extension.
@@ -41,7 +41,7 @@ internal fun Project.configureMavenCentral(
 
     val projectName = kreateExtension.project.name.orNull ?: project.name
     val projectDescription = kreateExtension.project.description.orNull
-    val projectGroup = kreateExtension.project.projectGroup.orNull ?: project.group.toString()
+    val projectGroup = project.group.toString()
 
     pluginManager.apply(MavenPublishBasePlugin::class.java)
     extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
