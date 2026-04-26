@@ -84,28 +84,28 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     validateRootDir(projectRootDir)
 
     val rustProject = projectRootDir.resolve(projectName)
-    val initializeRustProject by tasks.register<InitializeRustProject>("initializeRustProject") {
+    val initializeRustProject by tasks.register<InitializeRustProject>("kreate-c-interop-initialize") {
         this.workDir.set(projectRootDir)
         this.projectName.set(projectName)
     }
 
-    val addRustDependencies by tasks.register<AddRustDependencies>("addRustDependencies") {
+    val addRustDependencies by tasks.register<AddRustDependencies>("kreate-c-interop-dependencies") {
         workDir.set(rustProject)
         dependsOn(initializeRustProject)
     }
 
-    val configureCargo by tasks.register<ConfigureCargo>("configureCargo") {
+    val configureCargo by tasks.register<ConfigureCargo>("kreate-c-interop-configure") {
         workDir.set(rustProject)
         dependsOn(addRustDependencies)
     }
 
-    val generateRustBuildScript by tasks.register<GenerateRustBuildScript>("generateRustBuildScript") {
+    val generateRustBuildScript by tasks.register<GenerateRustBuildScript>("kreate-c-interop-script") {
         workDir.set(rustProject)
         this.projectName.set(projectName)
         dependsOn(configureCargo)
     }
 
-    val compileRust by tasks.register<CompileRust>("compileRust") {
+    val compileRust by tasks.register<CompileRust>("kreate-c-interop-compile") {
         workDir.set(rustProject)
         if (cInteropConfig.rustTargets.isPresent) {
             rustTargets.set(cInteropConfig.rustTargets)
@@ -113,7 +113,7 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
         dependsOn(generateRustBuildScript)
     }
 
-    val generateDefinitionFiles by tasks.register<GenerateDefinitionFiles>("generateDefinitionFiles") {
+    val generateDefinitionFiles by tasks.register<GenerateDefinitionFiles>("kreate-c-interop-definitions") {
         workDir.set(rustProject)
         this.rootDir.set(projectRootDir)
         this.projectName.set(projectName)

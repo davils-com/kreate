@@ -23,15 +23,15 @@ Kotlin/Native compilation:
 
 | Step | Task                      | Description                                                             |
 |------|---------------------------|-------------------------------------------------------------------------|
-| 1    | `initializeRustProject`   | Creates a new Rust library project with `cargo new --lib`               |
-| 2    | `addRustDependencies`     | Adds `libc` and `cbindgen` (or custom crates) via `cargo add`           |
-| 3    | `configureCargo`          | Appends `[lib] crate-type = ["staticlib"]` to `Cargo.toml`              |
-| 4    | `generateRustBuildScript` | Generates a `build.rs` that runs `cbindgen` to produce C headers        |
-| 5    | `compileRust`             | Runs `cargo build --release --target <target>` for each target          |
-| 6    | `generateDefinitionFiles` | Writes the Kotlin/Native `.def` file pointing to the compiled artifacts |
+| 1    | `kreate-c-interop-initialize`   | Creates a new Rust library project with `cargo new --lib`               |
+| 2    | `kreate-c-interop-dependencies` | Adds `libc` and `cbindgen` (or custom crates) via `cargo add`           |
+| 3    | `kreate-c-interop-configure`    | Appends `[lib] crate-type = ["staticlib"]` to `Cargo.toml`              |
+| 4    | `kreate-c-interop-script`       | Generates a `build.rs` that runs `cbindgen` to produce C headers        |
+| 5    | `kreate-c-interop-compile`      | Runs `cargo build --release --target <target>` for each target          |
+| 6    | `kreate-c-interop-definitions`  | Writes the Kotlin/Native `.def` file pointing to the compiled artifacts |
 
 After step 6 completes, all `CInteropProcess` tasks automatically depend on
-`generateDefinitionFiles`, so your normal `build` or `assemble` invocation drives the entire chain.
+`kreate-c-interop-definitions`, so your normal `build` or `assemble` invocation drives the entire chain.
 
 ## Enabling C-Interop
 

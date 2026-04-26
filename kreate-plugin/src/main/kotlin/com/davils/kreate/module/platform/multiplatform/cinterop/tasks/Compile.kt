@@ -46,7 +46,7 @@ public abstract class CompileRust @Inject constructor(
      * @since 1.0.0
      */
     private val exec: ExecOperations
-) : Task("Compile Rust code for C interop") {
+) : Task("Compile Rust code for C interop", "kreate c-interoperation") {
     /**
      * The working directory containing the Rust project.
      * @since 1.0.0

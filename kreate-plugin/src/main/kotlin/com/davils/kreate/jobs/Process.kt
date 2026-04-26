@@ -39,14 +39,16 @@ internal interface Process {
  * A base class for Kreate-specific Gradle tasks.
  *
  * This class extends [DefaultTask] and implements [Process].
- * It automatically assigns the task to the "kreate" group.
+ * It automatically assigns the task to the "kreate" group by default,
+ * but allows overriding through the [group] parameter.
  *
  * @param desc A description of what this task does.
+ * @param group The Gradle task group this task belongs to. Defaults to "kreate".
  * @since 1.0.0
  */
-public abstract class Task(desc: String) : DefaultTask(), Process {
+public abstract class Task(desc: String, group: String = "kreate") : DefaultTask(), Process {
     init {
-        group = "kreate"
+        this.group = group
         description = desc
     }
 }
@@ -55,14 +57,16 @@ public abstract class Task(desc: String) : DefaultTask(), Process {
  * A base class for Kreate-specific executable Gradle tasks.
  *
  * This class extends [Exec] and implements [Process].
- * It automatically assigns the task to the "kreate" group.
+ * It automatically assigns the task to the "kreate" group by default,
+ * but allows overriding through the [group] parameter.
  *
  * @param desc A description of what this executable task does.
+ * @param group The Gradle task group this task belongs to. Defaults to "kreate".
  * @since 1.0.0
  */
-public abstract class Executable(desc: String) : Exec(), Process {
+public abstract class Executable(desc: String, group: String = "kreate") : Exec(), Process {
     init {
-        group = "kreate"
+        this.group = group
         description = desc
     }
 }

@@ -1,7 +1,7 @@
 # Project Scaffolding
 
-The `initializeJniProject` task creates the native C++ project structure on first run.
-It is registered automatically when JNI is enabled and runs as a dependency of `buildNative`.
+The `kreate-jni-initialize` task creates the native C++ project structure on first run.
+It is registered automatically when JNI is enabled and runs as a dependency of `kreate-jni-build`.
 
 ## What Gets Generated
 
@@ -59,12 +59,12 @@ Replace its content with your actual JNI function implementations.
 ## Running the Task Manually
 
 ```bash
-./gradlew initializeJniProject
+./gradlew kreate-jni-initialize
 ```
 
 <note>
 You do not need to run this task manually in normal development.
-It is executed automatically as part of the <code>buildNative</code> dependency chain
+It is executed automatically as part of the <code>kreate-jni-build</code> dependency chain
 whenever you compile your Kotlin sources.
 </note>
 

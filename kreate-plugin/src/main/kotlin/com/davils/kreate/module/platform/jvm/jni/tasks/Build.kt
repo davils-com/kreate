@@ -47,7 +47,7 @@ public abstract class BuildNative @Inject constructor(
      * @since 1.1.0
      */
     private val exec: ExecOperations
-) : Task("Builds the native JNI library with CMake.") {
+) : Task("Builds the native JNI library with CMake.", "kreate jni") {
     /**
      * The native project directory (`<root>/<projectName>`).
      * @since 1.1.0

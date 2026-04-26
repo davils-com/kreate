@@ -44,7 +44,7 @@ public abstract class InitializeRustProject @Inject constructor(
      * @since 1.0.0
      */
     private val exec: ExecOperations
-) : Task("Generates a new rust project.") {
+) : Task("Generates a new rust project.", "kreate c-interoperation") {
     /**
      * The working directory where the Rust project will be created.
      * @since 1.0.0
