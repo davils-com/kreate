@@ -19,8 +19,11 @@ package com.davils.kreate
 import com.davils.kreate.module.builder.modules
 import com.davils.kreate.module.platform.PlatformModule
 import com.davils.kreate.module.project.ProjectModule
+import com.davils.kreate.settings.KreateSettingsExtension
+import com.davils.kreate.settings.initializeGitDependencies
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.initialization.Settings
 import org.gradle.kotlin.dsl.create
 
 /**
@@ -31,16 +34,25 @@ import org.gradle.kotlin.dsl.create
  *
  * @since 1.0.0
  */
-public class Kreate : Plugin<Project> {
+public class Kreate : Plugin<Any> {
     /**
      * Applies the plugin to the given project.
      *
      * @param project The project to which the plugin is applied.
      * @since 1.0.0
      */
-    override fun apply(project: Project) {
-        val kreateExtension = project.extensions.create<KreateExtension>("kreate")
-        project.addModules(kreateExtension)
+    override fun apply(project: Any) {
+        when (project) {
+            is Project -> {
+                val extension = project.extensions.create<KreateExtension>("kreate")
+                project.addModules(extension)
+            }
+
+            is Settings -> {
+                val extension = project.extensions.create<KreateSettingsExtension>("kreate")
+                initializeGitDependencies(project, extension)
+            }
+        }
     }
 }
 

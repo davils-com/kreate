@@ -20,7 +20,9 @@ import com.davils.kreate.module.project.constants.BuildConstantsExtension
 import com.davils.kreate.module.project.docs.DocsExtension
 import com.davils.kreate.module.project.publish.extension.PublishExtension
 import com.davils.kreate.module.project.tests.TestsExtension
+import com.davils.kreate.settings.GitDependency
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
@@ -57,6 +59,13 @@ public abstract class ProjectExtension @Inject constructor(
     public val description: Property<String> = factory.property(String::class.java).convention("A Kreate project.")
 
     /**
+     * Container for Git dependencies.
+     *
+     * @since 1.0.0
+     */
+    public val git: NamedDomainObjectContainer<GitDependency> = factory.domainObjectContainer(GitDependency::class.java)
+
+    /**
      * Configuration for project versioning.
      * @since 1.0.0
      */
@@ -90,6 +99,16 @@ public abstract class ProjectExtension @Inject constructor(
      */
     @get:Nested
     public abstract val publish: PublishExtension
+
+    /**
+     * Configures Git dependencies.
+     *
+     * @param action The configuration action for the Git dependencies container.
+     * @since 1.0.0
+     */
+    public fun git(action: Action<NamedDomainObjectContainer<GitDependency>>) {
+        action.execute(git)
+    }
 
     /**
      * Configures the [ProjectExtensionVersion] using the provided action.
