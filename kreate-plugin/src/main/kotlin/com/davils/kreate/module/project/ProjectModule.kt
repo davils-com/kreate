@@ -19,6 +19,7 @@ package com.davils.kreate.module.project
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import com.davils.kreate.module.project.constants.initializeBuildConstants
+import com.davils.kreate.module.project.detekt.initializeDetekt
 import com.davils.kreate.module.project.docs.initializeDocs
 import com.davils.kreate.module.project.publish.initializePublish
 import com.davils.kreate.module.project.tests.initializeTesting
@@ -56,6 +57,7 @@ internal object ProjectModule : Module {
             initializeDocs(extension)
             initializeTesting(extension)
             initializePublish(extension)
+            initializeDetekt(extension)
         }
     }
 }
