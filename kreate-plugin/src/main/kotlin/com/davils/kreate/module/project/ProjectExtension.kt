@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project
 
 import com.davils.kreate.module.project.constants.BuildConstantsExtension
+import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import com.davils.kreate.module.project.docs.DocsExtension
 import com.davils.kreate.module.project.publish.extension.PublishExtension
 import com.davils.kreate.module.project.tests.TestsExtension
@@ -92,6 +93,14 @@ public abstract class ProjectExtension @Inject constructor(
     public abstract val publish: PublishExtension
 
     /**
+     * Configuration for detekt.
+     *
+     * @since 1.2.0
+     */
+    @get:Nested
+    public abstract val detekt: DetektExtension
+
+    /**
      * Configures the [ProjectExtensionVersion] using the provided action.
      *
      * @param action The configuration action.
@@ -139,6 +148,16 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun publish(action: Action<PublishExtension>) {
         action.execute(publish)
+    }
+
+    /**
+     * Configures the [DetektExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 1.2.0
+     */
+    public fun detekt(action: Action<DetektExtension>) {
+        action.execute(detekt)
     }
 }
 
