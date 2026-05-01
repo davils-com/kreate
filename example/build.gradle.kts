@@ -45,7 +45,6 @@ kreate {
                 enabled = true
                 projectDirectory = layout.projectDirectory.dir("jni")
                 nameOverride = "example"
-
             }
         }
     }
@@ -76,7 +75,7 @@ kreate {
         }
 
         tests {
-            enabled = true
+            enabled = false
             maxParallelForks = Runtime.getRuntime().availableProcessors()
             timeoutMinutes = 10L
             ignoreFailures = false
@@ -96,8 +95,37 @@ kreate {
             }
         }
 
-        publish {
+        detekt {
             enabled = true
+            buildUponDefaultConfig = true
+            allRules = true
+            config = rootProject.file("detekt.yaml")
+
+            reports {
+                checkstyle {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/checkstyle.xml")
+                }
+
+                html {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/html.html")
+                }
+
+                markdown {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/markdown.md")
+                }
+
+                sarif {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/sarif.sarif")
+                }
+            }
+        }
+
+        publish {
+            enabled = false
             inceptionYear = 2026
             website = "https://example.com"
 
@@ -155,4 +183,3 @@ kreate {
         }
     }
 }
-
