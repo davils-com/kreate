@@ -47,12 +47,12 @@ Every report block (`html`, `sarif`, `checkstyle`, `markdown`) supports the foll
 
 If `outputLocation` is not specified, Kreate uses the following default locations (relative to the project's build directory):
 
-| Report Type | Default Path |
-|-------------|--------------|
-| HTML        | `reports/detekt/report.html` |
-| SARIF       | `reports/detekt/report.sarif` |
+| Report Type | Default Path                    |
+|-------------|---------------------------------|
+| HTML        | `reports/detekt/report.html`    |
+| SARIF       | `reports/detekt/report.sarif`   |
 | Checkstyle  | `reports/detekt/checkstyle.xml` |
-| Markdown    | `reports/detekt/report.md` |
+| Markdown    | `reports/detekt/report.md`      |
 
 ## Advanced Report Customization
 
