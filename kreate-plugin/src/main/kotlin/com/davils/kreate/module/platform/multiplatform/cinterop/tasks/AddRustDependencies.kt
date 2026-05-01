@@ -107,28 +107,8 @@ public abstract class AddRustDependencies @Inject constructor(
         }
     }
 
-    /**
-     * Checks if a dependency is already present in the `Cargo.toml` content.
-     *
-     * @param cargoContent The content of `Cargo.toml`.
-     * @param name The name of the dependency.
-     * @return `true` if present, `false` otherwise.
-     * @since 1.0.0
-     */
-    private fun isDependencyPresent(cargoContent: String, name: String): Boolean {
-        return cargoContent.contains(name)
-    }
+    private fun isDependencyPresent(cargoContent: String, name: String): Boolean = cargoContent.contains(name)
 
-    /**
-     * Adds a dependency using the `cargo add` command.
-     *
-     * @param cargoCmd The cargo command path.
-     * @param name The name of the dependency.
-     * @param version The version of the dependency.
-     * @param build Whether it's a build dependency.
-     * @throws GradleException If the command fails.
-     * @since 1.0.0
-     */
     private fun addDependency(cargoCmd: String, name: String, version: String, build: Boolean) {
         try {
             exec.exec {

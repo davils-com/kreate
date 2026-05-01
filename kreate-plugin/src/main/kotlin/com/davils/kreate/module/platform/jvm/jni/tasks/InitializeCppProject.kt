@@ -88,13 +88,6 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
         }
     }
 
-    /**
-     * Generates the default content for the CMakeLists.txt file.
-     *
-     * @param projectName The name of the project.
-     * @return The generated CMake configuration as a string.
-     * @since 1.1.0
-     */
     private fun defaultCMakeContent(projectName: String): String = $$"""
         cmake_minimum_required(VERSION 3.20)
         project($$projectName CXX)
@@ -111,13 +104,6 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
         target_link_libraries($$projectName PRIVATE ${JNI_LIBRARIES})
     """.trimIndent()
 
-    /**
-     * Generates the default content for the initial C++ source file.
-     *
-     * @param projectName The name of the project.
-     * @return The generated C++ source code as a string.
-     * @since 1.1.0
-     */
     private fun defaultSourceContent(projectName: String): String = """
         #include <jni.h>
 
@@ -125,6 +111,11 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
         // Implement your native methods here.
     """.trimIndent()
 
+    /**
+     * Companion object for [InitializeCppProject].
+     *
+     * @since 1.1.0
+     */
     public companion object {
         /**
          * The CMake file name.

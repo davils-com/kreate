@@ -36,10 +36,6 @@ internal class KreateModuleRegistry(
      */
     private val data: KreateModuleRegistryData
 ) {
-    /**
-     * Flag indicating if the modules have already been applied.
-     * @since 1.0.0
-     */
     private var isApplied = false
 
     /**
@@ -48,9 +44,7 @@ internal class KreateModuleRegistry(
      * @return A list of [Module]s.
      * @since 1.0.0
      */
-    fun getModules(): List<Module> {
-        return data.modules.toList()
-    }
+    fun getModules(): List<Module> = data.modules.toList()
 
     /**
      * Applies all registered modules to the project.

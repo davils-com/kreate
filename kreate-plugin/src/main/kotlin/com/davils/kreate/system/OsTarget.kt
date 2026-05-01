@@ -51,25 +51,10 @@ internal enum class OsTarget {
     UNKNOWN
 }
 
-/**
- * Keywords used to identify Windows operating systems.
- *
- * @since 1.0.0
- */
 private val WINDOWS_KEYWORDS = setOf("wind", "winnt")
 
-/**
- * Keywords used to identify Linux and other Unix-like operating systems.
- *
- * @since 1.0.0
- */
 private val LINUX_KEYWORDS = setOf("nux", "sun", "bsd", "ubu", "cent", "deb")
 
-/**
- * Keywords used to identify macOS operating systems.
- *
- * @since 1.0.0
- */
 private val MACOS_KEYWORDS = setOf("mac", "dar")
 
 /**
@@ -81,12 +66,17 @@ private val MACOS_KEYWORDS = setOf("mac", "dar")
  * @since 1.0.0
  */
 internal fun getOs(): Lazy<OsTarget> = lazy {
-    val os = System.getProperty("os.name")?.lowercase() ?: return@lazy OsTarget.UNKNOWN
+    val os = System.getProperty("os.name")?.lowercase()
 
-    return@lazy when {
-        WINDOWS_KEYWORDS.any { it in os } -> OsTarget.WINDOWS
-        LINUX_KEYWORDS.any { it in os } -> OsTarget.LINUX
-        MACOS_KEYWORDS.any { it in os } -> OsTarget.MACOS
-        else -> OsTarget.UNKNOWN
+    if (os == null) {
+        OsTarget.UNKNOWN
+    } else {
+        when {
+            WINDOWS_KEYWORDS.any { it in os } -> OsTarget.WINDOWS
+            LINUX_KEYWORDS.any { it in os } -> OsTarget.LINUX
+            MACOS_KEYWORDS.any { it in os } -> OsTarget.MACOS
+            else -> OsTarget.UNKNOWN
+        }
     }
+
 }

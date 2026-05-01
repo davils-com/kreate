@@ -20,5 +20,6 @@ plugins {
 
 detekt {
     config = files(rootProject.file("../detekt.yaml"))
+    buildUponDefaultConfig = true
     allRules = true
 }

@@ -21,7 +21,7 @@ import com.davils.kreate.module.Module
 import com.davils.kreate.module.platform.jvm.initializeJvmCompiler
 import com.davils.kreate.module.platform.jvm.jni.initializeJni
 import com.davils.kreate.module.platform.multiplatform.cinterop.initializeCInterop
-import com.davils.kreate.module.platform.multiplatform.initializeMultiplatformCompiler
+import com.davils.kreate.module.platform.multiplatform.initMultiplatformCompiler
 import org.gradle.api.Project
 
 /**
@@ -52,35 +52,17 @@ internal object PlatformModule : Module {
         }
     }
 
-    /**
-     * Configures common settings for all platform types.
-     *
-     * @param extension The Kreate configuration extension.
-     * @since 1.0.0
-     */
     private fun Project.configureCommon(extension: KreateExtension) = afterEvaluate {
         configureJava(extension)
     }
 
-    /**
-     * Configures JVM-specific settings.
-     *
-     * @param extension The Kreate configuration extension.
-     * @since 1.0.0
-     */
     private fun Project.configureJvm(extension: KreateExtension): Unit = afterEvaluate {
         initializeJvmCompiler(extension)
         initializeJni(extension)
     }
 
-    /**
-     * Configures multiplatform-specific settings.
-     *
-     * @param extension The Kreate configuration extension.
-     * @since 1.0.0
-     */
     private fun Project.configureMultiplatform(extension: KreateExtension): Unit = afterEvaluate {
-        initializeMultiplatformCompiler(extension)
+        initMultiplatformCompiler(extension)
         initializeCInterop(extension)
     }
 }

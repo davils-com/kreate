@@ -45,12 +45,6 @@ internal object ProjectModule : Module {
         project.configureCommon(extension)
     }
 
-    /**
-     * Configures common project-level settings.
-     *
-     * @param extension The Kreate configuration extension.
-     * @since 1.0.0
-     */
     private fun Project.configureCommon(extension: KreateExtension) {
         applyDefaultGradlePlugins()
         addRepositories()

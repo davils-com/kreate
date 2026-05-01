@@ -37,21 +37,25 @@ public fun KotlinMultiplatformExtension.currentOs(configure: KotlinNativeTarget.
     val arch by getArchitecture()
     val os by getOs()
     when (os) {
-        OsTarget.WINDOWS -> mingwX64 {
-            configure()
+        OsTarget.WINDOWS -> {
+            mingwX64 {
+                configure()
+            }
         }
 
-        OsTarget.MACOS -> macosArm64 {
-            configure()
+        OsTarget.MACOS -> {
+            macosArm64 {
+                configure()
+            }
         }
 
         OsTarget.LINUX -> {
-            when (arch) {
-                Architecture.X64 -> linuxX64 {
+            if (arch == Architecture.X64) {
+                linuxX64 {
                     configure()
                 }
-
-                else -> linuxArm64 {
+            } else {
+                linuxArm64 {
                     configure()
                 }
             }

@@ -43,10 +43,6 @@ public abstract class ConfigureCargo : Task(
     @get:InputDirectory
     public abstract val workDir: DirectoryProperty
 
-    /**
-     * The content to append to `Cargo.toml`.
-     * @since 1.0.0
-     */
     private val extendedCargoContent: String
         get() = """
             [lib]
@@ -79,35 +75,13 @@ public abstract class ConfigureCargo : Task(
         writeContentToFile(cargoToml)
     }
 
-    /**
-     * Checks if the `Cargo.toml` file is valid and exists.
-     *
-     * @param cargoToml The file to check.
-     * @return `true` if it exists, `false` otherwise.
-     * @since 1.0.0
-     */
-    private fun isValidCargoToml(cargoToml: File): Boolean {
-        return cargoToml.exists()
-    }
+    private fun isValidCargoToml(cargoToml: File): Boolean = cargoToml.exists()
 
-    /**
-     * Checks if the `Cargo.toml` already contains the extended content.
-     *
-     * @param cargoToml The file to check.
-     * @return `true` if already extended, `false` otherwise.
-     * @since 1.0.0
-     */
     private fun isContentAlreadyExtended(cargoToml: File): Boolean {
         val content = cargoToml.readText()
         return content.contains(extendedCargoContent)
     }
 
-    /**
-     * Writes the extended content to the `Cargo.toml` file.
-     *
-     * @param cargoToml The file to write to.
-     * @since 1.0.0
-     */
     private fun writeContentToFile(cargoToml: File) {
         val originalContent = cargoToml.readText()
         val newContent = originalContent + extendedCargoContent

@@ -39,8 +39,8 @@ internal fun MavenPom.configurePom(
 ) {
     val pomConfig = publishConfig.pom
 
-    (projectName)?.let { name.set(it) }
-    (projectDescription)?.let { description.set(it) }
+    projectName?.let { name.set(it) }
+    projectDescription?.let { description.set(it) }
     publishConfig.inceptionYear.orNull?.let { inceptionYear.set(it.toString()) }
     publishConfig.website.orNull?.let { url.set(it) }
 
@@ -51,12 +51,6 @@ internal fun MavenPom.configurePom(
     configureScm(pomConfig)
 }
 
-/**
- * Configures the issue management section of the POM.
- *
- * @param pomConfig The POM configuration extension.
- * @since 1.0.0
- */
 private fun MavenPom.configureIssueManagement(pomConfig: PomExtension) {
     issueManagement {
         pomConfig.issueManagement.system.orNull?.let { value -> system.set(value) }
@@ -64,12 +58,6 @@ private fun MavenPom.configureIssueManagement(pomConfig: PomExtension) {
     }
 }
 
-/**
- * Configures the CI management section of the POM.
- *
- * @param pomConfig The POM configuration extension.
- * @since 1.0.0
- */
 private fun MavenPom.configureCiManagement(pomConfig: PomExtension) {
     ciManagement {
         pomConfig.ciManagement.system.orNull?.let { value -> system.set(value) }
@@ -77,12 +65,6 @@ private fun MavenPom.configureCiManagement(pomConfig: PomExtension) {
     }
 }
 
-/**
- * Configures the licenses section of the POM.
- *
- * @param pomConfig The POM configuration extension.
- * @since 1.0.0
- */
 private fun MavenPom.configureLicenses(pomConfig: PomExtension) {
     licenses {
         license {
@@ -93,12 +75,6 @@ private fun MavenPom.configureLicenses(pomConfig: PomExtension) {
     }
 }
 
-/**
- * Configures the developers section of the POM.
- *
- * @param pomConfig The POM configuration extension.
- * @since 1.0.0
- */
 private fun MavenPom.configureDevelopers(pomConfig: PomExtension) {
     developers {
         developer {
@@ -111,12 +87,6 @@ private fun MavenPom.configureDevelopers(pomConfig: PomExtension) {
     }
 }
 
-/**
- * Configures the SCM section of the POM.
- *
- * @param pomConfig The POM configuration extension.
- * @since 1.0.0
- */
 private fun MavenPom.configureScm(pomConfig: PomExtension) {
     scm {
         pomConfig.scm.url.orNull?.let { value -> url.set(value) }

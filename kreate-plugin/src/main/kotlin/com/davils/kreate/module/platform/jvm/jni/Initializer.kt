@@ -52,37 +52,12 @@ public fun Project.initializeJni(extension: KreateExtension) {
     applyRuntimeLibraryPath(extension)
 }
 
-/**
- * Validates the existence of the root directory and creates it if missing.
- *
- * @param rootDir The root directory to validate.
- * @return Unit
- * @throws GradleException If directory creation fails.
- * @since 1.1.0
- */
 private fun validateRootDir(rootDir: File) {
-    if (!rootDir.exists()) {
-        if (!rootDir.mkdirs()) {
-            throw GradleException("Failed to create root directory: ${rootDir.absolutePath}")
-        }
+    if (!rootDir.exists() && !rootDir.mkdirs()) {
+        throw GradleException("Failed to create root directory: ${rootDir.absolutePath}")
     }
 }
 
-/**
- * Registers and configures all tasks required for JNI.
- *
- * This includes initializing the native C++ project, building the shared
- * library via CMake, and generating JNI headers from the compiled class files.
- *
- * The native build (`kreate-jni-build`) is hooked into the Kotlin compile pipeline
- * so that the shared library is always up to date whenever the Kotlin sources
- * are rebuilt. Header generation is attached to the standard `classes`
- * lifecycle since it depends on already-compiled class files.
- *
- * @param extension The Kreate configuration extension.
- * @return Unit
- * @since 1.1.0
- */
 private fun Project.addJniTasks(extension: KreateExtension) {
     val jniConfig = extension.platform.jvm.jni
     val projectName = resolveProjectName(extension)
@@ -96,7 +71,7 @@ private fun Project.addJniTasks(extension: KreateExtension) {
         this.projectName.set(projectName)
     }
 
-    val buildNative by tasks.register<BuildNative>("kreate-jni-build") {
+    val buildNative by tasks.register<BuildNative>(KREATE_JNI_BUILD_TASK) {
         this.workDir.set(nativeProjectDir)
         dependsOn(initializeJniProject)
     }
@@ -104,26 +79,20 @@ private fun Project.addJniTasks(extension: KreateExtension) {
     executeTaskBeforeCompile(buildNative)
 }
 
-/**
- * Configures [Test] and [JavaExec] tasks with `-Djava.library.path` pointing to
- * the native build output directory so that `System.loadLibrary` resolves the
- * shared library produced by [BuildNative].
- *
- * @param extension The Kreate configuration extension.
- * @return Unit
- * @since 1.1.0
- */
 private fun Project.applyRuntimeLibraryPath(extension: KreateExtension) {
     val jniConfig = extension.platform.jvm.jni
     val projectName = resolveProjectName(extension)
     val nativeLibDir = resolveRootDir(jniConfig).resolve(projectName).resolve("build")
 
     tasks.withType<Test>().configureEach {
-        dependsOn("kreate-jni-build")
-        jvmArgs("-Djava.library.path=${nativeLibDir.absolutePath}")
+        dependsOn(KREATE_JNI_BUILD_TASK)
+        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${nativeLibDir.absolutePath}")
     }
     tasks.withType<JavaExec>().configureEach {
-        dependsOn("kreate-jni-build")
-        jvmArgs("-Djava.library.path=${nativeLibDir.absolutePath}")
+        dependsOn(KREATE_JNI_BUILD_TASK)
+        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${nativeLibDir.absolutePath}")
     }
 }
+
+private const val KREATE_JNI_BUILD_TASK = "kreate-jni-build"
+private const val JAVA_LIBRARY_PATH_PROPERTY = "-Djava.library.path="

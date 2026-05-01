@@ -37,10 +37,6 @@ public abstract class BuildConstantsExtension @Inject constructor(
      */
     factory: ObjectFactory
 ) {
-    /**
-     * The properties to be generated as constants.
-     * @since 1.0.0
-     */
     private val properties: MapProperty<String, String> = factory.mapProperty(
         String::class.java, String::class.java
     ).convention(emptyMap())
@@ -107,7 +103,5 @@ public abstract class BuildConstantsExtension @Inject constructor(
      * @return A map of constant names to their values.
      * @since 1.0.0
      */
-    public fun getConstants(): Map<String, String> {
-        return properties.get().toMap()
-    }
+    public fun getConstants(): Map<String, String> = properties.get().toMap()
 }

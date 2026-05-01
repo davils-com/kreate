@@ -98,13 +98,6 @@ public abstract class GenerateBuildConstantsTask : Task(
         writeFileSpec(fileSpec)
     }
 
-    /**
-     * Builds the [FileSpec] for the generated file.
-     *
-     * @param props The map of constants.
-     * @return The constructed [FileSpec].
-     * @since 1.0.0
-     */
     private fun buildFileSpec(props: Map<String, String>): FileSpec {
         val isExplicitApi = explicitApi.get()
         val objectSpec = buildObjectSpec(props, isExplicitApi)
@@ -115,14 +108,6 @@ public abstract class GenerateBuildConstantsTask : Task(
             .build()
     }
 
-    /**
-     * Builds the [TypeSpec] for the generated object.
-     *
-     * @param props The map of constants.
-     * @param isExplicitApi Whether to use explicit public modifiers.
-     * @return The constructed [TypeSpec].
-     * @since 1.0.0
-     */
     private fun buildObjectSpec(props: Map<String, String>, isExplicitApi: Boolean): TypeSpec {
         val builder = TypeSpec.objectBuilder(className.get())
             .addKdoc("Auto-generated build constants.")
@@ -137,15 +122,6 @@ public abstract class GenerateBuildConstantsTask : Task(
         return builder.build()
     }
 
-    /**
-     * Builds a [PropertySpec] for a single constant.
-     *
-     * @param key The name of the constant.
-     * @param value The value of the constant.
-     * @param isExplicitApi Whether to use explicit public modifiers.
-     * @return The constructed [PropertySpec].
-     * @since 1.0.0
-     */
     private fun buildConstantProperty(key: String, value: String, isExplicitApi: Boolean): PropertySpec {
         return PropertySpec.builder(key.uppercase(), String::class)
             .addModifiers(KModifier.CONST)
@@ -156,12 +132,6 @@ public abstract class GenerateBuildConstantsTask : Task(
             .build()
     }
 
-    /**
-     * Builds the header comment for the generated file.
-     *
-     * @return The header string.
-     * @since 1.0.0
-     */
     private fun buildFileHeader(): String {
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         return "This file is generated automatically.\n" +
@@ -169,12 +139,6 @@ public abstract class GenerateBuildConstantsTask : Task(
             "Generated on $timestamp."
     }
 
-    /**
-     * Writes the [FileSpec] to the output file.
-     *
-     * @param fileSpec The file specification to write.
-     * @since 1.0.0
-     */
     private fun writeFileSpec(fileSpec: FileSpec) {
         val outputFile = file.get().asFile
         try {
@@ -221,13 +185,6 @@ internal fun Project.registerBuildConstantsTask(extension: KreateExtension) {
     executeTaskBeforeCompile(task.get())
 }
 
-/**
- * Resolves the package name for the generated build constants.
- *
- * @param extension The Kreate configuration extension.
- * @return The resolved package name.
- * @since 1.0.0
- */
 private fun Project.resolvePackageName(extension: KreateExtension): String {
     val buildConstants = extension.project.buildConstants
 

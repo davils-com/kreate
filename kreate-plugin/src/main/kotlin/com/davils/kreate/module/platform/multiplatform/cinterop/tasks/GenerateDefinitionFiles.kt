@@ -106,31 +106,14 @@ public abstract class GenerateDefinitionFiles : Task(
         writeFileContent(definition)
     }
 
-    /**
-     * Validates and creates the C-interop directory if it doesn't exist.
-     *
-     * @return The C-interop directory file.
-     * @throws GradleException If directory creation fails.
-     * @since 1.0.0
-     */
     private fun validateCInteropDir(): File {
         val dir = workDir.get().asFile.resolve(defDirName.get())
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                throw GradleException("Failed to create cinterop directory: ${dir.absolutePath}")
-            }
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw GradleException("Failed to create cinterop directory: ${dir.absolutePath}")
         }
         return dir
     }
 
-    /**
-     * Validates and creates the definition file if it doesn't exist.
-     *
-     * @param cinteropDir The directory where the definition file should reside.
-     * @return The definition file.
-     * @throws GradleException If file creation fails.
-     * @since 1.0.0
-     */
     private fun validateDefinitionFile(cinteropDir: File): File {
         val defFile = cinteropDir.resolve(defFileName.get())
         if (!defFile.exists()) {
@@ -143,12 +126,6 @@ public abstract class GenerateDefinitionFiles : Task(
         return defFile
     }
 
-    /**
-     * Writes the content to the definition file.
-     *
-     * @param defFile The file to write to.
-     * @since 1.0.0
-     */
     private fun writeFileContent(defFile: File) {
         val rootDir = rootDir.get()
         val name = projectName.get()

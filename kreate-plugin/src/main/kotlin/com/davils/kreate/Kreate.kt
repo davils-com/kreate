@@ -44,12 +44,6 @@ public class Kreate : Plugin<Project> {
     }
 }
 
-/**
- * Adds and applies modules to the project based on the extension configuration.
- *
- * @param extension The [KreateExtension] used for configuration.
- * @since 1.0.0
- */
 private fun Project.addModules(extension: KreateExtension) {
     val modules = modules(extension) {
         add(ProjectModule)

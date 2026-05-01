@@ -43,10 +43,6 @@ internal class KreateModuleRegistryBuilder(
      */
     private val extension: KreateExtension
 ) {
-    /**
-     * List of modules to be registered.
-     * @since 1.0.0
-     */
     private val modules = mutableListOf<Module>()
 
     /**

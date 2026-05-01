@@ -51,10 +51,6 @@ public abstract class GenerateRustBuildScript : Task(
     @get:Input
     public abstract val projectName: Property<String>
 
-    /**
-     * The content of the `build.rs` script.
-     * @since 1.0.0
-     */
     private val script: String
         get() = """
             extern crate cbindgen;
@@ -102,16 +98,7 @@ public abstract class GenerateRustBuildScript : Task(
         buildRsFile.writeText(script)
     }
 
-    /**
-     * Checks if the given file is empty.
-     *
-     * @param buildRsFile The file to check.
-     * @return `true` if empty, `false` otherwise.
-     * @since 1.0.0
-     */
-    private fun isFileEmpty(buildRsFile: File): Boolean {
-        return buildRsFile.length() == 0L
-    }
+    private fun isFileEmpty(buildRsFile: File): Boolean = buildRsFile.length() == 0L
 
     /**
      * Companion object for [GenerateRustBuildScript].

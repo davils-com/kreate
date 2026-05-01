@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
  * @param extension The Kreate configuration extension.
  * @since 1.0.0
  */
-internal fun Project.initializeMultiplatformCompiler(extension: KreateExtension) {
+internal fun Project.initMultiplatformCompiler(extension: KreateExtension) {
     val platformConfig = extension.platform
 
     configure<KotlinMultiplatformExtension> {
