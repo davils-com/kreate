@@ -1,6 +1,8 @@
 style:
   RedundantVisibilityModifier:
     active: false
+  AbstractClassCanBeConcreteClass:
+    active: false
 
 complexity:
   LabeledExpression:
