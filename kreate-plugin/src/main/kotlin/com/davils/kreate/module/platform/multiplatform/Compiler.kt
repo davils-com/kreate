@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
  * Initializes the Kotlin Multiplatform compiler options.
  *
  * This function configures the explicit API mode and warning handling
- * based on the [PlatformExtension].
+ * based on the `PlatformExtension`.
  *
  * @param extension The Kreate configuration extension.
  * @since 1.0.0

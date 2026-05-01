@@ -26,7 +26,7 @@ import java.io.File
 /**
  * Task to configure the Cargo.toml file for static library output.
  *
- * This task appends the necessary `[lib]` configuration to `Cargo.toml` if it's
+ * This task appends the necessary `lib` configuration to `Cargo.toml` if it's
  * not already present, ensuring that the Rust project can be built as a
  * static library for C-interop.
  *

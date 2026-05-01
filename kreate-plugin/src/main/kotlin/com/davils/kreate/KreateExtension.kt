@@ -19,7 +19,6 @@ package com.davils.kreate
 import com.davils.kreate.module.platform.PlatformExtension
 import com.davils.kreate.module.project.ProjectExtension
 import org.gradle.api.Action
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
