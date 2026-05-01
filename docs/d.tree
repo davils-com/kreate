@@ -39,6 +39,11 @@
             <toc-element topic="Constans-Configuration.md"/>
             <toc-element topic="Constants-Examples.md"/>
         </toc-element>
+        <toc-element toc-title="Detekt">
+            <toc-element topic="Detekt-Overview.md"/>
+            <toc-element topic="Detekt-Configuration.md"/>
+            <toc-element topic="Detekt-Reports.md"/>
+        </toc-element>
         <toc-element toc-title="Documentation">
             <toc-element topic="Documentation-Overview.md"/>
             <toc-element topic="Documentation-Configuration.md"/>

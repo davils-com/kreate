@@ -4,10 +4,10 @@ plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     `kreate-publish`
+    `kreate-code-analysis`
 }
 
 group = Project.Identity.GROUP.lowercase()
-
 
 repositories {
     mavenCentral()

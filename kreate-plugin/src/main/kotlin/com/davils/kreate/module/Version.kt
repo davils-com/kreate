@@ -32,12 +32,7 @@ import org.gradle.api.Project
  */
 public fun Project.getProjectVersion(env: String, prop: String): String {
     val ciTag = System.getenv(env)
-    if (ciTag != null) return ciTag
-
     val versionProp = findProperty(prop)?.toString()
-    if (versionProp != null && versionProp != "unspecified") {
-        return versionProp
-    }
 
-    return "1.0.0"
+    return ciTag ?: versionProp?.takeIf { it != "unspecified" } ?: "1.0.0"
 }

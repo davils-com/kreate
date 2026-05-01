@@ -46,10 +46,11 @@ internal enum class Architecture {
  * @since 1.0.0
  */
 internal fun getArchitecture(): Lazy<Architecture> = lazy {
-    val arch = System.getProperty("os.arch")?.lowercase() ?: return@lazy Architecture.X64
-
-    return@lazy when {
+    // without @lazy label
+    val arch = System.getProperty("os.arch").lowercase()
+    when {
         arch.contains("aarch64") || arch.contains("arm64") -> Architecture.ARM64
-        else -> Architecture.X64
+        arch.contains("x86_64") || arch.contains("amd64") -> Architecture.X64
+        else -> throw UnsupportedOperationException("Unsupported architecture: $arch")
     }
 }

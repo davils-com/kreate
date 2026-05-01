@@ -51,31 +51,12 @@ public fun Project.initializeCInterop(extension: KreateExtension) {
     applyNativeTargets(cInteropConfig)
 }
 
-/**
- * Validates the existence of the root directory and creates it if missing.
- *
- * @param rootDir The root directory to validate.
- * @throws GradleException If directory creation fails.
- * @since 1.0.0
- */
 private fun validateRootDir(rootDir: File) {
-    if (!rootDir.exists()) {
-        if (!rootDir.mkdirs()) {
-            throw GradleException("Failed to create root directory: ${rootDir.absolutePath}")
-        }
+    if (!rootDir.exists() && !rootDir.mkdirs()) {
+        throw GradleException("Failed to create root directory: ${rootDir.absolutePath}")
     }
 }
 
-/**
- * Registers and configures all tasks required for C-interop.
- *
- * This includes initializing the Rust project, adding dependencies,
- * configuring Cargo, generating build scripts, compiling Rust code,
- * and generating definition files.
- *
- * @param extension The Kreate configuration extension.
- * @since 1.0.0
- */
 private fun Project.addCInteropTasks(extension: KreateExtension) {
     val projectName = resolveProjectName(extension)
 
@@ -131,13 +112,6 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     executeTaskBeforeCompile(generateDefinitionFiles)
 }
 
-/**
- * Applies native targets to the Kotlin Multiplatform extension based on Rust targets.
- *
- * @param cInteropConfig The C-interop configuration extension.
- * @throws GradleException If a Rust target is unsupported for Kotlin/Native mapping.
- * @since 1.0.0
- */
 private fun Project.applyNativeTargets(cInteropConfig: CInteropExtension) {
     val targets = resolveRustTargets(cInteropConfig.rustTargets)
     configure<KotlinMultiplatformExtension> {
@@ -171,7 +145,9 @@ private fun Project.applyNativeTargets(cInteropConfig: CInteropExtension) {
                     }
                 }
 
-                else -> throw GradleException("Unsupported Rust target for Kotlin/Native mapping: $rustTarget")
+                else -> {
+                    throw GradleException("Unsupported Rust target for Kotlin/Native mapping: $rustTarget")
+                }
             }
         }
     }

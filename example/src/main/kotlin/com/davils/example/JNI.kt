@@ -16,14 +16,29 @@
 
 package com.davils.example
 
+/**
+ * Example of a native Kotlin class.
+ *
+ * @since 1.0.0
+ */
 public class JNI {
     init {
         System.loadLibrary("example")
     }
 
+    /**
+     * Native method declaration. This method is implemented in C/C++ and will be called from Kotlin.
+     *
+     * @return A string from C/C++
+     */
     public external fun hello(): String
 }
 
+/**
+ * Main entry point for the application.
+ *
+ * @since 1.0.0
+ */
 public fun main() {
     val jni = JNI()
     println(jni.hello())
