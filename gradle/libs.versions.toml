@@ -3,6 +3,7 @@ kotlin = "2.3.21"
 poet = "2.3.0"
 dokka = "2.2.0"
 publish = "0.36.0"
+detekt = "2.0.0-alpha.3"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
@@ -12,6 +13,7 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 publish-gradle-plugin = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "publish" }
+detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
@@ -19,7 +21,8 @@ kreate = { id = "com.davils.kreate" }
 [bundles]
 build-src = [
     "kotlin-gradle-plugin",
-    "publish-gradle-plugin"
+    "publish-gradle-plugin",
+    "detekt-gradle-plugin"
 ]
 
 kreate-plugin = [
@@ -27,5 +30,6 @@ kreate-plugin = [
     "kotlin-gradle-plugin",
     "dokka-gradle-plugin",
     "serialization-gradle-plugin",
-    "publish-gradle-plugin"
+    "publish-gradle-plugin",
+    "detekt-gradle-plugin"
 ]

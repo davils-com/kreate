@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.publish.extension.pom
+package com.davils.kreate.module.project.publish.extension.repository
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 /**
- * Extension for configuring POM source control management (SCM) metadata.
+ * Extension for configuring Maven Central publishing.
+ *
+ * This extension controls whether publishing is enabled, whether releases
+ * should be automatic, and whether publications should be signed.
  *
  * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class PomScmExtension @Inject constructor(
+public abstract class MavenCentralExtension @Inject constructor(
     /**
      * The object factory instance.
      * @since 1.0.0
@@ -34,20 +37,23 @@ public abstract class PomScmExtension @Inject constructor(
     factory: ObjectFactory
 ) {
     /**
-     * The URL to the SCM web interface.
+     * Whether Maven Central publishing is enabled.
+     * Defaults to `false`.
      * @since 1.0.0
      */
-    public val url: Property<String> = factory.property(String::class.java)
+    public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
-     * The read-only connection URL for SCM.
+     * Whether to release artifacts automatically.
+     * Defaults to `true`.
      * @since 1.0.0
      */
-    public val connection: Property<String> = factory.property(String::class.java)
+    public val automaticRelease: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
     /**
-     * The read-write connection URL for SCM.
+     * Whether to sign all publications.
+     * Defaults to `true`.
      * @since 1.0.0
      */
-    public val developerConnection: Property<String> = factory.property(String::class.java)
+    public val signPublications: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 }

@@ -74,7 +74,7 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
         val projectRoot = workDir.get().asFile.resolve(projectName)
         val srcDir = projectRoot.resolve(SRC_DIR_NAME)
         if (!srcDir.exists() && !srcDir.mkdirs()) {
-            throw IllegalStateException("Failed to create src directory: ${srcDir.absolutePath}")
+            error("Failed to create src directory: ${srcDir.absolutePath}")
         }
 
         val cMake = projectRoot.resolve(CMAKE_FILE_NAME)

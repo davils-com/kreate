@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.publish.extension.repository
+package com.davils.kreate.module.project.publish.extension.pom
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 /**
- * Extension for configuring Maven Central publishing.
- *
- * This extension controls whether publishing is enabled, whether releases
- * should be automatic, and whether publications should be signed.
+ * Extension for configuring POM issue management metadata.
  *
  * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class MavenCentralExtension @Inject constructor(
+public abstract class PomIssueManagementExtension @Inject constructor(
     /**
      * The object factory instance.
      * @since 1.0.0
@@ -37,23 +34,14 @@ public abstract class MavenCentralExtension @Inject constructor(
     factory: ObjectFactory
 ) {
     /**
-     * Whether Maven Central publishing is enabled.
-     * Defaults to `false`.
+     * The name of the issue management system (e.g., "GitHub Issues").
      * @since 1.0.0
      */
-    public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+    public val system: Property<String> = factory.property(String::class.java)
 
     /**
-     * Whether to release artifacts automatically.
-     * Defaults to `true`.
+     * The URL to the issue management system.
      * @since 1.0.0
      */
-    public val automaticRelease: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
-
-    /**
-     * Whether to sign all publications.
-     * Defaults to `true`.
-     * @since 1.0.0
-     */
-    public val signPublications: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+    public val url: Property<String> = factory.property(String::class.java)
 }

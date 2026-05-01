@@ -78,7 +78,10 @@ internal class KreateModuleRegistry(
  * @return A configured [KreateModuleRegistry].
  * @since 1.0.0
  */
-internal fun Project.modules(extension: KreateExtension, builder: KreateModuleRegistryBuilder.() -> Unit): KreateModuleRegistry {
+internal fun Project.modules(
+    extension: KreateExtension,
+    builder: KreateModuleRegistryBuilder.() -> Unit
+): KreateModuleRegistry {
     val registryBuilder = KreateModuleRegistryBuilder(this, extension)
     registryBuilder.builder()
     val registryData = registryBuilder.build()

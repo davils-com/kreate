@@ -89,8 +89,8 @@ public abstract class InitializeRustProject @Inject constructor(
                 workingDir = workDirFile
                 commandLine(cargoCmd, "new", "--lib", projectName)
             }
-        } catch (e: Exception) {
-            throw GradleException("Failed to initialize rust project.", e)
+        } catch (_: Exception) {
+            throw GradleException("Failed to initialize rust project.")
         }
     }
 }

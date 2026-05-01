@@ -30,6 +30,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -42,7 +43,10 @@ import java.time.format.DateTimeFormatter
  *
  * @since 1.0.0
  */
-public abstract class GenerateBuildConstantsTask : Task("Generates build constants as a Kotlin file.", "kreate build-constants") {
+public abstract class GenerateBuildConstantsTask : Task(
+    "Generates build constants as a Kotlin file.",
+    "kreate build-constants"
+) {
     /**
      * The map of properties to generate as constants.
      * @since 1.0.0
@@ -176,10 +180,12 @@ public abstract class GenerateBuildConstantsTask : Task("Generates build constan
         try {
             outputFile.parentFile.mkdirs()
             val raw = fileSpec.toString()
-            val content = raw.replaceFirst("package ${fileSpec.packageName}", "\npackage ${fileSpec.packageName}")
+            val content = raw.replaceFirst(
+                "package ${fileSpec.packageName}", "\npackage ${fileSpec.packageName}"
+            )
             outputFile.writeText(content)
             logger.lifecycle("Wrote build constants file to ${outputFile.absolutePath}.")
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             logger.error("Failed to write build constants file.", e)
         }
     }

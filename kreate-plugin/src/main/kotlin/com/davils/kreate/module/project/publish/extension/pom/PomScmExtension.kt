@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.platform.multiplatform
+package com.davils.kreate.module.project.publish.extension.pom
 
-import com.davils.kreate.module.platform.multiplatform.cinterop.CInteropExtension
-import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Nested
+import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 /**
- * Extension for configuring Kotlin Multiplatform settings.
- *
- * This extension provides nested configuration for C-interop.
+ * Extension for configuring POM source control management (SCM) metadata.
  *
  * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class MultiplatformExtension @Inject constructor(
+public abstract class PomScmExtension @Inject constructor(
     /**
      * The object factory instance.
      * @since 1.0.0
@@ -38,19 +34,20 @@ public abstract class MultiplatformExtension @Inject constructor(
     factory: ObjectFactory
 ) {
     /**
-     * Configuration for C-interop.
+     * The URL to the SCM web interface.
      * @since 1.0.0
      */
-    @get:Nested
-    public abstract val cInterop: CInteropExtension
+    public val url: Property<String> = factory.property(String::class.java)
 
     /**
-     * Configures the [CInteropExtension] using the provided action.
-     *
-     * @param action The configuration action.
+     * The read-only connection URL for SCM.
      * @since 1.0.0
      */
-    public fun cInterop(action: Action<CInteropExtension>) {
-        action.execute(cInterop)
-    }
+    public val connection: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The read-write connection URL for SCM.
+     * @since 1.0.0
+     */
+    public val developerConnection: Property<String> = factory.property(String::class.java)
 }

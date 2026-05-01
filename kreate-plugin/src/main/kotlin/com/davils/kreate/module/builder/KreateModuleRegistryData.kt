@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.publish.extension.pom
+package com.davils.kreate.module.builder
 
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-import javax.inject.Inject
+import com.davils.kreate.KreateExtension
+import com.davils.kreate.module.Module
+import org.gradle.api.Project
 
 /**
- * Extension for configuring POM issue management metadata.
+ * Data class holding the registry of Kreate modules for a project.
  *
- * @param factory The object factory used for creating properties.
+ * It contains the configuration extension, the project instance, and the list
+ * of registered modules to be applied.
+ *
  * @since 1.0.0
  */
-public abstract class PomIssueManagementExtension @Inject constructor(
+internal data class KreateModuleRegistryData(
     /**
-     * The object factory instance.
+     * The Kreate configuration extension.
      * @since 1.0.0
      */
-    factory: ObjectFactory
-) {
+    val extension: KreateExtension,
     /**
-     * The name of the issue management system (e.g., "GitHub Issues").
+     * The Gradle project instance.
      * @since 1.0.0
      */
-    public val system: Property<String> = factory.property(String::class.java)
-
+    val project: Project,
     /**
-     * The URL to the issue management system.
+     * The list of registered modules.
      * @since 1.0.0
      */
-    public val url: Property<String> = factory.property(String::class.java)
-}
+    val modules: List<Module>
+)

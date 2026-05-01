@@ -98,8 +98,8 @@ public abstract class BuildNative @Inject constructor(
                 workingDir = projectRoot
                 commandLine(cmakeCmd, "--build", buildDir.absolutePath, "--config", type)
             }
-        } catch (e: Exception) {
-            throw GradleException("Failed to build native JNI library.", e)
+        } catch (_: Exception) {
+            throw GradleException("Failed to build native JNI library.")
         }
     }
 }

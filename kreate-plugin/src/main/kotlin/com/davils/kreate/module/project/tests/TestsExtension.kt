@@ -53,7 +53,9 @@ public abstract class TestsExtension @Inject constructor(
      * Defaults to half of the available processors.
      * @since 1.0.0
      */
-    public val maxParallelForks: Property<Int> = factory.property(Int::class.java).convention(Runtime.getRuntime().availableProcessors() / 2)
+    public val maxParallelForks: Property<Int> = factory.property(
+        Int::class.java
+    ).convention(Runtime.getRuntime().availableProcessors() / 2)
 
     /**
      * The timeout for test execution in minutes.
@@ -67,21 +69,27 @@ public abstract class TestsExtension @Inject constructor(
      * Defaults to `false`.
      * @since 1.0.0
      */
-    public val ignoreFailures: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+    public val ignoreFailures: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(false)
 
     /**
      * Whether tests should always run, even if they are up-to-date.
      * Defaults to `false`.
      * @since 1.0.0
      */
-    public val alwaysRunTests: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+    public val alwaysRunTests: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(false)
 
     /**
      * Whether to fail the build if no tests are discovered.
      * Defaults to `false`.
      * @since 1.0.0
      */
-    public val failOnNoDiscoveredTests: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+    public val failOnNoDiscoveredTests: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(false)
 
     /**
      * Configuration for test logging.

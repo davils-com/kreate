@@ -18,7 +18,6 @@ package com.davils.kreate.module.platform.jvm
 
 import com.davils.kreate.module.platform.jvm.jni.JniExtension
 import org.gradle.api.Action
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
@@ -27,16 +26,9 @@ import javax.inject.Inject
  *
  * This extension allows configuring features like JNI for JVM modules.
  *
- * @param factory The object factory used for creating properties.
  * @since 1.1.0
  */
-public abstract class JvmExtension @Inject constructor(
-    /**
-     * The object factory instance.
-     * @since 1.1.0
-     */
-    factory: ObjectFactory
-) {
+public abstract class JvmExtension @Inject constructor() {
     /**
      * Configuration for JNI (Java Native Interface) support.
      *

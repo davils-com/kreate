@@ -25,16 +25,9 @@ import javax.inject.Inject
 /**
  * Extension for configuring POM developers metadata.
  *
- * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class PomDevelopersExtension @Inject constructor(
-    /**
-     * The object factory instance.
-     * @since 1.0.0
-     */
-    factory: ObjectFactory
-) {
+public abstract class PomDevelopersExtension @Inject constructor() {
     /**
      * Configuration for a single developer.
      * @since 1.0.0

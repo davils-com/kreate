@@ -25,16 +25,9 @@ import javax.inject.Inject
 /**
  * Extension for configuring POM licenses metadata.
  *
- * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class PomLicensesExtension @Inject constructor(
-    /**
-     * The object factory instance.
-     * @since 1.0.0
-     */
-    factory: ObjectFactory
-) {
+public abstract class PomLicensesExtension @Inject constructor() {
     /**
      * Configuration for a single license.
      * @since 1.0.0

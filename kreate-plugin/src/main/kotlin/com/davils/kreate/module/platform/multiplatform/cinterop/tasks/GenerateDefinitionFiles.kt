@@ -28,6 +28,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
+import java.io.IOException
 
 /**
  * Task to generate C-interop definition files for native targets.
@@ -38,7 +39,10 @@ import java.io.File
  *
  * @since 1.0.0
  */
-public abstract class GenerateDefinitionFiles : Task("Generates cinterop definition files for native targets", "kreate c-interoperation") {
+public abstract class GenerateDefinitionFiles : Task(
+    "Generates cinterop definition files for native targets",
+    "kreate c-interoperation"
+) {
     /**
      * The working directory for the task.
      * @since 1.0.0
@@ -132,7 +136,7 @@ public abstract class GenerateDefinitionFiles : Task("Generates cinterop definit
         if (!defFile.exists()) {
             try {
                 defFile.createNewFile()
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 throw GradleException("Failed to create cinterop definition file: ${defFile.absolutePath}", e)
             }
         }

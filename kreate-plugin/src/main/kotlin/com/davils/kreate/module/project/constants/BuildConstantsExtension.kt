@@ -41,7 +41,9 @@ public abstract class BuildConstantsExtension @Inject constructor(
      * The properties to be generated as constants.
      * @since 1.0.0
      */
-    private val properties: MapProperty<String, String> = factory.mapProperty(String::class.java, String::class.java).convention(emptyMap())
+    private val properties: MapProperty<String, String> = factory.mapProperty(
+        String::class.java, String::class.java
+    ).convention(emptyMap())
 
     /**
      * Whether build constants generation is enabled.
@@ -61,14 +63,18 @@ public abstract class BuildConstantsExtension @Inject constructor(
      * Defaults to "BuildConstants".
      * @since 1.0.0
      */
-    public val className: Property<String> = factory.property(String::class.java).convention("BuildConstants")
+    public val className: Property<String> = factory.property(
+        String::class.java
+    ).convention("BuildConstants")
 
     /**
      * The output path for the generated source file.
      * Defaults to "generated/compile".
      * @since 1.0.0
      */
-    public val path: Property<String> = factory.property(String::class.java).convention("generated/compile")
+    public val path: Property<String> = factory.property(
+        String::class.java
+    ).convention("generated/compile")
 
     /**
      * Adds a constant to the generated class.
@@ -79,10 +85,7 @@ public abstract class BuildConstantsExtension @Inject constructor(
      * @since 1.0.0
      */
     public fun constant(key: String, value: String) {
-        if (key.isBlank()) {
-            throw IllegalArgumentException("Key cannot be blank.")
-        }
-
+        require(key.isNotBlank()) { "Key must not be blank" }
         properties.put(key, value)
     }
 

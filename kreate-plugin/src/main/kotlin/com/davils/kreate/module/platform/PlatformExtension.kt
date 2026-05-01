@@ -46,21 +46,27 @@ public abstract class PlatformExtension @Inject constructor(
      * Defaults to [JavaVersion.VERSION_25].
      * @since 1.0.0
      */
-    public val javaVersion: Property<JavaVersion> = factory.property(JavaVersion::class.java).convention(JavaVersion.VERSION_25)
+    public val javaVersion: Property<JavaVersion> = factory.property(
+        JavaVersion::class.java
+    ).convention(JavaVersion.VERSION_25)
 
     /**
      * Whether to enable explicit API mode in Kotlin.
      * Defaults to `true`.
      * @since 1.0.0
      */
-    public val explicitApi: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+    public val explicitApi: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(true)
 
     /**
      * Whether to treat all compiler warnings as errors.
      * Defaults to `false`.
      * @since 1.0.0
      */
-    public val allWarningsAsErrors: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+    public val allWarningsAsErrors: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(false)
 
     /**
      * Configuration for Kotlin Multiplatform.

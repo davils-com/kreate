@@ -87,8 +87,8 @@ public abstract class CompileRust @Inject constructor(
                     workingDir = workDir.get().asFile
                     commandLine(cargoCmd, "build", "--target", target, "--release")
                 }
-            } catch (e: Exception) {
-                throw GradleException("Failed to compile Rust code for target '$target'.", e)
+            } catch (_: Exception) {
+                throw GradleException("Failed to compile Rust code for target '$target'.")
             }
         }
     }

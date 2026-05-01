@@ -28,10 +28,9 @@ import javax.inject.Inject
  *
  * This class provides access to project-level and platform-level configurations.
  *
- * @param factory The [ObjectFactory] used to create instances of configuration objects.
  * @since 1.0.0
  */
-public abstract class KreateExtension @Inject constructor(factory: ObjectFactory) {
+public abstract class KreateExtension @Inject constructor() {
     /**
      * Configuration for project-level settings.
      *

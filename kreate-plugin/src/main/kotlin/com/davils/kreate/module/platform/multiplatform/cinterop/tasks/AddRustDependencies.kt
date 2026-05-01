@@ -138,8 +138,8 @@ public abstract class AddRustDependencies @Inject constructor(
                 if (version.isNotEmpty()) cmd.add("$name@$version") else cmd.add(name)
                 commandLine(cmd)
             }
-        } catch (e: Exception) {
-            throw GradleException("Failed to add rust dependency '$name'.", e)
+        } catch (_: Exception) {
+            throw GradleException("Failed to add rust dependency '$name'.")
         }
     }
 }

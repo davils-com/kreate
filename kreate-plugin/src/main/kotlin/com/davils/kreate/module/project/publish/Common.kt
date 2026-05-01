@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project.publish
 
 import com.davils.kreate.module.project.publish.extension.PublishExtension
+import com.davils.kreate.module.project.publish.extension.pom.PomExtension
 import org.gradle.api.publish.maven.MavenPom
 
 /**
@@ -43,37 +44,83 @@ internal fun MavenPom.configurePom(
     publishConfig.inceptionYear.orNull?.let { inceptionYear.set(it.toString()) }
     publishConfig.website.orNull?.let { url.set(it) }
 
+    configureIssueManagement(pomConfig)
+    configureCiManagement(pomConfig)
+    configureLicenses(pomConfig)
+    configureDevelopers(pomConfig)
+    configureScm(pomConfig)
+}
+
+/**
+ * Configures the issue management section of the POM.
+ *
+ * @param pomConfig The POM configuration extension.
+ * @since 1.0.0
+ */
+private fun MavenPom.configureIssueManagement(pomConfig: PomExtension) {
     issueManagement {
-        pomConfig.issueManagement.system.orNull?.let { system.set(it) }
-        pomConfig.issueManagement.url.orNull?.let { url.set(it) }
+        pomConfig.issueManagement.system.orNull?.let { value -> system.set(value) }
+        pomConfig.issueManagement.url.orNull?.let { value -> url.set(value) }
     }
+}
 
+/**
+ * Configures the CI management section of the POM.
+ *
+ * @param pomConfig The POM configuration extension.
+ * @since 1.0.0
+ */
+private fun MavenPom.configureCiManagement(pomConfig: PomExtension) {
     ciManagement {
-        pomConfig.ciManagement.system.orNull?.let { system.set(it) }
-        pomConfig.ciManagement.url.orNull?.let { url.set(it) }
+        pomConfig.ciManagement.system.orNull?.let { value -> system.set(value) }
+        pomConfig.ciManagement.url.orNull?.let { value -> url.set(value) }
     }
+}
 
+/**
+ * Configures the licenses section of the POM.
+ *
+ * @param pomConfig The POM configuration extension.
+ * @since 1.0.0
+ */
+private fun MavenPom.configureLicenses(pomConfig: PomExtension) {
     licenses {
         license {
-            pomConfig.licenses.license.name.orNull?.let { name.set(it) }
-            pomConfig.licenses.license.url.orNull?.let { url.set(it) }
-            pomConfig.licenses.license.distribution.orNull?.let { distribution.set(it) }
+            pomConfig.licenses.license.name.orNull?.let { value -> name.set(value) }
+            pomConfig.licenses.license.url.orNull?.let { value -> url.set(value) }
+            pomConfig.licenses.license.distribution.orNull?.let { value -> distribution.set(value) }
         }
     }
+}
 
+/**
+ * Configures the developers section of the POM.
+ *
+ * @param pomConfig The POM configuration extension.
+ * @since 1.0.0
+ */
+private fun MavenPom.configureDevelopers(pomConfig: PomExtension) {
     developers {
         developer {
-            pomConfig.developers.developer.id.orNull?.let { id.set(it) }
-            pomConfig.developers.developer.name.orNull?.let { name.set(it) }
-            pomConfig.developers.developer.email.orNull?.let { email.set(it) }
-            pomConfig.developers.developer.organization.orNull?.let { organization.set(it) }
-            pomConfig.developers.developer.timezone.orNull?.let { timezone.set(it) }
+            pomConfig.developers.developer.id.orNull?.let { value -> id.set(value) }
+            pomConfig.developers.developer.name.orNull?.let { value -> name.set(value) }
+            pomConfig.developers.developer.email.orNull?.let { value -> email.set(value) }
+            pomConfig.developers.developer.organization.orNull?.let { value -> organization.set(value) }
+            pomConfig.developers.developer.timezone.orNull?.let { value -> timezone.set(value) }
         }
     }
+}
 
+/**
+ * Configures the SCM section of the POM.
+ *
+ * @param pomConfig The POM configuration extension.
+ * @since 1.0.0
+ */
+private fun MavenPom.configureScm(pomConfig: PomExtension) {
     scm {
-        pomConfig.scm.url.orNull?.let { url.set(it) }
-        pomConfig.scm.connection.orNull?.let { connection.set(it) }
-        pomConfig.scm.developerConnection.orNull?.let { developerConnection.set(it) }
+        pomConfig.scm.url.orNull?.let { value -> url.set(value) }
+        pomConfig.scm.connection.orNull?.let { value -> connection.set(value) }
+        pomConfig.scm.developerConnection.orNull?.let { value -> developerConnection.set(value) }
     }
 }

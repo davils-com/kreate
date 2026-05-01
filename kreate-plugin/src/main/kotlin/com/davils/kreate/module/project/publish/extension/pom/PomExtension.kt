@@ -17,7 +17,6 @@
 package com.davils.kreate.module.project.publish.extension.pom
 
 import org.gradle.api.Action
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
@@ -27,16 +26,9 @@ import javax.inject.Inject
  * This extension provides nested configurations for issue management,
  * CI management, licenses, developers, and SCM.
  *
- * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-public abstract class PomExtension @Inject constructor(
-    /**
-     * The object factory instance.
-     * @since 1.0.0
-     */
-    factory: ObjectFactory
-) {
+public abstract class PomExtension @Inject constructor() {
     /**
      * Configuration for issue management.
      * @since 1.0.0

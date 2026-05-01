@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.builder
+package com.davils.kreate.module.project.publish.extension.pom
 
-import com.davils.kreate.KreateExtension
-import com.davils.kreate.module.Module
-import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+import javax.inject.Inject
 
 /**
- * Data class holding the registry of Kreate modules for a project.
+ * Extension for configuring POM CI management metadata.
  *
- * It contains the configuration extension, the project instance, and the list
- * of registered modules to be applied.
- *
+ * @param factory The object factory used for creating properties.
  * @since 1.0.0
  */
-internal data class KreateModuleRegistryData(
+public abstract class PomCiManagementExtension @Inject constructor(
     /**
-     * The Kreate configuration extension.
+     * The object factory instance.
      * @since 1.0.0
      */
-    val extension: KreateExtension,
+    factory: ObjectFactory
+) {
     /**
-     * The Gradle project instance.
+     * The name of the CI system.
      * @since 1.0.0
      */
-    val project: Project,
+    public val system: Property<String> = factory.property(String::class.java)
+
     /**
-     * The list of registered modules.
+     * The URL to the CI system.
      * @since 1.0.0
      */
-    val modules: List<Module>
-)
+    public val url: Property<String> = factory.property(String::class.java)
+}
