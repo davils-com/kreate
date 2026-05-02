@@ -18,11 +18,21 @@ kreate {
 }
 ```
 
-Once enabled, Kreate will automatically apply the `dev.detekt` plugin to your project and configure the standard tasks.
+Once enabled, you must manually apply the `dev.detekt` plugin to your project. Kreate will then automatically configure the standard tasks and reports.
 
-> Since Kreate applies the official Detekt Gradle plugin under the hood, you can still use all standard Detekt features.
->
-{style="tip"}
+```kotlin
+plugins {
+    id("dev.detekt") version "1.23.6" // Use the latest version
+}
+
+kreate {
+    project {
+        detekt {
+            enabled.set(true)
+        }
+    }
+}
+```
 
 ## Why use Detekt?
 
