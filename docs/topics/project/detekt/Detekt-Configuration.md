@@ -6,10 +6,14 @@ The `detekt { }` block provides several properties to customize how static analy
 
 The following properties are available directly within the `detekt { }` block:
 
+> Note: You must manually apply the `dev.detekt` plugin for this to work.
+> 
+> {style="warning"}
+
 ### `enabled`
 - **Type**: `Property<Boolean>`
 - **Default**: `false`
-- **Description**: Master switch for Detekt integration. When set to `true`, Kreate automatically applies the `io.gitlab.arturbosch.detekt` plugin and configures all Detekt tasks.
+- **Description**: Master switch for Detekt integration. When set to `true`, Kreate configures all Detekt tasks. 
 
 ### `allRules`
 - **Type**: `Property<Boolean>`

@@ -43,7 +43,10 @@ internal fun Project.configureMavenCentral(
     val projectDescription = kreateExtension.project.description.orNull
     val projectGroup = project.group.toString()
 
-    pluginManager.apply(MavenPublishBasePlugin::class.java)
+    if (!plugins.hasPlugin(MavenPublishBasePlugin::class.java)) {
+        error("Maven Publish Base Plugin not applied. Do it yourself: 'com.vanniktech.maven.publish'")
+    }
+
     extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
         publishToMavenCentral(automaticRelease = mavenCentralConfig.automaticRelease.get())
         if (mavenCentralConfig.signPublications.get()) {

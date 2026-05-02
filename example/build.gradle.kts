@@ -2,7 +2,8 @@ import java.time.Year
 
 plugins {
     alias(libs.plugins.kreate)
-    kotlin("jvm") version "2.3.21"
+    id("dev.detekt") version "2.0.0-alpha.3"
+    kotlin("multiplatform") version "2.3.21"
 }
 
 group = "com.example"
@@ -167,7 +168,7 @@ kreate {
 
             repositories {
                 gitlab {
-                    enabled = false
+                    enabled = true
                     name = "ExampleInstance"
                     tokenEnv = "CI_JOB_TOKEN"
                     projectIdEnv = "CI_PROJECT_ID"
@@ -175,11 +176,15 @@ kreate {
                 }
 
                 mavenCentral {
-                    enabled = false
+                    enabled = true
                     automaticRelease = true
                     signPublications = true
                 }
             }
         }
     }
+}
+
+kotlin {
+    jvm()
 }

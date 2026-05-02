@@ -19,6 +19,7 @@ package com.davils.kreate.module.project.detekt
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.plugin.DetektPlugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
@@ -39,7 +40,10 @@ internal fun Project.initializeDetekt(extension: KreateExtension) {
          return
     }
 
-    applyDetektPlugin()
+    if (!plugins.hasPlugin(DetektPlugin::class.java)) {
+        error("Detekt Plugin not applied. Do it yourself: 'dev.detekt'")
+    }
+
     configureDetektExtension(detektExtension)
     configureDetektTasks(detektExtension)
 }

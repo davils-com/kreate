@@ -1,9 +1,12 @@
 # Maven Central
 
 Kreate uses the [Gradle Maven Publish Plugin by Vanniktech](https://vanniktech.github.io/gradle-maven-publish-plugin/central/)
-to publish to Maven Central. When enabled, Kreate applies `MavenPublishBasePlugin` automatically
-and configures coordinates, signing, and POM metadata from your `kreate { }` block — no manual
+to publish to Maven Central. When enabled, Kreate configures coordinates, signing, and POM metadata from your `kreate { }` block — no manual
 `mavenPublishing { }` block is required.
+
+> You must manually apply the `com.vanniktech.maven.publish` plugin to your project for this to work.
+>
+{style="warning"}
 
 ## Prerequisites
 
