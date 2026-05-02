@@ -23,7 +23,6 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.authentication.http.HttpHeaderAuthentication
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.credentials
 import org.gradle.kotlin.dsl.withType
 import java.net.URI
