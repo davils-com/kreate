@@ -98,12 +98,12 @@ public abstract class AddRustDependencies @Inject constructor(
 
         for ((name, version) in deps) {
             if (isDependencyPresent(cargoContent, name)) continue
-            addDependency(cargoCmd, name, version, build = false)
+            addDependency(cargoCmd = cargoCmd, name = name, version = version, build = false)
         }
 
         for ((name, version) in buildDeps) {
             if (isDependencyPresent(cargoContent, name)) continue
-            addDependency(cargoCmd, name, version, build = true)
+            addDependency(cargoCmd = cargoCmd, name = name, version = version, build = true)
         }
     }
 

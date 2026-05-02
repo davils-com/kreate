@@ -52,8 +52,10 @@ internal object PlatformModule : Module {
         }
     }
 
-    private fun Project.configureCommon(extension: KreateExtension) = afterEvaluate {
-        configureJava(extension)
+    private fun Project.configureCommon(extension: KreateExtension) {
+        afterEvaluate {
+            configureJava(extension)
+        }
     }
 
     private fun Project.configureJvm(extension: KreateExtension): Unit = afterEvaluate {

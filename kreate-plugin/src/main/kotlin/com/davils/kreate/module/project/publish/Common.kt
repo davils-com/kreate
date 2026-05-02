@@ -68,9 +68,10 @@ private fun MavenPom.configureCiManagement(pomConfig: PomExtension) {
 private fun MavenPom.configureLicenses(pomConfig: PomExtension) {
     licenses {
         license {
-            pomConfig.licenses.license.name.orNull?.let { value -> name.set(value) }
-            pomConfig.licenses.license.url.orNull?.let { value -> url.set(value) }
-            pomConfig.licenses.license.distribution.orNull?.let { value -> distribution.set(value) }
+            val license = pomConfig.licenses.license
+            license.name.orNull?.let { value -> name.set(value) }
+            license.url.orNull?.let { value -> url.set(value) }
+            license.distribution.orNull?.let { value -> distribution.set(value) }
         }
     }
 }
@@ -78,11 +79,12 @@ private fun MavenPom.configureLicenses(pomConfig: PomExtension) {
 private fun MavenPom.configureDevelopers(pomConfig: PomExtension) {
     developers {
         developer {
-            pomConfig.developers.developer.id.orNull?.let { value -> id.set(value) }
-            pomConfig.developers.developer.name.orNull?.let { value -> name.set(value) }
-            pomConfig.developers.developer.email.orNull?.let { value -> email.set(value) }
-            pomConfig.developers.developer.organization.orNull?.let { value -> organization.set(value) }
-            pomConfig.developers.developer.timezone.orNull?.let { value -> timezone.set(value) }
+            val developer = pomConfig.developers.developer
+            developer.id.orNull?.let { value -> id.set(value) }
+            developer.name.orNull?.let { value -> name.set(value) }
+            developer.email.orNull?.let { value -> email.set(value) }
+            developer.organization.orNull?.let { value -> organization.set(value) }
+            developer.timezone.orNull?.let { value -> timezone.set(value) }
         }
     }
 }

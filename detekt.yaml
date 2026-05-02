@@ -3,6 +3,8 @@ style:
     active: false
   AbstractClassCanBeConcreteClass:
     active: false
+  OptionalUnit:
+    active: false
 
 complexity:
   LabeledExpression:

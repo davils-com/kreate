@@ -70,7 +70,7 @@ internal fun Project.configureGitlab(
                 }
 
                 authentication {
-                    create<HttpHeaderAuthentication>("token")
+                    create("token", HttpHeaderAuthentication::class.java)
                 }
             }
         }

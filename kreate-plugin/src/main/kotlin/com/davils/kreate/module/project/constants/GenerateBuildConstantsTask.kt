@@ -102,7 +102,7 @@ public abstract class GenerateBuildConstantsTask : Task(
         val isExplicitApi = explicitApi.get()
         val objectSpec = buildObjectSpec(props, isExplicitApi)
 
-        return FileSpec.builder(packageName.get(), className.get())
+        return FileSpec.builder(packageName = packageName.get(), fileName = className.get())
             .addFileComment(buildFileHeader())
             .addType(objectSpec)
             .build()
@@ -145,7 +145,7 @@ public abstract class GenerateBuildConstantsTask : Task(
             outputFile.parentFile.mkdirs()
             val raw = fileSpec.toString()
             val content = raw.replaceFirst(
-                "package ${fileSpec.packageName}", "\npackage ${fileSpec.packageName}"
+                oldValue = "package ${fileSpec.packageName}", newValue = "\npackage ${fileSpec.packageName}"
             )
             outputFile.writeText(content)
             logger.lifecycle("Wrote build constants file to ${outputFile.absolutePath}.")
@@ -169,10 +169,11 @@ internal fun Project.registerBuildConstantsTask(extension: KreateExtension) {
     val className = buildConstants.className.get()
     val resolvedPackageName = resolvePackageName(extension)
 
-    val packagePath = resolvedPackageName.replace('.', '/')
+    val packagePath = resolvedPackageName.replace(oldChar = '.', newChar = '/')
     val outputFile = layout.buildDirectory.file("$constantsPath/$packagePath/$className.kt")
 
-    addBuildConstantsToSourceSets(layout.buildDirectory.dir(constantsPath).get().asFile.absolutePath)
+    val constantsDir = layout.buildDirectory.dir(constantsPath).get().asFile
+    addBuildConstantsToSourceSets(constantsDir.absolutePath)
 
     val task = tasks.register("kreate-build-constants", GenerateBuildConstantsTask::class.java) {
         properties.set(buildConstants.getConstants())
@@ -193,5 +194,5 @@ private fun Project.resolvePackageName(extension: KreateExtension): String {
     }
 
     val resolvedName = if (extension.project.name.isPresent) extension.project.name.get() else project.name
-    return "${group}.${resolvedName}.build".lowercase().replace(" ", "")
+    return "${group}.${resolvedName}.build".lowercase().replace(oldValue = " ", newValue = "")
 }

@@ -61,6 +61,6 @@ public fun KotlinMultiplatformExtension.currentOs(configure: KotlinNativeTarget.
             }
         }
 
-        else -> {}
+        OsTarget.UNKNOWN -> {}
     }
 }

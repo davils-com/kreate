@@ -51,8 +51,11 @@ internal object ProjectModule : Module {
         addRepositories()
 
         afterEvaluate {
-            configureVersion(extension.project.version.environment.get(), extension.project.version.property.get())
-            initializeProject(extension.project)
+            configureVersion(
+                env = extension.project.version.environment.get(),
+                prop = extension.project.version.property.get()
+            )
+            initializeProject(projectExtension = extension.project)
             initializeBuildConstants(extension)
             initializeDocs(extension)
             initializeTesting(extension)

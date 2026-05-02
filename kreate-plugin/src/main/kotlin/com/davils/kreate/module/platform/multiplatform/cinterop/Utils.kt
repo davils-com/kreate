@@ -83,7 +83,7 @@ internal fun resolveRustTargets(rustTargets: ListProperty<String>): List<String>
             listOf("aarch64-unknown-linux-gnu")
         }
         OsTarget.MACOS -> listOf("aarch64-apple-darwin")
-        else -> throw GradleException("Unsupported OS: $os")
+        OsTarget.UNKNOWN -> throw GradleException("Unsupported OS: $os")
     }
 }
 

@@ -17,8 +17,6 @@
 package com.davils.kreate.module.project.detekt.extension
 
 import org.gradle.api.Action
-import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
@@ -29,7 +27,7 @@ import javax.inject.Inject
  *
  * @since 1.2.0
  */
-public abstract class DetektReportExtension @Inject constructor(factory: ObjectFactory, project: Project) {
+public abstract class DetektReportExtension @Inject constructor() {
 
     /**
      * Configuration for the Checkstyle report.
