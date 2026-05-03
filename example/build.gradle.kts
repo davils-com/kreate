@@ -3,7 +3,7 @@ import java.time.Year
 plugins {
     alias(libs.plugins.kreate)
     id("dev.detekt") version "2.0.0-alpha.3"
-    kotlin("multiplatform") version "2.3.21"
+    kotlin("jvm") version "2.3.21"
 }
 
 group = "com.example"
@@ -125,6 +125,10 @@ kreate {
             }
         }
 
+        trivy {
+            enabled = true
+        }
+
         publish {
             enabled = false
             inceptionYear = 2026
@@ -185,6 +189,6 @@ kreate {
     }
 }
 
-kotlin {
-    jvm()
+dependencyLocking {
+    lockAllConfigurations()
 }
