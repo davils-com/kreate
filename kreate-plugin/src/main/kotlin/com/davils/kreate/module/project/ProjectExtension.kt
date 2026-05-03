@@ -21,6 +21,7 @@ import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import com.davils.kreate.module.project.docs.DocsExtension
 import com.davils.kreate.module.project.publish.extension.PublishExtension
 import com.davils.kreate.module.project.tests.TestsExtension
+import com.davils.kreate.module.project.trivy.TrivyExtension
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -100,6 +101,9 @@ public abstract class ProjectExtension @Inject constructor(
     @get:Nested
     public abstract val detekt: DetektExtension
 
+    @get:Nested
+    public abstract val trivy: TrivyExtension
+
     /**
      * Configures the [ProjectExtensionVersion] using the provided action.
      *
@@ -158,6 +162,10 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun detekt(action: Action<DetektExtension>) {
         action.execute(detekt)
+    }
+
+    public fun trivy(action: Action<TrivyExtension>) {
+        action.execute(trivy)
     }
 }
 
