@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy
+package com.davils.kreate.module.project.trivy.extension
 
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory) {
-    public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFactory) {
+
 }
