@@ -1,3 +1,5 @@
+import com.davils.kreate.module.project.trivy.Severity
+import com.davils.kreate.module.project.trivy.Score
 import java.time.Year
 
 plugins {
@@ -127,6 +129,22 @@ kreate {
 
         trivy {
             enabled = true
+
+            vulnerability {
+                score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
+                failOnFindings = true
+            }
+
+            license {
+                severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN)
+                failOnFindings = true
+                fullLicenseScan = true
+                ignoredLicenses = listOf("MIT")
+            }
+
+            secrets {
+                
+            }
         }
 
         publish {
@@ -187,8 +205,4 @@ kreate {
             }
         }
     }
-}
-
-dependencyLocking {
-    lockAllConfigurations()
 }
