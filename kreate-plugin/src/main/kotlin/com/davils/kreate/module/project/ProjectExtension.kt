@@ -21,7 +21,7 @@ import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import com.davils.kreate.module.project.docs.DocsExtension
 import com.davils.kreate.module.project.publish.extension.PublishExtension
 import com.davils.kreate.module.project.tests.TestsExtension
-import com.davils.kreate.module.project.trivy.TrivyExtension
+import com.davils.kreate.module.project.trivy.extension.TrivyExtension
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
