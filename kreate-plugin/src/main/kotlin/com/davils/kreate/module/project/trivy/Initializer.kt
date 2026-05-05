@@ -43,7 +43,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     }
 
     val trivySecretExtension = trivyExtension.secrets
-    tasks.register<TrivySecretScan>("trivyDetektSecrets") {
+    tasks.register<TrivySecretScan>("trivySecretScan") {
         failOnFindings.set(trivySecretExtension.failOnFindings)
         secretConfig.set(trivySecretExtension.secretConfig)
         severity.set(trivySecretExtension.severity.map { it.map { s -> s.name } })
