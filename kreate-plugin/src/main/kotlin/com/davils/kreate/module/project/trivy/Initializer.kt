@@ -23,7 +23,6 @@ import com.davils.kreate.module.project.trivy.tasks.TrivySecretScan
 import com.davils.kreate.module.project.trivy.tasks.TrivyScan
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.named
 
 /**
  * Initializes the Trivy module for the project.
