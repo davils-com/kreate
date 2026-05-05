@@ -144,7 +144,6 @@ kreate {
             license {
                 severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
                 failOnForbidden = true
-                fullLicenseScan = true
                 ignoredLicenses = listOf("MIT")
                 lockFiles.from(
                     fileTree(projectDir) {

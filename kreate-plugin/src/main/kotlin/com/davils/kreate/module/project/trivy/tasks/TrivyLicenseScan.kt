@@ -72,17 +72,6 @@ public abstract class TrivyLicenseScan @Inject constructor(
     public abstract val ignoredLicenses: ListProperty<String>
 
     /**
-     * Whether to enable a full license scan.
-     *
-     * When enabled, Trivy performs an extended license search, including
-     * source files, markdown, text, and LICENSE files in the scan path.
-     *
-     * @since 1.2.0
-     */
-    @get:Input
-    public abstract val fullLicenseScan: Property<Boolean>
-
-    /**
      * The collection of lock files to be scanned for license issues.
      *
      * @since 1.2.0
@@ -118,10 +107,6 @@ public abstract class TrivyLicenseScan @Inject constructor(
                     "--severity", severity.get().joinToString(","),
                     "--format", "table",
                 )
-
-                if (fullLicenseScan.get()) {
-                    args.add("--license-full")
-                }
 
                 if (ignoredLicenses.get().isNotEmpty()) {
                     args.add("--ignored-licenses")

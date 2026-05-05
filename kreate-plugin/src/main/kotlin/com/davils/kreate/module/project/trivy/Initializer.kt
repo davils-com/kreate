@@ -56,10 +56,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         failOnForbidden.set(trivyLicenseExtension.failOnForbidden)
         severity.set(trivyLicenseExtension.severity.map { it.map { s -> s.name } })
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
-        fullLicenseScan.set(trivyLicenseExtension.fullLicenseScan)
-        lockFiles.setFrom(trivyLicenseExtension.fullLicenseScan.map { full ->
-            if (full) project.layout.projectDirectory else trivyLicenseExtension.lockFiles
-        })
+        lockFiles.setFrom(trivyLicenseExtension.lockFiles)
     }
 
     val trivyVulnerabilityExtension = trivyExtension.vulnerability

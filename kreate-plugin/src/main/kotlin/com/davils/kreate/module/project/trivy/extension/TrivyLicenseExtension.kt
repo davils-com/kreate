@@ -52,15 +52,6 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     ).convention(true)
 
     /**
-     * Whether to enable a full license scan.
-     *
-     * @since 1.2.0
-     */
-    public val fullLicenseScan: Property<Boolean> = factory.property(
-        Boolean::class.java
-    ).convention(false)
-
-    /**
      * Licenses to be ignored during the scan.
      *
      * @since 1.2.0
