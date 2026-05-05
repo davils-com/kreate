@@ -137,9 +137,14 @@ kreate {
 
             license {
                 severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN)
-                failOnFindings = true
+                failOnForbidden = true
                 fullLicenseScan = true
                 ignoredLicenses = listOf("MIT")
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
             }
 
             secrets {

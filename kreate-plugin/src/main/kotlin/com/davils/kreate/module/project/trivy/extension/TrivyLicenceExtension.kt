@@ -17,17 +17,19 @@
 package com.davils.kreate.module.project.trivy.extension
 
 import com.davils.kreate.module.project.trivy.Severity
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectFactory) {
+public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectFactory, project: Project) {
     public val severity: ListProperty<Severity> = factory.listProperty(
         Severity::class.java
     ).convention(listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN))
 
-    public val failOnFindings: Property<Boolean> = factory.property(
+    public val failOnForbidden: Property<Boolean> = factory.property(
         Boolean::class.java
     ).convention(true)
 
@@ -38,4 +40,10 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     public val ignoredLicenses: ListProperty<String> = factory.listProperty(
         String::class.java
     ).convention(emptyList())
+
+    public val lockFiles: ConfigurableFileCollection = factory.fileCollection().from(
+        project.fileTree(project.projectDir) {
+            include("*.lockfile")
+        }
+    )
 }
