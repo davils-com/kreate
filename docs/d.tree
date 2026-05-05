@@ -44,6 +44,13 @@
             <toc-element topic="Detekt-Configuration.md"/>
             <toc-element topic="Detekt-Reports.md"/>
         </toc-element>
+        <toc-element toc-title="Security &amp; Compliance (Trivy)">
+            <toc-element topic="Trivy-Overview.md"/>
+            <toc-element topic="Trivy-License-Scan.md"/>
+            <toc-element topic="Trivy-Vulnerability-Scan.md"/>
+            <toc-element topic="Trivy-Secret-Scan.md"/>
+            <toc-element topic="Trivy-Configuration-Reference.md"/>
+        </toc-element>
         <toc-element toc-title="Documentation">
             <toc-element topic="Documentation-Overview.md"/>
             <toc-element topic="Documentation-Configuration.md"/>

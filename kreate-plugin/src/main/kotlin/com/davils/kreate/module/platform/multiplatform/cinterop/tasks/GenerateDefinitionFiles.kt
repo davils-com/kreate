@@ -26,7 +26,10 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.io.IOException
 
@@ -39,6 +42,7 @@ import java.io.IOException
  *
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Definition files generation is fast and depends on external paths")
 public abstract class GenerateDefinitionFiles : Task(
     "Generates cinterop definition files for native targets",
     "kreate c-interoperation"
@@ -48,6 +52,7 @@ public abstract class GenerateDefinitionFiles : Task(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     /**
@@ -55,6 +60,7 @@ public abstract class GenerateDefinitionFiles : Task(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val rootDir: DirectoryProperty
 
     /**

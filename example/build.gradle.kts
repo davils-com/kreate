@@ -1,9 +1,12 @@
+import com.davils.kreate.module.project.trivy.LicenseSeverity
+import com.davils.kreate.module.project.trivy.SecretSeverity
+import com.davils.kreate.module.project.trivy.Score
 import java.time.Year
 
 plugins {
     alias(libs.plugins.kreate)
     id("dev.detekt") version "2.0.0-alpha.3"
-    kotlin("multiplatform") version "2.3.21"
+    kotlin("jvm") version "2.3.21"
 }
 
 group = "com.example"
@@ -125,6 +128,42 @@ kreate {
             }
         }
 
+        trivy {
+            enabled = true
+
+            vulnerability {
+                score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
+                failOnFindings = true
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
+            }
+
+            license {
+                severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
+                failOnForbidden = true
+                ignoredLicenses = listOf("MIT")
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
+            }
+
+            secrets {
+                severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
+                failOnFindings = true
+                secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+                sourceFiles.from(
+                    fileTree(projectDir) {
+                        include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+                    }
+                )
+            }
+        }
+
         publish {
             enabled = false
             inceptionYear = 2026
@@ -183,8 +222,4 @@ kreate {
             }
         }
     }
-}
-
-kotlin {
-    jvm()
 }

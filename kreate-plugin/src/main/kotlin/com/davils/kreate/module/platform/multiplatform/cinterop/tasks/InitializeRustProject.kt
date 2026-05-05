@@ -24,7 +24,10 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
@@ -38,6 +41,7 @@ import javax.inject.Inject
  * @param exec The executive operations used to run external commands.
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Initialization task is only intended to run once and has conditional side effects")
 public abstract class InitializeRustProject @Inject constructor(
     /**
      * The executive operations instance.
@@ -50,6 +54,7 @@ public abstract class InitializeRustProject @Inject constructor(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     /**

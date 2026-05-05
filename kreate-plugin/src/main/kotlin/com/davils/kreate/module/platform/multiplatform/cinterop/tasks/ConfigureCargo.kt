@@ -20,7 +20,10 @@ import com.davils.kreate.jobs.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 /**
@@ -32,6 +35,7 @@ import java.io.File
  *
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Cargo configuration has side effects on Cargo.toml")
 public abstract class ConfigureCargo : Task(
     "Configure Cargo Toml file for static library output.",
     "kreate c-interoperation"
@@ -41,6 +45,7 @@ public abstract class ConfigureCargo : Task(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     private val extendedCargoContent: String

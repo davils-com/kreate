@@ -27,6 +27,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
@@ -41,6 +42,7 @@ import javax.inject.Inject
  * @param exec The executive operations used to run external commands.
  * @since 1.1.0
  */
+@DisableCachingByDefault(because = "CMake build depends on external environment and tools")
 public abstract class BuildNative @Inject constructor(
     /**
      * The executive operations instance.

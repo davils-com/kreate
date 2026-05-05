@@ -30,6 +30,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -43,6 +44,7 @@ import java.time.format.DateTimeFormatter
  *
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Generated constants include a timestamp and depend on project properties")
 public abstract class GenerateBuildConstantsTask : Task(
     "Generates build constants as a Kotlin file.",
     "kreate build-constants"

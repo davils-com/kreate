@@ -25,7 +25,7 @@ Scaffolds the native C++ project if it does not exist. See
 | Task type | `InitializeCppProject`                           |
 | Input     | `projectDirectory` (root JNI dir), `projectName` |
 | Output    | `<projectDirectory>/<projectName>/`              |
-| Runs      | Before `kreate-jni-build`                         |
+| Runs      | Before `kreate-jni-build`                        |
 
 ## `kreate-jni-build`
 
