@@ -17,7 +17,7 @@
 package com.davils.kreate.module.project.trivy
 
 import com.davils.kreate.KreateExtension
-import com.davils.kreate.module.project.trivy.tasks.TrivyCVEScan
+import com.davils.kreate.module.project.trivy.tasks.TrivyVulnerabilityScan
 import com.davils.kreate.module.project.trivy.tasks.TrivyLicenseScan
 import com.davils.kreate.module.project.trivy.tasks.TrivySecretScan
 import org.gradle.api.Project
@@ -53,23 +53,21 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         )
     }
 
+    val trivyLicenseExtension = trivyExtension.license
     tasks.register<TrivyLicenseScan>("trivyLicenseScan") {
-        targetDir.set(layout.projectDirectory)
-        failOnForbidden.set(false)
-        lockFiles.from(
-            fileTree(projectDir) {
-                include("*.lockfile")
-            }
-        )
+        failOnForbidden.set(trivyLicenseExtension.failOnForbidden)
+        severity.set(trivyLicenseExtension.severity.map { it.map { s -> s.name } })
+        ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
+        fullLicenseScan.set(trivyLicenseExtension.fullLicenseScan)
+        lockFiles.setFrom(trivyLicenseExtension.fullLicenseScan.map { full ->
+            if (full) project.layout.projectDirectory else trivyLicenseExtension.lockFiles
+        })
     }
 
-    project.tasks.register<TrivyCVEScan>("trivyCveScan") {
-        severity.set("HIGH,CRITICAL")
-        failOnFindings.set(true)
-        lockFiles.from(
-            project.fileTree(project.projectDir) {
-                include("*.lockfile")
-            }
-        )
+    val trivyVulnerabilityExtension = trivyExtension.vulnerability
+    tasks.register<TrivyVulnerabilityScan>("trivyVulnerabilityScan") {
+        severity.set(trivyVulnerabilityExtension.score.map { it.map { s -> s.name } })
+        failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
+        lockFiles.from(trivyVulnerabilityExtension.lockFiles)
     }
 }
