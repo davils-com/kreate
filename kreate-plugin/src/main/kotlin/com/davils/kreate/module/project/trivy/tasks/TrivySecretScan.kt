@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project.trivy.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.module.project.trivy.resolveTrivyCommand
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -96,7 +97,7 @@ public abstract class TrivySecretScan @Inject constructor(
             val result = exec.exec {
                 isIgnoreExitValue = true
                 commandLine(
-                    "trivy", "fs",
+                    resolveTrivyCommand(), "fs",
                     "--scanners", "secret",
                     "--secret-config", secretConfig.get().asFile.absolutePath,
                     "--severity", severity.get().joinToString(","),

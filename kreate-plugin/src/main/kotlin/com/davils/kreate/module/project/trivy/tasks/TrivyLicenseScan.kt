@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project.trivy.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.module.project.trivy.resolveTrivyCommand
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
@@ -104,8 +105,9 @@ public abstract class TrivyLicenseScan @Inject constructor(
         lockFiles.forEach { file ->
             val result = exec.exec {
                 isIgnoreExitValue = true
+                val trivyCmd = resolveTrivyCommand()
                 val args = mutableListOf(
-                    "trivy", "fs",
+                    trivyCmd, "fs",
                     "--scanners", "license",
                     "--exit-code", if (failOnForbidden.get()) "1" else "0",
                     "--severity", severity.get().joinToString(","),
