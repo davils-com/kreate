@@ -9,6 +9,7 @@ The `trivy` block is located at `kreate { project { trivy { ... } } }`.
 | Property        | Type                | Default | Description                                           |
 |:----------------|:--------------------|:--------|:------------------------------------------------------|
 | `enabled`       | `Property<Boolean>` | `false` | Enables or disables the Trivy module for the project. |
+| `disableDependencyLocking` | `Property<Boolean>` | `false` | Disables automatic dependency locking for all configurations. |
 | `license`       | `Nested`            | -       | Configuration for license scanning.                   |
 | `vulnerability` | `Nested`            | -       | Configuration for vulnerability scanning.             |
 | `secrets`       | `Nested`            | -       | Configuration for secret scanning.                    |

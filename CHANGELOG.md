@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.1
+
+### Added
+- **Trivy Configuration**: Added `disableDependencyLocking` property to `TrivyExtension` to allow manual management of Gradle lockfiles.
+
+### Fixed
+- **Trivy Initialization**: Fixed a `ConcurrentModificationException` and resolution strategy errors by ensuring dependency locking is only activated for unresolved configurations.
+
 ## 1.2.0
 
 ### Added
@@ -110,6 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.2.1]: https://github.com/davils/kreate/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/davils/kreate/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/davils/kreate/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/davils/kreate/compare/v1.0.1...v1.1.0

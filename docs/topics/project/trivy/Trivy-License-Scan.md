@@ -50,7 +50,7 @@ Trivy's license classification is a technical aid and does not replace legal adv
 
 ## Tips & Best Practices
 
-*   **Lockfile Management**: Ensure you are using Gradle lockfiles (`dependencyLocking { lockAllConfigurations() }`) for the most accurate and fastest results.
+*   **Lockfile Management**: Kreate automatically enables dependency locking for all configurations to ensure the most accurate results. If you need to manage this manually, set `disableDependencyLocking.set(true)`.
 *   **Handling "Unknown"**: Licenses are often marked as `UNKNOWN` if metadata in Maven Central is incomplete. Verify these manually and add them to `ignoredLicenses` if they are acceptable.
 *   **Gradual Adoption**: For existing projects, start with `failOnForbidden.set(false)` to identify issues without breaking the build, then fix or ignore them before enforcing compliance.
 
