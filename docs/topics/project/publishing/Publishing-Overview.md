@@ -6,7 +6,29 @@ Gradle build. Kreate supports two publish targets out of the box:
 - **Maven Central** via the [Gradle Maven Publish Plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/central/) by Vanniktech
 - **GitLab Package Registry** via the standard Gradle `maven-publish` plugin with CI job token authentication
 
-Publishing is **disabled by default**. Enable it with:
+Publishing is **disabled by default**. To use it, you must manually apply the required plugins and then enable it in Kreate.
+
+### Required Plugins
+
+For GitLab publishing, apply the standard `maven-publish` plugin:
+
+```kotlin
+plugins {
+    `maven-publish`
+}
+```
+
+For Maven Central publishing, apply the [Vanniktech Maven Publish Plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/):
+
+```kotlin
+plugins {
+    id("com.vanniktech.maven.publish") version "0.30.0" // Use the latest version
+}
+```
+
+### Kreate Configuration
+
+Enable the publishing module:
 
 ```kotlin
 kreate {
@@ -33,14 +55,14 @@ completely independent and can be active simultaneously.
 publish { enabled = true }
 │
 ├── repositories.mavenCentral { enabled = true }
-│ └── applies MavenPublishBasePlugin
+│ └── requires com.vanniktech.maven.publish plugin
 │ └── calls publishToMavenCentral(automaticRelease)
 │ └── calls signAllPublications() if signPublications = true
 │ └── sets coordinates(group, name, version)
 │ └── configures pom { ... }
 │
 └── repositories.gitlab { enabled = true }
-└── applies maven-publish plugin
+└── requires maven-publish plugin
 └── reads CI_JOB_TOKEN, CI_PROJECT_ID, CI_API_V4_URL from env
 └── registers Maven repository with HttpHeaderAuthentication
 └── configures pom { ... } on all MavenPublication tasks

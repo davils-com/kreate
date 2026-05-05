@@ -1,8 +1,11 @@
 # GitLab Package Registry
 
 Kreate supports publishing to the [GitLab Package Registry](https://docs.gitlab.com/ee/user/packages/maven_repository/)
-using CI job token authentication. The standard Gradle `maven-publish` plugin is applied
-automatically — no manual `plugins { }` block is required.
+using CI job token authentication.
+
+> You must manually apply the `maven-publish` plugin to your project for this to work.
+>
+{style="warning"}
 
 ## How Authentication Works
 

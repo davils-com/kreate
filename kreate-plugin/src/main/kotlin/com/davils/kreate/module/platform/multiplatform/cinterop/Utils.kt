@@ -77,12 +77,13 @@ internal fun resolveRustTargets(rustTargets: ListProperty<String>): List<String>
 
     return when (os) {
         OsTarget.WINDOWS -> listOf("x86_64-pc-windows-gnu")
-        OsTarget.LINUX -> when (arch) {
-            Architecture.X64 -> listOf("x86_64-unknown-linux-gnu")
-            else -> listOf("aarch64-unknown-linux-gnu")
+        OsTarget.LINUX -> if (arch == Architecture.X64) {
+            listOf("x86_64-unknown-linux-gnu")
+        } else {
+            listOf("aarch64-unknown-linux-gnu")
         }
         OsTarget.MACOS -> listOf("aarch64-apple-darwin")
-        else -> throw GradleException("Unsupported OS: $os")
+        OsTarget.UNKNOWN -> throw GradleException("Unsupported OS: $os")
     }
 }
 
@@ -94,8 +95,9 @@ internal fun resolveRustTargets(rustTargets: ListProperty<String>): List<String>
  */
 internal fun resolveCargoCommand(): String {
     val os by getOs()
-    return when (os) {
-        OsTarget.MACOS -> "${System.getProperty("user.home")}/.cargo/bin/cargo"
-        else -> "cargo"
+    return if (os == OsTarget.MACOS) {
+        "${System.getProperty("user.home")}/.cargo/bin/cargo"
+    } else {
+        "cargo"
     }
 }

@@ -16,6 +16,7 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+*.lockfile
 
 ### Eclipse ###
 .apt_generated

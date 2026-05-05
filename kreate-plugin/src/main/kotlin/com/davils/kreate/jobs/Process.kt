@@ -18,6 +18,7 @@ package com.davils.kreate.jobs
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Exec
+import org.gradle.work.DisableCachingByDefault
 
 /**
  * Represents a process that can be executed.
@@ -46,6 +47,7 @@ internal interface Process {
  * @param group The Gradle task group this task belongs to. Defaults to "kreate".
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Base task class for Kreate tasks")
 public abstract class Task(desc: String, group: String = "kreate") : DefaultTask(), Process {
     init {
         this.group = group
@@ -64,6 +66,7 @@ public abstract class Task(desc: String, group: String = "kreate") : DefaultTask
  * @param group The Gradle task group this task belongs to. Defaults to "kreate".
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Base executable task class for Kreate tasks")
 public abstract class Executable(desc: String, group: String = "kreate") : Exec(), Process {
     init {
         this.group = group

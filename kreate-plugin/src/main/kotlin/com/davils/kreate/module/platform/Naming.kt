@@ -42,5 +42,5 @@ internal fun Project.resolveFeatureProjectName(
         extension.project.name.isPresent -> extension.project.name.get()
         else -> project.name
     }
-    return name.lowercase().replace("-", "_")
+    return name.lowercase().replace(oldValue = "-", newValue = "_")
 }

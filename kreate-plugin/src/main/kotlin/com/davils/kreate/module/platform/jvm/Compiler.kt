@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
  * Initializes the Kotlin JVM compiler options.
  *
  * This function configures the explicit API mode, JVM toolchain version,
- * and warning handling based on the [PlatformExtension].
+ * and warning handling based on the `PlatformExtension`.
  *
  * @param extension The Kreate configuration extension.
  * @since 1.0.0

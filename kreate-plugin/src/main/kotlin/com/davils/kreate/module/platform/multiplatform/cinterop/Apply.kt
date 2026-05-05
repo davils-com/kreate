@@ -40,7 +40,9 @@ internal fun KotlinNativeTarget.configureCInterop(project: Project) {
     val projectRootDir = project.resolveRootDir(cInteropConfig)
     val rustProject = projectRootDir.resolve(projectName)
 
-    val defFile = rustProject.resolve(cInteropConfig.defFiles.dirName.get()).resolve(cInteropConfig.defFiles.fileName.get())
+    val defFile = rustProject.resolve(
+        cInteropConfig.defFiles.dirName.get()
+    ).resolve(cInteropConfig.defFiles.fileName.get())
 
     val packageName = when (cInteropConfig.packageNameOverride.isPresent) {
         true -> cInteropConfig.packageNameOverride.get()

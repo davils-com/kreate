@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.0
+
+### Added
+- **Trivy Security Integration**: Integrated [Trivy](https://trivy.dev/) for automated security and compliance scanning.
+  - **Vulnerability Scanning**: Automatically scan project dependencies (via lockfiles) for known CVEs.
+  - **License Compliance**: Verify dependency licenses against forbidden or restricted lists to ensure legal compliance.
+  - **Secret Detection**: Scan source files, configuration files, and environment files for hardcoded secrets and credentials.
+- **Detekt Integration**: Integrated [Detekt](https://detekt.dev/) for automated static code analysis to enforce clean code architecture and design patterns.
+- **Unified Security & Quality DSL**: New `trivy { }` and `detekt { }` configuration blocks to easily manage security and code quality settings.
+- **Optimized Execution**: Trivy scans are optimized to run in a single aggregate process per project, significantly reducing build times compared to file-by-file scanning.
+- **Lifecycle Aggregation**: Added a global `trivyScan` task that serves as a single entry point for all enabled security checks.
+
+### Changed
+- **Plugin Application (Breaking Change)**: To resolve lifecycle ordering issues, especially in Kotlin Multiplatform projects, `kreate` no longer automatically applies `maven-publish`, `detekt`, or the Vanniktech Maven Publish plugin. These must now be applied manually in the `plugins { }` block.
+- **KDoc Standards**: All new components follow strict professional KDoc guidelines, including mandatory `@param`, `@return`, and `@since` tags.
+- **Task Logging**: Improved console output for security findings with better formatting and clear error messages.
+
+### Fixed
+- **Publishing Lifecycle**: Fixed a critical bug where Maven and GitLab publication settings were not correctly initialized in Kotlin Multiplatform projects because the required plugins were applied too late by the framework.
+
 ## 1.1.1
 
 ### Changed
@@ -48,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-#### 🏗️ Core Architecture & Platform Support
+#### Core Architecture & Platform Support
 - **Intelligent Platform Detection**: Automatic identification and configuration of `org.jetbrains.kotlin.jvm`, `org.jetbrains.kotlin.multiplatform`, and Android projects.
 - **Unified Platform DSL**: Simplified configuration for target Java versions (supporting Java 21+ toolchains).
 - **Strict Quality Defaults**:
@@ -56,14 +76,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `allWarningsAsErrors` enabled by default for cleaner codebases.
 - **Native Multiplatform Support**: Pre-configured targets for Linux (x64), macOS (x64, arm64), and Windows (x64).
 
-#### 🦀 Rust C-Interop (KMP)
+#### Rust C-Interop (KMP)
 - **Automated Rust Integration**: Seamlessly bridge Rust libraries with Kotlin Multiplatform using `cinterop`.
 - **Cargo Toolchain Support**: Automated execution of `cargo build` with cross-compilation support.
 - **Project Scaffolding**: Built-in task to initialize new Rust library projects within the Kotlin workspace.
 - **Header & Definition Management**: Simplified DSL for `.def` files and C-header synchronization.
 - **Multi-Arch Compilation**: Support for major architectures including `x86_64-unknown-linux-gnu` and `aarch64-apple-darwin`.
 
-#### 🧪 Testing Pipeline
+#### Testing Pipeline
 - **Kotest Integration**: Deep integration with Kotest for advanced testing capabilities.
 - **Execution Engine**:
   - Configurable parallel test execution (max forks based on CPU availability).
@@ -71,18 +91,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced Test Logging**: Clear, colorized output for test states (Started, Passed, Skipped, Failed).
 - **Reporting**: Automated generation of comprehensive XML and HTML test reports for CI/CD pipelines.
 
-#### 📦 Publishing & POM Management
+#### Publishing & POM Management
 - **Declarative POM DSL**: Easy configuration of metadata including licenses, developers, SCM, and issue management.
 - **Registry Support**:
   - **Maven Central**: Streamlined publishing with automatic release and GPG signing.
   - **GitLab Package Registry**: Native support for GitLab CI environments using environment variables (`CI_JOB_TOKEN`, etc.).
 - **Security**: Integrated GPG signing for all publications.
 
-#### 📖 Documentation & Constants
+#### Documentation & Constants
 - **Integrated Dokka Support**: Simplified generation of API documentation via Gradle.
 - **Build Constants**: Generate type-safe Kotlin constants from Gradle properties to bridge build-time information into runtime code.
 
-#### 🛠️ Project Management
+#### Project Management
 - **Centralized Versioning**: Global management of project group and version across all modules.
 - **Standardized Repositories**: Automatic configuration of Maven Central and Google repositories.
 
@@ -90,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.2.0]: https://github.com/davils/kreate/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/davils/kreate/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/davils/kreate/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/davils/kreate/compare/v1.0.0...v1.0.1

@@ -6,28 +6,28 @@ To ensure a smooth and professional collaboration, please follow these guideline
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Code of Conduct](#-code-of-conduct)
-- [How to Contribute](#-how-to-contribute)
+- [Code of Conduct](#code-of-conduct)
+- [How to Contribute](#how-to-contribute)
   - [Reporting Bugs](#reporting-bugs)
   - [Suggesting Features](#suggesting-features)
   - [Pull Requests](#pull-requests)
-- [Development Standards](#%EF%B8%8F-development-standards)
+- [Development Standards](#development-standards)
   - [Code Style](#code-style)
   - [Testing](#testing)
   - [Documentation](#documentation)
-- [Commit Messages](#-commit-messages)
+- [Commit Messages](#commit-messages)
 
 ---
 
-## 🤝 Code of Conduct
+## Code of Conduct
 
 By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it to understand the expectations for all community members.
 
 ---
 
-## 🚀 How to Contribute
+## How to Contribute
 
 ### Reporting Bugs
 
@@ -51,7 +51,7 @@ We are open to new ideas! For major changes, please open an **Issue** first to d
 
 ---
 
-## 🛠️ Development Standards
+## Development Standards
 
 ### Code Style
 
@@ -81,7 +81,7 @@ All new features and bug fixes should include unit or functional tests.
 
 ---
 
-## 📝 Commit Messages
+## Commit Messages
 
 We prefer clear and concise commit messages. Use the imperative mood (e.g., "Add feature" instead of "Added feature").
 
@@ -93,6 +93,6 @@ Example:
 
 ---
 
-## ⚖️ License
+## License
 
 By contributing, you agree that your contributions will be licensed under the project's **Apache License 2.0**.

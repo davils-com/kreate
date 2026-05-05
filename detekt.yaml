@@ -1,0 +1,19 @@
+style:
+  RedundantVisibilityModifier:
+    active: false
+  AbstractClassCanBeConcreteClass:
+    active: false
+  OptionalUnit:
+    active: false
+
+complexity:
+  LabeledExpression:
+    active: true
+    ignoredLabels:
+      - 'forEach'
+      - 'apply'
+      - 'run'
+      - 'let'
+      - 'also'
+      - 'with'
+      - 'configure'

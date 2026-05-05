@@ -1,7 +1,11 @@
+import com.davils.kreate.module.project.trivy.LicenseSeverity
+import com.davils.kreate.module.project.trivy.SecretSeverity
+import com.davils.kreate.module.project.trivy.Score
 import java.time.Year
 
 plugins {
     alias(libs.plugins.kreate)
+    id("dev.detekt") version "2.0.0-alpha.3"
     kotlin("jvm") version "2.3.21"
 }
 
@@ -45,7 +49,6 @@ kreate {
                 enabled = true
                 projectDirectory = layout.projectDirectory.dir("jni")
                 nameOverride = "example"
-
             }
         }
     }
@@ -76,7 +79,7 @@ kreate {
         }
 
         tests {
-            enabled = true
+            enabled = false
             maxParallelForks = Runtime.getRuntime().availableProcessors()
             timeoutMinutes = 10L
             ignoreFailures = false
@@ -96,8 +99,73 @@ kreate {
             }
         }
 
-        publish {
+        detekt {
             enabled = true
+            buildUponDefaultConfig = true
+            allRules = true
+            config = rootProject.file("detekt.yaml")
+
+            reports {
+                checkstyle {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/checkstyle.xml")
+                }
+
+                html {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/html.html")
+                }
+
+                markdown {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/markdown.md")
+                }
+
+                sarif {
+                    required = true
+                    outputLocation = layout.buildDirectory.file("reports/detekt/sarif.sarif")
+                }
+            }
+        }
+
+        trivy {
+            enabled = true
+
+            vulnerability {
+                score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
+                failOnFindings = true
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
+            }
+
+            license {
+                severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
+                failOnForbidden = true
+                ignoredLicenses = listOf("MIT")
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
+            }
+
+            secrets {
+                severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
+                failOnFindings = true
+                secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+                sourceFiles.from(
+                    fileTree(projectDir) {
+                        include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+                    }
+                )
+            }
+        }
+
+        publish {
+            enabled = false
             inceptionYear = 2026
             website = "https://example.com"
 
@@ -139,7 +207,7 @@ kreate {
 
             repositories {
                 gitlab {
-                    enabled = false
+                    enabled = true
                     name = "ExampleInstance"
                     tokenEnv = "CI_JOB_TOKEN"
                     projectIdEnv = "CI_PROJECT_ID"
@@ -147,7 +215,7 @@ kreate {
                 }
 
                 mavenCentral {
-                    enabled = false
+                    enabled = true
                     automaticRelease = true
                     signPublications = true
                 }
@@ -155,4 +223,3 @@ kreate {
         }
     }
 }
-
