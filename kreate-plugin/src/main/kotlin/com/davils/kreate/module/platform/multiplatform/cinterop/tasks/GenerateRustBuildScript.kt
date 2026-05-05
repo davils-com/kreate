@@ -22,7 +22,10 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 /**
@@ -33,6 +36,7 @@ import java.io.File
  *
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Build script generation is conditional and depends on external state")
 public abstract class GenerateRustBuildScript : Task(
     "Generates the build script for the Rust project.",
     "kreate c-interoperation"
@@ -42,6 +46,7 @@ public abstract class GenerateRustBuildScript : Task(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     /**

@@ -26,7 +26,10 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
@@ -40,6 +43,7 @@ import javax.inject.Inject
  * @param exec The executive operations used to run external commands.
  * @since 1.0.0
  */
+@DisableCachingByDefault(because = "Rust compilation depends on external environment and tools")
 public abstract class CompileRust @Inject constructor(
     /**
      * The executive operations instance.
@@ -52,6 +56,7 @@ public abstract class CompileRust @Inject constructor(
      * @since 1.0.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     /**

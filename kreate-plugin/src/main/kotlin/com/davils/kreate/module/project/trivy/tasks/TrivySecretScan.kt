@@ -30,6 +30,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
+import org.gradle.work.DisableCachingByDefault
 import javax.inject.Inject
 
 /**
@@ -41,6 +42,7 @@ import javax.inject.Inject
  * @param exec The [ExecOperations] used to run the Trivy command.
  * @since 1.2.0
  */
+@DisableCachingByDefault(because = "Trivy scans depend on external vulnerability databases and tools")
 public abstract class TrivySecretScan @Inject constructor(
     private val exec: ExecOperations
 ) : Task(
@@ -78,6 +80,7 @@ public abstract class TrivySecretScan @Inject constructor(
      * @since 1.2.0
      */
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val secretConfig: RegularFileProperty
 
     /**

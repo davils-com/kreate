@@ -80,3 +80,17 @@ Once a secret is published, it must be considered compromised. Rotating the secr
 <tip>
 Use the <code>exclude</code> block in the <code>fileTree</code> of <code>sourceFiles</code> to exclude generated files or test resources that contain harmless test keys from the scan.
 </tip>
+
+## How to Run
+
+To execute the secret scan individually, use the following Gradle command:
+
+<code-block lang="bash">
+./gradlew trivySecretScan
+</code-block>
+
+Alternatively, the scan is automatically included when running the lifecycle task:
+
+<code-block lang="bash">
+./gradlew check
+</code-block>

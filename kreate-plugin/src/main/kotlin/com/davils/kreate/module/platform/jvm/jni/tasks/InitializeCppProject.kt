@@ -22,7 +22,10 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 /**
@@ -35,12 +38,14 @@ import java.io.File
  *
  * @since 1.1.0
  */
+@DisableCachingByDefault(because = "Initialization task is only intended to run once and has conditional side effects")
 public abstract class InitializeCppProject : Task("Generates a new native C++ JNI project.", "kreate jni") {
     /**
      * The root working directory where the native project will be created.
      * @since 1.1.0
      */
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val workDir: DirectoryProperty
 
     /**

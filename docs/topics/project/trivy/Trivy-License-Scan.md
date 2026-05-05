@@ -68,6 +68,16 @@ Trivy's license classification is a technical aid and does not replace legal adv
 *   **Aggressive Compliance**: For highly regulated projects, use `fullLicenseScan.set(true)` to ensure that no stray license files in subdirectories or vendor folders are missed.
 *   **Gradual Adoption**: For existing projects, start with `failOnForbidden.set(false)` to identify issues without breaking the build, then fix or ignore them before enforcing compliance.
 
-<tip>
-Use <code>./gradlew trivyLicenseScan</code> to run only the license check without starting the full build cycle.
-</tip>
+## How to Run
+
+To execute the license scan individually, use the following Gradle command:
+
+<code-block lang="bash">
+./gradlew trivyLicenseScan
+</code-block>
+
+Alternatively, the scan is automatically included when running the lifecycle task:
+
+<code-block lang="bash">
+./gradlew check
+</code-block>

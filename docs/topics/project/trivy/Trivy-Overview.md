@@ -100,14 +100,47 @@ kreate {
 
 Once enabled, Kreate automatically registers the following Gradle tasks for your project:
 
-| Task Name | Description |
-| :--- | :--- |
+| Task Name                | Description                                                |
+|:-------------------------|:-----------------------------------------------------------|
 | `trivyVulnerabilityScan` | Scans lockfiles for known security vulnerabilities (CVEs). |
-| `trivyLicenseScan` | Verifies dependencies for license compliance. |
-| `trivySecretScan` | Searches source code for hardcoded secrets. |
+| `trivyLicenseScan`       | Verifies dependencies for license compliance.              |
+| `trivySecretScan`        | Searches source code for hardcoded secrets.                |
+
+## Running Scans
+
+Kreate provides multiple ways to run Trivy scans, ranging from running all checks at once to executing specific, targeted scans.
+
+### Run All Enabled Scans
+The most common way to run scans is through the standard Gradle `check` lifecycle task. When the Trivy module is enabled, its tasks are automatically registered as dependencies of `check`.
+
+<code-block lang="bash">
+./gradlew check
+</code-block>
+
+<note>
+This will run all enabled scans (e.g., License, Vulnerability, and Secret) along with other verification tasks like Detekt or unit tests.
+</note>
+
+### Run Individual Scans
+If you want to perform only a specific type of scan, you can call the corresponding task directly. This is useful for faster feedback loops during development.
+
+**License Compliance:**
+<code-block lang="bash">
+./gradlew trivyLicenseScan
+</code-block>
+
+**Vulnerability (CVE) Scanning:**
+<code-block lang="bash">
+./gradlew trivyVulnerabilityScan
+</code-block>
+
+**Secret Detection:**
+<code-block lang="bash">
+./gradlew trivySecretScan
+</code-block>
 
 <tip>
-You can run all enabled scans combined by calling the lifecycle task <code>check</code>, as Kreate automatically registers the Trivy tasks as dependencies for <code>check</code> when they are enabled.
+Individual tasks are particularly useful when you've just updated a lockfile or added a custom secret rule and want to verify your changes without running the full test suite.
 </tip>
 
 ## Further Reading
