@@ -16,9 +16,31 @@
 
 package com.davils.kreate.module.project.trivy.extension
 
+import com.davils.kreate.module.project.trivy.Severity
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import javax.inject.Inject
 
-public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFactory) {
+public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFactory, project: Project) {
+    public val severity: ListProperty<Severity> = factory.listProperty(
+        Severity::class.java
+    ).convention(listOf(Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW))
 
+    public val failOnFindings: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(true)
+
+    public val secretConfig: RegularFileProperty = factory.fileProperty().convention(
+        project.rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+    )
+
+    public val sourceFiles: ConfigurableFileCollection = factory.fileCollection().from(
+        project.fileTree(project.projectDir) {
+            include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+        }
+    )
 }

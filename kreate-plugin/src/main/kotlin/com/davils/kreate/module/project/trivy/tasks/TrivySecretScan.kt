@@ -19,14 +19,12 @@ package com.davils.kreate.module.project.trivy.tasks
 import com.davils.kreate.jobs.Task
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -59,12 +57,12 @@ public abstract class TrivySecretScan @Inject constructor(
     public abstract val sourceFiles: ConfigurableFileCollection
 
     /**
-     * The severity levels to report (e.g., "HIGH,CRITICAL").
+     * The severity levels to report (e.g., HIGH, CRITICAL).
      *
      * @since 1.0.0
      */
     @get:Input
-    public abstract val severity: Property<String>
+    public abstract val severity: ListProperty<String>
 
     /**
      * Whether the task should fail the build if any secrets are found.
@@ -85,7 +83,9 @@ public abstract class TrivySecretScan @Inject constructor(
     /**
      * Executes the secret scan by running Trivy on each source file.
      *
-     * @throws GradleException If secrets are found and [failOnFindings] is true.
+     * Runs the Trivy CLI in filesystem mode specifically for secret scanning.
+     * Throws a [GradleException] if secrets are found and [failOnFindings] is true.
+     *
      * @since 1.0.0
      */
     @TaskAction
@@ -99,13 +99,15 @@ public abstract class TrivySecretScan @Inject constructor(
                     "trivy", "fs",
                     "--scanners", "secret",
                     "--secret-config", secretConfig.get().asFile.absolutePath,
-                    "--severity", severity.get(),
-                    "--exit-code", "1",
+                    "--severity", severity.get().joinToString(","),
+                    "--exit-code", if (failOnFindings.get()) "1" else "0",
                     "--format", "table",
                     file.absolutePath
                 )
             }
-            if (result.exitValue == 1) foundSecrets = true
+            if (result.exitValue == 1) {
+                foundSecrets = true
+            }
         }
 
         if (foundSecrets && failOnFindings.get()) {

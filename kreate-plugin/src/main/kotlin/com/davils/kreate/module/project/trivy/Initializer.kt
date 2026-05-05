@@ -42,15 +42,12 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         lockAllConfigurations()
     }
 
+    val trivySecretExtension = trivyExtension.secrets
     tasks.register<TrivySecretScan>("trivyDetektSecrets") {
-        failOnFindings.set(true)
-        secretConfig.set(rootProject.file("trivy-secret.yaml"))
-        severity.set("HIGH,CRITICAL,MEDIUM,LOW")
-        sourceFiles.from(
-            fileTree(projectDir) {
-                include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
-            }
-        )
+        failOnFindings.set(trivySecretExtension.failOnFindings)
+        secretConfig.set(trivySecretExtension.secretConfig)
+        severity.set(trivySecretExtension.severity.map { it.map { s -> s.name } })
+        sourceFiles.setFrom(trivySecretExtension.sourceFiles)
     }
 
     val trivyLicenseExtension = trivyExtension.license
@@ -68,6 +65,6 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     tasks.register<TrivyVulnerabilityScan>("trivyVulnerabilityScan") {
         severity.set(trivyVulnerabilityExtension.score.map { it.map { s -> s.name } })
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
-        lockFiles.from(trivyVulnerabilityExtension.lockFiles)
+        lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
     }
 }

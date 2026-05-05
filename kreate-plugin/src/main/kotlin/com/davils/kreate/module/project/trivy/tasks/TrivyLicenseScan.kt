@@ -99,6 +99,8 @@ public abstract class TrivyLicenseScan @Inject constructor(
      */
     @TaskAction
     override fun execute() {
+        var foundForbidden = false
+
         lockFiles.forEach { file ->
             val result = exec.exec {
                 isIgnoreExitValue = true
@@ -123,9 +125,13 @@ public abstract class TrivyLicenseScan @Inject constructor(
                 commandLine(args)
             }
 
-            if (result.exitValue == 1 && failOnForbidden.get()) {
-                throw GradleException("Trivy found forbidden or restricted licenses in dependencies in ${file.name}!")
+            if (result.exitValue == 1) {
+                foundForbidden = true
             }
+        }
+
+        if (foundForbidden && failOnForbidden.get()) {
+            throw GradleException("Trivy found forbidden or restricted licenses in dependencies!")
         }
     }
 }
