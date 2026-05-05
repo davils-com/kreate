@@ -16,10 +16,17 @@
 
 package com.davils.kreate.module.project.trivy
 
-public enum class Severity {
+public enum class LicenseSeverity {
     CRITICAL,
     HIGH,
     MEDIUM,
     LOW,
     UNKNOWN
+}
+
+public enum class SecretSeverity {
+    CRITICAL,
+    HIGH,
+    MEDIUM,
+    LOW
 }

@@ -1,4 +1,5 @@
-import com.davils.kreate.module.project.trivy.Severity
+import com.davils.kreate.module.project.trivy.LicenseSeverity
+import com.davils.kreate.module.project.trivy.SecretSeverity
 import com.davils.kreate.module.project.trivy.Score
 import java.time.Year
 
@@ -141,7 +142,7 @@ kreate {
             }
 
             license {
-                severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN)
+                severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
                 failOnForbidden = true
                 fullLicenseScan = true
                 ignoredLicenses = listOf("MIT")
@@ -153,7 +154,14 @@ kreate {
             }
 
             secrets {
-                
+                severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
+                failOnFindings = true
+                secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+                sourceFiles.from(
+                    fileTree(projectDir) {
+                        include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+                    }
+                )
             }
         }
 

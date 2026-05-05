@@ -16,7 +16,8 @@
 
 package com.davils.kreate.module.project.trivy.extension
 
-import com.davils.kreate.module.project.trivy.Severity
+import com.davils.kreate.module.project.trivy.LicenseSeverity
+import com.davils.kreate.module.project.trivy.SecretSeverity
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -26,9 +27,9 @@ import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFactory, project: Project) {
-    public val severity: ListProperty<Severity> = factory.listProperty(
-        Severity::class.java
-    ).convention(listOf(Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW))
+    public val severity: ListProperty<SecretSeverity> = factory.listProperty(
+        SecretSeverity::class.java
+    ).convention(listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW))
 
     public val failOnFindings: Property<Boolean> = factory.property(
         Boolean::class.java
