@@ -20,8 +20,10 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.project.trivy.tasks.TrivyVulnerabilityScan
 import com.davils.kreate.module.project.trivy.tasks.TrivyLicenseScan
 import com.davils.kreate.module.project.trivy.tasks.TrivySecretScan
+import com.davils.kreate.module.project.trivy.tasks.TrivyScan
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.named
 
 /**
  * Initializes the Trivy module for the project.
@@ -43,7 +45,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     }
 
     val trivySecretExtension = trivyExtension.secrets
-    tasks.register<TrivySecretScan>("trivySecretScan") {
+    val secretScan = tasks.register<TrivySecretScan>("trivySecretScan") {
         failOnFindings.set(trivySecretExtension.failOnFindings)
         secretConfig.set(trivySecretExtension.secretConfig)
         severity.set(trivySecretExtension.severity.map { it.map { s -> s.name } })
@@ -51,7 +53,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     }
 
     val trivyLicenseExtension = trivyExtension.license
-    tasks.register<TrivyLicenseScan>("trivyLicenseScan") {
+    val licenseScan = tasks.register<TrivyLicenseScan>("trivyLicenseScan") {
         failOnForbidden.set(trivyLicenseExtension.failOnForbidden)
         severity.set(trivyLicenseExtension.severity.map { it.map { s -> s.name } })
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
@@ -62,9 +64,13 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     }
 
     val trivyVulnerabilityExtension = trivyExtension.vulnerability
-    tasks.register<TrivyVulnerabilityScan>("trivyVulnerabilityScan") {
+    val vulnerabilityScan = tasks.register<TrivyVulnerabilityScan>("trivyVulnerabilityScan") {
         severity.set(trivyVulnerabilityExtension.score.map { it.map { s -> s.name } })
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
+    }
+
+    tasks.register<TrivyScan>("trivyScan") {
+        dependsOn(secretScan, licenseScan, vulnerabilityScan)
     }
 }
