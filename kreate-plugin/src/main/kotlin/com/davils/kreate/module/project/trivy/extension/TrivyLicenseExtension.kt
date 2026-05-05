@@ -29,14 +29,14 @@ import javax.inject.Inject
  *
  * @param factory The object factory used for creating properties.
  * @param project The Gradle project instance.
- * @since 1.0.0
+ * @since 1.2.0
  */
 public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectFactory, project: Project) {
 
     /**
      * The list of license severities to check for (e.g., CRITICAL, HIGH).
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val severity: ListProperty<LicenseSeverity> = factory.listProperty(
         LicenseSeverity::class.java
@@ -45,7 +45,7 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     /**
      * Whether the task should fail if forbidden or restricted licenses are found.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val failOnForbidden: Property<Boolean> = factory.property(
         Boolean::class.java
@@ -54,7 +54,7 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     /**
      * Whether to enable a full license scan.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val fullLicenseScan: Property<Boolean> = factory.property(
         Boolean::class.java
@@ -63,7 +63,7 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     /**
      * Licenses to be ignored during the scan.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val ignoredLicenses: ListProperty<String> = factory.listProperty(
         String::class.java
@@ -72,7 +72,7 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     /**
      * The collection of lock files to be scanned for license issues.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val lockFiles: ConfigurableFileCollection = factory.fileCollection().from(
         project.fileTree(project.projectDir) {

@@ -101,6 +101,11 @@ public abstract class ProjectExtension @Inject constructor(
     @get:Nested
     public abstract val detekt: DetektExtension
 
+    /**
+     * Configuration for trivy.
+     *
+     * @since 1.2.0
+     */
     @get:Nested
     public abstract val trivy: TrivyExtension
 
@@ -164,6 +169,11 @@ public abstract class ProjectExtension @Inject constructor(
         action.execute(detekt)
     }
 
+    /**
+     * Configures the [TrivyExtension] using the provided action.
+     *
+     * @since 1.2.0
+     */
     public fun trivy(action: Action<TrivyExtension>) {
         action.execute(trivy)
     }

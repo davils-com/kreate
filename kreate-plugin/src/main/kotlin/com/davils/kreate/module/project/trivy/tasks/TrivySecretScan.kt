@@ -39,7 +39,7 @@ import javax.inject.Inject
  * It can be configured to fail the build if any secrets are discovered.
  *
  * @param exec The [ExecOperations] used to run the Trivy command.
- * @since 1.0.0
+ * @since 1.2.0
  */
 public abstract class TrivySecretScan @Inject constructor(
     private val exec: ExecOperations
@@ -47,11 +47,10 @@ public abstract class TrivySecretScan @Inject constructor(
     "Scans source files for secrets using Trivy",
     "kreate trivy"
 ) {
-
     /**
      * The collection of source files to scan for secrets.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -60,7 +59,7 @@ public abstract class TrivySecretScan @Inject constructor(
     /**
      * The severity levels to report (e.g., HIGH, CRITICAL).
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val severity: ListProperty<String>
@@ -68,7 +67,7 @@ public abstract class TrivySecretScan @Inject constructor(
     /**
      * Whether the task should fail the build if any secrets are found.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val failOnFindings: Property<Boolean>
@@ -76,7 +75,7 @@ public abstract class TrivySecretScan @Inject constructor(
     /**
      * The configuration file for Trivy secret scanning.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:InputFile
     public abstract val secretConfig: RegularFileProperty
@@ -87,11 +86,11 @@ public abstract class TrivySecretScan @Inject constructor(
      * Runs the Trivy CLI in filesystem mode specifically for secret scanning.
      * Throws a [GradleException] if secrets are found and [failOnFindings] is true.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @TaskAction
     override fun execute() {
-        var foundSecrets = false
+        var hasSecrets = false
 
         sourceFiles.forEach { file ->
             val result = exec.exec {
@@ -107,11 +106,11 @@ public abstract class TrivySecretScan @Inject constructor(
                 )
             }
             if (result.exitValue == 1) {
-                foundSecrets = true
+                hasSecrets = true
             }
         }
 
-        if (foundSecrets && failOnFindings.get()) {
+        if (hasSecrets && failOnFindings.get()) {
             throw GradleException("Trivy found secrets in source files!")
         }
     }

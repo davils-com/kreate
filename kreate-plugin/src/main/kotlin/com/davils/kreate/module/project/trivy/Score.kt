@@ -16,9 +16,35 @@
 
 package com.davils.kreate.module.project.trivy
 
+/**
+ * Represents the vulnerability score levels for Trivy scans.
+ *
+ * These levels correspond to the severity of the found vulnerabilities.
+ *
+ * @since 1.2.0
+ */
 public enum class Score {
+    /**
+     * Critical severity level. Requires immediate attention.
+     * @since 1.2.0
+     */
     CRITICAL,
+
+    /**
+     * High severity level. Should be addressed as soon as possible.
+     * @since 1.2.0
+     */
     HIGH,
+
+    /**
+     * Medium severity level. Important to address but not urgent.
+     * @since 1.2.0
+     */
     MEDIUM,
+
+    /**
+     * Low severity level. Minimal impact on security.
+     * @since 1.2.0
+     */
     LOW;
 }

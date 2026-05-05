@@ -29,20 +29,20 @@ import javax.inject.Inject
  * and allows for detailed configuration of vulnerability, license, and secret scanning.
  *
  * @param factory The object factory used for creating properties.
- * @since 1.0.0
+ * @since 1.2.0
  */
 public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory) {
     /**
      * Whether the Trivy module is enabled for this project.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * Configuration for vulnerability scanning (CVEs).
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Nested
     public abstract val vulnerability: TrivyVulnerabilityExtension
@@ -50,7 +50,7 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
     /**
      * Configuration for license scanning.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Nested
     public abstract val license: TrivyLicenseExtension
@@ -58,7 +58,7 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
     /**
      * Configuration for secret scanning.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Nested
     public abstract val secrets: TrivySecretExtension
@@ -67,7 +67,7 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
      * Configures vulnerability scanning using the provided action.
      *
      * @param action The configuration action for [TrivyVulnerabilityExtension].
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public fun vulnerability(action: Action<TrivyVulnerabilityExtension>) {
         action.execute(vulnerability)
@@ -77,7 +77,7 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
      * Configures license scanning using the provided action.
      *
      * @param action The configuration action for [TrivyLicenseExtension].
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public fun license(action: Action<TrivyLicenseExtension>) {
         action.execute(license)
@@ -87,7 +87,7 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
      * Configures secret scanning using the provided action.
      *
      * @param action The configuration action for [TrivySecretExtension].
-     * @since 1.0.0
+     * @since 1.2.0
      */
     public fun secrets(action: Action<TrivySecretExtension>) {
         action.execute(secrets)

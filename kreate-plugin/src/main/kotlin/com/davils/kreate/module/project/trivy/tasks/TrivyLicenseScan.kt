@@ -37,7 +37,7 @@ import javax.inject.Inject
  * for forbidden or restricted licenses based on the configured severity levels.
  *
  * @param exec The Gradle ExecOperations used to run the Trivy process.
- * @since 1.0.0
+ * @since 1.2.0
  */
 public abstract class TrivyLicenseScan @Inject constructor(
     private val exec: ExecOperations
@@ -45,11 +45,10 @@ public abstract class TrivyLicenseScan @Inject constructor(
     "Scans source files for licenses using Trivy",
     "kreate trivy"
 ) {
-
     /**
      * Whether the task should fail if forbidden or restricted licenses are found.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val failOnForbidden: Property<Boolean>
@@ -57,7 +56,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
     /**
      * The list of license severities to check for (e.g., HIGH, CRITICAL, UNKNOWN).
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val severity: ListProperty<String>
@@ -65,7 +64,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
     /**
      * Licenses to be ignored during the scan.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val ignoredLicenses: ListProperty<String>
@@ -76,7 +75,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
      * When enabled, Trivy performs an extended license search, including
      * source files, markdown, text, and LICENSE files in the scan path.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:Input
     public abstract val fullLicenseScan: Property<Boolean>
@@ -84,7 +83,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
     /**
      * The collection of lock files to be scanned for license issues.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -96,12 +95,16 @@ public abstract class TrivyLicenseScan @Inject constructor(
      * Runs the Trivy CLI in filesystem mode specifically for license scanning.
      * Throws a [GradleException] if forbidden licenses are found and [failOnForbidden] is set to true.
      *
-     * @since 1.0.0
+     * @since 1.2.0
      */
     @TaskAction
     override fun execute() {
-        var foundForbidden = false
+        if (lockFiles.isEmpty) {
+            logger.lifecycle("No lock files found. Skipping license scan. Run 'gradle dependencies --write-locks'.")
+            return
+        }
 
+        var isForbidden = false
         lockFiles.forEach { file ->
             val result = exec.exec {
                 isIgnoreExitValue = true
@@ -128,11 +131,11 @@ public abstract class TrivyLicenseScan @Inject constructor(
             }
 
             if (result.exitValue == 1) {
-                foundForbidden = true
+                isForbidden = true
             }
         }
 
-        if (foundForbidden && failOnForbidden.get()) {
+        if (isForbidden && failOnForbidden.get()) {
             throw GradleException("Trivy found forbidden or restricted licenses in dependencies!")
         }
     }

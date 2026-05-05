@@ -30,7 +30,7 @@ import org.gradle.kotlin.dsl.register
  * Trivy-compatible lock files if the module is enabled.
  *
  * @param extension The Kreate extension containing module configuration.
- * @since 1.0.0
+ * @since 1.2.0
  */
 internal fun Project.initializeTrivy(extension: KreateExtension) {
     val trivyExtension = extension.project.trivy

@@ -29,7 +29,7 @@ import java.io.File
  * On other platforms the bare command name is returned and resolved via `PATH`.
  *
  * @return The resolved Trivy command path or name as a string.
- * @since 1.0.0
+ * @since 1.2.0
  */
 internal fun resolveTrivyCommand(): String {
     val os by getOs()
