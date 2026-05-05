@@ -40,6 +40,15 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
+     * Whether to disable dependency locking.
+     *
+     * @since 1.2.1
+     */
+    public val disableDependencyLocking: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(false)
+
+    /**
      * Configuration for vulnerability scanning (CVEs).
      *
      * @since 1.2.0

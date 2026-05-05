@@ -130,6 +130,7 @@ kreate {
 
         trivy {
             enabled = true
+            disableDependencyLocking = false
 
             vulnerability {
                 score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
