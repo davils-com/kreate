@@ -133,6 +133,11 @@ kreate {
             vulnerability {
                 score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
                 failOnFindings = true
+                lockFiles.from(
+                    fileTree(projectDir) {
+                        include("*.lockfile")
+                    }
+                )
             }
 
             license {
