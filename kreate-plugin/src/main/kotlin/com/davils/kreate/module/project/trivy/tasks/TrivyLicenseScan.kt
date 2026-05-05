@@ -19,10 +19,9 @@ package com.davils.kreate.module.project.trivy.tasks
 import com.davils.kreate.jobs.Task
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -30,6 +29,15 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
+/**
+ * Scans lock files for licenses using Trivy.
+ *
+ * This task iterates over all provided lock files and uses Trivy to scan them
+ * for forbidden or restricted licenses based on the configured severity levels.
+ *
+ * @param exec The Gradle ExecOperations used to run the Trivy process.
+ * @since 1.0.0
+ */
 public abstract class TrivyLicenseScan @Inject constructor(
     private val exec: ExecOperations
 ) : Task(
@@ -37,39 +45,87 @@ public abstract class TrivyLicenseScan @Inject constructor(
     "kreate trivy"
 ) {
 
-    @get:InputDirectory
-    public abstract val targetDir: DirectoryProperty
-
+    /**
+     * Whether the task should fail if forbidden or restricted licenses are found.
+     *
+     * @since 1.0.0
+     */
     @get:Input
     public abstract val failOnForbidden: Property<Boolean>
 
+    /**
+     * The list of license severities to check for (e.g., HIGH, CRITICAL, UNKNOWN).
+     *
+     * @since 1.0.0
+     */
+    @get:Input
+    public abstract val severity: ListProperty<String>
+
+    /**
+     * Licenses to be ignored during the scan.
+     *
+     * @since 1.0.0
+     */
+    @get:Input
+    public abstract val ignoredLicenses: ListProperty<String>
+
+    /**
+     * Whether to enable a full license scan.
+     *
+     * When enabled, Trivy performs an extended license search, including
+     * source files, markdown, text, and LICENSE files in the scan path.
+     *
+     * @since 1.0.0
+     */
+    @get:Input
+    public abstract val fullLicenseScan: Property<Boolean>
+
+    /**
+     * The collection of lock files to be scanned for license issues.
+     *
+     * @since 1.0.0
+     */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val lockFiles: ConfigurableFileCollection
 
+    /**
+     * Executes the license scan for each lock file in the collection.
+     *
+     * Runs the Trivy CLI in filesystem mode specifically for license scanning.
+     * Throws a [GradleException] if forbidden licenses are found and [failOnForbidden] is set to true.
+     *
+     * @since 1.0.0
+     */
     @TaskAction
     override fun execute() {
-        logger.lifecycle("Running Trivy license scan on ${targetDir.get().asFile.absolutePath} with lock files: ${lockFiles.files.joinToString(", ")}")
-        if (lockFiles.isEmpty) {
-            logger.warn("No *.gradle.lockfile found — skipping license scan. Run 'dependencies --write-locks' first.")
-            return
-        }
+        lockFiles.forEach { file ->
+            val result = exec.exec {
+                isIgnoreExitValue = true
+                val args = mutableListOf(
+                    "trivy", "fs",
+                    "--scanners", "license",
+                    "--exit-code", if (failOnForbidden.get()) "1" else "0",
+                    "--severity", severity.get().joinToString(","),
+                    "--format", "table",
+                )
 
+                if (fullLicenseScan.get()) {
+                    args.add("--license-full")
+                }
 
-        val result = exec.exec {
-            isIgnoreExitValue = true
-            commandLine(
-                "trivy", "fs",
-                "--scanners", "license",
-                "--exit-code", if (failOnForbidden.get()) "1" else "0",
-                "--severity", "UNKNOWN,HIGH,CRITICAL,LOW",
-                "--format", "table",
-                targetDir.get().asFile.absolutePath
-            )
-        }
+                if (ignoredLicenses.get().isNotEmpty()) {
+                    args.add("--ignored-licenses")
+                    args.add(ignoredLicenses.get().joinToString(","))
+                }
 
-        if (result.exitValue == 1 && failOnForbidden.get()) {
-            throw GradleException("Trivy found forbidden or restricted licenses in dependencies!")
+                args.add(file.absolutePath)
+                commandLine(args)
+            }
+
+            if (result.exitValue == 1 && failOnForbidden.get()) {
+                throw GradleException("Trivy found forbidden or restricted licenses in dependencies in ${file.name}!")
+            }
         }
     }
 }
