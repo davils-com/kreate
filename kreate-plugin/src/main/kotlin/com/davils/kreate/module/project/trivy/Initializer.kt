@@ -22,7 +22,6 @@ import com.davils.kreate.module.project.trivy.tasks.TrivyLicenseScan
 import com.davils.kreate.module.project.trivy.tasks.TrivySecretScan
 import com.davils.kreate.module.project.trivy.tasks.TrivyScan
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.kotlin.dsl.register
 
 /**
