@@ -8,7 +8,7 @@ Before applying the plugin, make sure the following are available in your enviro
 
 - **Gradle**: 9.4.1 or later
 - **Kotlin**: 2.3.21 or later
-- **Java**: JDK 25 or later
+- **Java**: JDK 17 or later
 
 <tip>
 Kreate automatically synchronizes Java and Kotlin toolchain versions across all modules.
@@ -60,7 +60,7 @@ group = "com.example"
 
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_21
+        javaVersion = JavaVersion.VERSION_17
         explicitApi = true
         allWarningsAsErrors = true
     }

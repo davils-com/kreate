@@ -43,12 +43,12 @@ public abstract class PlatformExtension @Inject constructor(
 ) {
     /**
      * The Java version to be used for the project.
-     * Defaults to [JavaVersion.VERSION_25].
+     * Defaults to [JavaVersion.VERSION_17].
      * @since 1.0.0
      */
     public val javaVersion: Property<JavaVersion> = factory.property(
         JavaVersion::class.java
-    ).convention(JavaVersion.VERSION_25)
+    ).convention(JavaVersion.VERSION_17)
 
     /**
      * Whether to enable explicit API mode in Kotlin.

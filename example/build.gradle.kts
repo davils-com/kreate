@@ -17,7 +17,7 @@ dependencyLocking {
 
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_25
+        javaVersion = JavaVersion.VERSION_17
         explicitApi = true
         allWarningsAsErrors = false
 

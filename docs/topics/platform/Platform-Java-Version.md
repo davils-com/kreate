@@ -12,7 +12,7 @@ Kreate defaults to `JavaVersion.VERSION_25` if `javaVersion` is not explicitly s
 ```kotlin
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_21
+        javaVersion = JavaVersion.VERSION_17
     }
 }
 ```
@@ -36,6 +36,7 @@ Any `JavaVersion` enum value from Gradle's API is accepted. Kreate is tested aga
 
 | Value                    | Java Release      |
 |--------------------------|-------------------|
+| `JavaVersion.VERSION_17` | Java 17 (Minimum) |
 | `JavaVersion.VERSION_21` | Java 21 (LTS)     |
 | `JavaVersion.VERSION_25` | Java 25 (default) |
 

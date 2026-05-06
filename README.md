@@ -51,7 +51,7 @@ Managing Kotlin Multiplatform and JVM configurations can be complex. **Kreate** 
 
 ### Platform Support
 Kreate detects the project type (JVM, Android, or KMP) and applies appropriate optimizations:
-- **JVM Support**: Configures Java 21+ toolchains and compiler options.
+- **JVM Support**: Configures Java 17+ toolchains and compiler options.
 - **Multiplatform DSL**: Unified targets for Linux, macOS, and Windows.
 - **Consistent Toolchains**: Ensures Java and Kotlin versions are synchronized across modules.
 
@@ -127,7 +127,7 @@ Apply the plugin in your `build.gradle.kts`:
 ```kotlin
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_25
+        javaVersion = JavaVersion.VERSION_17
         explicitApi = true
         
         jvm {
@@ -172,7 +172,7 @@ kreate {
 
 | Block      | Property              | Description                               | Default      |
 |:-----------|:----------------------|:------------------------------------------|:-------------|
-| `platform` | `javaVersion`         | Target Java version (21, 25, etc.)        | `VERSION_21` |
+| `platform` | `javaVersion`         | Target Java version (17, 21, etc.)        | `VERSION_17` |
 | `platform` | `explicitApi`         | Enforces Kotlin Explicit API mode         | `false`      |
 | `platform` | `allWarningsAsErrors` | Treats all compiler warnings as errors    | `true`       |
 | `jvm.jni`  | `enabled`             | Enables JNI support (CMake-based)         | `false`      |
