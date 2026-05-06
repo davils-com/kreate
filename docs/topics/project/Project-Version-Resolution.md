@@ -9,7 +9,6 @@ kreate {
     project {
         name = "Example"
         description = "Example project"
-        projectGroup = group.toString()
         
         version {
             environment = "VERSION"   // default — checked first
