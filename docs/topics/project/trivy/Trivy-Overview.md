@@ -83,6 +83,30 @@ curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/inst
 Kreate attempts to automatically resolve the path to the Trivy executable. On macOS, it specifically checks common Homebrew installation paths (e.g., <code>/opt/homebrew/bin/trivy</code>) to ensure compatibility with the Gradle environment.
 </note>
 
+## Dependency Locking
+
+For **License Compliance** and **Vulnerability Scanning (CVEs)**, Kreate relies on Gradle lockfiles. These files provide a precise snapshot of all transitive dependencies, which is required for Trivy to perform an accurate analysis.
+
+### 1. Enable Dependency Locking
+You must manually enable dependency locking in your project. This is typically done in your `build.gradle.kts`:
+
+```kotlin
+dependencyLocking {
+    lockAllConfigurations()
+}
+```
+
+### 2. Generate Lockfiles
+After enabling locking or when changing dependencies, you must generate or update the lockfiles using the following command:
+
+<code-block lang="bash">
+./gradlew dependencies --write-locks
+</code-block>
+
+<warning>
+If no lockfiles are present, the <code>trivyLicenseScan</code> and <code>trivyVulnerabilityScan</code> tasks will not have any input to analyze and might not produce any results.
+</warning>
+
 ## Quick Start
 
 All Trivy scans are **disabled by default**. To use the module, it must be globally enabled in the `trivy` block:
