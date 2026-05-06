@@ -11,6 +11,10 @@ plugins {
 
 group = "com.example"
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 kreate {
     platform {
         javaVersion = JavaVersion.VERSION_25
@@ -130,7 +134,6 @@ kreate {
 
         trivy {
             enabled = true
-            disableDependencyLocking = false
 
             vulnerability {
                 score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)

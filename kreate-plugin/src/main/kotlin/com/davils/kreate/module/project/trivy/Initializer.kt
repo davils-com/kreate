@@ -40,14 +40,6 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         return
     }
 
-    if (!trivyExtension.disableDependencyLocking.get()) {
-        configurations.all {
-            if (isCanBeResolved && state == Configuration.State.UNRESOLVED) {
-                resolutionStrategy.activateDependencyLocking()
-            }
-        }
-    }
-
     val trivySecretExtension = trivyExtension.secrets
     val secretScan = tasks.register<TrivySecretScan>("trivySecretScan") {
         failOnFindings.set(trivySecretExtension.failOnFindings)
