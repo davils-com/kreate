@@ -35,7 +35,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @since 1.2.0
      */
     @get:Nested
-    public abstract val checkstyle: DetektReportSpec
+    public abstract val checkstyle: DetektCheckstyleReportSpec
 
     /**
      * Configuration for the HTML report.
@@ -43,7 +43,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @since 1.2.0
      */
     @get:Nested
-    public abstract val html: DetektReportSpec
+    public abstract val html: DetektHtmlReportSpec
 
     /**
      * Configuration for the Markdown report.
@@ -51,7 +51,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @since 1.2.0
      */
     @get:Nested
-    public abstract val markdown: DetektReportSpec
+    public abstract val markdown: DetektMarkdownReportSpec
 
     /**
      * Configuration for the SARIF report.
@@ -59,7 +59,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @since 1.2.0
      */
     @get:Nested
-    public abstract val sarif: DetektReportSpec
+    public abstract val sarif: DetektSarifReportSpec
 
 
     /**
@@ -68,7 +68,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @param action The configuration action.
      * @since 1.2.0
      */
-    public fun checkstyle(action: Action<DetektReportSpec>) {
+    public fun checkstyle(action: Action<DetektCheckstyleReportSpec>) {
         action.execute(checkstyle)
     }
 
@@ -78,7 +78,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @param action The configuration action.
      * @since 1.2.0
      */
-    public fun html(action: Action<DetektReportSpec>) {
+    public fun html(action: Action<DetektHtmlReportSpec>) {
         action.execute(html)
     }
 
@@ -88,7 +88,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @param action The configuration action.
      * @since 1.2.0
      */
-    public fun markdown(action: Action<DetektReportSpec>) {
+    public fun markdown(action: Action<DetektMarkdownReportSpec>) {
         action.execute(markdown)
     }
 
@@ -98,7 +98,7 @@ public abstract class DetektReportExtension @Inject constructor() {
      * @param action The configuration action.
      * @since 1.2.0
      */
-    public fun sarif(action: Action<DetektReportSpec>) {
+    public fun sarif(action: Action<DetektSarifReportSpec>) {
         action.execute(sarif)
     }
 }
