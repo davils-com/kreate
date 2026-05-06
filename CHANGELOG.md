@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.2
+
+### Added
+- **Detekt Report Specialization**: Introduced specialized report specifications for HTML, Markdown, Checkstyle, and SARIF formats.
+- **Detekt Defaults**: HTML and Markdown reports are now enabled by default (`required = true`).
+
+### Changed
+- **Trivy Dependency Locking**: Refactored Trivy integration to require Gradle lockfiles for dependency scanning, removing the `disableDependencyLocking` option to ensure more reliable security audits.
+- **Detekt Report Paths**: Standardized default output locations for all Detekt report types under `build/reports/detekt/`.
+
+### Fixed
+- **Code Quality**: Removed unused imports in `Initializer.kt` and cleaned up internal configuration logic.
+- **Documentation**: Fixed incorrect project group assignments in documentation and updated KDoc to reflect new report specifications.
+
 ## 1.2.1
 
 ### Added
@@ -118,6 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.2.2]: https://github.com/davils/kreate/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/davils/kreate/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/davils/kreate/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/davils/kreate/compare/v1.1.0...v1.1.1
