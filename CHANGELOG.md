@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.3
+
+### Added
+- **KDoc Completion**: Completed the KDoc documentation for the `Project.kt` configuration file, ensuring compliance with strict professional standards for all project identity, organization, and legal constants.
+
+### Changed
+- **Minimum Java Version**: Updated the minimum required Java version for the plugin and example projects to **Java 17**.
+- **Documentation Update**: Synchronized all documentation (README, Getting Started, Platform guides) to reflect Java 17 as the new minimum requirement.
+
 ## 1.2.2
 
 ### Added
@@ -132,6 +141,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.2.3]: https://github.com/davils/kreate/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/davils/kreate/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/davils/kreate/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/davils/kreate/compare/v1.1.1...v1.2.0
