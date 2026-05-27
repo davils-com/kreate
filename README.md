@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/Kotlin-2.3.21-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
   </a>
   <a href="https://gradle.org">
-    <img src="https://img.shields.io/badge/Gradle-9.5.0-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
+    <img src="https://img.shields.io/badge/Gradle-9.5.1-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
   </a>
 </p>
 
@@ -101,7 +101,7 @@ Detailed documentation for Kreate is available in the following locations:
 
 ### Installation
 
-Add the plugin to your `settings.gradle.kts` (recommended) or `build.gradle.kts`. 
+Add the plugin to your `settings.gradle.kts` (recommended) or `build.gradle.kts`.
 
 **Note**: To resolve lifecycle ordering issues, you must manually apply the `maven-publish` and `dev.detekt` plugins if you intend to use publishing or static analysis features.
 
@@ -129,7 +129,7 @@ kreate {
     platform {
         javaVersion = JavaVersion.VERSION_17
         explicitApi = true
-        
+
         jvm {
             jni {
                 enabled = true
@@ -140,7 +140,7 @@ kreate {
     project {
         name = "MyProject"
         description = "A project powered by Kreate"
-        
+
         detekt {
             enabled = true
             allRules = true

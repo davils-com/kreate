@@ -23,7 +23,7 @@ Add the plugin entry to `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-kreate = { id = "com.davils.kreate", version = "1.1.0" }
+kreate = { id = "com.davils.kreate", version = "1.2.4" }
 ```
 
 Then apply it in your module's `build.gradle.kts`:
@@ -39,7 +39,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("com.davils.kreate") version "1.1.0"
+    id("com.davils.kreate") version "1.2.4"
 }
 ```
 
@@ -116,6 +116,7 @@ The table below shows the available top-level feature blocks and their defaults:
 | `project.docs`                    | `enabled`             | `false` | Configures Dokka documentation generation   |
 | `project.tests`                   | `enabled`             | `true`  | Configures Kotest integration and reporting |
 | `project.publish`                 | `enabled`             | `false` | Enables Maven Central / GitLab publishing   |
+| `trivy`                           | `enabled`             | `false` | Enables security and compliance scanning    |
 
 ## Next Steps
 
@@ -127,3 +128,4 @@ Once the plugin is applied and the basic configuration is in place, explore the 
 - **[Build Constants](Constants-Overview.md)**: Generate type-safe Kotlin constants from Gradle properties at compile time.
 - **[Testing Overview](Testing-Overview.md)**: Configure Kotest parallel execution, test logging, reporting, and Dokka.
 - **[Publishing Overview](Publishing-Overview.md)**: Set up automated GPG-signed publishing to Maven Central or GitLab Package Registry.
+- **[Security & Compliance (Trivy)](Trivy-Overview.md)**: Automated security scanning for vulnerabilities, licenses, and secrets.

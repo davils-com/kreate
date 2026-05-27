@@ -51,6 +51,14 @@ Kreate ships a pre-configured **Kotest** integration — no setup required.
 - Standardized logging output for Passed, Skipped, and Started states
 - Automatic HTML and XML report generation for CI/CD pipelines
 
+## Security & Compliance (Trivy)
+
+Automated security scanning integrated directly into the Gradle build process.
+
+- **Vulnerability Scanning**: Identify CVEs in dependencies using Gradle lockfiles.
+- **License Compliance**: Verify third-party licenses against forbidden lists.
+- **Secret Detection**: Scan source code for hardcoded API keys and credentials.
+
 <tip>
 All features are opt-in via the <code>kreate { }</code> block in your <code>build.gradle.kts</code>.
 Sensible defaults are applied automatically so you only configure what you need.
