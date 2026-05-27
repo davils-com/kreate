@@ -4,9 +4,12 @@ poet = "2.3.0"
 dokka = "2.2.0"
 publish = "0.36.0"
 detekt = "2.0.0-alpha.3"
+kore = "1.1.0"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
+
+davilsx-kore = { module = "com.davils:davilsx-kore", version.ref = "kore" }
 
 # actual plugins, but needed as dependencies in buildSrc's
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -27,6 +30,7 @@ build-src = [
 
 kreate-plugin = [
     "poet-core",
+    "davilsx-kore",
     "kotlin-gradle-plugin",
     "dokka-gradle-plugin",
     "serialization-gradle-plugin",

@@ -78,6 +78,6 @@ internal fun Project.modules(
 ): KreateModuleRegistry {
     val registryBuilder = KreateModuleRegistryBuilder(this, extension)
     registryBuilder.builder()
-    val registryData = registryBuilder.build()
+    val registryData = registryBuilder.produce()
     return KreateModuleRegistry(registryData)
 }

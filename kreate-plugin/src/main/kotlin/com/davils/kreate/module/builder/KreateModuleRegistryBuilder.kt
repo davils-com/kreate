@@ -16,7 +16,8 @@
 
 package com.davils.kreate.module.builder
 
-import com.davils.kreate.KreateDsl
+import com.davils.kore.annotation.KoreDsl
+import com.davils.kore.pattern.creational.dsl.validation.DslValidator
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import org.gradle.api.Project
@@ -30,7 +31,7 @@ import org.gradle.api.Project
  * @param extension The Kreate extension containing the configuration.
  * @since 1.0.0
  */
-@KreateDsl
+@KoreDsl
 internal class KreateModuleRegistryBuilder(
     /**
      * The project instance.
@@ -42,7 +43,7 @@ internal class KreateModuleRegistryBuilder(
      * @since 1.0.0
      */
     private val extension: KreateExtension
-) {
+) : DslValidator<KreateModuleRegistryData>() {
     private val modules = mutableListOf<Module>()
 
     /**
@@ -85,17 +86,9 @@ internal class KreateModuleRegistryBuilder(
         add(this)
     }
 
-    /**
-     * Builds and returns a [KreateModuleRegistryData] instance.
-     *
-     * @return A new instance of [KreateModuleRegistryData].
-     * @since 1.0.0
-     */
-    fun build(): KreateModuleRegistryData {
-        return KreateModuleRegistryData(
-            extension = extension,
-            project = project,
-            modules = modules.toList()
-        )
-    }
+    override fun data(): KreateModuleRegistryData = KreateModuleRegistryData(
+        extension = extension,
+        project = project,
+        modules = modules.toList()
+    )
 }

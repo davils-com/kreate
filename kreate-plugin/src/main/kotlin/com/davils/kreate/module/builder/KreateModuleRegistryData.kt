@@ -16,6 +16,9 @@
 
 package com.davils.kreate.module.builder
 
+import com.davils.kore.pattern.creational.dsl.verification.DslVerifiableData
+import com.davils.kore.pattern.creational.dsl.verification.DslVerification
+import com.davils.kore.pattern.creational.dsl.verification.verifyDsl
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import org.gradle.api.Project
@@ -44,4 +47,8 @@ internal data class KreateModuleRegistryData(
      * @since 1.0.0
      */
     val modules: List<Module>
-)
+) : DslVerifiableData {
+    override fun validate(): DslVerification = verifyDsl {
+        // Nothing to validate yet.
+    }
+}
