@@ -17,6 +17,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 *.lockfile
+.junie/memory
 
 ### Eclipse ###
 .apt_generated
