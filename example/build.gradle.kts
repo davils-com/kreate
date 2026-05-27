@@ -1,6 +1,6 @@
-import com.davils.kreate.module.project.trivy.LicenseSeverity
-import com.davils.kreate.module.project.trivy.SecretSeverity
-import com.davils.kreate.module.project.trivy.Score
+import com.davils.kreate.module.trivy.LicenseSeverity
+import com.davils.kreate.module.trivy.SecretSeverity
+import com.davils.kreate.module.trivy.Score
 import java.time.Year
 
 plugins {
@@ -54,6 +54,42 @@ kreate {
                 projectDirectory = layout.projectDirectory.dir("jni")
                 nameOverride = "example"
             }
+        }
+    }
+
+    trivy {
+        enabled = true
+
+        vulnerability {
+            score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
+            failOnFindings = true
+            lockFiles.from(
+                fileTree(projectDir) {
+                    include("*.lockfile")
+                }
+            )
+        }
+
+        license {
+            severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
+            failOnForbidden = true
+            ignoredLicenses = listOf("MIT")
+            lockFiles.from(
+                fileTree(projectDir) {
+                    include("*.lockfile")
+                }
+            )
+        }
+
+        secrets {
+            severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
+            failOnFindings = true
+            secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+            sourceFiles.from(
+                fileTree(projectDir) {
+                    include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+                }
+            )
         }
     }
 
@@ -129,42 +165,6 @@ kreate {
                     required = true
                     outputLocation = layout.buildDirectory.file("reports/detekt/sarif.sarif")
                 }
-            }
-        }
-
-        trivy {
-            enabled = true
-
-            vulnerability {
-                score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
-                failOnFindings = true
-                lockFiles.from(
-                    fileTree(projectDir) {
-                        include("*.lockfile")
-                    }
-                )
-            }
-
-            license {
-                severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
-                failOnForbidden = true
-                ignoredLicenses = listOf("MIT")
-                lockFiles.from(
-                    fileTree(projectDir) {
-                        include("*.lockfile")
-                    }
-                )
-            }
-
-            secrets {
-                severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
-                failOnFindings = true
-                secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
-                sourceFiles.from(
-                    fileTree(projectDir) {
-                        include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
-                    }
-                )
             }
         }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy.tasks
+package com.davils.kreate.module.trivy.tasks
 
 import com.davils.kreate.jobs.Task
 import org.gradle.api.tasks.TaskAction

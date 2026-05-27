@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy.extension
+package com.davils.kreate.module.trivy.extension
 
-import com.davils.kreate.module.project.trivy.SecretSeverity
+import com.davils.kreate.module.trivy.SecretSeverity
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty

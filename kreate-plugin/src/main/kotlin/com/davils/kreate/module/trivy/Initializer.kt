@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy
+package com.davils.kreate.module.trivy
 
 import com.davils.kreate.KreateExtension
-import com.davils.kreate.module.project.trivy.tasks.TrivyVulnerabilityScan
-import com.davils.kreate.module.project.trivy.tasks.TrivyLicenseScan
-import com.davils.kreate.module.project.trivy.tasks.TrivySecretScan
-import com.davils.kreate.module.project.trivy.tasks.TrivyScan
+import com.davils.kreate.module.trivy.tasks.TrivyVulnerabilityScan
+import com.davils.kreate.module.trivy.tasks.TrivyLicenseScan
+import com.davils.kreate.module.trivy.tasks.TrivySecretScan
+import com.davils.kreate.module.trivy.tasks.TrivyScan
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
 
@@ -34,7 +34,7 @@ import org.gradle.kotlin.dsl.register
  * @since 1.2.0
  */
 internal fun Project.initializeTrivy(extension: KreateExtension) {
-    val trivyExtension = extension.project.trivy
+    val trivyExtension = extension.trivy
     if (!trivyExtension.enabled.get()) {
         return
     }

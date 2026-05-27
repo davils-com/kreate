@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy.extension
+package com.davils.kreate.module.trivy.extension
 
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory

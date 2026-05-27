@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy.tasks
+package com.davils.kreate.module.trivy.tasks
 
 import com.davils.kreate.jobs.Task
-import com.davils.kreate.module.project.trivy.resolveTrivyCommand
+import com.davils.kreate.module.trivy.resolveTrivyCommand
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty

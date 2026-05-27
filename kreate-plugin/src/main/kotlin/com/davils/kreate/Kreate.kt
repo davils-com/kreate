@@ -19,6 +19,7 @@ package com.davils.kreate
 import com.davils.kreate.module.builder.modules
 import com.davils.kreate.module.platform.PlatformModule
 import com.davils.kreate.module.project.ProjectModule
+import com.davils.kreate.module.trivy.TrivyModule
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -48,6 +49,7 @@ private fun Project.addModules(extension: KreateExtension) {
     val modules = modules(extension) {
         add(ProjectModule)
         add(PlatformModule)
+        add(TrivyModule)
     }
     modules.applyAll()
 }

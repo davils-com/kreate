@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.project.trivy
+package com.davils.kreate.module.trivy
 
 /**
  * Represents the severity levels for license scanning.

@@ -18,6 +18,7 @@ package com.davils.kreate
 
 import com.davils.kreate.module.platform.PlatformExtension
 import com.davils.kreate.module.project.ProjectExtension
+import com.davils.kreate.module.trivy.extension.TrivyExtension
 import org.gradle.api.Action
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
@@ -47,6 +48,14 @@ public abstract class KreateExtension @Inject constructor() {
     public abstract val platform: PlatformExtension
 
     /**
+     * Configuration for trivy.
+     *
+     * @since 1.2.0
+     */
+    @get:Nested
+    public abstract val trivy: TrivyExtension
+
+    /**
      * Configures the project-level settings.
      *
      * @param action The configuration action for [ProjectExtension].
@@ -64,5 +73,14 @@ public abstract class KreateExtension @Inject constructor() {
      */
     public fun platform(action: Action<PlatformExtension>) {
         action.execute(platform)
+    }
+
+    /**
+     * Configures the [TrivyExtension] using the provided action.
+     *
+     * @since 1.2.0
+     */
+    public fun trivy(action: Action<TrivyExtension>) {
+        action.execute(trivy)
     }
 }

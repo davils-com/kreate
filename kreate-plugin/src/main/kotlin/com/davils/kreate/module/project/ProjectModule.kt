@@ -23,7 +23,6 @@ import com.davils.kreate.module.project.detekt.initializeDetekt
 import com.davils.kreate.module.project.docs.initializeDocs
 import com.davils.kreate.module.project.publish.initializePublish
 import com.davils.kreate.module.project.tests.initializeTesting
-import com.davils.kreate.module.project.trivy.initializeTrivy
 import org.gradle.api.Project
 
 /**
@@ -62,7 +61,6 @@ internal object ProjectModule : Module {
             initializeTesting(extension)
             initializePublish(extension)
             initializeDetekt(extension)
-            initializeTrivy(extension)
         }
     }
 }
