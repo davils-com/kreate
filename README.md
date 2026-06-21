@@ -9,10 +9,10 @@
     <img src="https://img.shields.io/badge/License-Apache_2.0-Redtronics?style=for-the-badge&logo=apache&labelColor=white&color=blue" alt="License">
   </a>
   <a href="https://kotlinlang.org">
-    <img src="https://img.shields.io/badge/Kotlin-2.3.21-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
+    <img src="https://img.shields.io/badge/Kotlin-2.4.0-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
   </a>
   <a href="https://gradle.org">
-    <img src="https://img.shields.io/badge/Gradle-9.5.1-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
+    <img src="https://img.shields.io/badge/Gradle-9.6.0-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
   </a>
 </p>
 
@@ -116,7 +116,7 @@ pluginManagement {
 plugins {
     id("com.davils.kreate") version "<latest>"
     id("maven-publish") // Required for publishing
-    id("dev.detekt") version "2.0.0-alpha.3" // Required for Detekt
+    id("dev.detekt") version "2.0.0-alpha.5" // Required for Detekt
 }
 ```
 

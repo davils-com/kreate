@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.5
+
+### Changed
+- **Task Registration Refactoring**: Replaced property delegates with direct task registrations in JNI and C-Interop initializer classes to optimize configuration time.
+- **Dependency Updates**:
+  - Updated Kotlin to **2.4.0**.
+  - Updated Gradle Wrapper to **9.6.0**.
+  - Updated Detekt Gradle plugin.
+
+### Fixed
+- **Code Quality**: Cleaned up unused imports in platform-specific initializer classes.
+
 ## 1.2.4
 
 ### Added
@@ -153,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
 
 ---
+[1.2.5]: https://github.com/davils/kreate/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/davils/kreate/compare/v1.2.3...v1.2.4
 [1.2.3]: https://github.com/davils/kreate/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/davils/kreate/compare/v1.2.1...v1.2.2

@@ -23,7 +23,7 @@ Add the plugin entry to `gradle/libs.versions.toml`:
 
 ```toml
 [plugins]
-kreate = { id = "com.davils.kreate", version = "1.2.4" }
+kreate = { id = "com.davils.kreate", version = "1.2.5" }
 ```
 
 Then apply it in your module's `build.gradle.kts`:
@@ -31,7 +31,7 @@ Then apply it in your module's `build.gradle.kts`:
 ```kotlin
 plugins {
     alias(libs.plugins.kreate)
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
 }
 ```
 
@@ -39,7 +39,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("com.davils.kreate") version "1.2.4"
+    id("com.davils.kreate") version "1.2.5"
 }
 ```
 
