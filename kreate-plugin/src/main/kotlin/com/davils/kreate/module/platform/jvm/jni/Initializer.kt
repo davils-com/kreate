@@ -66,17 +66,17 @@ private fun Project.addJniTasks(extension: KreateExtension) {
     validateRootDir(rootDir)
     val nativeProjectDir = rootDir.resolve(projectName)
 
-    val initializeJniProject by tasks.register<InitializeCppProject>("kreate-jni-initialize") {
+    val initializeJniProject = tasks.register<InitializeCppProject>("kreate-jni-initialize") {
         this.workDir.set(rootDir)
         this.projectName.set(projectName)
     }
 
-    val buildNative by tasks.register<BuildNative>(KREATE_JNI_BUILD_TASK) {
+    val buildNative = tasks.register<BuildNative>(KREATE_JNI_BUILD_TASK) {
         this.workDir.set(nativeProjectDir)
         dependsOn(initializeJniProject)
     }
 
-    executeTaskBeforeCompile(buildNative)
+    executeTaskBeforeCompile(buildNative.get())
 }
 
 private fun Project.applyRuntimeLibraryPath(extension: KreateExtension) {

@@ -65,28 +65,28 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     validateRootDir(projectRootDir)
 
     val rustProject = projectRootDir.resolve(projectName)
-    val initializeRustProject by tasks.register<InitializeRustProject>("kreate-c-interop-initialize") {
+    val initializeRustProject = tasks.register<InitializeRustProject>("kreate-c-interop-initialize") {
         this.workDir.set(projectRootDir)
         this.projectName.set(projectName)
     }
 
-    val addRustDependencies by tasks.register<AddRustDependencies>("kreate-c-interop-dependencies") {
+    val addRustDependencies = tasks.register<AddRustDependencies>("kreate-c-interop-dependencies") {
         workDir.set(rustProject)
         dependsOn(initializeRustProject)
     }
 
-    val configureCargo by tasks.register<ConfigureCargo>("kreate-c-interop-configure") {
+    val configureCargo = tasks.register<ConfigureCargo>("kreate-c-interop-configure") {
         workDir.set(rustProject)
         dependsOn(addRustDependencies)
     }
 
-    val generateRustBuildScript by tasks.register<GenerateRustBuildScript>("kreate-c-interop-script") {
+    val generateRustBuildScript = tasks.register<GenerateRustBuildScript>("kreate-c-interop-script") {
         workDir.set(rustProject)
         this.projectName.set(projectName)
         dependsOn(configureCargo)
     }
 
-    val compileRust by tasks.register<CompileRust>("kreate-c-interop-compile") {
+    val compileRust = tasks.register<CompileRust>("kreate-c-interop-compile") {
         workDir.set(rustProject)
         if (cInteropConfig.rustTargets.isPresent) {
             rustTargets.set(cInteropConfig.rustTargets)
@@ -94,7 +94,7 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
         dependsOn(generateRustBuildScript)
     }
 
-    val generateDefinitionFiles by tasks.register<GenerateDefinitionFiles>("kreate-c-interop-definitions") {
+    val generateDefinitionFiles = tasks.register<GenerateDefinitionFiles>("kreate-c-interop-definitions") {
         workDir.set(rustProject)
         this.rootDir.set(projectRootDir)
         this.projectName.set(projectName)
@@ -109,7 +109,7 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
     tasks.withType<CInteropProcess>().configureEach {
         dependsOn(generateDefinitionFiles)
     }
-    executeTaskBeforeCompile(generateDefinitionFiles)
+    executeTaskBeforeCompile(generateDefinitionFiles.get())
 }
 
 private fun Project.applyNativeTargets(cInteropConfig: CInteropExtension) {
