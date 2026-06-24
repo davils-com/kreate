@@ -68,7 +68,7 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
      * When empty, only the conventional `include` directory and the JNI
      * headers are used.
      *
-     * @since 1.2.6
+     * @since 1.3.0
      */
     @get:Input
     @get:Optional

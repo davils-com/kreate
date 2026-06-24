@@ -78,7 +78,7 @@ public abstract class JniExtension @Inject constructor(
      * Defaults to an empty list, in which case only the conventional `include`
      * directory and the JNI headers are used.
      *
-     * @since 1.2.6
+     * @since 1.3.0
      */
     public val libraryIncludePaths: ListProperty<String> = factory.listProperty(String::class.java)
 }
