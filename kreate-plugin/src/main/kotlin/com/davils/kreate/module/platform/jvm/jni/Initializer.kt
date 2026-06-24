@@ -89,13 +89,25 @@ private fun Project.applyRuntimeLibraryPath(extension: KreateExtension) {
     val projectName = resolveProjectName(extension)
     val nativeLibDir = resolveRootDir(jniConfig).resolve(projectName).resolve("build")
 
+    val allLibraryPaths = provider {
+        val paths = mutableListOf(nativeLibDir.absolutePath)
+        jniConfig.libraryRuntimePaths.get().forEach { path ->
+            paths.add(file(path).absolutePath)
+        }
+        paths.joinToString(File.pathSeparator)
+    }
+
     tasks.withType<Test>().configureEach {
         dependsOn(KREATE_JNI_BUILD_TASK)
-        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${nativeLibDir.absolutePath}")
+        val filteredArgs = jvmArgs.filterNot { it.startsWith(JAVA_LIBRARY_PATH_PROPERTY) }
+        setJvmArgs(filteredArgs)
+        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${allLibraryPaths.get()}")
     }
     tasks.withType<JavaExec>().configureEach {
         dependsOn(KREATE_JNI_BUILD_TASK)
-        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${nativeLibDir.absolutePath}")
+        val filteredArgs = jvmArgs.filterNot { it.startsWith(JAVA_LIBRARY_PATH_PROPERTY) }
+        setJvmArgs(filteredArgs)
+        jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${allLibraryPaths.get()}")
     }
 }
 

@@ -81,4 +81,17 @@ public abstract class JniExtension @Inject constructor(
      * @since 1.3.0
      */
     public val libraryIncludePaths: ListProperty<String> = factory.listProperty(String::class.java)
+
+    /**
+     * Additional library directories added to `java.library.path` at runtime.
+     *
+     * These paths are used by [Test] and [JavaExec] tasks to resolve shared
+     * libraries (`.so`, `.dylib`, `.dll`) at runtime. The paths are appended
+     * to the default native build output directory.
+     *
+     * Paths can be absolute or relative to the Gradle project directory.
+     *
+     * @since 1.3.1
+     */
+    public val libraryRuntimePaths: ListProperty<String> = factory.listProperty(String::class.java)
 }
