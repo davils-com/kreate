@@ -1,3 +1,4 @@
+import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
 import com.davils.kreate.module.trivy.LicenseSeverity
 import com.davils.kreate.module.trivy.SecretSeverity
 import com.davils.kreate.module.trivy.Score
@@ -24,6 +25,8 @@ kreate {
         multiplatform {
             cInterop {
                 enabled = false
+                // Selects the native interop language: RUST (default), C or CPP.
+                language = NativeLanguage.RUST
                 nameOverride = "example"
                 projectDirectory = file("cinterop")
                 packageNameOverride.set("com.davils.example.cinterop")

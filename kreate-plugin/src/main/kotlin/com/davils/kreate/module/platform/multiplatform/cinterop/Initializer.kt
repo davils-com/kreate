@@ -19,10 +19,12 @@ package com.davils.kreate.module.platform.multiplatform.cinterop
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.jobs.executeTaskBeforeCompile
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.AddRustDependencies
+import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.CompileNative
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.CompileRust
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.ConfigureCargo
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.GenerateDefinitionFiles
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.GenerateRustBuildScript
+import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.InitializeNativeProject
 import com.davils.kreate.module.platform.multiplatform.cinterop.tasks.InitializeRustProject
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -57,6 +59,14 @@ private fun validateRootDir(rootDir: File) {
 }
 
 private fun Project.addCInteropTasks(extension: KreateExtension) {
+    val cInteropConfig = extension.platform.multiplatform.cInterop
+    when (cInteropConfig.language.get()) {
+        NativeLanguage.RUST -> addRustCInteropTasks(extension)
+        NativeLanguage.C, NativeLanguage.CPP -> addNativeCInteropTasks(extension)
+    }
+}
+
+private fun Project.addRustCInteropTasks(extension: KreateExtension) {
     val projectName = resolveProjectName(extension)
 
     val cInteropConfig = extension.platform.multiplatform.cInterop
@@ -99,10 +109,46 @@ private fun Project.addCInteropTasks(extension: KreateExtension) {
         this.projectName.set(projectName)
         this.defFileName.set(cInteropConfig.defFiles.fileName)
         this.defDirName.set(cInteropConfig.defFiles.dirName)
+        this.language.set(cInteropConfig.language)
         if (cInteropConfig.rustTargets.isPresent) {
             rustTargets.set(cInteropConfig.rustTargets)
         }
         dependsOn(compileRust)
+    }
+
+    tasks.withType<CInteropProcess>().configureEach {
+        dependsOn(generateDefinitionFiles)
+    }
+    executeTaskBeforeCompile(generateDefinitionFiles.get())
+}
+
+private fun Project.addNativeCInteropTasks(extension: KreateExtension) {
+    val projectName = resolveProjectName(extension)
+
+    val cInteropConfig = extension.platform.multiplatform.cInterop
+    val projectRootDir = resolveRootDir(cInteropConfig)
+    validateRootDir(projectRootDir)
+
+    val nativeProject = projectRootDir.resolve(projectName)
+    val initializeNativeProject = tasks.register<InitializeNativeProject>("kreate-c-interop-initialize") {
+        this.workDir.set(projectRootDir)
+        this.projectName.set(projectName)
+        this.language.set(cInteropConfig.language)
+    }
+
+    val compileNative = tasks.register<CompileNative>("kreate-c-interop-compile") {
+        this.workDir.set(nativeProject)
+        dependsOn(initializeNativeProject)
+    }
+
+    val generateDefinitionFiles = tasks.register<GenerateDefinitionFiles>("kreate-c-interop-definitions") {
+        this.workDir.set(nativeProject)
+        this.rootDir.set(projectRootDir)
+        this.projectName.set(projectName)
+        this.defFileName.set(cInteropConfig.defFiles.fileName)
+        this.defDirName.set(cInteropConfig.defFiles.dirName)
+        this.language.set(cInteropConfig.language)
+        dependsOn(compileNative)
     }
 
     tasks.withType<CInteropProcess>().configureEach {

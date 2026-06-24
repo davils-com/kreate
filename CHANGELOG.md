@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.0
+
+### Added
+- **C and C++ Native Interop**: Extended Kotlin Multiplatform C-interop to support C and C++ as first-class native languages alongside Rust. A new `language` option in the `cInterop` block selects the pipeline: `NativeLanguage.RUST` (default) keeps the Cargo/`cbindgen` flow, while `NativeLanguage.C` and `NativeLanguage.CPP` scaffold and build a CMake static-library project that is bridged through a hand-written C header.
+- **Multiple JNI Include Paths**: Added a `libraryIncludePaths` option to the JNI configuration block, allowing multiple C++ library include directories to be specified. Each configured path is passed to the compiler via the generated `CMakeLists.txt`, making it easier to depend on multiple external libraries located in different directories.
+- **JNI for Multiplatform JVM Targets**: Extended JNI support to Kotlin Multiplatform projects. Native integration can now be configured via `platform.jvm.jni` and is wired into the JVM target's compilation, test, and run tasks without affecting other platform targets.
+
+### Changed
+- **C-Interop Pipeline Refactoring**: Internal reorganization of the C-interop initialization logic to support multiple native backends (Cargo for Rust, CMake for C/C++).
+- **Task Registration Strategy**: Refined how native tasks are wired into the Kotlin compilation lifecycle to ensure consistent behavior across JVM and Multiplatform projects.
+
+### Fixed
+- **JNI Library Path Resolution**: Fixed issues where native libraries were not correctly resolved during tests in Multiplatform projects by ensuring the JVM target's runtime classpath is properly updated.
+
 ## 1.2.5
 
 ### Changed
@@ -163,15 +177,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Initial stable release. Transitioned from internal development to a public Gradle plugin.
-
----
-[1.2.5]: https://github.com/davils/kreate/compare/v1.2.4...v1.2.5
-[1.2.4]: https://github.com/davils/kreate/compare/v1.2.3...v1.2.4
-[1.2.3]: https://github.com/davils/kreate/compare/v1.2.2...v1.2.3
-[1.2.2]: https://github.com/davils/kreate/compare/v1.2.1...v1.2.2
-[1.2.1]: https://github.com/davils/kreate/compare/v1.2.0...v1.2.1
-[1.2.0]: https://github.com/davils/kreate/compare/v1.1.1...v1.2.0
-[1.1.1]: https://github.com/davils/kreate/compare/v1.1.0...v1.1.1
-[1.1.0]: https://github.com/davils/kreate/compare/v1.0.1...v1.1.0
-[1.0.1]: https://github.com/davils/kreate/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/davils/kreate/releases/tag/v1.0.0

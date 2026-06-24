@@ -17,6 +17,7 @@
 package com.davils.kreate.module.platform.multiplatform.cinterop.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
 import com.davils.kreate.module.platform.multiplatform.cinterop.resolveRustTargets
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -93,6 +94,18 @@ public abstract class GenerateDefinitionFiles : Task(
     public abstract val rustTargets: ListProperty<String>
 
     /**
+     * The native source language the definition file is generated for.
+     *
+     * For [NativeLanguage.RUST] the `libraryPaths` point to the per-target
+     * Cargo `release` output directories, while for [NativeLanguage.C] and
+     * [NativeLanguage.CPP] they point to the single CMake `build` directory.
+     *
+     * @since 1.3.0
+     */
+    @get:Input
+    public abstract val language: Property<NativeLanguage>
+
+    /**
      * The output directory where definition files are generated.
      * @since 1.0.0
      */
@@ -135,9 +148,11 @@ public abstract class GenerateDefinitionFiles : Task(
     private fun writeFileContent(defFile: File) {
         val rootDir = rootDir.get()
         val name = projectName.get()
-        val targets = resolveRustTargets(rustTargets)
-        val libraryPaths = targets.joinToString(" ") { target ->
-            "${rootDir.asFile.name}/${name}/target/${target}/release"
+        val libraryPaths = when (language.get()) {
+            NativeLanguage.RUST -> resolveRustTargets(rustTargets).joinToString(" ") { target ->
+                "${rootDir.asFile.name}/${name}/target/${target}/release"
+            }
+            else -> "${rootDir.asFile.name}/${name}/build"
         }
 
         defFile.writeText(

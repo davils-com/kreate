@@ -67,6 +67,20 @@ public abstract class CInteropExtension @Inject constructor(
     public val enabled: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
 
     /**
+     * The native source language used for the interop.
+     *
+     * Selects the scaffolding and build pipeline. [NativeLanguage.RUST] (the
+     * default) builds a Cargo project and generates headers with `cbindgen`,
+     * while [NativeLanguage.C] and [NativeLanguage.CPP] build a CMake project
+     * producing a static library that is bridged through a hand-written C
+     * header.
+     *
+     * @since 1.3.0
+     */
+    public val language: Property<NativeLanguage> =
+        objects.property(NativeLanguage::class.java).convention(NativeLanguage.RUST)
+
+    /**
      * Optional override for the C-interop name.
      * @since 1.0.0
      */

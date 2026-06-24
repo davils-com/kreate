@@ -33,6 +33,29 @@ Kotlin/Native compilation:
 After step 6 completes, all `CInteropProcess` tasks automatically depend on
 `kreate-c-interop-definitions`, so your normal `build` or `assemble` invocation drives the entire chain.
 
+## Native Language Selection
+
+Since Kreate **1.3.0**, C-Interop supports C and C++ as first-class native languages alongside Rust.
+The `language` option selects the underlying pipeline:
+
+| `language`             | Toolchain        | Pipeline summary                                                                 |
+|------------------------|------------------|----------------------------------------------------------------------------------|
+| `NativeLanguage.RUST`  | Cargo + cbindgen | _(default)_ Initializes a Cargo project and generates headers with `cbindgen`    |
+| `NativeLanguage.C`     | CMake            | Scaffolds a CMake C project and builds a static library bridged via a C header   |
+| `NativeLanguage.CPP`   | CMake            | Scaffolds a CMake C++ project and builds a static library bridged via a C header |
+
+For `C` and `CPP`, the pipeline is reduced to three tasks:
+
+| Step | Task                           | Description                                                              |
+|------|--------------------------------|--------------------------------------------------------------------------|
+| 1    | `kreate-c-interop-initialize`  | Scaffolds a CMake project with `CMakeLists.txt`, `include/` and `src/`   |
+| 2    | `kreate-c-interop-compile`     | Runs `cmake` to build the static library `lib<name>.a`                   |
+| 3    | `kreate-c-interop-definitions` | Writes the Kotlin/Native `.def` file pointing to the compiled artifacts  |
+
+The C/C++ flow requires **CMake 3.20 or later** and a C/C++ compiler instead of the Rust toolchain.
+The public API is declared in a hand-written header `include/<projectName>.h` (using an
+`extern "C"` boundary for C++), which Kotlin/Native consumes directly.
+
 ## Enabling C-Interop
 
 C-Interop is **disabled by default**. Enable it inside your module's `build.gradle.kts` within the

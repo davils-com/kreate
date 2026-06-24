@@ -8,7 +8,8 @@ pipeline.
 | Property              | Type                   | Default                   | Description                                                                            |
 |-----------------------|------------------------|---------------------------|----------------------------------------------------------------------------------------|
 | `enabled`             | `Property<Boolean>`    | `false`                   | Master switch — must be `true` for any C-Interop tasks to run                          |
-| `nameOverride`        | `Property<String>`     | *(project name)*          | Overrides the name used for the Rust project directory and C-Interop compilation unit  |
+| `language`            | `Property<NativeLanguage>` | `NativeLanguage.RUST` | Selects the native language/pipeline: `RUST` (Cargo + cbindgen), `C` or `CPP` (CMake)  |
+| `nameOverride`        | `Property<String>`     | *(project name)*          | Overrides the name used for the native project directory and C-Interop compilation unit |
 | `projectDirectory`    | `DirectoryProperty`    | `cinterop/`               | Directory (relative to the Gradle module) where the Rust project is created            |
 | `packageNameOverride` | `Property<String>`     | `<group>.<name>.cinterop` | Overrides the Kotlin package name under which the native bindings are exposed          |
 | `rustTargets`         | `ListProperty<String>` | *(auto-detected)*         | Explicit list of Rust target triples to compile for; if empty the host OS/arch is used |
@@ -39,6 +40,27 @@ Each Rust target triple is mapped to a Kotlin/Native target automatically:
 | `aarch64-unknown-linux-*`         | `linuxArm64`         |
 
 Any other triple causes a `GradleException` at configuration time.
+
+## Native Language (`language`)
+
+The `language` property selects which native toolchain backs the interop. It accepts a
+`NativeLanguage` value:
+
+```kotlin
+import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
+
+cInterop {
+    enabled.set(true)
+    language.set(NativeLanguage.CPP) // RUST (default), C, or CPP
+}
+```
+
+- `NativeLanguage.RUST` *(default)* — runs the full Cargo/`cbindgen` pipeline and honors
+  `rustTargets`.
+- `NativeLanguage.C` / `NativeLanguage.CPP` — scaffold and build a CMake project, producing a
+  static library `lib<projectName>.a` in the project's `build/` directory. The public API is
+  declared in a hand-written `include/<projectName>.h` header (the C++ scaffold wraps it in an
+  `extern "C"` boundary). These modes require **CMake 3.20+** and a C/C++ compiler.
 
 ## Definition File Configuration
 
@@ -94,6 +116,16 @@ libraryPaths = <cinteropDir>/<projectName>/target/<rustTarget>/release
 
 When multiple Rust targets are configured, all their release directories are listed in
 `libraryPaths` separated by spaces.
+
+For `NativeLanguage.C` and `NativeLanguage.CPP`, `libraryPaths` instead points to the single
+CMake build directory:
+
+```
+headers = <projectName>.h
+staticLibraries = lib<projectName>.a
+compilerOpts = -I<cinteropDir>/<projectName>/include
+libraryPaths = <cinteropDir>/<projectName>/build
+```
 
 ## Generated `build.rs`
 
