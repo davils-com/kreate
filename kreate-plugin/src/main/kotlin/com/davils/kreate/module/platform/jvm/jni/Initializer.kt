@@ -68,6 +68,7 @@ private fun Project.addJniTasks(extension: KreateExtension) {
     val initializeJniProject = tasks.register<InitializeCppProject>("kreate-jni-initialize") {
         this.workDir.set(rootDir)
         this.projectName.set(projectName)
+        this.libraryIncludePaths.set(jniConfig.libraryIncludePaths)
     }
 
     val buildNative = tasks.register<BuildNative>(KREATE_JNI_BUILD_TASK) {

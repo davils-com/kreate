@@ -18,9 +18,11 @@ package com.davils.kreate.module.platform.jvm.jni.tasks
 
 import com.davils.kreate.jobs.Task
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -58,6 +60,21 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
     public abstract val projectName: Property<String>
 
     /**
+     * Additional C++ library include directories added to the generated
+     * `CMakeLists.txt`.
+     *
+     * Each entry is appended to `target_include_directories`, enabling the
+     * native project to resolve headers from multiple external libraries.
+     * When empty, only the conventional `include` directory and the JNI
+     * headers are used.
+     *
+     * @since 1.2.6
+     */
+    @get:Input
+    @get:Optional
+    public abstract val libraryIncludePaths: ListProperty<String>
+
+    /**
      * The output directory that represents the native project root.
      *
      * @since 1.1.0
@@ -84,7 +101,7 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
 
         val cMake = projectRoot.resolve(CMAKE_FILE_NAME)
         if (!cMake.exists()) {
-            cMake.writeText(defaultCMakeContent(projectName))
+            cMake.writeText(defaultCMakeContent(projectName, libraryIncludePaths.getOrElse(emptyList())))
         }
 
         val placeholder = srcDir.resolve("$projectName.cpp")
@@ -93,21 +110,27 @@ public abstract class InitializeCppProject : Task("Generates a new native C++ JN
         }
     }
 
-    private fun defaultCMakeContent(projectName: String): String = $$"""
-        cmake_minimum_required(VERSION 3.20)
-        project($$projectName CXX)
-        set(CMAKE_CXX_STANDARD 17)
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    private fun defaultCMakeContent(projectName: String, libraryIncludePaths: List<String>): String {
+        val extraIncludes = libraryIncludePaths
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString("") { " \"$it\"" }
+        return $$"""
+            cmake_minimum_required(VERSION 3.20)
+            project($$projectName CXX)
+            set(CMAKE_CXX_STANDARD 17)
+            set(CMAKE_CXX_STANDARD_REQUIRED ON)
+            set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-        find_package(JNI REQUIRED)
+            find_package(JNI REQUIRED)
 
-        file(GLOB $${projectName.uppercase()}_SOURCES "src/*.cpp" "src/*.cc")
+            file(GLOB $${projectName.uppercase()}_SOURCES "src/*.cpp" "src/*.cc")
 
-        add_library($$projectName SHARED ${$${projectName.uppercase()}_SOURCES})
-        target_include_directories($$projectName PRIVATE ${JNI_INCLUDE_DIRS} include)
-        target_link_libraries($$projectName PRIVATE ${JNI_LIBRARIES})
-    """.trimIndent()
+            add_library($$projectName SHARED ${$${projectName.uppercase()}_SOURCES})
+            target_include_directories($$projectName PRIVATE ${JNI_INCLUDE_DIRS} include$$extraIncludes)
+            target_link_libraries($$projectName PRIVATE ${JNI_LIBRARIES})
+        """.trimIndent()
+    }
 
     private fun defaultSourceContent(projectName: String): String = """
         #include <jni.h>

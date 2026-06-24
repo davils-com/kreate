@@ -53,6 +53,7 @@ kreate {
                 enabled = true
                 projectDirectory = layout.projectDirectory.dir("jni")
                 nameOverride = "example"
+                libraryIncludePaths = listOf("include", "libs/foo/include", "libs/bar/include")
             }
         }
     }

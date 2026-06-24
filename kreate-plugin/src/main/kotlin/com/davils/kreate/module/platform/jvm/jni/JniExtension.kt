@@ -18,6 +18,7 @@ package com.davils.kreate.module.platform.jvm.jni
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import javax.inject.Inject
 
@@ -64,4 +65,20 @@ public abstract class JniExtension @Inject constructor(
      * @since 1.1.0
      */
     public val projectDirectory: DirectoryProperty = factory.directoryProperty()
+
+    /**
+     * Additional C++ library include directories passed to the compiler.
+     *
+     * Each entry is added to the generated `CMakeLists.txt` via
+     * `target_include_directories`, allowing the native project to resolve
+     * headers from multiple external libraries located in different
+     * directories. Paths may be absolute or relative to the native project
+     * root (`<projectDirectory>/<projectName>`).
+     *
+     * Defaults to an empty list, in which case only the conventional `include`
+     * directory and the JNI headers are used.
+     *
+     * @since 1.2.6
+     */
+    public val libraryIncludePaths: ListProperty<String> = factory.listProperty(String::class.java)
 }
