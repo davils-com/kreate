@@ -6,6 +6,12 @@ and runtime library resolution — is automated through a set of dedicated Gradl
 
 JNI support was introduced in Kreate **1.1.0** and lives inside the `platform.jvm.jni` DSL block.
 
+<note>
+Since Kreate <b>1.2.6</b>, JNI is also available for the JVM target of Kotlin Multiplatform projects.
+The same <code>platform.jvm.jni</code> block applies; only the JVM target's compilation, test, and run
+tasks are affected, leaving other platform targets untouched.
+</note>
+
 ## How It Works
 
 When JNI is enabled, Kreate registers and wires up the following automatically:

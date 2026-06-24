@@ -66,5 +66,6 @@ internal object PlatformModule : Module {
     private fun Project.configureMultiplatform(extension: KreateExtension): Unit = afterEvaluate {
         initMultiplatformCompiler(extension)
         initializeCInterop(extension)
+        initializeJni(extension)
     }
 }

@@ -39,6 +39,11 @@ import java.io.File
  * into the Kotlin compile pipeline, and wires `-Djava.library.path` into any
  * [Test] and [JavaExec] task so the runtime can resolve the shared library.
  *
+ * This works for both pure JVM projects and the JVM target of Kotlin
+ * Multiplatform projects; in the latter case only the JVM target's
+ * compilation, test, and run tasks are affected, leaving other platform
+ * targets untouched.
+ *
  * @param extension The Kreate configuration extension.
  * @return Unit
  * @since 1.1.0
