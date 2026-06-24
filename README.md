@@ -41,7 +41,7 @@
 Managing Kotlin Multiplatform and JVM configurations can be complex. **Kreate** simplifies this by:
 
 *   **Standardizing Platform Setup**: A consistent DSL for JVM, Linux, macOS, and Windows.
-*   **Integrating Native Code**: Automated bridge for Rust (via C-Interop) and C/C++ (via JNI).
+*   **Integrating Native Code**: Automated bridge for Rust, C, and C++ (via C-Interop) and JNI for JVM/Multiplatform.
 *   **Enforcing Quality & Security**: Integrated code analysis (Detekt) and security scanning (Trivy).
 *   **Declarative Infrastructure**: Focus on project requirements while the plugin handles the underlying Gradle configuration.
 
@@ -61,18 +61,21 @@ Integrated tools to ensure enterprise-grade code quality and security:
 - **Detekt Integration**: Static code analysis to enforce clean code architecture and design patterns.
 - **Unified DSL**: Simple `trivy { }` and `detekt { }` blocks for centralized management.
 
-### Rust C-Interop
-Automates the integration of Rust libraries into Kotlin Multiplatform:
-- **Toolchain Integration**: Manages `cargo` and cross-compilation targets.
-- **Project Scaffolding**: Can generate Rust library structures if missing.
-- **Header Synchronization**: Manages C headers and Kotlin bindings.
-- **Multi-Arch Support**: Targets `x86_64`, `aarch64`, and others.
+### C-Interoperability (Native)
+Automates the integration of native libraries (Rust, C, C++) into Kotlin Multiplatform:
+- **Multi-Language Support**: Support for Rust (via Cargo), C, and C++ (via CMake).
+- **Toolchain Integration**: Manages `cargo`, `cmake`, and cross-compilation targets.
+- **Project Scaffolding**: Automatically generates project structures for the selected language.
+- **Header Synchronization**: Manages C headers and Kotlin bindings via `.def` files.
+- **Multi-Arch Support**: Targets `x86_64`, `aarch64`, and other native triples.
 
 ### JNI Support (Java Native Interface)
-Simplified integration for native C/C++ code in JVM projects:
+Simplified integration for native C/C++ code in JVM and Multiplatform (JVM target) projects:
 - **CMake Integration**: Automatically handles CMake-based native builds.
+- **Multiple Include Paths**: Support for configuring multiple external library directories.
+- **KMP Integration**: Seamlessly wires JNI into the JVM target of Multiplatform projects.
 - **Runtime Library Path**: Automatically configures `java.library.path` for testing and execution.
-- **Consistent Layout**: Follows a structured layout for native sources (mirroring C-Interop style).
+- **Consistent Layout**: Follows a structured layout for native sources.
 
 ### Testing Pipeline
 Pre-configured **Kotest** integration for robust validation:
@@ -133,6 +136,14 @@ kreate {
         jvm {
             jni {
                 enabled = true
+                libraryIncludePaths.add("/usr/local/include/mylib")
+            }
+        }
+
+        multiplatform {
+            cinterop {
+                language = NativeLanguage.CPP // Support for RUST, C, CPP
+                // ... other configs
             }
         }
     }
@@ -176,6 +187,8 @@ kreate {
 | `platform` | `explicitApi`         | Enforces Kotlin Explicit API mode         | `false`      |
 | `platform` | `allWarningsAsErrors` | Treats all compiler warnings as errors    | `true`       |
 | `jvm.jni`  | `enabled`             | Enables JNI support (CMake-based)         | `false`      |
+| `jvm.jni`  | `libraryIncludePaths` | List of additional C++ include paths      | `[]`         |
+| `cinterop` | `language`            | Native language (RUST, C, CPP)            | `RUST`       |
 | `project`  | `detekt`              | Static code analysis configuration        | `Disabled`   |
 | `project`  | `trivy`               | Security & license scanning configuration | `Disabled`   |
 | `project`  | `buildConstant`       | Generate type-safe Kotlin constants       | `Disabled`   |
