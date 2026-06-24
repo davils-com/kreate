@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.1
+
+### Added
+- **JNI Library Runtime Paths**: Added `libraryRuntimePaths` option to the JNI configuration block. This allows specifying additional directories to be included in `java.library.path` at runtime, enabling the JVM to resolve external shared libraries that are not part of the primary JNI build.
+
+### Fixed
+- **JNI Library Path Merging**: Improved how `java.library.path` is configured for tests and execution tasks. It now correctly merges the default native build output directory with any user-specified runtime paths, preventing issues where external libraries were not correctly resolved.
+- **Native Build Error Reporting**: Enhanced the `kreate-jni-build` task to provide more detailed error messages when CMake builds fail, including the underlying cause of the failure.
+
 ## 1.3.0
 
 ### Added
