@@ -100,13 +100,13 @@ private fun Project.applyRuntimeLibraryPath(extension: KreateExtension) {
     tasks.withType<Test>().configureEach {
         dependsOn(KREATE_JNI_BUILD_TASK)
         val filteredArgs = jvmArgs.filterNot { it.startsWith(JAVA_LIBRARY_PATH_PROPERTY) }
-        setJvmArgs(filteredArgs)
+        jvmArgs = filteredArgs
         jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${allLibraryPaths.get()}")
     }
     tasks.withType<JavaExec>().configureEach {
         dependsOn(KREATE_JNI_BUILD_TASK)
         val filteredArgs = jvmArgs.filterNot { it.startsWith(JAVA_LIBRARY_PATH_PROPERTY) }
-        setJvmArgs(filteredArgs)
+        jvmArgs = filteredArgs
         jvmArgs("$JAVA_LIBRARY_PATH_PROPERTY${allLibraryPaths.get()}")
     }
 }
