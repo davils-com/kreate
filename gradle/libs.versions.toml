@@ -4,7 +4,7 @@ poet = "2.3.0"
 dokka = "2.2.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.5"
-kore = "1.1.0"
+kore = "1.1.1"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
