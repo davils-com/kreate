@@ -4,7 +4,7 @@
 # built against the oldest API it claims to support, otherwise it fails at runtime on a
 # consumer's machine rather than at build time here. Consumers remain free to use any
 # newer Kotlin version in their own build.
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 poet = "2.3.0"
 dokka = "2.2.0"
 publish = "0.37.0"
