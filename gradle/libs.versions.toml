@@ -5,7 +5,7 @@
 # consumer's machine rather than at build time here. Consumers remain free to use any
 # newer Kotlin version in their own build.
 kotlin = "2.4.0"
-poet = "2.3.0"
+poet = "2.4.0"
 dokka = "2.2.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
