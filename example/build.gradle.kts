@@ -8,7 +8,7 @@ import com.davils.kreate.module.trivy.Score
 import java.time.Year
 
 plugins {
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     alias(libs.plugins.kreate)
     application
 }
