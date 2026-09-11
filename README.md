@@ -47,8 +47,9 @@ Kreate is a *convention* plugin, not a framework.
 
 - **It does not wrap Gradle.** Your build script stays a Gradle build script, and every task
   Kreate registers is an ordinary task you can depend on, reconfigure, or disable.
-- **It does not apply plugins behind your back.** Where an integration needs Detekt or the Maven
-  Publish plugin, you apply it and choose its version; Kreate configures it.
+- **It applies a plugin only for a feature you enabled.** Enabling `coverage` applies Kover, and
+  nothing applies Kover otherwise. Apply it yourself to pin a version or to reach its own DSL
+  block, and Kreate leaves it alone. The Kotlin plugin is always yours to apply.
 - **It does not touch your repositories or dependency resolution** unless you explicitly ask.
 - **Everything is opt-in.** Applying the plugin on its own registers no tasks and changes no
   behaviour.
@@ -167,16 +168,16 @@ dependencyResolutionManagement {
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.0"
-    id("com.davils.kreate") version "2.0.0"
+    id("com.davils.kreate") version "3.0.0"
 }
 ```
 
 > **Note**
-> Kreate configures Detekt, Kover, kotlinx-benchmark and the Maven Publish plugin but does not
-> apply them, so their versions stay under your control. Apply them yourself if you enable those
-> integrations: `id("dev.detekt") version "..."`,
-> `id("org.jetbrains.kotlinx.kover") version "..."` and
-> `id("com.vanniktech.maven.publish") version "..."`.
+> That is the whole plugins block. Kreate applies Detekt, Kover, kotlinx-benchmark, Dokka and the
+> publishing plugins itself, for whichever integrations you enable — apply them yourself only to
+> pin a version or to reach their own DSL blocks, in which case Kreate leaves them alone. The
+> Kotlin plugin is the exception and stays yours: which one a project uses is the shape of the
+> project, and its version governs the language your sources are written in.
 
 ### Configuration
 

@@ -9,6 +9,7 @@
     <toc-element topic="Home.topic"/>
     <toc-element topic="Overview.md"/>
     <toc-element topic="Getting-Started.md"/>
+    <toc-element topic="Plugin-Management.md"/>
     <toc-element topic="Compatibility.md"/>
     <toc-element topic="Task-Reference.md"/>
 
@@ -74,8 +75,9 @@
             <toc-element topic="Testing-Suites-Migration.md"/>
             <toc-element topic="Testing-Kotest.md"/>
             <toc-element topic="Testing-Configuration-Reference.md"/>
-            <toc-element topic="Testing-Multiplatfrom.md"/>
+            <toc-element topic="Testing-Multiplatform.md"/>
             <toc-element topic="Testing-Example.md"/>
+            <toc-element topic="Testing-Troubleshooting.md"/>
         </toc-element>
         <toc-element toc-title="API validation">
             <toc-element topic="API-Validation-Overview.md"/>

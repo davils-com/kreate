@@ -48,6 +48,12 @@ For a Kotlin Multiplatform project, replace <code>kotlin("jvm")</code> with
 matching compilation path; nothing else in your <code>kreate { }</code> block changes.
 </note>
 
+<tip>
+That is the whole <code>plugins { }</code> block. %product% applies Detekt, Kover,
+kotlinx-benchmark, Dokka and the publishing plugins itself, for whichever features you enable — see
+<a href="Plugin-Management.md">Plugins %product% applies</a>. The Kotlin plugin stays yours.
+</tip>
+
 ## Step 2: Declare your repositories
 
 %product% does not add repositories to your project. Declare them where Gradle expects them,
@@ -185,15 +191,42 @@ kreate {
 Continue at [JNI support](JNI-Support.md).
 
 </tab>
+<tab title="Testing" group-key="tests">
+
+Unit and integration tests as separate suites, each with its own dependencies.
+
+```kotlin
+kreate {
+    project {
+        tests {
+            enabled = true
+
+            suites {
+                named("integrationTest") {
+                    dependencies {
+                        implementation("org.testcontainers:postgresql:1.20.4")
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+```bash
+./gradlew check             # unit tests
+./gradlew integrationTest   # the slow ones, on demand
+```
+
+Continue at [Testing overview](Testing-Overview.md), or
+[Migrating from src/test](Testing-Suites-Migration.md) if the project already has tests.
+
+</tab>
 <tab title="Publishing" group-key="publish">
 
 Signed releases with complete POM metadata.
 
 ```kotlin
-plugins {
-    id("com.vanniktech.maven.publish") version "<version>"
-}
-
 kreate {
     project {
         publish {
@@ -223,6 +256,8 @@ scaffolded for you on the first build.
 └── my-module/
     ├── build.gradle.kts          # the kreate { } block
     ├── src/main/kotlin/          # Kotlin sources
+    ├── src/unitTest/kotlin/      # fast tests, run by `check`
+    ├── src/integrationTest/kotlin/  # slow tests, run on demand
     ├── jni/                      # JNI sources (optional)
     │   └── my_module/
     │       ├── CMakeLists.txt
@@ -253,14 +288,24 @@ Every feature is off unless listed otherwise.
 | `project` | `applySerializationPlugin` | `false` |
 | `project.buildConstant` | `enabled` | `false` |
 | `project.docs` | `enabled` | `false` |
-| `project.tests` | `enabled` | `true` |
+| `project.tests` | `enabled` | `false` |
+| `project.tests` | `legacyTestSourceSet` | `DISABLE` |
+| `project.tests` | `excludeSuitesFromCoverage` | `true` |
+| `project.tests.kotest` | `enabled` | `false` |
+| `project.tests.suites["unitTest"]` | `runOnCheck` | `true` |
+| `project.tests.suites["integrationTest"]` | `runOnCheck` | `false` |
 | `project.detekt` | `enabled` | `false` |
+| `project.coverage` | `enabled` | `false` |
+| `project.benchmark` | `enabled` | `false` |
+| `project.apiValidation` | `enabled` | `false` |
+| `project.dependencyLocking` | `enabled` | `false` |
 | `project.publish` | `enabled` | `false` |
 | `trivy` | `enabled` | `false` |
 
 <seealso>
     <category ref="start">
         <a href="Overview.md">Overview</a>
+        <a href="Plugin-Management.md">Plugins %product% applies</a>
         <a href="Compatibility.md">Compatibility</a>
         <a href="Task-Reference.md">Task reference</a>
     </category>

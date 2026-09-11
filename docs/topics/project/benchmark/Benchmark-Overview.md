@@ -6,7 +6,7 @@
 
 <tldr>
 <p><b>Enable</b>: <code>project { benchmark { enabled = true } }</code></p>
-<p><b>Requires</b>: the <code>org.jetbrains.kotlinx.benchmark</code> plugin applied by you</p>
+<p><b>Applies</b>: the <code>org.jetbrains.kotlinx.benchmark</code> plugin</p>
 <p><b>Tasks</b>: <code>kreateBenchmarkBaseline</code>, <code>kreateBenchmarkCheck</code>, <code>kreateBenchmarkReport</code></p>
 </tldr>
 
@@ -19,13 +19,9 @@ needs, a report at a path other tasks can depend on, and a baseline you commit a
 
 ## Quick start
 
-Apply the plugin yourself, then enable the integration:
+Enable the integration; %product% applies the plugin:
 
 ```kotlin
-plugins {
-    id("org.jetbrains.kotlinx.benchmark") version "0.4.17"
-}
-
 kreate {
     project {
         benchmark {
@@ -75,21 +71,27 @@ write by hand:
 * **The `kotlinx-benchmark-runtime` dependency** on that source set.
 * **The `allopen` compiler plugin**, configured for `org.openjdk.jmh.annotations.State`.
   JMH subclasses every `@State` class, so a benchmark class that is final fails during
-  generation with an error that never mentions `allopen`. This is the one plugin Kreate
-  applies for you, because there is nothing here to decide.
+  generation with an error that never mentions `allopen`.
 * **The measurement profiles**, with defaults chosen for reproducibility rather than speed —
   including a fixed fork count, which is the difference between a measurement and a
   snapshot of whatever state the JIT happened to be in.
 
-## Why the plugin is not applied for you
+## The plugin is applied for you
 
-Kreate configures kotlinx-benchmark, it does not apply it. It is a 0.4.x release with an API
-that is not marked stable, so pinning it to Kreate's release cycle would make Kreate the
-reason you cannot upgrade. Kreate does not put it on your buildscript classpath either — it
-compiles against the plugin and lets your `plugins { }` block supply it at runtime.
+Enabling `benchmark { }` applies kotlinx-benchmark; your `plugins { }` block does not need to
+mention it. Note that the plugin is published to the Gradle Plugin Portal only, which a build
+resolving its buildscript classpath through an internal mirror has to account for.
 
-If you enable the feature without applying the plugin, the build fails with an explanation
-rather than a `NoClassDefFoundError`.
+It is a 0.4.x release with an API that is not marked stable, so pin the version yourself if you
+need a particular one:
+
+```kotlin
+plugins {
+    id("org.jetbrains.kotlinx.benchmark") version "<version>"
+}
+```
+
+Kreate's own application is then a no-op.
 
 ## Scope
 

@@ -65,31 +65,22 @@ plugin has to be applied in each of them:
 ```kotlin
 // core/build.gradle.kts
 plugins {
-    id("org.jetbrains.kotlinx.kover") version "0.9.9"
 }
 ```
 
 Only the aggregating project needs the `kreate { }` coverage configuration; the others just need
 the plugin.
 
-A project that is missing it is reported by path:
-
-```
-Kreate's coverage aggregation on project ':' includes projects that do not apply the
-Kover plugin:
-
-  - :api
-
-An aggregated project has to measure its own coverage before it can contribute any.
-```
+A project that is missing it gets it: %product% applies Kover to every project it aggregates, for
+the same reason it applies it to the aggregating one. An aggregated project has to measure its own
+coverage before it can contribute any, so listing it and applying the plugin there are the same
+decision.
 
 <note>
-<b>Why %product% does not just apply it for you.</b> Kover ships a <code>merge { }</code> block
-that applies its own plugin to the projects it aggregates. That is exactly the behaviour
-%product% exists to avoid — a project whose build script never mentions Kover would gain it, at a
-version nobody in that module chose. %product% wires the projects through Kover's
-<code>kover</code> configuration instead and reports the ones that are missing it, which is a
-message you can act on rather than a variant resolution failure.
+The projects are wired through Kover's own <code>kover</code> configuration rather than through its
+<code>merge { }</code> block, which reaches into other projects to configure them as well as to
+apply a plugin. Naming a project in <code>aggregate { }</code> should mean that its coverage is
+counted, and nothing more.
 </note>
 
 ## Verification applies to the merged number

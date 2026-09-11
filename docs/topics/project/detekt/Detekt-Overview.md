@@ -6,7 +6,7 @@
 
 <tldr>
 <p><b>Enable</b>: <code>project { detekt { enabled = true } }</code></p>
-<p><b>Requires</b>: the <code>dev.detekt</code> plugin applied by you</p>
+<p><b>Applies</b>: the <code>dev.detekt</code> plugin</p>
 </tldr>
 
 Detekt is a static code analysis tool for the Kotlin programming language. It operates on the abstract syntax tree provided by the Kotlin compiler and focuses on finding code smells, complexity issues, and potential bugs.
@@ -27,21 +27,22 @@ kreate {
 }
 ```
 
-Once enabled, you must manually apply the `dev.detekt` plugin to your project. Kreate will then automatically configure the standard tasks and reports.
+Enabling it is all it takes — Kreate applies the `dev.detekt` plugin and configures the standard tasks and reports.
+
+Apply it yourself when you want something Kreate does not expose: a pinned version, or Detekt's own `detekt { }` block, which only exists in your build script if the plugin was applied there. Kreate's own application is then a no-op.
 
 ```kotlin
 plugins {
-    id("dev.detekt") version "1.23.6" // Use the latest version
-}
-
-kreate {
-    project {
-        detekt {
-            enabled = true
-        }
-    }
+    id("dev.detekt") version "<version>"
 }
 ```
+
+## Which source sets are analysed
+
+Detekt registers a task per source set, so everything the project compiles is analysed — including
+the [test suites](Testing-Suites.md). A project with the two default suites gets
+`detektMainSourceSet`, `detektUnitTestSourceSet` and `detektIntegrationTestSourceSet`, plus one for
+every suite it registers. Nothing to configure.
 
 ## What `check` runs
 

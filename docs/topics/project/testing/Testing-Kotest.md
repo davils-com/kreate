@@ -89,9 +89,104 @@ kotest {
 >
 {style="note"}
 
+## A complete example
+
+```kotlin
+import com.davils.kreate.module.project.tests.suite.KotestModule
+
+kreate {
+    project {
+        tests {
+            enabled = true
+
+            kotest {
+                enabled = true
+                modules = listOf(KotestModule.ASSERTIONS, KotestModule.PROPERTY)
+            }
+
+            suites {
+                named("integrationTest") {
+                    kotest {
+                        // This suite writes its own JUnit XML for the CI parser.
+                        modules = listOf(KotestModule.ASSERTIONS, KotestModule.JUNIT_XML)
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+```kotlin
+// src/unitTest/kotlin/com/example/GreeterSpec.kt
+package com.example
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+
+class GreeterSpec : StringSpec({
+    "greets by name" {
+        Greeter().greet("world") shouldBe "Hello, world"
+    }
+})
+```
+
+```bash
+./gradlew unitTest
+```
+
+Nothing else is declared: no framework in the top level `dependencies { }` block, no
+`useJUnitPlatform()`, no launcher.
+
+## Tag filtering
+
+Kotest maps its own `@Tags` onto JUnit Platform tags, so a suite's `includeTags` and `excludeTags`
+reach Kotest specs unchanged:
+
+```kotlin
+suites {
+    named("unitTest") {
+        excludeTags = listOf("slow")
+    }
+}
+```
+
+## Version alignment
+
+One version applies to the whole bundle. The Kotest modules are released together, and mixing them
+produces link errors at run time rather than a resolution failure at configuration time — which is
+why the version is a single property rather than one per module.
+
+The JUnit Platform launcher is versioned separately because it belongs to JUnit, not to Kotest.
+Keep it in step with whatever JUnit line the project is on:
+
+| Project uses    | `junitPlatformVersion` |
+|-----------------|------------------------|
+| JUnit 6.x       | `6.x` (the default)    |
+| JUnit 5.x       | the matching `1.x`     |
+
+## Using a different framework
+
+Leave the bundle disabled and declare whatever you use on the suite:
+
+```kotlin
+suites {
+    named("unitTest") {
+        dependencies {
+            implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+        }
+    }
+}
+```
+
+The launcher is still added, because that is what starts the JUnit Platform rather than part of
+any one framework.
+
 <seealso>
     <category ref="related">
+        <a href="Testing-Overview.md">Overview</a>
         <a href="Testing-Suites.md">Test suites</a>
         <a href="Testing-Configuration-Reference.md">Configuration reference</a>
+        <a href="Testing-Troubleshooting.md">Troubleshooting</a>
     </category>
 </seealso>

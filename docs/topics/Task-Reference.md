@@ -303,14 +303,43 @@ Gradle's `verification` group rather than a `kreate` one, because a suite is not
 feature: it is the project's own test task under a more honest name, and it belongs where a
 developer and a CI pipeline already look for it. See [](Testing-Suites.md).
 
-The conventional `test` task is disabled and removed from `check` unless
-`project.tests.legacyTestSourceSet` says otherwise — see [](Testing-Suites-Migration.md).
+### Inputs and outputs
+
+<deflist type="wide">
+    <def title="Inputs">
+        The suite's compiled classes and its runtime classpath, plus every execution setting —
+        tag filters, system properties, environment variables and JVM arguments — as task inputs.
+        Changing any of them re-runs the task.
+    </def>
+    <def title="Outputs">
+        <code>build/test-results/&lt;suite&gt;/*.xml</code> when XML reporting is on, and
+        <code>build/reports/tests/&lt;suite&gt;/index.html</code> when HTML reporting is on.
+    </def>
+    <def title="Up-to-date">
+        Like any Gradle test task. Set <code>alwaysRun = true</code> on the suite, or
+        <code>alwaysRunTests = true</code> on the block, to opt out of the check.
+    </def>
+</deflist>
+
+### Ordering
+
+`mustRunAfterSuites` produces ordering constraints, not dependencies. `integrationTest` runs after
+`unitTest` when both are in the build, and asking for either alone pulls in only that one. On a
+multiplatform project the constraint is applied per target as well, so `jvmIntegrationTest` runs
+after `jvmUnitTest` even when the aggregate tasks are not requested.
+
+### The conventional test task
+
+Disabled and removed from `check` unless `project.tests.legacyTestSourceSet` says otherwise — see
+[](Testing-Suites-Migration.md). On a multiplatform project the per-target tasks are disabled but
+the `check` → `allTests` edge survives, because the Kotlin plugin's aggregate report has no removal
+API; the tasks are reported as `SKIPPED`.
 
 ## Tasks %product% configures but does not register
 
-Some integrations configure someone else's tasks rather than adding their own, because %product%
-configures Detekt and Kover without applying them. These names carry no `kreate` prefix — they
-belong to those plugins, and their contract is theirs.
+Some integrations configure someone else's tasks rather than adding their own. %product% applies
+those plugins for you — see [](Plugin-Management.md) — but the tasks are theirs, and so is their
+contract. These names carry no `kreate` prefix.
 
 <table>
     <tr>

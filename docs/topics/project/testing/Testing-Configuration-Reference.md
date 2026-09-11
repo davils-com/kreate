@@ -126,10 +126,70 @@ unconditionally printed to the console.
 
 The following exception formatting is always applied regardless of the logging settings:
 
+### `legacyTestSourceSet`
+
+What happens to the conventional `test` source set once the suites take over. Four values, covered
+in full in [](Testing-Suites-Migration.md):
+
+```kotlin
+import com.davils.kreate.module.project.tests.LegacyTestPolicy
+
+tests {
+    legacyTestSourceSet = LegacyTestPolicy.FAIL
+}
+```
+
+| Value     | `test` task                      | `src/test` sources    |
+|-----------|----------------------------------|-----------------------|
+| `DISABLE` | disabled, removed from `check`   | cleared               |
+| `FAIL`    | build fails while sources remain | —                     |
+| `ALIAS`   | runs the unit suite              | adopted by `unitTest` |
+| `KEEP`    | untouched                        | untouched             |
+
+### `legacySourceDirectories`
+
+What happens to the legacy source **directories**, separately from what happens to the task.
+Derived from `legacyTestSourceSet` unless set explicitly, and rarely worth setting:
+
+| Value   | Effect                                                       | Implied by        |
+|---------|--------------------------------------------------------------|-------------------|
+| `CLEAR` | directories cleared; the compilation reports `NO-SOURCE`      | `DISABLE`, `FAIL` |
+| `ADOPT` | directories added to the unit suite, then cleared             | `ALIAS`           |
+| `KEEP`  | left registered on the legacy source set                      | `KEEP`            |
+
+Set both to combine them differently — for instance to disable the legacy task while leaving its
+directories registered:
+
+```kotlin
+tests {
+    legacyTestSourceSet = LegacyTestPolicy.DISABLE
+    legacySourceDirectories = LegacySourceDirectories.KEEP
+}
+```
+
+### `excludeSuitesFromCoverage`
+
+Keeps the suites' own source sets out of the coverage denominator. Defaults to `true`.
+
+The coverage engine recognises a test compilation by the name `test` and nothing else, so a suite
+called `unitTest` would otherwise be measured as production code — the build stays green while the
+number describes the wrong thing. The exclusion is skipped when
+`coverage { sources { includedSourceSets } }` is non-empty, because an explicit include list
+already decides what counts.
+
 ## Suites
 
 `suites` is a `NamedDomainObjectContainer<TestSuiteExtension>`, pre-registered with `unitTest` and
 `integrationTest`. See [](Testing-Suites.md) for what a suite is and how it is laid out.
+
+```kotlin
+tests {
+    suites {
+        named("unitTest") { }          // configure a pre-registered suite
+        register("contractTest") { }   // add one
+    }
+}
+```
 
 ### Identity and layout
 
@@ -184,6 +244,95 @@ inherit their values from there. `dependencies { }` is suite-only:
 | `runtimeOnly(String)`   | Runtime classpath only                                     |
 | `platform(String)`      | A bill of materials applied to the suite's classpath       |
 
+### `enabled`
+
+Whether the suite is created at all. Defaults to `true`, including for suites you register.
+Setting it to `false` on a pre-registered suite is how a project opts out of `integrationTest`
+without working around it — no source set, no configurations, no task.
+
+### `sourceSetName`
+
+The name of the source set backing the suite, defaulting to the suite name. Separating the two
+lets a task be named one thing and its directory another:
+
+```kotlin
+suites {
+    register("it") {
+        sourceSetName = "integrationTest"   // task `it`, src/integrationTest/kotlin
+    }
+}
+```
+
+On a multiplatform project this is the name of the source set *tree*, from which `common<Name>`
+and `<target><Name>` are derived.
+
+### `srcDirs`
+
+Replaces the conventional source directories rather than adding to them. Empty by default, which
+leaves `src/<sourceSetName>/kotlin` in place. Paths resolve relative to the project directory.
+
+### `associateWithMain`
+
+Associates the suite's compilation with `main`. Defaults to `true`, which is what makes `internal`
+declarations visible to the tests and puts `main`'s own dependencies on the suite's classpath.
+
+Turning it off is a deliberate choice for a black-box suite and a mistake everywhere else: the
+tests can then only exercise the published surface.
+
+### `dependsOnSuites`
+
+Other suites whose compiled output — including their `internal` declarations — this suite may use.
+The mechanism for shared fixtures.
+
+Naming a suite here does **not** pull it into a build. It is about visibility; `mustRunAfterSuites`
+is about order.
+
+### `runOnCheck`
+
+Whether `check` runs this suite. `true` for everything except the pre-registered
+`integrationTest`, which cannot be a precondition of every local build when it needs Docker.
+
+### `mustRunAfterSuites`
+
+Ordering only. If both suites are in the same build, this one runs second; asking for this one
+alone does not drag the other in. `integrationTest` lists `unitTest` by default, so a build that
+runs both reports the cheap failures first.
+
+On a multiplatform project the ordering is applied per target as well, so requesting only
+`jvmIntegrationTest` still runs after `jvmUnitTest` when both are present.
+
+### `targets`
+
+Multiplatform only, ignored on Kotlin/JVM. Empty means every JVM target. Naming a Native, JS or
+Wasm target fails the build — see
+[](Testing-Multiplatform.md#which-targets-can-carry-a-suite).
+
+### `includeTags` and `excludeTags`
+
+JUnit Platform tag expressions applied to this suite's task. `includeTags` is exclusive: a
+non-empty list runs those tags and nothing else. Both reach Kotest specs, which map `@Tags` onto
+JUnit Platform tags.
+
+### `systemProperties`, `environment` and `jvmArgs`
+
+Passed to this suite's test JVM and no other. This is where an integration suite's switches belong
+— a Testcontainers reuse flag, a Spring profile, a larger heap — rather than on every test task in
+the project.
+
+### `dependencies { }`
+
+The suite's own dependencies, declared here because a suite's configurations do not exist while
+the build script runs.
+
+| Function                 | Configuration                       |
+|--------------------------|-------------------------------------|
+| `implementation(String)` | `<suite>Implementation`             |
+| `compileOnly(String)`    | `<suite>CompileOnly`                |
+| `runtimeOnly(String)`    | `<suite>RuntimeOnly`                |
+| `platform(String)`       | `<suite>Implementation` as platform |
+
+On a multiplatform project these land on the suite's shared source set.
+
 ## Kotest
 
 | Property                   | Type                          | Default               | Description                                    |
@@ -193,6 +342,18 @@ inherit their values from there. `dependencies { }` is suite-only:
 | `modules`                  | `ListProperty<KotestModule>`  | `[ASSERTIONS]`        | Optional libraries added beside the runner     |
 | `addJUnitPlatformLauncher` | `Property<Boolean>`           | `true`                | Adds the launcher a suite cannot start without |
 | `junitPlatformVersion`     | `Property<String>`            | `6.1.3`               | Version of that launcher                       |
+
+### `addJUnitPlatformLauncher`
+
+Adds `org.junit.platform:junit-platform-launcher` to every suite's runtime classpath, whether or
+not the rest of the bundle is enabled. Defaults to `true`, and it has to: Gradle supplies a
+launcher only to the `test` suite it created itself, so a suite's task otherwise fails before
+running a single test with `Failed to load JUnit Platform`.
+
+### `junitPlatformVersion`
+
+The version of that launcher. Defaults to the JUnit 6 line; a project on JUnit 5 should set the
+matching `1.x`, because the launcher and the engines it starts are released together.
 
 See [](Testing-Kotest.md).
 

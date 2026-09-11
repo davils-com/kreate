@@ -6,7 +6,7 @@
 
 <tldr>
 <p><b>Enable</b>: <code>project { publish { enabled = true } }</code></p>
-<p><b>Requires</b>: the <code>com.vanniktech.maven.publish</code> plugin applied by you</p>
+<p><b>Applies</b>: <code>maven-publish</code>, and <code>com.vanniktech.maven.publish</code> for Maven Central</p>
 </tldr>
 
 The `publish { }` block inside `kreate { project { } }` integrates artifact publishing into your
@@ -15,25 +15,12 @@ Gradle build. Kreate supports two publish targets out of the box:
 - **Maven Central** via the [Gradle Maven Publish Plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/central/) by Vanniktech
 - **GitLab Package Registry** via the standard Gradle `maven-publish` plugin with CI job token authentication
 
-Publishing is **disabled by default**. To use it, you must manually apply the required plugins and then enable it in Kreate.
+Publishing is **disabled by default**. Enabling it is all it takes: Kreate applies Gradle's
+`maven-publish` plugin, and the [Vanniktech Maven Publish Plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/)
+as well when Maven Central is one of the targets.
 
-### Required Plugins
-
-For GitLab publishing, apply the standard `maven-publish` plugin:
-
-```kotlin
-plugins {
-    `maven-publish`
-}
-```
-
-For Maven Central publishing, apply the [Vanniktech Maven Publish Plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/):
-
-```kotlin
-plugins {
-    id("com.vanniktech.maven.publish") version "0.30.0" // Use the latest version
-}
-```
+Apply either yourself to pin a version or to reach its own DSL block; Kreate's own application is
+then a no-op.
 
 ### Kreate Configuration
 
@@ -64,14 +51,14 @@ completely independent and can be active simultaneously.
 publish { enabled = true }
 │
 ├── repositories.mavenCentral { enabled = true }
-│ └── requires com.vanniktech.maven.publish plugin
+│ └── applies com.vanniktech.maven.publish
 │ └── calls publishToMavenCentral(automaticRelease)
 │ └── calls signAllPublications() if signPublications = true
 │ └── sets coordinates(group, name, version)
 │ └── configures pom { ... }
 │
 └── repositories.gitlab { enabled = true }
-└── requires maven-publish plugin
+└── applies maven-publish
 └── registers a `maven` publication unless the project declares one
 └── reads CI_JOB_TOKEN, CI_PROJECT_ID, CI_API_V4_URL from env
 └── registers Maven repository with HttpHeaderAuthentication

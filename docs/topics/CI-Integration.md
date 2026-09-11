@@ -16,8 +16,14 @@ verifying anything.
 
 <deflist type="wide">
     <def title="./gradlew build">
-        Compiles, tests, and assembles. With <code>project.tests.enabled</code> this includes your
-        test suite with the configured reporting.
+        Compiles, assembles, and runs everything wired to <code>check</code> — which with
+        <code>project.tests.enabled</code> means the <code>unitTest</code> suite, with the
+        configured reporting. It does <i>not</i> include <code>integrationTest</code>.
+    </def>
+    <def title="./gradlew integrationTest">
+        The suite that needs Docker or a network, which is deliberately off <code>check</code>.
+        Give it its own step, so a container that fails to start is reported as an infrastructure
+        failure rather than as a test failure. See <a href="Testing-Suites.md">Test suites</a>.
     </def>
     <def title="./gradlew kreateTrivyScan">
         The security and compliance scans. Needs Trivy installed and dependency lock files
@@ -37,6 +43,26 @@ verifying anything.
         the native failure reported separately from the JVM one.
     </def>
 </deflist>
+
+### Staging the test suites
+
+The two default suites exist so that a pipeline can fail fast on the cheap signal:
+
+<code-block lang="bash">
+./gradlew check              # unit tests, static analysis, coverage gate
+./gradlew integrationTest    # containers and external services
+</code-block>
+
+Run them as separate steps rather than as <code>./gradlew check integrationTest</code>. A single
+invocation gives one red step for two very different causes, and on a shared runner the slow suite
+holds the build long after the fast one has already told you what you needed to know.
+
+<tip>
+Every suite writes JUnit XML to <code>build/test-results/&lt;suite&gt;/</code>. Point the report
+collector at the directory rather than at one file, so a suite you add later is picked up without
+another pipeline edit:
+<code-block>**/build/test-results/*/TEST-*.xml</code-block>
+</tip>
 
 ## Two pitfalls that produce a meaningless green build
 
@@ -154,7 +180,7 @@ build:
   artifacts:
     when: always
     reports:
-      junit: "**/build/test-results/test/TEST-*.xml"
+      junit: "**/build/test-results/*/TEST-*.xml"
     paths:
       - "**/build/reports/"
     expire_in: 1 week
@@ -299,5 +325,6 @@ This requires pinned archive timestamps and file order in your build configurati
     <category ref="project">
         <a href="Publishing-Overview.md">Publishing</a>
         <a href="Testing-Overview.md">Testing</a>
+        <a href="Testing-Suites.md">Test suites</a>
     </category>
 </seealso>
