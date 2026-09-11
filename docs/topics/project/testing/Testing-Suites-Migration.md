@@ -200,7 +200,7 @@ Two details in that diff:
 See [](Testing-Troubleshooting.md) for the rest.
 
 <seealso>
-    <category ref="related">
+    <category ref="project">
         <a href="Testing-Overview.md">Overview</a>
         <a href="Testing-Suites.md">Test suites</a>
         <a href="Testing-Multiplatform.md">Multiplatform testing</a>

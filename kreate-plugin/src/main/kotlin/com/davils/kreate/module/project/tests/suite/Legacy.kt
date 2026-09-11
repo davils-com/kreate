@@ -211,8 +211,13 @@ private fun Project.failOnLegacySources(legacySourceSets: Map<String, KotlinSour
 
     if (populated.isEmpty()) return
 
+    // `invariantSeparatorsPath` rather than `path`: the rest of this message spells directories
+    // with forward slashes, and `File.path` would print the listing with backslashes on Windows -
+    // one message, two conventions, and a reader left wondering whether the difference means
+    // something.
     val listing = populated.joinToString("\n") { directory ->
-        "  - ${directory.relativeToOrSelf(projectDir).path} (${directory.sourceFileCount()} files)"
+        val relative = directory.relativeToOrSelf(projectDir).invariantSeparatorsPath
+        "  - $relative (${directory.sourceFileCount()} files)"
     }
 
     throw GradleException(
