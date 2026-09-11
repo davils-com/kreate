@@ -211,7 +211,7 @@ Intended. Detekt registers a task per source set, so suite code is analysed like
 </deflist>
 
 <seealso>
-    <category ref="related">
+    <category ref="project">
         <a href="Testing-Overview.md">Overview</a>
         <a href="Testing-Suites.md">Test suites</a>
         <a href="Testing-Suites-Migration.md">Migrating from src/test</a>

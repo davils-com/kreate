@@ -153,7 +153,7 @@ as soon as %product% is. Two consequences:
 </deflist>
 
 <seealso>
-    <category ref="related">
+    <category ref="start">
         <a href="Getting-Started.md">Getting started</a>
         <a href="Overview.md">Overview</a>
         <a href="Compatibility.md">Compatibility</a>

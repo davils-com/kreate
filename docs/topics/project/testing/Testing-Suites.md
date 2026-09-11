@@ -380,7 +380,7 @@ already taken, Gradle hands back the existing source set. A suite called `main` 
 the production code into a test suite and run it.
 
 <seealso>
-    <category ref="related">
+    <category ref="project">
         <a href="Testing-Overview.md">Overview</a>
         <a href="Testing-Suites-Migration.md">Migrating from src/test</a>
         <a href="Testing-Kotest.md">The Kotest bundle</a>

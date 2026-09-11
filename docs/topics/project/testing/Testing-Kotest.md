@@ -183,7 +183,7 @@ The launcher is still added, because that is what starts the JUnit Platform rath
 any one framework.
 
 <seealso>
-    <category ref="related">
+    <category ref="project">
         <a href="Testing-Overview.md">Overview</a>
         <a href="Testing-Suites.md">Test suites</a>
         <a href="Testing-Configuration-Reference.md">Configuration reference</a>
