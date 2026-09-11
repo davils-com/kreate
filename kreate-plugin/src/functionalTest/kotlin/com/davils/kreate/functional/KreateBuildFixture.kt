@@ -221,6 +221,25 @@ class KreateBuildFixture(
     fun build(vararg arguments: String): BuildResult = runner(arguments.toList()).build()
 
     /**
+     * Runs Gradle and expects the build to succeed, without the Kotlin plugin's own test tasks.
+     *
+     * For multiplatform builds that reach `check`. The Wasm target's test task unpacks a Node.js
+     * and a Yarn distribution into the TestKit Gradle user home, which every functional test
+     * shares. The suite runs in parallel forks against that one user home, and two of them
+     * unpacking at the same moment is a race Windows loses on a file it cannot replace while it is
+     * open — an `UnexpectedBuildFailure` in whichever build happened to be second. No test asserts
+     * anything about what the Wasm target runs, so leaving those tasks out costs nothing.
+     *
+     * A task named on the command line still runs; only what `check` would have pulled in through
+     * the aggregate is dropped.
+     *
+     * @param arguments The Gradle command line arguments.
+     * @return The build result.
+     */
+    fun buildWithoutKotlinTestTasks(vararg arguments: String): BuildResult =
+        build(*arguments, "-x", "allTests", "-x", "wasmJsNodeTest")
+
+    /**
      * Runs Gradle and expects the build to fail.
      *
      * @param arguments The Gradle command line arguments.

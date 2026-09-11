@@ -234,7 +234,7 @@ class TestSuiteMultiplatformFunctionalTest {
         writeTest("commonIntegrationTest", "NotOnCheck")
         writeBuild()
 
-        val result = fixture.build("check")
+        val result = fixture.buildWithoutKotlinTestTasks("check")
 
         result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
         result.task(":jvmIntegrationTest") shouldBe null
@@ -246,7 +246,10 @@ class TestSuiteMultiplatformFunctionalTest {
         writeTest("commonUnitTest", "Replacement")
         writeBuild()
 
-        fixture.build("check", "jvmTest").task(":jvmTest")?.outcome shouldBe TaskOutcome.SKIPPED
+        // `jvmTest` is named on the command line, so the exclusions leave it in the graph: what
+        // they drop is the Wasm side of `check`, which this assertion has no interest in.
+        fixture.buildWithoutKotlinTestTasks("check", "jvmTest")
+            .task(":jvmTest")?.outcome shouldBe TaskOutcome.SKIPPED
     }
 
     @Test
@@ -332,8 +335,8 @@ class TestSuiteMultiplatformFunctionalTest {
         writeTest("commonUnitTest", "Cached")
         writeBuild()
 
-        fixture.build("check")
+        fixture.buildWithoutKotlinTestTasks("check")
 
-        fixture.build("check").output shouldContain "Configuration cache entry reused"
+        fixture.buildWithoutKotlinTestTasks("check").output shouldContain "Configuration cache entry reused"
     }
 }

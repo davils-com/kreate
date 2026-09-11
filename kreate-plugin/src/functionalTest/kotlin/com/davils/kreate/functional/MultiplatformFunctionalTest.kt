@@ -146,16 +146,12 @@ class MultiplatformFunctionalTest {
      * Runs `check` without the Kotlin test tasks.
      *
      * Every assertion below is about what `check` reaches on the Detekt side; none is about test
-     * execution, so excluding it costs the tests nothing. Leaving it in costs them a Node.js and a
-     * Yarn distribution, unpacked into the shared Gradle user home by the Wasm target's test task.
-     * The functional suite runs in parallel forks against that one user home, and two of them
-     * unpacking at the same moment is a race Windows loses on a file it cannot replace while it is
-     * open — an `UnexpectedBuildFailure` in whichever test happened to be second.
+     * execution, so leaving those tasks out costs the tests nothing and avoids the Wasm toolchain
+     * race described on [KreateBuildFixture.buildWithoutKotlinTestTasks].
      *
      * @return The build result.
      */
-    private fun checkWithoutTestExecution() =
-        fixture.build("check", "-x", "allTests", "-x", "wasmJsNodeTest")
+    private fun checkWithoutTestExecution() = fixture.buildWithoutKotlinTestTasks("check")
 
     @Test
     @DisplayName("check analyses every source set instead of an aggregate task with no sources")
