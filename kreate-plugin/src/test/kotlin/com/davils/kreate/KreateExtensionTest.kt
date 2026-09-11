@@ -75,9 +75,21 @@ class KreateExtensionTest {
         }
 
         @Test
-        @DisplayName("packaged natives land under natives/")
+        @DisplayName("packaged natives land under native/, where a Davils loader looks")
         fun packagingResourcePath() {
-            extension(project()).platform.jvm.jni.packaging.resourcePath.get() shouldBe "natives"
+            extension(project()).platform.jvm.jni.packaging.resourcePath.get() shouldBe "native"
+        }
+
+        @Test
+        @DisplayName("the generated loader is off, so the weakest loader is not the default one")
+        fun loaderDefaultsOff() {
+            extension(project()).platform.jvm.jni.packaging.generateLoader.get() shouldBe false
+        }
+
+        @Test
+        @DisplayName("a digest manifest is written, because nobody should hash a release by hand")
+        fun digestManifestDefaultsOn() {
+            extension(project()).platform.jvm.jni.packaging.digestManifest.get() shouldBe true
         }
 
         @Test

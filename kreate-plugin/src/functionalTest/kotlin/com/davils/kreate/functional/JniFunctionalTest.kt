@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
+private val NATIVE_EXTENSIONS: Set<String> = setOf("so", "dylib", "dll")
+
 /**
  * End-to-end tests for the JNI pipeline.
  *
@@ -259,8 +261,87 @@ class JniFunctionalTest {
         val jar = fixture.file("build/libs").listFiles()!!.single { it.extension == "jar" }
         val entries = java.util.zip.ZipFile(jar).use { zip -> zip.entries().toList().map { it.name } }
 
-        entries.any { it.startsWith("natives/") && it.contains("sample") } shouldBe true
+        entries.any { it.startsWith("native/") && it.contains("sample") } shouldBe true
         entries.any { it.endsWith("KreateNativeLoader.class") } shouldBe true
+        entries.any { it == "native/digests.properties" } shouldBe true
+    }
+
+    @Test
+    @DisplayName("the digest manifest carries the SHA-256 of the library that was packaged")
+    fun writesDigestManifest() {
+        writeNativeSource("hello")
+        fixture.writeBuild(
+            """
+            ${KreateBuildFixture.platformBlock}
+
+            platform {
+                jvm {
+                    jni {
+                        enabled = true
+                        nameOverride = "sample"
+                        packaging {
+                            enabled = true
+                        }
+                    }
+                }
+            }
+
+            project {
+                name = "Sample"
+                description = "JNI fixture"
+            }
+            """.trimIndent()
+        )
+
+        fixture.build("jar")
+
+        val jar = fixture.file("build/libs").listFiles()!!.single { it.extension == "jar" }
+        val manifest = java.util.zip.ZipFile(jar).use { zip ->
+            val entry = zip.getEntry("native/digests.properties")
+            zip.getInputStream(entry).readBytes().decodeToString()
+        }
+        val library = fixture.file("build/jni").walkTopDown()
+            .single { file -> file.isFile && file.name.contains("sample") && file.extension in NATIVE_EXTENSIONS }
+        val expected = java.security.MessageDigest.getInstance("SHA-256")
+            .digest(library.readBytes())
+            .joinToString("") { byte -> "%02x".format(byte) }
+
+        manifest shouldContain "=$expected"
+    }
+
+    @Test
+    @DisplayName("the generated loader is off unless a build asks for it")
+    fun loaderIsOptIn() {
+        writeNativeSource("hello")
+        fixture.writeBuild(
+            """
+            ${KreateBuildFixture.platformBlock}
+
+            platform {
+                jvm {
+                    jni {
+                        enabled = true
+                        nameOverride = "sample"
+                        packaging {
+                            enabled = true
+                        }
+                    }
+                }
+            }
+
+            project {
+                name = "Sample"
+                description = "JNI fixture"
+            }
+            """.trimIndent()
+        )
+
+        fixture.build("jar")
+
+        val jar = fixture.file("build/libs").listFiles()!!.single { it.extension == "jar" }
+        val entries = java.util.zip.ZipFile(jar).use { zip -> zip.entries().toList().map { it.name } }
+
+        entries.none { it.endsWith("KreateNativeLoader.class") } shouldBe true
     }
 
     @Test

@@ -17,6 +17,8 @@
 package com.davils.kreate.module.platform.jvm.jni.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.system.AARCH64_ID
+import com.davils.kreate.system.X86_64_ID
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -229,7 +231,9 @@ public abstract class GenerateNativeLoader : Task(
      * Renders the platform detection helpers of the generated loader.
      *
      * The logic is duplicated from Kreate's own platform helpers on purpose: the generated
-     * code runs in the consumer's process, which must not need a dependency on the plugin.
+     * code runs in the consumer's process, which must not need a dependency on the plugin. The
+     * identifiers themselves are interpolated from [X86_64_ID] and [AARCH64_ID] rather than written
+     * out again, so the packaging side and the loading side cannot drift.
      *
      * @return The rendered helpers, indented for inclusion in the object body.
      * @since 2.0.0
@@ -245,9 +249,9 @@ public abstract class GenerateNativeLoader : Task(
         |
         |        val archName = System.getProperty("os.arch").lowercase()
         |        val archId = if (archName.contains("aarch64") || archName.contains("arm64")) {
-        |            "arm64"
+        |            "$AARCH64_ID"
         |        } else {
-        |            "x64"
+        |            "$X86_64_ID"
         |        }
         |
         |        return osId + "-" + archId

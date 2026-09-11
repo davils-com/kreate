@@ -8,7 +8,8 @@ Kreate uses the [Gradle Maven Publish Plugin by Vanniktech](https://vanniktech.g
 to publish to Maven Central. When enabled, Kreate configures coordinates, signing, and POM metadata from your `kreate { }` block — no manual
 `mavenPublishing { }` block is required.
 
-> You must manually apply the `com.vanniktech.maven.publish` plugin to your project for this to work.
+> Kreate applies the `com.vanniktech.maven.publish` plugin when Maven Central is enabled; your
+> `plugins { }` block does not need to mention it.
 >
 {style="warning"}
 

@@ -38,6 +38,17 @@ kreate {
 
 Commit the resulting `gradle.lockfile`.
 
+<note>
+The classpaths of every enabled <a href="Testing-Suites.md">test suite</a> are locked as well —
+<code>unitTestCompileClasspath</code>, <code>integrationTestRuntimeClasspath</code> and so on, or
+their per-target equivalents on a multiplatform project. An integration suite is usually the only
+place a project declares Testcontainers and a database driver; without this, the lock file would be
+missing exactly the dependencies that reach outside the process while still looking complete to a
+reader and to Trivy.
+
+Regenerate the lock files after adding a suite or a suite dependency.
+</note>
+
 ## Why there is a task for this
 
 `--write-locks` records only the configurations a build actually resolves. Run it against

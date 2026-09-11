@@ -82,7 +82,7 @@ public abstract class VerifyNativePlatforms : Task(
         if (selected.isEmpty()) {
             throw GradleException(
                 "Kreate's native publishing is enabled but no platform is selected. Set " +
-                    "`jni { packaging { publishing { platforms = listOf(\"linux-x64\") } } }`, " +
+                    "`jni { packaging { publishing { platforms = listOf(\"linux-x86_64\") } } }`, " +
                     "or pass -Pkreate.jni.publishPlatforms=<ids>."
             )
         }

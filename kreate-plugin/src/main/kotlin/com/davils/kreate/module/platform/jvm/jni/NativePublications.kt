@@ -28,7 +28,7 @@ import org.gradle.kotlin.dsl.register
 /**
  * Registers one Maven publication per platform.
  *
- * Each platform becomes its own artifact id — `mylib-linux-x64` next to `mylib` — rather than a
+ * Each platform becomes its own artifact id — `mylib-linux-x86_64` next to `mylib` — rather than a
  * classifier on the main one. The artifact is a pure resource carrier and declares no
  * dependencies: a dependency on the main library would point the wrong way, since it is the
  * consumer that pulls both.

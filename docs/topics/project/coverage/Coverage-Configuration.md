@@ -20,8 +20,9 @@ that fails loudly.
 ### `enabled`
 - **Type**: `Property<Boolean>`
 - **Default**: `false`
-- **Description**: Master switch. When `true`, %product% configures Kover's project settings,
-  reports and verification rules. Requires the `org.jetbrains.kotlinx.kover` plugin to be applied.
+- **Description**: Master switch. When `true`, %product% applies the
+  `org.jetbrains.kotlinx.kover` plugin and configures its project settings, reports and
+  verification rules. See [](Plugin-Management.md).
 
 ### `useJacoco`
 - **Type**: `Property<Boolean>`
@@ -52,6 +53,17 @@ the number".
 - **Description**: Test source sets are already excluded by the coverage engine. This is for what
   it cannot know about: generated sources, fixtures, or a source set that only supports another
   module's build.
+
+<note>
+The coverage engine recognises a test compilation by the name <code>test</code> and nothing else,
+so a <a href="Testing-Suites.md">test suite</a> called <code>unitTest</code> would land in the
+denominator as if it were code you ship. %product% appends every enabled suite's compilation name
+to this list for you, controlled by
+<code>tests { excludeSuitesFromCoverage }</code> (default <code>true</code>).
+
+It does not do so when <code>includedSourceSets</code> is non-empty: an explicit include list
+already decides what counts, and adding exclusions to it would only be a second opinion.
+</note>
 
 ### `excludeJava`
 - **Type**: `Property<Boolean>`

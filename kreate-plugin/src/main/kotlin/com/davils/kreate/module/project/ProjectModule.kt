@@ -55,6 +55,12 @@ internal object ProjectModule : Module {
             // Both of these are opt-in as of 2.0.0, so they have to be evaluated after the
             // consumer's `kreate { }` block has been applied rather than at apply time.
             applyDefaultGradlePlugins(extension.project)
+
+            // Every plugin behind an enabled feature, applied before any feature configures
+            // one. A plugin applied halfway through would miss whatever the features ahead of
+            // it had already done.
+            applyFeaturePlugins(extension)
+
             addRepositories(extension.project)
 
             // Locking has to be activated before anything resolves a configuration, so it

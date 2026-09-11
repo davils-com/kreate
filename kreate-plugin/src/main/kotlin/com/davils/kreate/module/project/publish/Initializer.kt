@@ -20,6 +20,20 @@ import com.davils.kreate.KreateExtension
 import org.gradle.api.Project
 
 /**
+ * The id of Gradle's own Maven publishing plugin, which owns the `publishing { }` extension.
+ *
+ * @since 3.0.0
+ */
+internal const val MAVEN_PUBLISH_PLUGIN_ID: String = "maven-publish"
+
+/**
+ * The id of the Maven Central publishing plugin Kreate applies.
+ *
+ * @since 3.0.0
+ */
+internal const val MAVEN_CENTRAL_PLUGIN_ID: String = "com.vanniktech.maven.publish"
+
+/**
  * Initializes publishing configuration for the project.
  *
  * If publishing is enabled in the extension, this function configures

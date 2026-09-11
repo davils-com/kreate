@@ -208,10 +208,14 @@ public abstract class JniHeaderExtension @Inject constructor(
 /**
  * Configures packaging of the built native libraries into the project's JAR.
  *
- * Without packaging, a consumer of the published artifact has to install the shared
- * library separately and set `-Djava.library.path`. With packaging enabled the library
- * travels inside the JAR under `<resourcePath>/<os>-<arch>/`, and the generated loader
- * extracts it on first use.
+ * Without packaging, a consumer of the published artifact has to install the shared library
+ * separately and set `-Djava.library.path`. With packaging enabled the library travels inside the
+ * JAR under `<resourcePath>/<os>-<arch>/`, where a loader finds and extracts it on first use.
+ *
+ * `<os>-<arch>` is [com.davils.kreate.system.currentPlatformId], which is the spelling
+ * `com.davils.arc.platform.Platform.identifier` uses - `linux-x86_64`, not `linux-x64`. That is not
+ * a detail: it is the only thing that makes what this writes and what a loader reads the same
+ * path.
  *
  * @param factory The object factory used for creating properties.
  * @since 2.0.0
@@ -236,23 +240,56 @@ public abstract class JniPackagingExtension @Inject constructor(
     /**
      * The directory inside the JAR the native libraries are placed in.
      *
-     * The operating system and architecture segment is appended automatically, so the
-     * default results in `natives/linux-x64/libexample.so`.
+     * The operating system and architecture segment is appended automatically, so the default
+     * results in `native/linux-x86_64/libexample.so`.
+     *
+     * **The default was `natives` until 3.0.0**, which no Davils loader has ever looked in:
+     * `com.davils:sira-native` reads `/native` and so did `com.davils.arc.jni` before it. Packaging
+     * and loading were a directory apart, and the only symptom was a library that could not be found
+     * at runtime.
      *
      * @since 2.0.0
      */
-    public val resourcePath: Property<String> = factory.property(String::class.java).convention("natives")
+    public val resourcePath: Property<String> = factory.property(String::class.java).convention("native")
+
+    /**
+     * Whether a `digests.properties` manifest is written beside the packaged libraries.
+     *
+     * Defaults to `true`. The manifest carries the SHA-256 of every library this build produced,
+     * under the platform it was built for, and it is what a consumer pins so that nobody has to
+     * hash a release artifact by hand.
+     *
+     * It is not a check that runs itself: a digest read out of the same artifact as the binary it
+     * describes was written by whoever wrote the binary. See
+     * [com.davils.kreate.module.platform.jvm.jni.tasks.GenerateDigestManifest].
+     *
+     * @since 3.0.0
+     */
+    public val digestManifest: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
     /**
      * Whether a `KreateNativeLoader` object is generated into the project's sources.
      *
-     * The generated loader first tries `System.loadLibrary`, so a developer's local run
-     * with `java.library.path` set keeps working, and only falls back to extracting the
-     * packaged library from the classpath. Defaults to `true` when packaging is enabled.
+     * The generated loader first tries `System.loadLibrary`, so a developer's local run with
+     * `java.library.path` set keeps working, and only falls back to extracting the packaged library
+     * from the classpath.
+     *
+     * **Defaults to `false` since 3.0.0.** It is the dependency-free fallback, not the recommended
+     * loader, and having it on by default made the weakest of the available loaders the one most
+     * builds got. What it does not do:
+     *
+     * - it checks no digest, so it cannot tell the binary you shipped from one somebody replaced;
+     * - it extracts into `Files.createTempDirectory`, which on a shared machine is world-readable
+     *   and writable by every other user;
+     * - it marks the copy `deleteOnExit`, so every run extracts again;
+     * - it reports the first thing that went wrong rather than every place it looked.
+     *
+     * `com.davils:sira-native` does all four, and is what a Davils program should take. Turn this on
+     * where the artifact must load with nothing on the classpath but itself.
      *
      * @since 2.0.0
      */
-    public val generateLoader: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+    public val generateLoader: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * Configuration for publishing the native libraries as separate per-platform artifacts.

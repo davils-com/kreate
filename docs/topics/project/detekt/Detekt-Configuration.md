@@ -10,7 +10,7 @@ The `detekt { }` block provides several properties to customize how static analy
 
 The following properties are available directly within the `detekt { }` block:
 
-> Note: You must manually apply the `dev.detekt` plugin for this to work.
+> Note: Kreate applies the `dev.detekt` plugin when the integration is enabled.
 > 
 > {style="warning"}
 

@@ -18,6 +18,8 @@ package com.davils.kreate.module.project.locking
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.KreateTasks
+import com.davils.kreate.module.project.tests.suite.enabledSuites
+import com.davils.kreate.module.project.tests.suite.lowerCamelCaseName
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -37,7 +39,9 @@ internal fun Project.initializeDependencyLocking(extension: KreateExtension) {
 
     // Read once, at configuration time: the task action below must not reach back into the
     // extension, or the task would carry a reference to the whole project model.
-    val lockedClasspaths = lockingExtension.lockedClasspaths.get() + multiplatformClasspaths()
+    val lockedClasspaths = lockingExtension.lockedClasspaths.get() +
+        multiplatformClasspaths() +
+        testSuiteClasspaths(extension)
 
     val lockEverything = lockingExtension.lockAllConfigurations.get()
     if (lockEverything) {
@@ -73,6 +77,39 @@ private fun Project.multiplatformClasspaths(): Set<String> {
 
     return multiplatform.targets.flatMapTo(mutableSetOf()) { target ->
         listOf("${target.name}CompileClasspath", "${target.name}RuntimeClasspath")
+    }
+}
+
+/**
+ * The classpaths of every enabled test suite.
+ *
+ * A suite brings dependencies of its own - an integration suite is usually the only place a
+ * project declares Testcontainers and a database driver - and those classpaths carry names the
+ * defaults do not match. Left out, the lock file would be missing precisely the dependencies
+ * that reach outside the process, while still looking complete to a reader and to Trivy.
+ *
+ * Derived from the configuration rather than read off the created configurations, because
+ * locking is initialised before the suites exist. That is harmless: locking matches
+ * configurations by name as they are created, and a name that never appears never matches.
+ *
+ * @param extension The main Kreate extension.
+ * @return The suite classpath names to lock in addition to the configured ones.
+ * @since 3.0.0
+ */
+private fun Project.testSuiteClasspaths(extension: KreateExtension): Set<String> {
+    val tests = extension.project.tests
+    if (!tests.enabled.get()) return emptySet()
+
+    val multiplatform = extensions.findByType(KotlinMultiplatformExtension::class.java)
+
+    return tests.enabledSuites().flatMapTo(mutableSetOf()) { suite ->
+        val sourceSetName = suite.sourceSetName.get()
+        val prefixes = multiplatform
+            ?.targets
+            ?.map { target -> lowerCamelCaseName(target.name, sourceSetName) }
+            ?: listOf(sourceSetName)
+
+        prefixes.flatMap { prefix -> listOf("${prefix}CompileClasspath", "${prefix}RuntimeClasspath") }
     }
 }
 

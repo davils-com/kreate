@@ -10,7 +10,7 @@ Put the .so, .dylib, or .dll into your artifact and let the generated loader ext
 
 <tldr>
 <p><b>Enable</b>: <code>jni { packaging { enabled = true } }</code></p>
-<p><b>Result</b>: <code>natives/&lt;os&gt;-&lt;arch&gt;/libfoo.so</code> inside your JAR</p>
+<p><b>Result</b>: <code>native/&lt;os&gt;-&lt;arch&gt;/libfoo.so</code> inside your JAR</p>
 <p><b>Default</b>: off</p>
 </tldr>
 
@@ -38,8 +38,8 @@ kreate {
 
                 packaging {
                     enabled = true
-                    generateLoader = true
-                    resourcePath = "natives"
+                    resourcePath = "native"
+                    digestManifest = true
                 }
             }
         }
@@ -52,13 +52,18 @@ kreate {
         Whether the built library is added to the JAR. Defaults to <code>false</code>, so
         upgrading %product% never changes the contents of an existing artifact.
     </def>
+    <def title="resourcePath">
+        The directory inside the JAR. Defaults to <code>native</code>; the
+        <code>&lt;os&gt;-&lt;arch&gt;</code> segment is appended automatically. It was
+        <code>natives</code> before 3.0.0, which no loader ever looked in.
+    </def>
+    <def title="digestManifest">
+        Whether <code>digests.properties</code> is written beside the libraries. Defaults to
+        <code>true</code>. See <a href="#the-digest-manifest">The digest manifest</a>.
+    </def>
     <def title="generateLoader">
         Whether <code>KreateNativeLoader</code> is generated into your sources. Defaults to
-        <code>true</code>.
-    </def>
-    <def title="resourcePath">
-        The directory inside the JAR. Defaults to <code>natives</code>; the
-        <code>&lt;os&gt;-&lt;arch&gt;</code> segment is appended automatically.
+        <code>false</code> since 3.0.0 — see <a href="#loading-the-library">Loading the library</a>.
     </def>
 </deflist>
 
@@ -67,9 +72,9 @@ kreate {
 ```text
 my-module-1.0.0.jar
 ├── com/example/Native.class
-├── com/example/my_module/jni/KreateNativeLoader.class
-└── natives/
-    └── linux-x64/
+└── native/
+    ├── digests.properties
+    └── linux-x86_64/
         └── libmy_module.so
 ```
 
@@ -77,10 +82,87 @@ Verify it with:
 
 ```bash
 ./gradlew jar
-unzip -l build/libs/my-module-1.0.0.jar | grep natives
+unzip -l build/libs/my-module-1.0.0.jar | grep native
 ```
 
-## Using the loader
+## The platform directory
+
+`<os>-<arch>` is not a name %product% is free to choose. It is the directory a loader looks in at
+runtime, and the loader a Davils program runs resolves it through
+`com.davils.arc.platform.Platform.identifier`:
+
+| | %product% writes | A loader reads |
+|---|---|---|
+| 64-bit x86 | `linux-x86_64` | `linux-x86_64` |
+| 64-bit ARM | `macos-aarch64` | `macos-aarch64` |
+
+Before 3.0.0 %product% wrote `linux-x64` and `macos-arm64`, and the root was `natives` rather than
+`native`. Both halves published cleanly and the binary was never found, which is the failure the
+closed platform vocabulary exists to prevent — made against %product% itself.
+
+**If you published with 2.3.x or earlier**, consumers pinned to those artifacts are looking in the
+old directory. Either republish, or set `resourcePath = "natives"` and keep the old layout until
+they move.
+
+## The digest manifest
+
+Packaging writes `native/digests.properties`:
+
+```properties
+# Written by Kreate. Do not edit - it is rewritten on every build.
+linux-x86_64=9f2c4d1e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d
+```
+
+It is **the value a consumer pins**, so that nobody has to hash a release artifact by hand:
+
+```kotlin
+val library = nativeLibrary("my_module") {
+    expect("linux-x86_64", sha256 = "9f2c…")
+}
+```
+
+It is **not a check that runs itself**, and `com.davils:sira-native` deliberately does not read it
+out of the JAR it is checking. A manifest that travels in the same artifact as the binary was
+written by whoever wrote the binary: it catches a truncated download and says nothing whatsoever
+about tampering. The digest only means something once it has reached the consumer by a path the
+publisher does not control.
+
+## Loading the library
+
+**Use `com.davils:sira-native`.** It is the loader this packaging is built for: it searches an
+operator's override, `java.library.path`, a mount and the classpath in a declared order, checks the
+binary against a digest you pinned, extracts it into a directory only you can write to, and reports
+every place it looked rather than the last thing that failed.
+
+```kotlin
+private val module = nativeLibrary("my_module")
+
+suspend fun main() {
+    module.prepare()
+}
+
+internal object Native {
+    init {
+        module.link()
+    }
+
+    external fun greet(): String
+}
+```
+
+### The generated loader
+
+`generateLoader = true` still writes a `KreateNativeLoader` into your sources. It defaults to
+**off** since 3.0.0: it is the fallback for an artifact that must load with nothing on the classpath
+but itself, and having it on by default made the weakest available loader the one most builds got.
+
+What it does not do:
+
+- it checks no digest, so it cannot tell your binary from one somebody replaced;
+- it extracts into `Files.createTempDirectory`, which on a shared machine is readable by every
+  other user and writable by them too;
+- it marks the copy `deleteOnExit`, so every run extracts again;
+- it reports the first thing that went wrong rather than every place it looked.
 
 Replace `System.loadLibrary` with the generated loader:
 

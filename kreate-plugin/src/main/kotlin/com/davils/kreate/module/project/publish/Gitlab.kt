@@ -63,10 +63,6 @@ internal fun Project.configureGitlab(
     val gitlabConfig = publishConfig.repositories.gitlab
     if (!gitlabConfig.enabled.get()) return
 
-    if (!plugins.hasPlugin("maven-publish")) {
-        error("Maven Publish Plugin not applied. Do it yourself: 'maven-publish'")
-    }
-
     val projectName = kreateExtension.project.name.orNull ?: project.name
     val projectDescription = kreateExtension.project.description.orNull
 

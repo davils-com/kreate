@@ -1,11 +1,6 @@
 [versions]
-# The Kotlin Gradle Plugin version Kreate *compiles against*, not the one consumers use.
-# Pinned to the Kotlin embedded in the minimum supported Gradle (9.0): a plugin must be
-# built against the oldest API it claims to support, otherwise it fails at runtime on a
-# consumer's machine rather than at build time here. Consumers remain free to use any
-# newer Kotlin version in their own build.
 kotlin = "2.4.0"
-poet = "2.3.0"
+poet = "2.4.0"
 dokka = "2.2.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
@@ -16,8 +11,8 @@ kover = "0.9.9"
 junit = "6.1.3"
 kotest = "6.2.4"
 asm = "9.10.1"
-bcv = "0.18.1"
-benchmark = "0.4.17"
+bcv = "0.18.2"
+benchmark = "0.5.0"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
@@ -29,13 +24,6 @@ asm-core = { module = "org.ow2.asm:asm", version.ref = "asm" }
 # Reads the `kotlin.Metadata` annotation so that ABI validation can tell a Kotlin
 # `internal` declaration from a genuinely public one — both are `public` in bytecode.
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
-
-# Declared `compileOnly` in kreate-plugin/build.gradle.kts rather than added to the bundle
-# below: Kreate configures kotlinx-benchmark but never applies it, so the artifact has no
-# business on a consumer's buildscript classpath — and it lives on the Gradle Plugin Portal
-# only, which an enterprise build resolving through an internal mirror would notice.
-benchmark-gradle-plugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "benchmark" }
-kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 
 # detekt rule sets applied to the plugin's own sources via `detektPlugins`
 detekt-rules-ktlintWrapper = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
@@ -50,13 +38,17 @@ kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.r
 # actual plugins, but needed as dependencies in build-logic
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
-# Unlike kotlinx-benchmark, allopen *is* applied by Kreate: a benchmark class that is not
-# open fails inside JMH with a message that never mentions allopen.
 allopen-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.allopen:org.jetbrains.kotlin.plugin.allopen.gradle.plugin", version.ref = "kotlin" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 publish-gradle-plugin = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "publish" }
 detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 bcv-gradle-plugin = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "bcv" }
+# On the kreate-plugin bundle below, like every other plugin Kreate applies. Kreate applies
+# kotlinx-benchmark rather than asking the consumer to, so the classes have to be there at runtime.
+# Note that this artifact lives on the Gradle Plugin Portal only, which an enterprise build
+# resolving through an internal mirror has to account for.
+benchmark-gradle-plugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "benchmark" }
+kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
@@ -82,7 +74,8 @@ kreate-plugin = [
     "allopen-gradle-plugin",
     "publish-gradle-plugin",
     "detekt-gradle-plugin",
-    "kover-gradle-plugin"
+    "kover-gradle-plugin",
+    "benchmark-gradle-plugin"
 ]
 
 kreate-test = [

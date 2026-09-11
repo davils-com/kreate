@@ -53,9 +53,16 @@ public final class com/davils/kreate/KreateTasks$DependencyLocking {
 	public static final field RESOLVE_AND_LOCK_ALL Ljava/lang/String;
 }
 
+public final class com/davils/kreate/KreateTasks$Detekt {
+	public static final field ANALYSE Ljava/lang/String;
+	public static final field GROUP Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Detekt;
+}
+
 public final class com/davils/kreate/KreateTasks$Jni {
 	public static final field BUILD Ljava/lang/String;
 	public static final field CONFIGURE Ljava/lang/String;
+	public static final field DIGEST_MANIFEST Ljava/lang/String;
 	public static final field GROUP Ljava/lang/String;
 	public static final field HEADERS Ljava/lang/String;
 	public static final field INITIALIZE Ljava/lang/String;
@@ -64,6 +71,13 @@ public final class com/davils/kreate/KreateTasks$Jni {
 	public static final field NATIVE_JARS Ljava/lang/String;
 	public static final field VERIFY_PLATFORMS Ljava/lang/String;
 	public final fun nativeJar (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class com/davils/kreate/KreateTasks$Tests {
+	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Tests;
+	public static final field INTEGRATION Ljava/lang/String;
+	public static final field LEGACY Ljava/lang/String;
+	public static final field UNIT Ljava/lang/String;
 }
 
 public final class com/davils/kreate/KreateTasks$Trivy {
@@ -121,6 +135,7 @@ public abstract class com/davils/kreate/module/platform/jvm/jni/JniHeaderExtensi
 
 public abstract class com/davils/kreate/module/platform/jvm/jni/JniPackagingExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getDigestManifest ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getGenerateLoader ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPublishing ()Lcom/davils/kreate/module/platform/jvm/jni/JniPublishingExtension;
@@ -167,6 +182,19 @@ public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/ConfigureN
 
 public final class com/davils/kreate/module/platform/jvm/jni/tasks/ConfigureNative$Companion {
 	public final fun getCMAKE_CONFIGURATIONS ()Ljava/util/List;
+}
+
+public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest : com/davils/kreate/jobs/Task {
+	public static final field Companion Lcom/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest$Companion;
+	public static final field MANIFEST_FILE_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public final fun execute ()V
+	public abstract fun getLibraryDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getManifest ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPlatformId ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest$Companion {
 }
 
 public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateJniHeaders : com/davils/kreate/jobs/Task {
@@ -834,18 +862,44 @@ public abstract class com/davils/kreate/module/project/publish/extension/reposit
 	public final fun mavenCentral (Lorg/gradle/api/Action;)V
 }
 
+public final class com/davils/kreate/module/project/tests/LegacySourceDirectories : java/lang/Enum {
+	public static final field ADOPT Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
+	public static final field CLEAR Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
+	public static final field KEEP Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
+	public static fun values ()[Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
+}
+
+public final class com/davils/kreate/module/project/tests/LegacyTestPolicy : java/lang/Enum {
+	public static final field ALIAS Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+	public static final field DISABLE Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+	public static final field FAIL Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+	public static final field KEEP Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+	public static fun values ()[Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
+}
+
 public abstract class com/davils/kreate/module/project/tests/TestsExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getAlwaysRunTests ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getExcludeSuitesFromCoverage ()Lorg/gradle/api/provider/Property;
 	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotest ()Lcom/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension;
+	public final fun getLegacySourceDirectories ()Lorg/gradle/api/provider/Property;
+	public final fun getLegacyTestSourceSet ()Lorg/gradle/api/provider/Property;
 	public abstract fun getLogging ()Lcom/davils/kreate/module/project/tests/logging/TestsLoggingExtension;
 	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
 	public abstract fun getReport ()Lcom/davils/kreate/module/project/tests/report/TestsReportExtension;
+	public final fun getSuites ()Lorg/gradle/api/NamedDomainObjectContainer;
 	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
+	public final fun kotest (Lorg/gradle/api/Action;)V
 	public final fun logging (Lorg/gradle/api/Action;)V
 	public final fun report (Lorg/gradle/api/Action;)V
+	public final fun suites (Lorg/gradle/api/Action;)V
 }
 
 public abstract class com/davils/kreate/module/project/tests/logging/TestsLoggingExtension {
@@ -860,6 +914,70 @@ public abstract class com/davils/kreate/module/project/tests/report/TestsReportE
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getHtml ()Lorg/gradle/api/provider/Property;
 	public final fun getXml ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/module/project/tests/suite/KotestModule : java/lang/Enum {
+	public static final field ASSERTIONS Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+	public static final field DATATEST Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+	public static final field JUNIT_XML Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+	public static final field PROPERTY Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+	public static fun values ()[Lcom/davils/kreate/module/project/tests/suite/KotestModule;
+}
+
+public abstract class com/davils/kreate/module/project/tests/suite/SuiteJvmTest : org/jetbrains/kotlin/gradle/targets/jvm/tasks/KotlinJvmTest {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteDependencies {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun compileOnly (Ljava/lang/String;)V
+	public final fun implementation (Ljava/lang/String;)V
+	public final fun platform (Ljava/lang/String;)V
+	public final fun runtimeOnly (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteExtension {
+	public fun <init> (Ljava/lang/String;Lcom/davils/kreate/module/project/tests/TestsExtension;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun dependencies (Lorg/gradle/api/Action;)V
+	public final fun getAlwaysRun ()Lorg/gradle/api/provider/Property;
+	public final fun getAssociateWithMain ()Lorg/gradle/api/provider/Property;
+	public final fun getDependsOnSuites ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getDescription ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getEnvironment ()Lorg/gradle/api/provider/MapProperty;
+	public final fun getExcludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
+	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
+	public final fun getIncludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getJvmArgs ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getKotest ()Lcom/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension;
+	public final fun getLogging ()Lcom/davils/kreate/module/project/tests/logging/TestsLoggingExtension;
+	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
+	public final fun getMustRunAfterSuites ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getReport ()Lcom/davils/kreate/module/project/tests/report/TestsReportExtension;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun getSourceSetName ()Lorg/gradle/api/provider/Property;
+	public final fun getSrcDirs ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getSystemProperties ()Lorg/gradle/api/provider/MapProperty;
+	public final fun getTargets ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
+	public final fun kotest (Lorg/gradle/api/Action;)V
+	public final fun logging (Lorg/gradle/api/Action;)V
+	public final fun report (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension {
+	public static final field DEFAULT_JUNIT_PLATFORM_VERSION Ljava/lang/String;
+	public static final field DEFAULT_KOTEST_VERSION Ljava/lang/String;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAddJUnitPlatformLauncher ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getJunitPlatformVersion ()Lorg/gradle/api/provider/Property;
+	public final fun getModules ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getVersion ()Lorg/gradle/api/provider/Property;
 }
 
 public final class com/davils/kreate/module/trivy/LicenseSeverity : java/lang/Enum {

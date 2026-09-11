@@ -27,8 +27,9 @@ to get subtly wrong, and it drifts apart across modules the moment more than one
 
 - It does not wrap Gradle. Your build script stays a Gradle build script, and every task
   %product% registers is an ordinary task you can depend on, reconfigure, or disable.
-- It does not apply plugins behind your back. Where an integration needs Detekt or the Maven
-  Publish plugin, you apply it and choose its version; %product% configures it.
+- It applies a plugin only for a feature you enabled. Enabling `coverage` applies Kover, and
+  nothing applies Kover otherwise. Apply it yourself to pin a version or to reach its own DSL
+  block, and %product% leaves it alone. The Kotlin plugin is always yours to apply.
 - It does not touch your repositories or dependency resolution unless you ask it to.
 
 <include from="lib.topic" element-id="opt-in-note"/>
@@ -61,6 +62,9 @@ kreate {
         <a href="Constants-Overview.md">build constants</a>,
         <a href="Documentation-Overview.md">Dokka</a>,
         <a href="Testing-Overview.md">testing</a>,
+        <a href="Coverage-Overview.md">coverage</a>,
+        <a href="Benchmark-Overview.md">benchmarks</a>,
+        <a href="API-Validation-Overview.md">API validation</a>,
         <a href="Detekt-Overview.md">static analysis</a>, and
         <a href="Publishing-Overview.md">publishing</a>.
     </def>
@@ -76,6 +80,10 @@ kreate {
 %product% reacts to the Kotlin plugin you applied rather than guessing. Apply
 `org.jetbrains.kotlin.jvm` and you get the JVM configuration path; apply
 `org.jetbrains.kotlin.multiplatform` and you get the multiplatform one.
+
+That is also the only plugin you apply. The plugin behind every feature you enable — Detekt, Kover,
+kotlinx-benchmark, Dokka, the publishing plugins — is applied by %product%, and applying one
+yourself to pin its version still works. See [](Plugin-Management.md).
 
 | Concern | What you write | What you would otherwise repeat |
 |---|---|---|

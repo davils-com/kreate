@@ -7,7 +7,8 @@
 Kreate supports publishing to the [GitLab Package Registry](https://docs.gitlab.com/ee/user/packages/maven_repository/)
 using CI job token authentication.
 
-> You must manually apply the `maven-publish` plugin to your project for this to work.
+> Kreate applies the `maven-publish` plugin when publishing is enabled; your `plugins { }` block
+> does not need to mention it.
 >
 {style="warning"}
 

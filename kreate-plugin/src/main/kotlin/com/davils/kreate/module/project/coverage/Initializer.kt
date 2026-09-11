@@ -24,6 +24,7 @@ import com.davils.kreate.module.project.coverage.extension.CoverageFilterSpec
 import com.davils.kreate.module.project.coverage.extension.CoverageReportExtension
 import com.davils.kreate.module.project.coverage.extension.CoverageRuleSpec
 import com.davils.kreate.module.project.coverage.extension.CoverageVerifyExtension
+import com.davils.kreate.module.project.tests.suite.enabledSuites
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverReportFilter
 import kotlinx.kover.gradle.plugin.dsl.KoverReportSetConfig
@@ -55,8 +56,9 @@ private const val KOVER_CONFIGURATION: String = "kover"
  * Configures Kover's project settings, reports and verification rules from the Kreate
  * configuration, if coverage is enabled.
  *
+ * The Kover plugin itself is applied earlier, by `applyFeaturePlugins`.
+ *
  * @param extension The main Kreate extension.
- * @throws GradleException If coverage is enabled but the Kover plugin is not applied.
  * @since 2.2.0
  */
 internal fun Project.initializeCoverage(extension: KreateExtension) {
@@ -65,29 +67,9 @@ internal fun Project.initializeCoverage(extension: KreateExtension) {
         return
     }
 
-    if (!plugins.hasPlugin(KOVER_PLUGIN_ID)) {
-        throw GradleException(
-            """
-                Kreate's coverage integration is enabled, but the Kover plugin is not applied to
-                project '$path'.
-
-                Kreate configures Kover, it does not apply it — that keeps the Kover version
-                under your control instead of pinning it to Kreate's release cycle.
-
-                Add it to your build script:
-
-                    plugins {
-                        id("$KOVER_PLUGIN_ID") version "<version>"
-                    }
-
-                Or disable the integration with `kreate { project { coverage { enabled = false } } }`.
-            """.trimIndent()
-        )
-    }
-
     extensions.configure<KoverProjectExtension> {
         configureEngine(coverageExtension)
-        configureCurrentProject(coverageExtension)
+        configureCurrentProject(coverageExtension, suiteSourceSetsToExclude(extension))
 
         reports {
             total {
@@ -99,6 +81,33 @@ internal fun Project.initializeCoverage(extension: KreateExtension) {
     }
 
     configureAggregation(coverageExtension.aggregate)
+}
+
+/**
+ * The compilations of the test suites, which must not be measured as production code.
+ *
+ * Kover recognises a test compilation by the name `test` and nothing else, so a suite called
+ * `unitTest` lands in the denominator as if it were code the project ships. The build stays
+ * green and the number quietly describes the wrong thing, which is the worst failure mode a
+ * coverage report has.
+ *
+ * The name to exclude is the compilation's, which is the suite's source set name on both
+ * Kotlin/JVM and multiplatform projects - not the per-target source set names derived from it.
+ *
+ * Returns nothing when the project has listed the source sets to measure explicitly: that list
+ * already decides what counts, and adding exclusions to it would only be a second opinion.
+ *
+ * @param extension The main Kreate extension.
+ * @return The suite compilation names to exclude from the measurement.
+ * @since 3.0.0
+ */
+private fun suiteSourceSetsToExclude(extension: KreateExtension): Set<String> {
+    val tests = extension.project.tests
+    val explicitlyIncluded = extension.project.coverage.sources.includedSourceSets.get().isNotEmpty()
+    val applicable = tests.enabled.get() && tests.excludeSuitesFromCoverage.get() && !explicitlyIncluded
+    if (!applicable) return emptySet()
+
+    return tests.enabledSuites().mapTo(mutableSetOf()) { it.sourceSetName.get() }
 }
 
 /**
@@ -118,14 +127,18 @@ private fun KoverProjectExtension.configureEngine(extension: CoverageExtension) 
  * Configures which source sets are measured and which classes are instrumented.
  *
  * @param extension The Kreate coverage configuration.
+ * @param suiteSourceSets The test suite source sets that must not be measured.
  * @since 2.2.0
  */
-private fun KoverProjectExtension.configureCurrentProject(extension: CoverageExtension) {
+private fun KoverProjectExtension.configureCurrentProject(
+    extension: CoverageExtension,
+    suiteSourceSets: Set<String>
+) {
     currentProject {
         sources {
             excludeJava.set(extension.sources.excludeJava)
             includedSourceSets.set(extension.sources.includedSourceSets)
-            excludedSourceSets.set(extension.sources.excludedSourceSets)
+            excludedSourceSets.set(extension.sources.excludedSourceSets.map { it + suiteSourceSets })
         }
 
         instrumentation {
@@ -326,33 +339,15 @@ private fun Project.configureAggregation(extension: CoverageAggregateExtension) 
         }
     }
 
-    targets.forEach { target -> dependencies.add(KOVER_CONFIGURATION, target) }
+    targets.forEach { target ->
+        dependencies.add(KOVER_CONFIGURATION, target)
 
-    // The check has to wait until every project has been evaluated. Kreate's own configuration
-    // runs in this project's `afterEvaluate`, and Gradle evaluates the root before its children,
-    // so asking a subproject about its plugins here would report every one of them as missing.
-    gradle.projectsEvaluated {
-        val missing = targets.filterNot { it.plugins.hasPlugin(KOVER_PLUGIN_ID) }
-        if (missing.isNotEmpty()) {
-            throw GradleException(
-                """
-                    Kreate's coverage aggregation on project '${this@configureAggregation.path}'
-                    includes projects that do not apply the Kover plugin:
-
-                    ${missing.joinToString(separator = "\n                    ") { "  - ${it.path}" }}
-
-                    An aggregated project has to measure its own coverage before it can contribute
-                    any. Apply the plugin in each of them:
-
-                        plugins {
-                            id("$KOVER_PLUGIN_ID") version "<version>"
-                        }
-
-                    Or name only the projects that do, with
-                    `coverage { aggregate { projects = listOf(...) } }`.
-                """.trimIndent()
-            )
-        }
+        // An aggregated project has to measure its own coverage before it can contribute any, so
+        // it needs the plugin. Applied here rather than demanded of each subproject's build
+        // script, and applied now rather than checked later: Gradle evaluates the root before its
+        // children, so this runs before the subproject is configured, which is the only point at
+        // which applying a plugin to it still means anything.
+        target.pluginManager.apply(KOVER_PLUGIN_ID)
     }
 }
 

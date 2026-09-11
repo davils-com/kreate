@@ -22,19 +22,25 @@ import org.gradle.api.GradleException
  * Every platform identifier Kreate can produce or consume.
  *
  * The set is closed on purpose. A platform id is not free text: it is the directory name inside
- * the JAR, the suffix of a published artifact id, and the string the generated loader computes at
- * runtime from `os.name` and `os.arch`. A typo like `linux-amd64` would produce an artifact that
- * publishes cleanly and that no consumer ever resolves, because the loader looks for
- * `linux-x64` — a defect that only surfaces as an `UnsatisfiedLinkError` on someone else's
- * machine.
+ * the JAR, the suffix of a published artifact id, and the string a loader resolves at runtime from
+ * `os.name` and `os.arch`. A typo like `linux-amd64` would produce an artifact that publishes
+ * cleanly and that no consumer ever resolves - a defect that only surfaces as an
+ * `UnsatisfiedLinkError` on someone else's machine.
  *
- * The values mirror what [currentPlatformId] produces.
+ * **That argument is the reason 3.0.0 changed the set.** It was `x64` and `arm64`, and the loader
+ * consumers actually run - `com.davils.arc.platform.Platform.identifier`, by way of
+ * `com.davils:sira-native` - resolves `x86_64` and `aarch64`. Kreate was making exactly the mistake
+ * this table exists to prevent, against itself.
+ *
+ * The values mirror what [currentPlatformId] produces, and `KnownPlatformsTest` pins them as
+ * literal strings. They are a wire format rather than an implementation detail: a published JAR and
+ * a consumer built a year apart have to agree on them, so they are written out rather than derived.
  *
  * @since 2.2.0
  */
 internal val KNOWN_PLATFORM_IDS: Set<String> = buildSet {
     for (os in listOf("windows", "linux", "macos")) {
-        for (arch in listOf("x64", "arm64")) {
+        for (arch in listOf(X86_64_ID, AARCH64_ID)) {
             add("$os-$arch")
         }
     }
@@ -71,8 +77,9 @@ internal fun requireKnownPlatform(platformId: String, context: String): String {
 /**
  * Converts a platform identifier into the suffix used in a Gradle task name.
  *
- * `linux-x64` becomes `LinuxX64`, so that [com.davils.kreate.KreateTasks.Jni.nativeJar] yields
- * `kreateJniNativeJarLinuxX64`.
+ * `linux-x86_64` becomes `LinuxX86_64`, so that [com.davils.kreate.KreateTasks.Jni.nativeJar] yields
+ * `kreateJniNativeJarLinuxX86_64`. The underscore survives: it is part of the identifier, and a task
+ * name that dropped it would no longer round-trip to the platform it names.
  *
  * @param platformId The platform identifier.
  * @return The task name suffix in upper camel case.

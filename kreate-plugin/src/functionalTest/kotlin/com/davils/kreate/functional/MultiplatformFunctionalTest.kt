@@ -174,6 +174,38 @@ class MultiplatformFunctionalTest {
     }
 
     @Test
+    @DisplayName("kreateDetekt analyses every source set, so a pipeline needs no list of task names")
+    fun analyseTaskCoversEverySourceSet() {
+        fixture.writeMultiplatformBuild(
+            kreateBlock = """
+                ${KreateBuildFixture.platformBlock}
+
+                project {
+                    name = "Sample"
+                    description = "Fixture"
+
+                    detekt {
+                        enabled = true
+                        allRules = false
+                        buildUponDefaultConfig = true
+                    }
+                }
+            """.trimIndent(),
+            extraPlugins = listOf("""id("dev.detekt")""")
+        )
+        fixture.write("detekt.yaml", "")
+
+        val result = fixture.build("kreateDetekt")
+
+        // The point of the task: one name a CI job can run that reaches every target. Before it
+        // existed, every project spelled these out by hand and a target added later was analysed
+        // by nothing, silently.
+        result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":detektJvmMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":detektWasmJsMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+    }
+
+    @Test
     @DisplayName("gives each Detekt task its own report directory")
     fun reportsPerTask() {
         fixture.writeMultiplatformBuild(

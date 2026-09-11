@@ -131,17 +131,16 @@ class BenchmarkFunctionalTest {
     }
 
     @Test
-    @DisplayName("explains that the kotlinx-benchmark plugin has to be applied")
-    fun explainsMissingPlugin() {
+    @DisplayName("applies the kotlinx-benchmark plugin itself")
+    fun appliesItsOwnPlugin() {
+        // Nothing in the generated build script mentions kotlinx-benchmark. Enabling the
+        // feature is the decision; applying its plugin is bookkeeping Kreate does.
         writeBuild(withPlugin = false)
 
-        val result = fixture.buildAndFail("tasks")
+        val result = fixture.build("tasks", "--all")
 
-        // The point of depending on kotlinx-benchmark `compileOnly` is that this is a
-        // readable message rather than a NoClassDefFoundError.
-        result.output shouldContain "the kotlinx-benchmark plugin is not"
-        result.output shouldContain "org.jetbrains.kotlinx.benchmark"
-        result.output shouldNotContain "NoClassDefFoundError"
+        result.output shouldContain "benchmarksBenchmarkGenerate"
+        result.output shouldContain "kreateBenchmarkCheck"
     }
 
     @Test

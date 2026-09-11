@@ -191,11 +191,11 @@ class CoverageAggregationFunctionalTest {
     }
 
     @Test
-    @DisplayName("names the projects that are missing the Kover plugin")
-    fun reportsProjectsWithoutKover() {
-        // Kover's own `merge { }` would apply the plugin to these projects. Kreate reports them
-        // instead, because injecting a plugin a build script never asked for is the behaviour
-        // this project exists to avoid.
+    @DisplayName("applies Kover to an aggregated project that does not apply it itself")
+    fun appliesKoverToAggregatedProjects() {
+        // Aggregation names the projects to measure, and a project cannot contribute coverage
+        // without the plugin. Listing it is the decision; applying the plugin there follows from
+        // it, and is not a second thing every subproject's build script has to repeat.
         writeSettings(":core", ":api")
         writeSubproject("core", "Core")
         writeSubproject("api", "Api", applyKover = false)
@@ -207,10 +207,12 @@ class CoverageAggregationFunctionalTest {
             """.trimIndent()
         )
 
-        val result = fixture.buildAndFail("koverXmlReport")
+        val result = fixture.build("koverXmlReport")
 
-        result.output shouldContain "do not apply the Kover plugin"
-        result.output shouldContain ":api"
+        // The aggregated project never applies Kover itself; the aggregating project applies it
+        // there, which is the only way it can contribute any coverage at all.
+        result.task(":api:koverGenerateArtifact")?.outcome shouldBe TaskOutcome.SUCCESS
+        fixture.file("build/reports/kover/report.xml").readText() shouldContain "Api"
     }
 
     @Test

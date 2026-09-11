@@ -1,4 +1,18 @@
 version: 2
+
+# The Kotlin version is never updated by Dependabot. It is not an ordinary dependency: it governs
+# the language Kreate's own sources are written in, the API level consumers are compiled against,
+# and the Gradle plugin surface every module builds on. Raising it is a deliberate, coordinated
+# change — see docs/topics/Compatibility.md — not something to merge from a bot that has only
+# checked that resolution still succeeds.
+#
+# The patterns are anchored on the group with an explicit colon on purpose. A bare
+# `org.jetbrains.kotlin*` would also swallow `org.jetbrains.kotlinx`, taking Kover,
+# kotlinx-benchmark and the binary compatibility validator out of the updates with it.
+#
+# The list is repeated per ecosystem rather than shared through a YAML anchor: Dependabot
+# validates this file against a fixed schema and rejects an unknown top-level key.
+
 updates:
   - package-ecosystem: "gradle"
     directory: "/"
@@ -6,6 +20,14 @@ updates:
       interval: "daily"
     target-branch: "develop"
     open-pull-requests-limit: 10
+    ignore:
+      # kotlin-gradle-plugin, kotlin-metadata-jvm, kotlin-test, the stdlib
+      - dependency-name: "org.jetbrains.kotlin:*"
+      # the marker artifacts behind `kotlin("jvm")` and `kotlin("multiplatform")`
+      - dependency-name: "org.jetbrains.kotlin.jvm:*"
+      - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
+      # the compiler plugins Kreate applies: serialization, allopen
+      - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
 
   - package-ecosystem: "gradle"
     directory: "/kreate-plugin"
@@ -13,6 +35,11 @@ updates:
       interval: "daily"
     target-branch: "develop"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "org.jetbrains.kotlin:*"
+      - dependency-name: "org.jetbrains.kotlin.jvm:*"
+      - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
+      - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
 
   - package-ecosystem: "gradle"
     directory: "/build-logic"
@@ -20,6 +47,11 @@ updates:
       interval: "daily"
     target-branch: "develop"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "org.jetbrains.kotlin:*"
+      - dependency-name: "org.jetbrains.kotlin.jvm:*"
+      - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
+      - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
 
   - package-ecosystem: "github-actions"
     directory: "/"

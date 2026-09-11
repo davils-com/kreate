@@ -166,8 +166,71 @@ class PluginContractFunctionalTest {
     }
 
     @Test
-    @DisplayName("fails with an actionable message when Detekt is enabled without its plugin")
-    fun detektRequiresItsPlugin() {
+    @DisplayName("one plugins block is enough for every feature at once")
+    fun appliesEveryFeaturePlugin() {
+        // The point of the whole arrangement: the generated build script applies Kotlin and
+        // Kreate and nothing else, and four third-party plugins end up configured and wired.
+        fixture.writeBuild(
+            """
+            $minimalKreateBlock
+
+            project {
+                detekt { enabled = true }
+                coverage { enabled = true }
+                benchmark { enabled = true }
+
+                publish {
+                    enabled = true
+
+                    repositories {
+                        mavenCentral { enabled = true }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = fixture.build("tasks", "--all")
+
+        result.output shouldContain "detektMainSourceSet"
+        result.output shouldContain "koverXmlReport"
+        result.output shouldContain "benchmarksBenchmarkGenerate"
+        result.output shouldContain "publishToMavenLocal"
+    }
+
+    @Test
+    @DisplayName("a plugin the consumer applies themselves is left alone")
+    fun respectsAConsumerAppliedPlugin() {
+        // The other half of the guarantee: applying a plugin yourself - to pin a version, or to
+        // configure it beyond what Kreate exposes - has to keep working, which means Kreate's
+        // own application must be a no-op rather than a second one.
+        fixture.writeBuild(
+            """
+            $minimalKreateBlock
+
+            project {
+                detekt { enabled = true }
+                coverage { enabled = true }
+            }
+            """.trimIndent(),
+            extraPlugins = listOf("""id("dev.detekt")""", """id("org.jetbrains.kotlinx.kover")"""),
+            extra = """
+                detekt {
+                    buildUponDefaultConfig = true
+                }
+            """.trimIndent()
+        )
+
+        val result = fixture.build("tasks", "--all")
+
+        result.task(":tasks")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.output shouldContain "detektMainSourceSet"
+        result.output shouldContain "koverXmlReport"
+    }
+
+    @Test
+    @DisplayName("applies the Detekt plugin itself when Detekt is enabled")
+    fun detektAppliesItsPlugin() {
         fixture.writeBuild(
             """
             $minimalKreateBlock
@@ -180,14 +243,16 @@ class PluginContractFunctionalTest {
             """.trimIndent()
         )
 
-        val result = fixture.buildAndFail("build")
+        val result = fixture.build("tasks", "--all")
 
-        result.output shouldContain "dev.detekt"
+        // Detekt's own tasks, from a build script that never mentions Detekt.
+        result.output shouldContain "detektMainSourceSet"
+        result.output shouldContain "kreateDetekt"
     }
 
     @Test
-    @DisplayName("fails with an actionable message when coverage is enabled without the Kover plugin")
-    fun coverageRequiresItsPlugin() {
+    @DisplayName("applies the Kover plugin itself when coverage is enabled")
+    fun coverageAppliesItsPlugin() {
         fixture.writeBuild(
             """
             $minimalKreateBlock
@@ -200,9 +265,11 @@ class PluginContractFunctionalTest {
             """.trimIndent()
         )
 
-        val result = fixture.buildAndFail("build")
+        val result = fixture.build("tasks", "--all")
 
-        result.output shouldContain "org.jetbrains.kotlinx.kover"
+        // Kover's own tasks, from a build script that never mentions Kover.
+        result.output shouldContain "koverXmlReport"
+        result.output shouldContain "koverVerify"
     }
 
     @Test

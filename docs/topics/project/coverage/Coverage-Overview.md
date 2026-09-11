@@ -6,7 +6,7 @@
 
 <tldr>
 <p><b>Enable</b>: <code>project { coverage { enabled = true } }</code></p>
-<p><b>Requires</b>: the <code>org.jetbrains.kotlinx.kover</code> plugin applied by you</p>
+<p><b>Applies</b>: the <code>org.jetbrains.kotlinx.kover</code> plugin</p>
 </tldr>
 
 Detekt says whether the code looks right. Trivy says whether it is safe to ship. Neither says
@@ -19,11 +19,11 @@ which classes are instrumented, what the reports contain, and what threshold the
 
 ## Quick start
 
-Coverage is **disabled by default**. Apply Kover yourself and switch the integration on:
+Coverage is **disabled by default**. Switching the integration on is all it takes — %product%
+applies Kover itself:
 
 ```kotlin
 plugins {
-    id("org.jetbrains.kotlinx.kover") version "0.9.9"
     id("com.davils.kreate")
 }
 
@@ -42,15 +42,22 @@ Then measure before you gate:
 ./gradlew koverLog
 ```
 
-## %product% configures Kover, it does not apply it
+## %product% applies Kover for you
 
-Enabling the integration without the Kover plugin fails the build with a message telling you what
-to add. That is deliberate: applying Kover on your behalf would pin its version to %product%'s
-release cycle, and a coverage engine is exactly the kind of dependency a build wants to upgrade on
-its own schedule. The same contract applies to [Detekt](Detekt-Overview.md).
+Enabling the integration is all it takes; your `plugins { }` block does not need to mention Kover.
+Enabling a feature is the decision, and applying the plugin behind it is bookkeeping.
 
-Silently doing nothing would be the worse failure mode — a build that reports no coverage problem
-because it measured no coverage looks identical to one that passed.
+Apply it yourself when you want something %product% does not expose — a pinned version, or Kover's
+own DSL block, which only exists in your build script if the plugin was applied there. %product%'s
+own application is then a no-op. The same holds for [Detekt](Detekt-Overview.md) and
+[kotlinx-benchmark](Benchmark-Overview.md).
+
+<note>
+Before 3.0.0 %product% refused to run unless you had applied the plugin yourself. The reason was
+version control, and it still holds where it matters: declaring
+<code>id("org.jetbrains.kotlinx.kover") version "..."</code> pins the version exactly as it did
+before. What changed is that you no longer have to do it to get a coverage report.
+</note>
 
 ## What you get
 
