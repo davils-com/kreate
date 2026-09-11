@@ -96,6 +96,12 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
     systemProperty("kreate.test.minGradleVersion", Project.Compatibility.MIN_GRADLE_VERSION)
 
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+
+    // TestKit leaves a Gradle daemon holding handles on the project it just built, and on Windows
+    // a file that is open cannot be deleted. JUnit then fails a test that already passed, because
+    // it could not remove the `@TempDir` afterwards. Whether the directory goes away is not
+    // something this suite asserts; the runner's temp directory is cleaned up by the runner.
+    systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "NEVER")
 }
 
 tasks.test {

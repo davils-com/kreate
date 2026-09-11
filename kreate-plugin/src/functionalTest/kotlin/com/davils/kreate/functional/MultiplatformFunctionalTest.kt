@@ -142,6 +142,21 @@ class MultiplatformFunctionalTest {
         locked shouldContain "wasmJsRuntimeClasspath"
     }
 
+    /**
+     * Runs `check` without the Kotlin test tasks.
+     *
+     * Every assertion below is about what `check` reaches on the Detekt side; none is about test
+     * execution, so excluding it costs the tests nothing. Leaving it in costs them a Node.js and a
+     * Yarn distribution, unpacked into the shared Gradle user home by the Wasm target's test task.
+     * The functional suite runs in parallel forks against that one user home, and two of them
+     * unpacking at the same moment is a race Windows loses on a file it cannot replace while it is
+     * open — an `UnexpectedBuildFailure` in whichever test happened to be second.
+     *
+     * @return The build result.
+     */
+    private fun checkWithoutTestExecution() =
+        fixture.build("check", "-x", "allTests", "-x", "wasmJsNodeTest")
+
     @Test
     @DisplayName("check analyses every source set instead of an aggregate task with no sources")
     fun checkAnalysesSourceSets() {
@@ -164,7 +179,7 @@ class MultiplatformFunctionalTest {
         )
         fixture.write("detekt.yaml", "")
 
-        val result = fixture.build("check")
+        val result = checkWithoutTestExecution()
 
         // The aggregate task has no sources under this plugin, so `check` depending on it alone is
         // a quality gate that reads nothing.
@@ -233,7 +248,7 @@ class MultiplatformFunctionalTest {
         )
         fixture.write("detekt.yaml", "")
 
-        fixture.build("check")
+        checkWithoutTestExecution()
 
         // One shared path would have made these overlapping task outputs, and whichever ran last
         // would be the only report left.
@@ -287,7 +302,7 @@ class MultiplatformFunctionalTest {
             """.trimIndent()
         )
 
-        val result = fixture.build("check")
+        val result = checkWithoutTestExecution()
 
         result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
     }
