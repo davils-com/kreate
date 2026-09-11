@@ -37,10 +37,15 @@ class KnownPlatformsTest {
     @Test
     @DisplayName("covers every operating system and architecture combination")
     fun vocabularyIsComplete() {
+        // Written out as literals rather than derived. These strings are a wire format: a JAR
+        // packaged today and a consumer built a year from now have to agree on them, and they are
+        // the same strings `com.davils.arc.platform.Platform.identifier` renders. Deriving them
+        // from the same constants the production code uses would make this test agree with any
+        // rename, including the one that breaks every published artifact.
         KNOWN_PLATFORM_IDS shouldBe setOf(
-            "windows-x64", "windows-arm64",
-            "linux-x64", "linux-arm64",
-            "macos-x64", "macos-arm64"
+            "windows-x86_64", "windows-aarch64",
+            "linux-x86_64", "linux-aarch64",
+            "macos-x86_64", "macos-aarch64"
         )
     }
 
@@ -55,7 +60,7 @@ class KnownPlatformsTest {
     @Test
     @DisplayName("accepts a known identifier unchanged")
     fun acceptsKnownIdentifier() {
-        requireKnownPlatform("linux-x64", "test") shouldBe "linux-x64"
+        requireKnownPlatform("linux-x86_64", "test") shouldBe "linux-x86_64"
     }
 
     @Test
@@ -68,15 +73,15 @@ class KnownPlatformsTest {
         }
 
         failure.message shouldContain "linux-amd64"
-        failure.message shouldContain "linux-x64"
+        failure.message shouldContain "linux-x86_64"
         failure.message shouldContain "jni { packaging { publishing { platforms } } }"
     }
 
     @Test
     @DisplayName("derives task names in upper camel case")
     fun taskSuffix() {
-        platformTaskSuffix("linux-x64") shouldBe "LinuxX64"
-        platformTaskSuffix("macos-arm64") shouldBe "MacosArm64"
+        platformTaskSuffix("linux-x86_64") shouldBe "LinuxX86_64"
+        platformTaskSuffix("macos-aarch64") shouldBe "MacosAarch64"
     }
 
     @Test

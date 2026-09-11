@@ -70,7 +70,7 @@ class NativePublishingFunctionalTest {
             else -> "linux"
         }
         val arch = System.getProperty("os.arch").lowercase()
-        val archId = if (arch.contains("aarch64") || arch.contains("arm64")) "arm64" else "x64"
+        val archId = if (arch.contains("aarch64") || arch.contains("arm64")) "aarch64" else "x86_64"
         "$osId-$archId"
     }
 
@@ -157,7 +157,7 @@ class NativePublishingFunctionalTest {
         val mainJar = publishedModule("sample").walkTopDown()
             .single { it.name.endsWith(".jar") && !it.name.contains("-sources") }
 
-        jarEntries(mainJar).none { it.startsWith("natives/") } shouldBe true
+        jarEntries(mainJar).none { it.startsWith("native/") } shouldBe true
     }
 
     @Test
@@ -185,7 +185,7 @@ class NativePublishingFunctionalTest {
             .single { it.name.endsWith(".jar") }
 
         val entries = jarEntries(platformJar)
-        entries.any { it == "natives/$hostPlatform/libsample.so" } shouldBe true
+        entries.any { it == "native/$hostPlatform/libsample.so" } shouldBe true
         entries.none { it.endsWith(".class") } shouldBe true
     }
 
@@ -225,7 +225,7 @@ class NativePublishingFunctionalTest {
     fun failsOnSelectedButMissingPlatform() {
         // Selecting fewer platforms is fine; selecting one you cannot deliver is always an
         // accident, and one that would otherwise upload cleanly.
-        val absent = if (hostPlatform == "linux-arm64") "linux-x64" else "linux-arm64"
+        val absent = if (hostPlatform == "linux-aarch64") "linux-x86_64" else "linux-aarch64"
         writeBuild(
             platforms = """"$hostPlatform", "$absent"""",
             stagePlatforms = listOf(hostPlatform)
@@ -245,7 +245,7 @@ class NativePublishingFunctionalTest {
         val result = fixture.buildAndFail("tasks")
 
         result.output shouldContain "linux-amd64"
-        result.output shouldContain "linux-x64"
+        result.output shouldContain "linux-x86_64"
     }
 
     @Test
@@ -311,7 +311,7 @@ class NativePublishingFunctionalTest {
     fun propertyOverridesSelection() {
         // A pipeline that gains or loses a runner should not need a commit to change what a
         // release publishes.
-        val other = if (hostPlatform == "linux-arm64") "linux-x64" else "linux-arm64"
+        val other = if (hostPlatform == "linux-aarch64") "linux-x86_64" else "linux-aarch64"
         writeBuild(
             platforms = """"$other"""",
             stagePlatforms = listOf(hostPlatform)

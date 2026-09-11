@@ -16,9 +16,13 @@
 
 package com.davils.kreate.module.project.tests
 
+import com.davils.kreate.KreateTasks
 import com.davils.kreate.module.project.tests.logging.TestsLoggingExtension
 import com.davils.kreate.module.project.tests.report.TestsReportExtension
+import com.davils.kreate.module.project.tests.suite.TestSuiteExtension
+import com.davils.kreate.module.project.tests.suite.TestSuiteKotestExtension
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
@@ -106,6 +110,96 @@ public abstract class TestsExtension @Inject constructor(
     public abstract val report: TestsReportExtension
 
     /**
+     * What happens to the conventional `test` source set once the suites take over.
+     *
+     * Defaults to [LegacyTestPolicy.DISABLE]. Set it to [LegacyTestPolicy.FAIL] while
+     * migrating: it turns tests that would silently stop running into a build error naming
+     * the directories still to be moved.
+     *
+     * @since 3.0.0
+     */
+    public val legacyTestSourceSet: Property<LegacyTestPolicy> = factory.property(
+        LegacyTestPolicy::class.java
+    ).convention(LegacyTestPolicy.DISABLE)
+
+    /**
+     * What happens to the source directories of the conventional `test` source set.
+     *
+     * Derived from [legacyTestSourceSet] unless set: [LegacyTestPolicy.ALIAS] adopts the
+     * directories into the unit suite so an unmoved tree keeps running, [LegacyTestPolicy.KEEP]
+     * leaves them alone, and the remaining policies clear them.
+     *
+     * @since 3.0.0
+     */
+    public val legacySourceDirectories: Property<LegacySourceDirectories> = factory.property(
+        LegacySourceDirectories::class.java
+    ).convention(legacyTestSourceSet.map { it.defaultSourceDirectories() })
+
+    /**
+     * Whether the suites' source sets are kept out of the coverage measurement.
+     *
+     * Defaults to `true`. The coverage engine excludes a source set called `test` by name and
+     * knows nothing about `unitTest`, so without this the suites' own code would be counted as
+     * production code in the denominator - a number that stays green while measuring the wrong
+     * thing.
+     *
+     * @since 3.0.0
+     */
+    public val excludeSuitesFromCoverage: Property<Boolean> =
+        factory.property(Boolean::class.java).convention(true)
+
+    /**
+     * The default Kotest bundle, inherited by every suite.
+     *
+     * @since 3.0.0
+     */
+    @get:Nested
+    public abstract val kotest: TestSuiteKotestExtension
+
+    /**
+     * The test suites of this project.
+     *
+     * Pre-registered with `unitTest` and `integrationTest`, so `named("unitTest") { }` works
+     * without registering anything first. `integrationTest` is registered off `check` and
+     * ordered after `unitTest`, which is the whole point of separating them: a build that runs
+     * both reports the cheap failures before it starts a container.
+     *
+     * Registering further suites is supported and works the same way.
+     *
+     * @since 3.0.0
+     */
+    public val suites: NamedDomainObjectContainer<TestSuiteExtension> = factory
+        .domainObjectContainer(TestSuiteExtension::class.java) { suiteName ->
+            // The factory exists so that each suite receives this block as its defaults; the
+            // container's built-in factory would pass the name alone, and there would be
+            // nothing for the inherited properties to point at.
+            //
+            // It closes over the object factory rather than over the project. A lambda stored
+            // in a field of this extension keeps whatever it captured alive, and a `Project`
+            // captured here would make every task that reads any part of the Kreate extension
+            // impossible to write to the configuration cache.
+            factory.newInstance(TestSuiteExtension::class.java, suiteName, this)
+        }
+        .apply {
+            // Realized on creation, and every later registration with them. A container that
+            // still holds pending elements cannot be written to the configuration cache, and
+            // this extension is reachable from anything holding the Kreate extension - so a
+            // project that never enables testing, and therefore never reads the suites, would
+            // otherwise fail to cache its configuration. A suite is a handful of properties;
+            // there is nothing to be saved by leaving it unrealized.
+            all { }
+
+            create(KreateTasks.Tests.UNIT)
+            create(KreateTasks.Tests.INTEGRATION).apply {
+                runOnCheck.set(false)
+                mustRunAfterSuites.set(listOf(KreateTasks.Tests.UNIT))
+                description.set(
+                    "Runs the integration suite, which may start containers and reach external services."
+                )
+            }
+        }
+
+    /**
      * Configures the [TestsLoggingExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -123,5 +217,25 @@ public abstract class TestsExtension @Inject constructor(
      */
     public fun report(action: Action<TestsReportExtension>) {
         action.execute(report)
+    }
+
+    /**
+     * Configures the [TestSuiteKotestExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 3.0.0
+     */
+    public fun kotest(action: Action<TestSuiteKotestExtension>) {
+        action.execute(kotest)
+    }
+
+    /**
+     * Configures the test suites using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 3.0.0
+     */
+    public fun suites(action: Action<NamedDomainObjectContainer<TestSuiteExtension>>) {
+        action.execute(suites)
     }
 }

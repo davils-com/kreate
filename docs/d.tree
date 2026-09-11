@@ -70,6 +70,9 @@
         </toc-element>
         <toc-element toc-title="Testing">
             <toc-element topic="Testing-Overview.md"/>
+            <toc-element topic="Testing-Suites.md"/>
+            <toc-element topic="Testing-Suites-Migration.md"/>
+            <toc-element topic="Testing-Kotest.md"/>
             <toc-element topic="Testing-Configuration-Reference.md"/>
             <toc-element topic="Testing-Multiplatfrom.md"/>
             <toc-element topic="Testing-Example.md"/>

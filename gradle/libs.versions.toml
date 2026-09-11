@@ -1,9 +1,4 @@
 [versions]
-# The Kotlin Gradle Plugin version Kreate *compiles against*, not the one consumers use.
-# Pinned to the Kotlin embedded in the minimum supported Gradle (9.0): a plugin must be
-# built against the oldest API it claims to support, otherwise it fails at runtime on a
-# consumer's machine rather than at build time here. Consumers remain free to use any
-# newer Kotlin version in their own build.
 kotlin = "2.4.0"
 poet = "2.3.0"
 dokka = "2.2.0"
@@ -50,8 +45,6 @@ kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.r
 # actual plugins, but needed as dependencies in build-logic
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
-# Unlike kotlinx-benchmark, allopen *is* applied by Kreate: a benchmark class that is not
-# open fails inside JMH with a message that never mentions allopen.
 allopen-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.allopen:org.jetbrains.kotlin.plugin.allopen.gradle.plugin", version.ref = "kotlin" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 publish-gradle-plugin = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "publish" }

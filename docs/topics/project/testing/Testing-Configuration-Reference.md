@@ -14,6 +14,9 @@
 | `ignoreFailures`          | `Property<Boolean>` | `false`                   | When `true`, the build continues even if tests fail                     |
 | `alwaysRunTests`          | `Property<Boolean>` | `false`                   | When `true`, disables Gradle's up-to-date check so tests always execute |
 | `failOnNoDiscoveredTests` | `Property<Boolean>` | `false`                   | When `true`, fails the build if a test task finds no tests              |
+| `legacyTestSourceSet`     | `Property<LegacyTestPolicy>` | `DISABLE`        | What happens to the conventional `test` source set                     |
+| `legacySourceDirectories` | `Property<LegacySourceDirectories>` | derived  | What happens to its source directories                                 |
+| `excludeSuitesFromCoverage` | `Property<Boolean>` | `true`                  | Keeps the suites' own code out of the coverage denominator             |
 
 ### `maxParallelForks`
 
@@ -123,9 +126,82 @@ unconditionally printed to the console.
 
 The following exception formatting is always applied regardless of the logging settings:
 
+## Suites
+
+`suites` is a `NamedDomainObjectContainer<TestSuiteExtension>`, pre-registered with `unitTest` and
+`integrationTest`. See [](Testing-Suites.md) for what a suite is and how it is laid out.
+
+### Identity and layout
+
+| Property        | Type                    | Default        | Description                                                   |
+|-----------------|-------------------------|----------------|---------------------------------------------------------------|
+| `enabled`       | `Property<Boolean>`     | `true`         | Whether the suite is created at all                           |
+| `sourceSetName` | `Property<String>`      | the suite name | Name of the backing source set, and of the KMP source set tree |
+| `srcDirs`       | `ListProperty<String>`  | empty          | Replaces the conventional source directories when set         |
+| `description`   | `Property<String>`      | derived        | Description shown for the suite's task                        |
+
+### Wiring
+
+| Property             | Type                   | Default                    | Description                                                        |
+|----------------------|------------------------|----------------------------|--------------------------------------------------------------------|
+| `associateWithMain`  | `Property<Boolean>`    | `true`                     | Makes `main`'s `internal` declarations visible to the suite        |
+| `dependsOnSuites`    | `ListProperty<String>` | empty                      | Other suites whose compiled output this suite may use              |
+| `runOnCheck`         | `Property<Boolean>`    | `true`, `false` for `integrationTest` | Whether `check` runs this suite                         |
+| `mustRunAfterSuites` | `ListProperty<String>` | empty, `["unitTest"]` for `integrationTest` | Ordering only; does not pull the suite into a build |
+| `targets`            | `ListProperty<String>` | empty (every JVM target)   | Multiplatform only; naming a non-JVM target fails the build        |
+
+### Execution
+
+Everything in this table is inherited from the enclosing `tests { }` block unless set on the suite.
+
+| Property                  | Type                | Description                                  |
+|---------------------------|---------------------|----------------------------------------------|
+| `maxParallelForks`        | `Property<Int>`     | Parallel test worker processes               |
+| `timeoutMinutes`          | `Property<Long>`    | Per-task timeout                             |
+| `ignoreFailures`          | `Property<Boolean>` | Whether the build continues after failures   |
+| `alwaysRun`               | `Property<Boolean>` | Disables the up-to-date check                |
+| `failOnNoDiscoveredTests` | `Property<Boolean>` | Fails the build on an empty suite            |
+
+Suite-only:
+
+| Property           | Type                            | Default | Description                                      |
+|--------------------|---------------------------------|---------|--------------------------------------------------|
+| `includeTags`      | `ListProperty<String>`          | empty   | JUnit Platform tags to run, to the exclusion of the rest |
+| `excludeTags`      | `ListProperty<String>`          | empty   | JUnit Platform tags to skip                      |
+| `systemProperties` | `MapProperty<String, String>`   | empty   | System properties for the suite's test JVM       |
+| `environment`      | `MapProperty<String, String>`   | empty   | Environment variables for the suite's test JVM   |
+| `jvmArgs`          | `ListProperty<String>`          | empty   | Additional JVM arguments                         |
+
+### Nested blocks
+
+`logging { }`, `report { }` and `kotest { }` take the same properties as on `tests { }` and
+inherit their values from there. `dependencies { }` is suite-only:
+
+| Function                | Description                                                |
+|-------------------------|------------------------------------------------------------|
+| `implementation(String)`| Compile and runtime classpath                              |
+| `compileOnly(String)`   | Compile classpath only                                     |
+| `runtimeOnly(String)`   | Runtime classpath only                                     |
+| `platform(String)`      | A bill of materials applied to the suite's classpath       |
+
+## Kotest
+
+| Property                   | Type                          | Default               | Description                                    |
+|----------------------------|-------------------------------|-----------------------|------------------------------------------------|
+| `enabled`                  | `Property<Boolean>`           | `false`               | Whether Kreate adds the Kotest artifacts       |
+| `version`                  | `Property<String>`            | `6.2.4`               | One version for the whole bundle               |
+| `modules`                  | `ListProperty<KotestModule>`  | `[ASSERTIONS]`        | Optional libraries added beside the runner     |
+| `addJUnitPlatformLauncher` | `Property<Boolean>`           | `true`                | Adds the launcher a suite cannot start without |
+| `junitPlatformVersion`     | `Property<String>`            | `6.1.3`               | Version of that launcher                       |
+
+See [](Testing-Kotest.md).
+
 <seealso>
     <category ref="project">
         <a href="Testing-Overview.md">Overview</a>
+        <a href="Testing-Suites.md">Test suites</a>
+        <a href="Testing-Suites-Migration.md">Migrating from src/test</a>
+        <a href="Testing-Kotest.md">The Kotest bundle</a>
         <a href="Testing-Example.md">Examples</a>
     </category>
 </seealso>

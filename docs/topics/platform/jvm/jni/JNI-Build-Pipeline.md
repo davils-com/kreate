@@ -131,8 +131,8 @@ The full CMake, compiler, and linker output is captured and attached to the fail
 ```
 CMake build failed with exit code 2.
 
-Command:           /usr/bin/cmake --build /path/build/jni/linux-x64/cmake --config Release
-Working directory: /path/build/jni/linux-x64/cmake
+Command:           /usr/bin/cmake --build /path/build/jni/linux-x86_64/cmake --config Release
+Working directory: /path/build/jni/linux-x86_64/cmake
 JAVA_HOME:         /usr/lib/jvm/temurin-21
 
 CMake output:

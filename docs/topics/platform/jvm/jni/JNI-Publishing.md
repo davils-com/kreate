@@ -6,12 +6,12 @@
 
 <tldr>
 <p><b>Enable</b>: <code>jni { packaging { publishing { enabled = true } } }</code></p>
-<p><b>Publishes</b>: <code>mylib</code> plus <code>mylib-linux-x64</code>, one artifact per platform</p>
+<p><b>Publishes</b>: <code>mylib</code> plus <code>mylib-linux-x86_64</code>, one artifact per platform</p>
 </tldr>
 
 A JNI library built on one machine contains one machine's binary. Publish that and you have
 published a Linux-only library, or a Windows-only one — %product% files the native library under
-`natives/<os>-<arch>/` inside the JAR, and only the platform the build ran on ends up there.
+`native/<os>-<arch>/` inside the JAR, and only the platform the build ran on ends up there.
 
 The usual answer is a fat JAR: a build matrix over Linux, Windows and macOS, whose results are
 merged into one artifact carrying every platform. It needs a runner for every operating system you
@@ -34,7 +34,7 @@ kreate {
 
                     publishing {
                         enabled = true
-                        platforms = listOf("linux-x64")
+                        platforms = listOf("linux-x86_64")
                         stagingDirectory = layout.projectDirectory.dir("natives")
                     }
                 }
@@ -53,7 +53,7 @@ Two things follow from `publishing { enabled = true }`:
         mode exists to remove, because it is invisible until someone runs on a different machine.
     </def>
     <def title="Each platform becomes its own artifact id">
-        <code>com.example:mylib-linux-x64</code> next to <code>com.example:mylib</code>. A
+        <code>com.example:mylib-linux-x86_64</code> next to <code>com.example:mylib</code>. A
         classifier would have worked too; a separate artifact id is what Maven tooling handles
         without special cases.
     </def>
@@ -73,7 +73,7 @@ Publishing a subset is a supported, ordinary state:
 ```kotlin
 publishing {
     enabled = true
-    platforms = listOf("linux-x64")   // today
+    platforms = listOf("linux-x86_64")   // today
 }
 ```
 
@@ -83,11 +83,11 @@ library change nothing.
 A pipeline can override the selection without a commit:
 
 ```bash
-./gradlew publish -Pkreate.jni.publishPlatforms=linux-x64,linux-arm64
+./gradlew publish -Pkreate.jni.publishPlatforms=linux-x86_64,linux-aarch64
 ```
 
-Valid identifiers are `linux-x64`, `linux-arm64`, `windows-x64`, `windows-arm64`, `macos-x64` and
-`macos-arm64` — the same strings the generated loader computes at runtime. Anything else fails
+Valid identifiers are `linux-x86_64`, `linux-aarch64`, `windows-x86_64`, `windows-aarch64`, `macos-x86_64` and
+`macos-aarch64` — the same strings the generated loader computes at runtime. Anything else fails
 during configuration rather than producing an artifact nobody resolves.
 
 ### The one thing that fails
@@ -97,8 +97,8 @@ during configuration rather than producing an artifact nobody resolves.
 ```
 No native library was found for every platform selected for publishing.
 
-  windows-x64 — looked in:
-    /project/natives/windows-x64
+  windows-x86_64 — looked in:
+    /project/native/windows-x86_64
 ```
 
 Leaving a platform out is a decision. Selecting one you cannot deliver is always an accident, and
@@ -110,10 +110,10 @@ without this check the release would upload cleanly and fail later inside a cons
 out by platform:
 
 ```
-natives/
-├── linux-x64/libmylib.so
-├── windows-x64/mylib.dll
-└── macos-arm64/libmylib.dylib
+native/
+├── linux-x86_64/libmylib.so
+├── windows-x86_64/mylib.dll
+└── macos-aarch64/libmylib.dylib
 ```
 
 Anything in the staging directory is published. A staged binary also **wins over one this build
@@ -135,10 +135,10 @@ publish:
   script:
     - ./gradlew kreateJniBuild
     - ./gradlew kreateJniVerifyPlatforms
-    - ./gradlew publish -Pkreate.jni.publishPlatforms=linux-x64
+    - ./gradlew publish -Pkreate.jni.publishPlatforms=linux-x86_64
 ```
 
-When binaries for other platforms appear under `natives/`, extend the property. Nothing in the
+When binaries for other platforms appear under `native/`, extend the property. Nothing in the
 build script changes.
 
 ## What consumers write
@@ -146,7 +146,7 @@ build script changes.
 ```kotlin
 dependencies {
     implementation("com.example:mylib:1.0.0")
-    runtimeOnly("com.example:mylib-linux-x64:1.0.0")
+    runtimeOnly("com.example:mylib-linux-x86_64:1.0.0")
 }
 ```
 
@@ -162,13 +162,13 @@ A consumer who forgets it gets a message that says exactly what to add:
 
 ```
 Native library 'mylib' is not on java.library.path and no packaged copy was found
-at /natives/macos-arm64/libmylib.dylib.
+at /native/macos-aarch64/libmylib.dylib.
 
 Add the platform artifact to your runtime classpath:
 
-    runtimeOnly("com.example:mylib-macos-arm64:1.0.0")
+    runtimeOnly("com.example:mylib-macos-aarch64:1.0.0")
 
-Platforms published with this version: linux-x64
+Platforms published with this version: linux-x86_64
 ```
 
 The last line is the one that saves an afternoon: it separates "you forgot the dependency" from
@@ -187,7 +187,7 @@ The GitLab Package Registry asks for none of this, and the empty JARs are not pr
 
 <deflist type="medium">
     <def title="glibc and musl look identical">
-        <code>linux-x64</code> says nothing about the C library. A binary linked against glibc
+        <code>linux-x86_64</code> says nothing about the C library. A binary linked against glibc
         fails at runtime on Alpine. If your consumers run containers, this is the most likely bug
         report you will get, and the platform identifier cannot express the difference.
     </def>

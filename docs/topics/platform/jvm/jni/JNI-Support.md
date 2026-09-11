@@ -151,8 +151,8 @@ my-module/
 ```
 
 <warning>
-The build output is scoped by operating system and architecture (<code>linux-x64</code>,
-<code>macos-arm64</code>, …). Without that separation, a shared build cache or a checkout mounted
+The build output is scoped by operating system and architecture (<code>linux-x86_64</code>,
+<code>macos-aarch64</code>, …). Without that separation, a shared build cache or a checkout mounted
 into containers of different architectures would mix incompatible binaries.
 </warning>
 

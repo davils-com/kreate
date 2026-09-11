@@ -90,6 +90,25 @@ kotlin {
 }
 ```
 
+
+## Test suites on multiplatform
+
+Named test suites exist on JVM targets only, and give a shared source set plus one per target:
+
+| Path                             | Task                | Notes                                    |
+|----------------------------------|---------------------|------------------------------------------|
+| `src/commonUnitTest/kotlin`      | —                   | Compiled by every JVM target's suite task |
+| `src/jvmUnitTest/kotlin`         | `jvmUnitTest`       | A `KotlinJvmTest`, so coverage sees it   |
+| —                                | `unitTest`          | Runs every target's task                 |
+
+The Kotlin plugin ties the test binary of a Native target and the test run of a JS or Wasm target
+to the compilation called `test`, with no way to point them elsewhere — so those targets keep
+their conventional test source sets, and naming one in a suite's `targets` fails the build rather
+than producing a source directory that is never compiled. Set
+`legacyTestSourceSet = LegacyTestPolicy.KEEP` to keep those tests running beside the suites.
+
+See [](Testing-Suites.md).
+
 <seealso>
     <category ref="project">
         <a href="Testing-Overview.md">Overview</a>

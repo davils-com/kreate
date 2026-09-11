@@ -9,7 +9,8 @@ A complete index of %product%'s tasks, their inputs and outputs, and their cachi
 </card-summary>
 
 Task names are part of %product%'s public contract. They all follow one scheme: the `kreate`
-prefix, then the feature, then the action, in camel case.
+prefix, then the feature, then the action, in camel case. The test suites are the one exception,
+and deliberately so — see below.
 
 <tip>
 List what is actually registered in your project with
@@ -267,6 +268,44 @@ Registered when `project.dependencyLocking.enabled` is `true`. See
 Registered when `project.buildConstant.enabled` is `true`, and wired to run before Kotlin
 compilation so the generated code is always available to your sources.
 
+## Test suites
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>On <code>check</code></td>
+    </tr>
+    <tr>
+        <td><code>unitTest</code></td>
+        <td>Runs the tests in <code>src/unitTest/kotlin</code>.</td>
+        <td>yes</td>
+    </tr>
+    <tr>
+        <td><code>integrationTest</code></td>
+        <td>Runs the tests in <code>src/integrationTest/kotlin</code>, ordered after <code>unitTest</code>.</td>
+        <td>no</td>
+    </tr>
+    <tr>
+        <td><code>&lt;suite&gt;</code></td>
+        <td>One task per registered suite, named after it.</td>
+        <td>per <code>runOnCheck</code></td>
+    </tr>
+    <tr>
+        <td><code>&lt;target&gt;&lt;Suite&gt;</code></td>
+        <td>Multiplatform: one task per JVM target, for example <code>jvmUnitTest</code>. The suite's own task runs all of them.</td>
+        <td>per <code>runOnCheck</code></td>
+    </tr>
+</table>
+
+Registered when `project.tests.enabled` is `true`. These carry no `kreate` prefix and sit in
+Gradle's `verification` group rather than a `kreate` one, because a suite is not a %product%
+feature: it is the project's own test task under a more honest name, and it belongs where a
+developer and a CI pipeline already look for it. See [](Testing-Suites.md).
+
+The conventional `test` task is disabled and removed from `check` unless
+`project.tests.legacyTestSourceSet` says otherwise — see [](Testing-Suites-Migration.md).
+
 ## Tasks %product% configures but does not register
 
 Some integrations configure someone else's tasks rather than adding their own, because %product%
@@ -324,6 +363,7 @@ Tasks are grouped so that `./gradlew tasks` stays readable.
 | `kreate c-interop` | The C-interop pipeline |
 | `kreate trivy` | The security scans |
 | `kreate build-constants` | Constant generation |
+| `verification` | The test suites, beside Gradle's own `test` and `check` |
 
 ## Caching and up-to-date behaviour
 

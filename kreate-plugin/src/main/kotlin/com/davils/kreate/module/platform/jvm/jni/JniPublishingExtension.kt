@@ -30,7 +30,7 @@ import javax.inject.Inject
  * published artifact works on a single platform. The usual answer is a fat JAR assembled from a
  * build matrix over every supported operating system — which requires runners for every one of
  * them. Where that is not available, this is the alternative: each platform becomes its own
- * artifact, `com.example:mylib-linux-x64`, and a release publishes whichever ones it has.
+ * artifact, `com.example:mylib-linux-x86_64`, and a release publishes whichever ones it has.
  *
  * The generated loader needs no change for this. It resolves `natives/<os>-<arch>/` from the
  * classpath and does not care which JAR on that classpath provides it.
@@ -60,7 +60,7 @@ public abstract class JniPublishingExtension @Inject constructor(
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
-     * The platforms this release publishes, for example `listOf("linux-x64")`.
+     * The platforms this release publishes, for example `listOf("linux-x86_64")`.
      *
      * This is a selection, not a promise about every version to come. Publishing a subset is a
      * supported state and not an error — a project whose infrastructure can only build Linux

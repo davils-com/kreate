@@ -20,6 +20,7 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.KreateTasks
 import com.davils.kreate.module.platform.jvm.jni.tasks.BuildNative
 import com.davils.kreate.module.platform.jvm.jni.tasks.ConfigureNative
+import com.davils.kreate.module.platform.jvm.jni.tasks.GenerateDigestManifest
 import com.davils.kreate.module.platform.jvm.jni.tasks.GenerateJniHeaders
 import com.davils.kreate.module.platform.jvm.jni.tasks.GenerateNativeLoader
 import com.davils.kreate.module.platform.jvm.jni.tasks.InitializeCppProject
@@ -30,6 +31,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
@@ -176,6 +178,7 @@ private fun Project.applyNativePackaging(
 
     val resourcePath = packaging.resourcePath.get()
     val publishPerPlatform = packaging.publishing.enabled.get()
+    val manifest = registerDigestManifest(packaging, libraryDir, platformId, buildTaskName)
 
     // With per-platform publishing the natives leave the main JAR entirely, so that no consumer
     // silently receives whichever platform the library happened to be built on. They arrive
@@ -185,6 +188,11 @@ private fun Project.applyNativePackaging(
             dependsOn(buildTaskName)
             from(libraryDir) {
                 into("$resourcePath/$platformId")
+            }
+            if (manifest != null) {
+                from(manifest) {
+                    into(resourcePath)
+                }
             }
         }
     } else {
@@ -224,6 +232,40 @@ private fun Project.applyNativePackaging(
     }
 
     addGeneratedSourceDirectory(loaderDir, loader.name)
+}
+
+/**
+ * Registers the task that writes the digest manifest, or returns null when it is switched off.
+ *
+ * The manifest is one file per build and carries the host platform's entry, which is the only
+ * platform this build produced a binary for. A build that packages several platforms publishes one
+ * artifact each, and each carries its own.
+ *
+ * @param packaging The packaging configuration.
+ * @param libraryDir The directory the native build writes its artifacts to.
+ * @param platformId The `<os>-<arch>` identifier the libraries were built for.
+ * @param buildTaskName The name of the native build task the manifest must wait for.
+ * @return The registered task, or null.
+ * @since 3.0.0
+ */
+private fun Project.registerDigestManifest(
+    packaging: JniPackagingExtension,
+    libraryDir: Provider<out org.gradle.api.file.Directory>,
+    platformId: String,
+    buildTaskName: String
+): TaskProvider<GenerateDigestManifest>? {
+    if (!packaging.digestManifest.get()) return null
+
+    return tasks.register<GenerateDigestManifest>(KreateTasks.Jni.DIGEST_MANIFEST) {
+        dependsOn(buildTaskName)
+        libraryDirectory.set(libraryDir)
+        this.platformId.set(platformId)
+        manifest.set(
+            layout.buildDirectory.file(
+                "jni/$platformId/${GenerateDigestManifest.MANIFEST_FILE_NAME}"
+            )
+        )
+    }
 }
 
 /**

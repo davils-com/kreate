@@ -14,6 +14,12 @@ configuration for both Kotlin JVM and Kotlin Multiplatform projects. When enable
 automatically configures all test tasks with sensible defaults for parallelism, timeouts,
 failure handling, console logging, and report generation — without requiring manual `tasks.withType<Test>` boilerplate.
 
+Enabling it also replaces the conventional `test` source set with named **test suites** —
+`unitTest` and `integrationTest` by default, each with its own source set, dependency
+configurations and task. That is where most of the configuration now lives; see
+[](Testing-Suites.md), and [](Testing-Suites-Migration.md) for what happens to an existing
+`src/test`.
+
 Testing is **disabled by default**. Enable it with:
 
 ```kotlin

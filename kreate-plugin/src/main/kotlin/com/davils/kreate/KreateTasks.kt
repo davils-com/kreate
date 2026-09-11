@@ -76,6 +76,13 @@ public object KreateTasks {
         public const val LOADER: String = "kreateJniLoader"
 
         /**
+         * Writes the SHA-256 of every packaged native library as a `.properties` manifest.
+         *
+         * @since 3.0.0
+         */
+        public const val DIGEST_MANIFEST: String = "kreateJniDigestManifest"
+
+        /**
          * Builds the per-platform native JARs that are published alongside the library.
          * New in 2.2.0.
          * @since 2.2.0
@@ -100,8 +107,8 @@ public object KreateTasks {
          * Unlike the other names in this object, this one is parameterised: there is one task
          * per platform a release publishes, and the set is chosen by the consumer.
          *
-         * @param platformId The platform identifier, for example `linux-x64`.
-         * @return The task name, for example `kreateJniNativeJarLinuxX64`.
+         * @param platformId The platform identifier, for example `linux-x86_64`.
+         * @return The task name, for example `kreateJniNativeJarLinuxX86_64`.
          * @since 2.2.0
          */
         public fun nativeJar(platformId: String): String =
@@ -274,6 +281,37 @@ public object KreateTasks {
     }
 
     /**
+     * Task names and the group for static analysis.
+     *
+     * @since 3.0.0
+     */
+    public object Detekt {
+        /**
+         * Runs Detekt over every source set that has sources.
+         *
+         * Detekt registers one task per source set, and its own aggregate `detekt` task analyses
+         * **nothing** on a multiplatform project: every file belongs to a source set, so the
+         * aggregate has no sources of its own and passes without reading a line. A CI job that ran
+         * it would be green and blind.
+         *
+         * Until 3.0.0 the answer was for every project to spell the per-source-set task names out
+         * in its pipeline definition - a list that had to be revisited whenever a target or a module
+         * of a new kind was added, and whose failure mode when somebody forgot was silence. This
+         * task is that list, computed.
+         *
+         * @since 3.0.0
+         */
+        public const val ANALYSE: String = "kreateDetekt"
+
+        /**
+         * The group the analysis task is filed under.
+         *
+         * @since 3.0.0
+         */
+        public const val GROUP: String = "kreate detekt"
+    }
+
+    /**
      * Name of the build constants generation task.
      *
      * Was `kreate-build-constants` in 1.x.
@@ -288,4 +326,37 @@ public object KreateTasks {
      * @since 2.0.0
      */
     public const val BUILD_CONSTANTS_GROUP: String = "kreate build-constants"
+
+    /**
+     * Names of the test suite tasks.
+     *
+     * These are the only names in this object without a `kreate` prefix, and the only tasks
+     * Kreate puts in Gradle's verification group rather than a `kreate ...` one. A test suite
+     * is not a Kreate feature: it is the project's own test task under a more honest name, and
+     * it belongs where a developer and a CI pipeline already look for it.
+     *
+     * @since 3.0.0
+     */
+    public object Tests {
+        /**
+         * Name of the suite for fast, hermetic tests, registered by default.
+         *
+         * @since 3.0.0
+         */
+        public const val UNIT: String = "unitTest"
+
+        /**
+         * Name of the suite for tests that reach outside the process, registered by default.
+         *
+         * @since 3.0.0
+         */
+        public const val INTEGRATION: String = "integrationTest"
+
+        /**
+         * Name of the conventional test task the suites replace.
+         *
+         * @since 3.0.0
+         */
+        public const val LEGACY: String = "test"
+    }
 }

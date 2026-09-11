@@ -24,6 +24,7 @@ import com.davils.kreate.module.project.coverage.extension.CoverageFilterSpec
 import com.davils.kreate.module.project.coverage.extension.CoverageReportExtension
 import com.davils.kreate.module.project.coverage.extension.CoverageRuleSpec
 import com.davils.kreate.module.project.coverage.extension.CoverageVerifyExtension
+import com.davils.kreate.module.project.tests.suite.enabledSuites
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import kotlinx.kover.gradle.plugin.dsl.KoverReportFilter
 import kotlinx.kover.gradle.plugin.dsl.KoverReportSetConfig
@@ -87,7 +88,7 @@ internal fun Project.initializeCoverage(extension: KreateExtension) {
 
     extensions.configure<KoverProjectExtension> {
         configureEngine(coverageExtension)
-        configureCurrentProject(coverageExtension)
+        configureCurrentProject(coverageExtension, suiteSourceSetsToExclude(extension))
 
         reports {
             total {
@@ -99,6 +100,33 @@ internal fun Project.initializeCoverage(extension: KreateExtension) {
     }
 
     configureAggregation(coverageExtension.aggregate)
+}
+
+/**
+ * The compilations of the test suites, which must not be measured as production code.
+ *
+ * Kover recognises a test compilation by the name `test` and nothing else, so a suite called
+ * `unitTest` lands in the denominator as if it were code the project ships. The build stays
+ * green and the number quietly describes the wrong thing, which is the worst failure mode a
+ * coverage report has.
+ *
+ * The name to exclude is the compilation's, which is the suite's source set name on both
+ * Kotlin/JVM and multiplatform projects - not the per-target source set names derived from it.
+ *
+ * Returns nothing when the project has listed the source sets to measure explicitly: that list
+ * already decides what counts, and adding exclusions to it would only be a second opinion.
+ *
+ * @param extension The main Kreate extension.
+ * @return The suite compilation names to exclude from the measurement.
+ * @since 3.0.0
+ */
+private fun suiteSourceSetsToExclude(extension: KreateExtension): Set<String> {
+    val tests = extension.project.tests
+    val explicitlyIncluded = extension.project.coverage.sources.includedSourceSets.get().isNotEmpty()
+    val applicable = tests.enabled.get() && tests.excludeSuitesFromCoverage.get() && !explicitlyIncluded
+    if (!applicable) return emptySet()
+
+    return tests.enabledSuites().mapTo(mutableSetOf()) { it.sourceSetName.get() }
 }
 
 /**
@@ -118,14 +146,18 @@ private fun KoverProjectExtension.configureEngine(extension: CoverageExtension) 
  * Configures which source sets are measured and which classes are instrumented.
  *
  * @param extension The Kreate coverage configuration.
+ * @param suiteSourceSets The test suite source sets that must not be measured.
  * @since 2.2.0
  */
-private fun KoverProjectExtension.configureCurrentProject(extension: CoverageExtension) {
+private fun KoverProjectExtension.configureCurrentProject(
+    extension: CoverageExtension,
+    suiteSourceSets: Set<String>
+) {
     currentProject {
         sources {
             excludeJava.set(extension.sources.excludeJava)
             includedSourceSets.set(extension.sources.includedSourceSets)
-            excludedSourceSets.set(extension.sources.excludedSourceSets)
+            excludedSourceSets.set(extension.sources.excludedSourceSets.map { it + suiteSourceSets })
         }
 
         instrumentation {

@@ -35,7 +35,7 @@ class NativePlatformTest {
     @Test
     @DisplayName("produces an <os>-<arch> identifier for the running platform")
     fun platformIdShape() {
-        currentPlatformId() shouldMatch Regex("(windows|linux|macos)-(x64|arm64)")
+        currentPlatformId() shouldMatch Regex("(windows|linux|macos)-(x86_64|aarch64)")
     }
 
     @Test

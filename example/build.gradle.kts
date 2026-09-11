@@ -1,5 +1,7 @@
 import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
 import com.davils.kreate.module.project.coverage.Grouping
+import com.davils.kreate.module.project.tests.LegacyTestPolicy
+import com.davils.kreate.module.project.tests.suite.KotestModule
 import com.davils.kreate.module.trivy.LicenseSeverity
 import com.davils.kreate.module.trivy.SecretSeverity
 import com.davils.kreate.module.trivy.Score
@@ -26,7 +28,8 @@ detekt {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    // Nothing here for the test suites: a suite's configurations do not exist yet while this
+    // script runs, so its dependencies are declared in the suite itself.
 }
 
 kreate {
@@ -189,6 +192,55 @@ kreate {
                 enabled = true
                 xml = true
                 html = true
+            }
+
+            // The migration is finished here, so the build fails if anything reappears
+            // under src/test. Use ALIAS while moving, which runs an unmoved tree as the
+            // unit suite - remembering to move its dependencies onto the suite as well.
+            legacyTestSourceSet = LegacyTestPolicy.FAIL
+
+            kotest {
+                enabled = false
+                modules = listOf(KotestModule.ASSERTIONS)
+            }
+
+            suites {
+                named("unitTest") {
+                    maxParallelForks = Runtime.getRuntime().availableProcessors()
+
+                    dependencies {
+                        // The JUnit 5 backed variant, named explicitly: the Kotlin plugin
+                        // only infers a variant for the conventional `test` configuration.
+                        implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.10")
+                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+                    }
+                }
+
+                named("integrationTest") {
+                    // Left off `check` and ordered after the unit suite, which is what the
+                    // defaults already do; spelled out here because this is the example.
+                    runOnCheck = false
+                    mustRunAfterSuites = listOf("unitTest")
+
+                    // One fork: an integration suite usually shares an external service.
+                    maxParallelForks = 1
+                    timeoutMinutes = 30L
+
+                    environment = mapOf("EXAMPLE_INTEGRATION" to "true")
+
+                    dependencies {
+                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+                    }
+                }
+
+                register("contractTest") {
+                    runOnCheck = false
+                    includeTags = listOf("contract")
+
+                    dependencies {
+                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+                    }
+                }
             }
         }
 

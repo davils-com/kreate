@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project.detekt
 
 import com.davils.kreate.KreateExtension
+import com.davils.kreate.KreateTasks
 import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import dev.detekt.gradle.Detekt
 import dev.detekt.gradle.plugin.DetektPlugin
@@ -79,7 +80,41 @@ internal fun Project.initializeDetekt(extension: KreateExtension) {
 
     configureDetektExtension(detektExtension)
     configureDetektTasks(detektExtension)
+    registerAnalyseTask()
     analyseOnCheck()
+}
+
+/**
+ * Registers the one task that really analyses everything.
+ *
+ * Detekt's own aggregate `detekt` task has no sources on a multiplatform project - every file
+ * belongs to a source set - so it succeeds having read nothing. Anything that ran it as a quality
+ * gate would be green and blind, and the workaround every project reached for was to list the
+ * per-source-set task names by hand in its pipeline. A list like that is wrong the day a target is
+ * added and says nothing when it is.
+ *
+ * The matching collection is live: a source set registered later is picked up, which is what makes
+ * this a computed list rather than a snapshot taken at the wrong moment.
+ *
+ * @return Unit
+ * @since 3.0.0
+ */
+private fun Project.registerAnalyseTask() {
+    tasks.register(KreateTasks.Detekt.ANALYSE) {
+        group = KreateTasks.Detekt.GROUP
+        description = "Runs Detekt over every source set that has sources."
+        dependsOn(perSourceSetTasks())
+    }
+}
+
+/**
+ * Every Detekt task that belongs to a source set, as a live collection.
+ *
+ * @return The matching tasks.
+ * @since 3.0.0
+ */
+private fun Project.perSourceSetTasks() = tasks.withType(Detekt::class.java).matching { task ->
+    task.name.endsWith(SOURCE_SET_TASK_SUFFIX)
 }
 
 private fun Project.configureDetektExtension(extension: DetektExtension) {
@@ -136,12 +171,8 @@ private fun Project.configureDetektTasks(extension: DetektExtension) {
  * @since 2.3.0
  */
 private fun Project.analyseOnCheck() {
-    val perSourceSet = tasks.withType(Detekt::class.java).matching { task ->
-        task.name.endsWith(SOURCE_SET_TASK_SUFFIX)
-    }
-
     tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
-        dependsOn(perSourceSet)
+        dependsOn(perSourceSetTasks())
     }
 }
 
