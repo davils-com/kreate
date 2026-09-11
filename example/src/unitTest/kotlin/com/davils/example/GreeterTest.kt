@@ -19,13 +19,28 @@ package com.davils.example
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * Unit tests for [Greeter].
+ *
+ * @since 1.0.0
+ */
 class GreeterTest {
 
+    /**
+     * Verifies the greeting for an ordinary name.
+     *
+     * @since 1.0.0
+     */
     @Test
     fun greetsByName() {
         assertEquals("Hello, Kreate!", Greeter().greet("Kreate"))
     }
 
+    /**
+     * Verifies the fallback for a blank name.
+     *
+     * @since 1.0.0
+     */
     @Test
     fun fallsBackWhenNameIsBlank() {
         // Covers the other side of the condition. Without this the class still reaches full

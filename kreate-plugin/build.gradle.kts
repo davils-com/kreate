@@ -16,7 +16,6 @@
 
 import com.davils.buildlogic.Project
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -27,36 +26,14 @@ plugins {
     id("kreate.publish-conventions")
 }
 
-/**
- * Carries kotlinx-benchmark into the TestKit plugin classpath.
- *
- * The functional builds have to apply the plugin without a version. Resolving it from the
- * Plugin Portal instead would give it a classloader of its own, which cannot see the Kotlin
- * Gradle plugin TestKit injects, and kotlinx-benchmark fails on `KotlinBasePlugin`.
- */
-val benchmarkTestPlugin: Configuration = configurations.create("benchmarkTestPlugin") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
-
 dependencies {
     implementation(gradleApi())
     implementation(libs.bundles.kreate.plugin)
 
-    // Kreate configures kotlinx-benchmark but never applies it, so it compiles against the
-    // plugin's types without shipping them. The consumer's own `id("...benchmark")` supplies
-    // the classes at runtime, which is why the presence check in the benchmark module goes
-    // through the plugin id rather than a class literal — a class literal would load a type
-    // that is not on the runtime classpath.
-    compileOnly(libs.benchmark.gradle.plugin)
-
     testImplementation(platform(libs.junit.bom))
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.kreate.test)
-    testImplementation(libs.benchmark.gradle.plugin)
     testRuntimeOnly(libs.junit.platform.launcher)
-
-    benchmarkTestPlugin(libs.benchmark.gradle.plugin)
 }
 
 
@@ -70,10 +47,6 @@ configurations[functionalTest.implementationConfigurationName]
     .extendsFrom(configurations.testImplementation.get())
 configurations[functionalTest.runtimeOnlyConfigurationName]
     .extendsFrom(configurations.testRuntimeOnly.get())
-
-tasks.named<PluginUnderTestMetadata>("pluginUnderTestMetadata") {
-    pluginClasspath.from(benchmarkTestPlugin)
-}
 
 gradlePlugin {
     vcsUrl = Project.VersionControl.SCM_URL

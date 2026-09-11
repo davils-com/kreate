@@ -8,11 +8,8 @@ import com.davils.kreate.module.trivy.Score
 import java.time.Year
 
 plugins {
-    alias(libs.plugins.kreate)
-    alias(libs.plugins.kover)
-    id("dev.detekt") version "2.0.0-alpha.6"
-    id("org.jetbrains.kotlinx.benchmark") version "0.4.17"
     kotlin("jvm") version "2.4.10"
+    alias(libs.plugins.kreate)
     application
 }
 
@@ -21,11 +18,6 @@ application {
 }
 
 group = "com.example"
-
-detekt {
-    config.setFrom(rootProject.file("config/detekt/detekt-consumer.yml"))
-    buildUponDefaultConfig = true
-}
 
 dependencies {
     // Nothing here for the test suites: a suite's configurations do not exist yet while this
@@ -245,7 +237,7 @@ kreate {
         }
 
         detekt {
-            enabled = false
+            enabled = true
             buildUponDefaultConfig = true
             allRules = true
             config = rootProject.file("config/detekt/detekt-consumer.yml")

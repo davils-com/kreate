@@ -25,10 +25,10 @@ asm-core = { module = "org.ow2.asm:asm", version.ref = "asm" }
 # `internal` declaration from a genuinely public one — both are `public` in bytecode.
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 
-# Declared `compileOnly` in kreate-plugin/build.gradle.kts rather than added to the bundle
-# below: Kreate configures kotlinx-benchmark but never applies it, so the artifact has no
-# business on a consumer's buildscript classpath — and it lives on the Gradle Plugin Portal
-# only, which an enterprise build resolving through an internal mirror would notice.
+# On the bundle below, like every other plugin Kreate applies. Kreate applies kotlinx-benchmark
+# rather than asking the consumer to, so the classes have to be there at runtime. Note that this
+# artifact lives on the Gradle Plugin Portal only, which an enterprise build resolving through an
+# internal mirror has to account for.
 benchmark-gradle-plugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "benchmark" }
 kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 
@@ -75,7 +75,8 @@ kreate-plugin = [
     "allopen-gradle-plugin",
     "publish-gradle-plugin",
     "detekt-gradle-plugin",
-    "kover-gradle-plugin"
+    "kover-gradle-plugin",
+    "benchmark-gradle-plugin"
 ]
 
 kreate-test = [

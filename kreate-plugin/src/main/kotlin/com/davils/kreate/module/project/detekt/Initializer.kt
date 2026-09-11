@@ -20,8 +20,6 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.KreateTasks
 import com.davils.kreate.module.project.detekt.extension.DetektExtension
 import dev.detekt.gradle.Detekt
-import dev.detekt.gradle.plugin.DetektPlugin
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
@@ -44,10 +42,17 @@ import dev.detekt.gradle.extensions.DetektExtension as KDetektExtension
 private const val SOURCE_SET_TASK_SUFFIX: String = "SourceSet"
 
 /**
+ * The id of the Detekt plugin Kreate applies.
+ *
+ * @since 3.0.0
+ */
+internal const val DETEKT_PLUGIN_ID: String = "dev.detekt"
+
+/**
  * Initializes the Detekt static analysis for the project.
  *
- * This function applies the Detekt plugin and configures its extension and tasks
- * if Detekt is enabled in the Kreate configuration.
+ * The plugin itself is applied earlier, by `applyFeaturePlugins`, so that every plugin behind an
+ * enabled feature is in place before any feature starts configuring one.
  *
  * @param extension The main Kreate extension.
  * @since 1.2.0
@@ -56,26 +61,6 @@ internal fun Project.initializeDetekt(extension: KreateExtension) {
     val detektExtension = extension.project.detekt
     if (!detektExtension.enabled.get()) {
         return
-    }
-
-    if (!plugins.hasPlugin(DetektPlugin::class.java)) {
-        throw GradleException(
-            """
-                Kreate's Detekt integration is enabled, but the Detekt plugin is not applied to
-                project '$path'.
-
-                Kreate configures Detekt, it does not apply it — that keeps the Detekt version
-                under your control instead of pinning it to Kreate's release cycle.
-
-                Add it to your build script:
-
-                    plugins {
-                        id("dev.detekt") version "<version>"
-                    }
-
-                Or disable the integration with `kreate { project { detekt { enabled = false } } }`.
-            """.trimIndent()
-        )
     }
 
     configureDetektExtension(detektExtension)

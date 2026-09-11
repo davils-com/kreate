@@ -56,34 +56,15 @@ private const val KOVER_CONFIGURATION: String = "kover"
  * Configures Kover's project settings, reports and verification rules from the Kreate
  * configuration, if coverage is enabled.
  *
+ * The Kover plugin itself is applied earlier, by `applyFeaturePlugins`.
+ *
  * @param extension The main Kreate extension.
- * @throws GradleException If coverage is enabled but the Kover plugin is not applied.
  * @since 2.2.0
  */
 internal fun Project.initializeCoverage(extension: KreateExtension) {
     val coverageExtension = extension.project.coverage
     if (!coverageExtension.enabled.get()) {
         return
-    }
-
-    if (!plugins.hasPlugin(KOVER_PLUGIN_ID)) {
-        throw GradleException(
-            """
-                Kreate's coverage integration is enabled, but the Kover plugin is not applied to
-                project '$path'.
-
-                Kreate configures Kover, it does not apply it — that keeps the Kover version
-                under your control instead of pinning it to Kreate's release cycle.
-
-                Add it to your build script:
-
-                    plugins {
-                        id("$KOVER_PLUGIN_ID") version "<version>"
-                    }
-
-                Or disable the integration with `kreate { project { coverage { enabled = false } } }`.
-            """.trimIndent()
-        )
     }
 
     extensions.configure<KoverProjectExtension> {
@@ -358,33 +339,15 @@ private fun Project.configureAggregation(extension: CoverageAggregateExtension) 
         }
     }
 
-    targets.forEach { target -> dependencies.add(KOVER_CONFIGURATION, target) }
+    targets.forEach { target ->
+        dependencies.add(KOVER_CONFIGURATION, target)
 
-    // The check has to wait until every project has been evaluated. Kreate's own configuration
-    // runs in this project's `afterEvaluate`, and Gradle evaluates the root before its children,
-    // so asking a subproject about its plugins here would report every one of them as missing.
-    gradle.projectsEvaluated {
-        val missing = targets.filterNot { it.plugins.hasPlugin(KOVER_PLUGIN_ID) }
-        if (missing.isNotEmpty()) {
-            throw GradleException(
-                """
-                    Kreate's coverage aggregation on project '${this@configureAggregation.path}'
-                    includes projects that do not apply the Kover plugin:
-
-                    ${missing.joinToString(separator = "\n                    ") { "  - ${it.path}" }}
-
-                    An aggregated project has to measure its own coverage before it can contribute
-                    any. Apply the plugin in each of them:
-
-                        plugins {
-                            id("$KOVER_PLUGIN_ID") version "<version>"
-                        }
-
-                    Or name only the projects that do, with
-                    `coverage { aggregate { projects = listOf(...) } }`.
-                """.trimIndent()
-            )
-        }
+        // An aggregated project has to measure its own coverage before it can contribute any, so
+        // it needs the plugin. Applied here rather than demanded of each subproject's build
+        // script, and applied now rather than checked later: Gradle evaluates the root before its
+        // children, so this runs before the subproject is configured, which is the only point at
+        // which applying a plugin to it still means anything.
+        target.pluginManager.apply(KOVER_PLUGIN_ID)
     }
 }
 
