@@ -48,7 +48,6 @@ kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", ve
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 [bundles]
 build-logic = [
