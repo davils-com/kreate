@@ -416,6 +416,9 @@ class TestSuiteFunctionalTest {
 
             val output = fixture.buildAndFail("check").output
 
+            // Forward slashes on every platform. This assertion can only fail on Windows, which
+            // is the point: the listing is built from `File`, and the rest of the same message
+            // spells directories with `/`.
             output shouldContain "src/test/kotlin"
             output shouldContain "would stop running"
         }
