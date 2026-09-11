@@ -5,6 +5,150 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.0.0
+
+A major release for two reasons: the conventional `test` source set is no longer built by default,
+and Kreate now applies the plugins behind the features you enable. Both are covered below; the
+short version for an existing build is:
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("jvm") version "2.4.0"
+    id("com.davils.kreate") version "3.0.0"
+    // Kover, Detekt, kotlinx-benchmark and the publishing plugins can come out.
+}
+
+kreate {
+    project {
+        tests {
+            enabled = true
+
+            // Keeps src/test running as the unit suite while you move files at your own pace.
+            legacyTestSourceSet = LegacyTestPolicy.ALIAS
+
+            suites {
+                named("unitTest") {
+                    dependencies {
+                        // Moved off `testImplementation`, which no longer feeds the tests.
+                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### Breaking
+
+- **The conventional `test` source set is not built when `tests { }` is enabled.** Its task is
+  disabled and removed from `check`, and its source directories are cleared. A project that does
+  nothing else will find its tests silently stop running, which is why
+  `legacyTestSourceSet = LegacyTestPolicy.FAIL` exists — it turns that into a build error naming
+  the directories to move. `ALIAS` keeps an unmoved tree running, and `KEEP` restores the previous
+  behaviour entirely.
+- **`testImplementation` no longer feeds the tests that `check` runs.** A suite's dependencies are
+  declared on the suite, because its configurations do not exist while the build script is being
+  evaluated. See the snippet above.
+- **`TestsExtension` gains a `suites` container and several properties.** Additive at the DSL
+  level; the binary compatibility dump records the full surface.
+- **A plugin Kreate applies has no typed DSL accessor.** A top-level `detekt { }` or
+  `kover { }` block in a build script that does not itself apply the plugin no longer compiles.
+  Everything Kreate exposes is reachable through `kreate { }`; apply the plugin yourself to get
+  its own block back.
+
+### Added
+
+- **Named test suites replace the conventional `test` source set.** A project's fast tests and its
+  Testcontainers-backed ones have opposite requirements — the first belong on every build, the
+  second have no business running before someone pushes — and one source set forces the slower
+  answer onto both, while putting every integration-only dependency on the classpath of every test.
+  `kreate { project { tests { } } }` now creates named suites instead: `unitTest` and
+  `integrationTest` by default, each with its own source set, dependency configurations and task,
+  and as many more as a project registers. `check` runs `unitTest`; `integrationTest` is opt-in and
+  ordered after it.
+
+  Every execution setting on `tests { }` is inherited by each suite and can be overridden per
+  suite, alongside suite-only settings for tags, system properties, environment, JVM arguments,
+  fixture sharing between suites, and — on multiplatform projects — which targets the suite covers.
+
+  A suite's dependencies are declared on the suite rather than in the project's top-level
+  `dependencies { }` block, because a suite's configurations do not exist yet while the build
+  script runs. Kreate declares nothing of its own there; the one exception is an optional,
+  version-configurable Kotest bundle, which is the framework the suite runs on rather than
+  something it talks to.
+
+  What happens to the existing `test` source set is a policy: `DISABLE` (the default) disables the
+  task and removes it from `check`, `FAIL` errors while sources remain so a migration cannot leave
+  tests silently unrun, `ALIAS` runs an unmoved tree as the unit suite so nothing has to move on
+  day one, and `KEEP` leaves it alone.
+
+  On multiplatform projects a suite gives `commonUnitTest` plus one source set and task per JVM
+  target. Kreate extends the Kotlin hierarchy template to do it: the default template covers the
+  `main` and `test` trees only, so `commonUnitTest` would otherwise be created, connected to
+  nothing, and reported as unused while the tests in it did not run. Extending the template rather
+  than adding a `dependsOn` edge is deliberate — one manual edge makes the Kotlin plugin abandon
+  the whole default hierarchy, and `nativeMain` and the rest stop existing without the build
+  failing. Only JVM targets can carry a suite, because the Kotlin plugin binds the test binaries of
+  Native, JS and Wasm targets to the `test` compilation; naming one fails the build rather than
+  producing a source directory nothing compiles.
+
+  Coverage and dependency locking follow the suites. Suite compilations are excluded from the
+  coverage denominator — the coverage engine recognises a test compilation by the name `test` and
+  nothing else, so a suite's own code would otherwise be measured as production code and the number
+  would stay green while describing the wrong thing. Suite classpaths are locked, so an integration
+  suite's dependencies reach `gradle.lockfile` and any scan over it.
+
+### Changed
+
+- **Kreate applies the plugins behind the features you enable.** Until now it configured Detekt,
+  Kover, kotlinx-benchmark and the two publishing plugins and refused to run unless the consumer
+  had applied them, on the grounds that it kept their versions out of Kreate's release cycle. What
+  that produced in practice was the same six plugins repeated in every repository, each with a
+  version to keep in step, to reach features already spelled out one block below in `kreate { }`.
+  Enabling a feature is the decision; applying its plugin is bookkeeping.
+
+  A build script now needs the Kotlin plugin and Kreate, and nothing else. Kotlin stays the
+  consumer's to apply deliberately: which one a project uses is the shape of the project rather
+  than a Kreate feature, and its version governs the language the sources are written in.
+
+  Applying is idempotent, so the escape hatch is unchanged in substance — declare
+  `id("dev.detekt") version "..."` and that version participates in buildscript classpath
+  resolution exactly as before, with Kreate's own application becoming a no-op. Doing so is also
+  the way to reach a plugin's own DSL block: Gradle only generates the accessor for
+  `detekt { }` when the plugin was applied in the `plugins { }` block, and Kreate applies it too
+  late for that. Everything Kreate exposes stays available either way.
+
+  Coverage aggregation applies Kover to each project it aggregates rather than reporting the ones
+  that lack it. Naming a project in `aggregate { }` means its coverage is counted, and a project
+  cannot contribute any without the plugin.
+
+  kotlinx-benchmark moves from `compileOnly` to a runtime dependency of the plugin as a result. It
+  is published to the Gradle Plugin Portal only, which a build resolving its buildscript classpath
+  through an internal mirror has to account for.
+
+### Documentation
+
+- **New topic: Plugins Kreate applies.** What is applied and when, why the Kotlin plugin is the
+  exception, how to keep control of a version, and the one behavioural consequence — a plugin
+  Kreate applies has no typed DSL accessor in your build script, because Gradle generates those
+  from the `plugins { }` block before the script runs.
+- **New topic: Testing troubleshooting.** Every error the test suites can produce, its cause and
+  its fix, plus the outcomes that look wrong and are not — `:test` reporting `NO-SOURCE`, a
+  `SKIPPED` `jvmTest` still in the task graph, a suite task that succeeds having discovered
+  nothing.
+- **Rewritten: the testing topics.** The overview stated that testing was enabled by default while
+  the text below said the opposite, and the multiplatform topic still told readers to write tests
+  in `jvmTest/kotlin`. Both are now accurate and suite-aware, alongside substantially expanded
+  topics for the suites themselves, migration, Kotest, the configuration reference and worked
+  examples.
+- `Testing-Multiplatfrom.md` is renamed to `Testing-Multiplatform.md`.
+- Corrected in passing: `Getting-Started.md` listed `project.tests.enabled` as defaulting to
+  `true`; the Trivy licence scan topic recommended `./gradlew dependencies --write-locks`, which
+  records only the configurations that one invocation happens to resolve and produces a lock file
+  that looks complete and is not.
+
 ## 2.3.1
 
 ### Fixed
