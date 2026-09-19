@@ -227,6 +227,43 @@ public object KreateTasks {
     }
 
     /**
+     * Names of the configuration schema tasks.
+     *
+     * The same pair as [ApiValidation] and for the same reason: a configuration schema is a promise
+     * to every document already written against it, exactly as a published signature is a promise to
+     * everything compiled against one. `DUMP` and `CHECK` must never run in one invocation - they
+     * read and write the same files, and Gradle refuses the implicit dependency.
+     *
+     * @since 3.1.0
+     */
+    public object ConfigurationSchema {
+        /**
+         * Records every declared schema in its checked-in JSON Schema export. New in 3.1.0.
+         * @since 3.1.0
+         */
+        public const val DUMP: String = "kreateConfigSchemaDump"
+
+        /**
+         * Verifies every declared schema against its export, failing on a breaking change. New in
+         * 3.1.0.
+         * @since 3.1.0
+         */
+        public const val CHECK: String = "kreateConfigSchemaCheck"
+
+        /**
+         * Reports what loading this repository's own configuration files would do. New in 3.1.0.
+         * @since 3.1.0
+         */
+        public const val VALIDATE: String = "kreateConfigValidate"
+
+        /**
+         * The task group for configuration schema tasks.
+         * @since 3.1.0
+         */
+        public const val GROUP: String = "kreate configuration"
+    }
+
+    /**
      * Names of the benchmark tasks.
      *
      * None of these is wired into `check` or `build`. A benchmark run takes minutes, and

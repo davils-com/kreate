@@ -47,6 +47,14 @@ public final class com/davils/kreate/KreateTasks$CInterop {
 	public static final field SCRIPT Ljava/lang/String;
 }
 
+public final class com/davils/kreate/KreateTasks$ConfigurationSchema {
+	public static final field CHECK Ljava/lang/String;
+	public static final field DUMP Ljava/lang/String;
+	public static final field GROUP Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$ConfigurationSchema;
+	public static final field VALIDATE Ljava/lang/String;
+}
+
 public final class com/davils/kreate/KreateTasks$DependencyLocking {
 	public static final field GROUP Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$DependencyLocking;
@@ -383,6 +391,7 @@ public abstract class com/davils/kreate/module/project/ProjectExtension {
 	public final fun apiValidation (Lorg/gradle/api/Action;)V
 	public final fun benchmark (Lorg/gradle/api/Action;)V
 	public final fun buildConstant (Lorg/gradle/api/Action;)V
+	public final fun configurationSchema (Lorg/gradle/api/Action;)V
 	public final fun coverage (Lorg/gradle/api/Action;)V
 	public final fun dependencyLocking (Lorg/gradle/api/Action;)V
 	public final fun detekt (Lorg/gradle/api/Action;)V
@@ -392,6 +401,7 @@ public abstract class com/davils/kreate/module/project/ProjectExtension {
 	public final fun getApplySerializationPlugin ()Lorg/gradle/api/provider/Property;
 	public abstract fun getBenchmark ()Lcom/davils/kreate/module/project/benchmark/extension/BenchmarkExtension;
 	public abstract fun getBuildConstants ()Lcom/davils/kreate/module/project/constants/BuildConstantsExtension;
+	public abstract fun getConfigurationSchema ()Lcom/davils/kreate/module/project/configuration/extension/ConfigurationSchemaExtension;
 	public abstract fun getCoverage ()Lcom/davils/kreate/module/project/coverage/extension/CoverageExtension;
 	public abstract fun getDependencyLocking ()Lcom/davils/kreate/module/project/locking/extension/DependencyLockingExtension;
 	public final fun getDescription ()Lorg/gradle/api/provider/Property;
@@ -519,6 +529,58 @@ public abstract class com/davils/kreate/module/project/benchmark/tasks/Normalize
 	public abstract fun getNormalizedDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getProfile ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTimestampedReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
+public final class com/davils/kreate/module/project/configuration/DeclaredSchema : java/io/Serializable {
+	public final fun getAccessor ()Ljava/lang/String;
+	public final fun getHolder ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/module/project/configuration/extension/ConfigurationDefinition {
+	public fun <init> ()V
+	public abstract fun getAccessor ()Lorg/gradle/api/provider/Property;
+	public abstract fun getHolder ()Lorg/gradle/api/provider/Property;
+	public abstract fun getName ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/module/project/configuration/extension/ConfigurationSchemaExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getDefinitions ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getSchemaDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun getValidation ()Lorg/gradle/api/provider/Property;
+	public final fun schema (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun validation (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigSchemaCheck : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public final fun execute ()V
+	public abstract fun getDumpTaskPath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getExpectedExports ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getOutcomeFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getSchemaDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getSchemas ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigSchemaDump : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public final fun execute ()V
+	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getSchemaDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getSchemas ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigValidate : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public final fun execute ()V
+	public abstract fun getConfigurationFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getReportFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getReports ()Lorg/gradle/api/provider/Property;
+	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
 public abstract class com/davils/kreate/module/project/constants/BuildConstantsExtension {

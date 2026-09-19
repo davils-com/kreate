@@ -200,6 +200,35 @@ Registered when `project.apiValidation.enabled` is `true`. See
     </tr>
 </table>
 
+## Configuration schema
+
+Registered when `project.configurationSchema.enabled` is `true`. The dump and the check read and
+write the same files, so they are never run in one invocation. See
+[Configuration schema validation](Configuration-Schema-Overview.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateConfigSchemaDump</code></td>
+        <td>Records the JSON Schema export of every declared schema. Commit the result.</td>
+        <td><code>config-schema/&lt;name&gt;.json</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateConfigSchemaCheck</code></td>
+        <td>Fails on a schema change that breaks a deployed document. Runs as part of <code>check</code>.</td>
+        <td><code>build/kreate/configuration/schema-check.txt</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateConfigValidate</code></td>
+        <td>Fails when one of this repository's own configuration files would not load. Runs as part of <code>check</code>.</td>
+        <td><code>build/kreate/configuration/validation.txt</code></td>
+    </tr>
+</table>
+
 ## Benchmarks
 
 Registered when `project.benchmark.enabled` is `true`. None of these is wired into `check`

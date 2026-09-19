@@ -20,6 +20,7 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
 import com.davils.kreate.module.project.api.initializeApiValidation
 import com.davils.kreate.module.project.benchmark.initializeBenchmark
+import com.davils.kreate.module.project.configuration.initializeConfigurationSchema
 import com.davils.kreate.module.project.constants.initializeBuildConstants
 import com.davils.kreate.module.project.coverage.initializeCoverage
 import com.davils.kreate.module.project.detekt.initializeDetekt
@@ -78,6 +79,7 @@ internal object ProjectModule : Module {
             initializePublish(extension)
             initializeDetekt(extension)
             initializeApiValidation(extension)
+            initializeConfigurationSchema(extension)
             initializeBenchmark(extension)
             initializeCoverage(extension)
         }

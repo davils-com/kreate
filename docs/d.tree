@@ -83,6 +83,9 @@
             <toc-element topic="API-Validation-Overview.md"/>
             <toc-element topic="API-Validation-Configuration.md"/>
         </toc-element>
+        <toc-element toc-title="Configuration schema">
+            <toc-element topic="Configuration-Schema-Overview.md"/>
+        </toc-element>
         <toc-element topic="Dependency-Locking.md"/>
         <toc-element toc-title="Benchmarks">
             <toc-element topic="Benchmark-Overview.md"/>

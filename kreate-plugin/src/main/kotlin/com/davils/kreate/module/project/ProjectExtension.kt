@@ -18,6 +18,7 @@ package com.davils.kreate.module.project
 
 import com.davils.kreate.module.project.api.extension.ApiValidationExtension
 import com.davils.kreate.module.project.benchmark.extension.BenchmarkExtension
+import com.davils.kreate.module.project.configuration.extension.ConfigurationSchemaExtension
 import com.davils.kreate.module.project.constants.BuildConstantsExtension
 import com.davils.kreate.module.project.coverage.extension.CoverageExtension
 import com.davils.kreate.module.project.detekt.extension.DetektExtension
@@ -151,6 +152,14 @@ public abstract class ProjectExtension @Inject constructor(
     public abstract val apiValidation: ApiValidationExtension
 
     /**
+     * Configuration for configuration schema export and compatibility checking.
+     *
+     * @since 3.1.0
+     */
+    @get:Nested
+    public abstract val configurationSchema: ConfigurationSchemaExtension
+
+    /**
      * Configuration for Gradle dependency locking.
      *
      * @since 2.1.0
@@ -244,6 +253,16 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun apiValidation(action: Action<ApiValidationExtension>) {
         action.execute(apiValidation)
+    }
+
+    /**
+     * Configures the [ConfigurationSchemaExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 3.1.0
+     */
+    public fun configurationSchema(action: Action<ConfigurationSchemaExtension>) {
+        action.execute(configurationSchema)
     }
 
     /**
