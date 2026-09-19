@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.1.0
+
+One feature, and it is the counterpart to the one 2.1.0 added. Binary compatibility validation made
+a change to a published signature something a reviewer approves deliberately; this does the same for
+a configuration schema, which is a promise to every file already written against it.
+
+### Added
+
+- **Configuration schema export and compatibility checking.** Making a field required, narrowing a
+  type or removing an enum constant breaks every deployed document, none of those looks dangerous in
+  a source diff — they look like ordinary edits — and the first anybody hears of one is a validation
+  failure at a customer's boot. Nothing in a build checked it.
+
+  `kreate { project { configurationSchema { } } }` registers three tasks:
+
+  - `kreateConfigSchemaDump` writes each declared schema's JSON Schema export to
+    `<module>/config-schema/<name>.json`. Commit it, and give the directory the CODEOWNERS
+    treatment the `api/` directory has.
+  - `kreateConfigSchemaCheck` compares against the checked-in export and fails on a breaking change.
+    It runs as part of `check`, and it is never run in the same invocation as the dump — the two
+    read and write the same files, and Gradle refuses the implicit dependency.
+  - `kreateConfigValidate` runs a dry run over the repository's own configuration files and fails on
+    any that would not load, reporting every one of them rather than stopping at the first.
+
+  **Kreate depends on no configuration library.** Everything is read by reflection over the project's
+  own runtime classpath, in a class loader of its own parented to the platform loader — parenting to
+  Gradle's would let whatever Gradle happens to carry answer for a class the project declares, which
+  is how a build quietly starts depending on the version of a library it never named. A project that
+  uses no such library is unaffected, and one that does is not pinned to whichever version this
+  plugin was built against.
+
+  A schema is built by Kotlin code rather than written down as data, so there is nothing for a build
+  to find by looking. A declaration is addressed by a holder class and a no-argument accessor, both
+  spellings of a Kotlin property accepted and members of an `object` reached through `INSTANCE`,
+  because which of the two a property compiles to is not something a build file should have to know.
+
+  **What decides that a change is breaking is the library, not this.** A change that would stop an
+  existing document loading is breaking when the schema version has not moved, because nothing will
+  run to repair it, and merely a migration when it has. The failure message says so, because the
+  usual fix is to raise the version and write the migration rather than to re-record the export.
+
+  The dry run names an accessor handing back the reports rather than assembling one. A dry run has to
+  resolve the sources, the prefix and the secret resolvers a real load would resolve — a required
+  field an environment variable supplies is not missing, and a reference nothing can resolve is a
+  failure rather than a value — so a build that assembled those would be a second place the
+  declaration is written, and the two would disagree the first time either moved.
+
+  The two facade names the reflection looks for are constants, because a Kotlin top level function is
+  a static method on a class named after its file and nothing marks it. A missing facade is reported
+  by name with what it belongs to, rather than as a `ClassNotFoundException` out of the middle of a
+  task.
+
+### Documentation
+
+- A topic for the feature under Project, and an entry in the task reference for each of the three
+  tasks.
+
 ## 3.0.0
 
 A major release for two reasons: the conventional `test` source set is no longer built by default,
