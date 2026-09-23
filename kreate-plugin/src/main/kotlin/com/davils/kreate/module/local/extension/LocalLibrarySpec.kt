@@ -59,10 +59,10 @@ public abstract class LocalLibrarySpec @Inject constructor(
     /**
      * The tasks run in this repository to publish it locally.
      *
-     * Defaults to [KreateTasks.Local.PUBLISH] alone. Override it for a repository that also
-     * builds a Gradle plugin of its own as an included build — `novy-gradle` and
-     * `mica-openapi-gradle` are both consumed as normal artefacts and have to be installed
-     * alongside the library, and neither is reachable from the library's own task.
+     * Defaults to [KreateTasks.Local.PUBLISH] alone. Override it for a repository that has more
+     * to install than its own task reaches — most often one that also builds a Gradle plugin of
+     * its own as an included build, which consumers resolve as an ordinary artifact and which the
+     * library's `kreateLocalPublish` therefore never sees.
      *
      * @since 3.2.0
      */

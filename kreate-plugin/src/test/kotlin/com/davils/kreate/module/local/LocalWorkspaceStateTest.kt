@@ -41,17 +41,17 @@ class LocalWorkspaceStateTest {
     lateinit var stateDirectory: File
 
     private fun library(
-        name: String = "rise",
+        name: String = "library",
         version: String = "1.1.0-SNAPSHOT",
-        repository: File = File("/workspace/rise"),
+        repository: File = File("/workspace/library"),
         modules: List<LocalModule> = listOf(
-            LocalModule("com.davils", "rise-bom"),
-            LocalModule("com.davils", "rise-core"),
-            LocalModule("com.davils", "rise-core-jvm")
+            LocalModule("com.example", "library-bom"),
+            LocalModule("com.example", "library-core"),
+            LocalModule("com.example", "library-core-jvm")
         )
     ) = LocalLibrary(
         library = name,
-        group = "com.davils",
+        group = "com.example",
         repository = repository,
         version = version,
         publishedAt = "2026-09-23T14:02:11Z",
@@ -85,7 +85,7 @@ class LocalWorkspaceStateTest {
         fun unicodePath() {
             // `Properties.store(OutputStream)` escapes everything outside Latin-1, which would
             // corrupt a path the moment someone checks out into a directory with an umlaut.
-            val path = File("/workspace/prüfung-日本/rise")
+            val path = File("/workspace/prüfung-日本/library")
             writeLocalLibrary(stateDirectory, library(repository = path))
 
             val read = readLocalWorkspace(stateDirectory).libraries.single()
@@ -96,14 +96,14 @@ class LocalWorkspaceStateTest {
         @Test
         @DisplayName("keys one file per library, so two producers cannot collide")
         fun oneFilePerLibrary() {
-            writeLocalLibrary(stateDirectory, library(name = "rise"))
+            writeLocalLibrary(stateDirectory, library(name = "library"))
             writeLocalLibrary(
                 stateDirectory,
-                library(name = "arc", modules = listOf(LocalModule("com.davils", "arc")))
+                library(name = "extra", modules = listOf(LocalModule("com.example", "extra")))
             )
 
             readLocalWorkspace(stateDirectory).libraries.map { it.library } shouldBe
-                listOf("arc", "rise")
+                listOf("extra", "library")
         }
 
         @Test
@@ -153,18 +153,18 @@ class LocalWorkspaceStateTest {
         @DisplayName("skips a truncated file rather than blocking every build on the machine")
         fun truncatedFile() {
             writeLocalLibrary(stateDirectory, library())
-            File(stateDirectory, "com.davils.broken$STATE_EXTENSION")
-                .writeText("library=broken\ngroup=com.davils\n")
+            File(stateDirectory, "com.example.broken$STATE_EXTENSION")
+                .writeText("library=broken\ngroup=com.example\n")
 
             // The intact record still resolves; the incomplete one is simply absent.
-            readLocalWorkspace(stateDirectory).libraries.map { it.library } shouldBe listOf("rise")
+            readLocalWorkspace(stateDirectory).libraries.map { it.library } shouldBe listOf("library")
         }
 
         @Test
         @DisplayName("skips a record naming no modules, which would substitute nothing")
         fun noModules() {
-            File(stateDirectory, "com.davils.empty$STATE_EXTENSION")
-                .writeText("library=empty\ngroup=com.davils\nversion=1.0.0-SNAPSHOT\nmodules=\n")
+            File(stateDirectory, "com.example.empty$STATE_EXTENSION")
+                .writeText("library=empty\ngroup=com.example\nversion=1.0.0-SNAPSHOT\nmodules=\n")
 
             readLocalWorkspace(stateDirectory).isEmpty shouldBe true
         }
@@ -189,9 +189,9 @@ class LocalWorkspaceStateTest {
             val workspace = LocalWorkspace(listOf(library()))
 
             workspace.substitutions shouldBe mapOf(
-                "com.davils:rise-bom" to "1.1.0-SNAPSHOT",
-                "com.davils:rise-core" to "1.1.0-SNAPSHOT",
-                "com.davils:rise-core-jvm" to "1.1.0-SNAPSHOT"
+                "com.example:library-bom" to "1.1.0-SNAPSHOT",
+                "com.example:library-core" to "1.1.0-SNAPSHOT",
+                "com.example:library-core-jvm" to "1.1.0-SNAPSHOT"
             )
         }
 
@@ -200,12 +200,12 @@ class LocalWorkspaceStateTest {
         fun duplicates() {
             val workspace = LocalWorkspace(
                 listOf(
-                    library(name = "rise", modules = listOf(LocalModule("com.davils", "shared"))),
-                    library(name = "leaf", modules = listOf(LocalModule("com.davils", "shared")))
+                    library(name = "library", modules = listOf(LocalModule("com.example", "shared"))),
+                    library(name = "other", modules = listOf(LocalModule("com.example", "shared")))
                 )
             )
 
-            workspace.duplicateCoordinates shouldContainExactly listOf("com.davils:shared")
+            workspace.duplicateCoordinates shouldContainExactly listOf("com.example:shared")
         }
     }
 
@@ -216,23 +216,23 @@ class LocalWorkspaceStateTest {
         @Test
         @DisplayName("accepts a group and a name")
         fun accepts() {
-            LocalModule.parse(" com.davils : rise-core ") shouldBe
-                LocalModule("com.davils", "rise-core")
+            LocalModule.parse(" com.example : library-core ") shouldBe
+                LocalModule("com.example", "library-core")
         }
 
         @Test
         @DisplayName("rejects anything that is not exactly one pair")
         fun rejects() {
-            LocalModule.parse("com.davils") shouldBe null
-            LocalModule.parse("com.davils:rise:1.0.0") shouldBe null
+            LocalModule.parse("com.example") shouldBe null
+            LocalModule.parse("com.example:library:1.0.0") shouldBe null
             LocalModule.parse(":rise") shouldBe null
-            LocalModule.parse("com.davils:") shouldBe null
+            LocalModule.parse("com.example:") shouldBe null
         }
 
         @Test
         @DisplayName("renders back to the form it was parsed from")
         fun renders() {
-            LocalModule("com.davils", "rise-core").coordinate shouldBe "com.davils:rise-core"
+            LocalModule("com.example", "library-core").coordinate shouldBe "com.example:library-core"
         }
     }
 
@@ -243,10 +243,10 @@ class LocalWorkspaceStateTest {
         @Test
         @DisplayName("lives under the Gradle user home, where CI cannot carry it between jobs")
         fun underGradleUserHome() {
-            val file = stateFileOf(stateDirectory, "com.davils", "rise")
+            val file = stateFileOf(stateDirectory, "com.example", "library")
 
             file.parentFile shouldBe stateDirectory
-            file.name shouldBe "com.davils.rise.properties"
+            file.name shouldBe "com.example.library.properties"
             file.absolutePath shouldNotBe null
         }
     }

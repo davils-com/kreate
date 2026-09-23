@@ -29,6 +29,11 @@ The following properties are available directly within the `detekt { }` block:
 - **Default**: `true`
 - **Description**: When `true`, your custom configuration file (if provided) will be merged with Detekt's default rule set. This is recommended to ensure you benefit from standard Kotlin best practices while still being able to override specific rules.
 
+### `kreateRules`
+- **Type**: `Property<Boolean>`
+- **Default**: `true`
+- **Description**: Adds `com.davils:kreate-detekt-rules` to the project's `detektPlugins` configuration, pinned to the version of Kreate that is running. The rule set enforces the Kreate comment and KDoc standard and reports only — it never rewrites a file. Set to `false` to keep the artifact off the analysis classpath. See [](Detekt-Rules.md).
+
 ### `config`
 - **Type**: `RegularFileProperty`
 - **Default**: `detekt.yaml` at the root project level.

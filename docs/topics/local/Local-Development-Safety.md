@@ -11,19 +11,20 @@ long build is a line nobody reads, and by the time anyone would, the damage is c
 
 ## Local artifacts never reach CI
 
-The state that switches local mode on lives at `$GRADLE_USER_HOME/davils/local`. The shared GitLab
-pipeline points `GRADLE_USER_HOME` at `$CI_PROJECT_DIR/.gradle`, which is created fresh for every
-job, so the directory **cannot exist** in a pipeline. That is a structural guarantee, not a check
-that can be forgotten.
+The state that switches local mode on lives at `$GRADLE_USER_HOME/kreate/local`. A pipeline that
+points `GRADLE_USER_HOME` inside its own workspace — the usual arrangement, so that the dependency
+cache is scoped to the job — recreates that directory empty every time, so it **cannot** carry
+local state into a build. That is a structural guarantee rather than a check that can be
+forgotten.
 
 A runner that somehow carries it anyway fails:
 
 ```
 Kreate found local development state while running in CI.
 
-    State directory: /builds/davils/leaf/.gradle/davils/local
+    State directory: /builds/acme/http/.gradle/kreate/local
     Detected by:     CI_PIPELINE_ID
-    Libraries:       arc, rise
+    Libraries:       core, net
 
 A CI build must never resolve from the local Maven repository: the artefacts there exist on
 one machine only, so anything built against them cannot be reproduced and must not be released.
@@ -36,7 +37,7 @@ local-state:
   stage: security
   needs: []
   script:
-    - test ! -d "$GRADLE_USER_HOME/davils/local"
+    - test ! -d "$GRADLE_USER_HOME/kreate/local"
 ```
 
 ## Local artifacts are never published onward
@@ -46,7 +47,7 @@ A build resolving local artifacts refuses to push its output to a shared registr
 ```
 Refusing to publish to a remote repository while resolving from the local Maven repository.
 
-This build resolves: arc:3.0.0-SNAPSHOT
+This build resolves: core:3.0.0-SNAPSHOT
 ```
 
 Only remote targets are blocked. `publishToMavenLocal` — the publication local mode exists to
@@ -62,8 +63,8 @@ Refusing to write lock files while resolving from the local Maven repository.
 
 These versions would have been recorded into a committed lock file:
 
-com.davils:arc:3.0.0-SNAPSHOT
-com.davils:arc-jvm:3.0.0-SNAPSHOT
+com.example:core:3.0.0-SNAPSHOT
+com.example:core-jvm:3.0.0-SNAPSHOT
 
 They exist on this machine only, so the lock file would break every pipeline and every
 other checkout.

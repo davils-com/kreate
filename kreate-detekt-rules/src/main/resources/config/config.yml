@@ -1,0 +1,28 @@
+# Default configuration of the Kreate rule set.
+#
+# Detekt reads this file from every JAR on the analysis classpath and merges it into the default
+# configuration, so these values apply to a project that runs with `buildUponDefaultConfig = true`
+# and never mentions the `kreate` section. A project that sets `buildUponDefaultConfig = false` owns
+# its whole configuration and has to list the rules it wants.
+#
+# Every rule is active. An opt-in flag is a thing to forget, and forgetting it looks exactly like
+# the feature not working. To switch the set off for a project, set `kreate: active: false` in its
+# Detekt configuration, or `detekt { kreateRules = false }` in its Kreate configuration to keep the
+# rules off the classpath altogether.
+
+kreate:
+  active: true
+  ForbiddenLineComment:
+    active: true
+    allowedPattern: ''
+  KDocOnNonPublicDeclaration:
+    active: true
+    allowProtected: false
+  KDocWithoutSinceTag:
+    active: true
+  SingleLineKDocWithBlockTag:
+    active: true
+  KDocClosingMarkerOnSharedLine:
+    active: true
+  KDocSeparatedFromDeclaration:
+    active: true

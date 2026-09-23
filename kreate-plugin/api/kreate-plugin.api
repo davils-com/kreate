@@ -872,6 +872,7 @@ public abstract class com/davils/kreate/module/project/detekt/extension/DetektEx
 	public final fun getBuildUponDefaultConfig ()Lorg/gradle/api/provider/Property;
 	public final fun getConfig ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getKreateRules ()Lorg/gradle/api/provider/Property;
 	public abstract fun getReports ()Lcom/davils/kreate/module/project/detekt/extension/DetektReportExtension;
 	public final fun reports (Lorg/gradle/api/Action;)V
 }

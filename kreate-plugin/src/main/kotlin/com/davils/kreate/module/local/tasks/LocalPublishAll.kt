@@ -36,10 +36,10 @@ import javax.inject.Inject
 /**
  * Publishes a whole workspace of repositories locally, in dependency order.
  *
- * A change at the root of the Davils dependency graph has to be pushed through every library
- * above it before it can be tried in the one that matters. Done by hand that means remembering
- * both the set and the order, and getting the order wrong does not produce an error — it produces
- * a library published against the *released* version of the thing that just changed.
+ * A change at the root of a dependency graph has to be pushed through every library above it
+ * before it can be tried in the one that matters. Done by hand that means remembering both the set
+ * and the order, and getting the order wrong does not produce an error — it produces a library
+ * published against the *released* version of the thing that just changed.
  *
  * Each repository is built by its own wrapper in its own process. Sharing a daemon across a dozen
  * unrelated builds would mean one JVM holding every plugin classpath in the workspace at once,

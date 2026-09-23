@@ -4,6 +4,11 @@
 # strict configuration and references the `ktlint` and `libraries` rule sets, which are
 # only on the kreate-plugin classpath. A consumer must be able to use Kreate without
 # installing extra detekt rule set plugins, and this file proves that.
+#
+# The `kreate` rule set is the one exception, and it is not installed by the consumer either:
+# Kreate puts it on `detektPlugins` itself, and the artifact carries its own defaults. No
+# section for it appears below on purpose — every rule is active here, which is what makes
+# this project a working end-to-end test of the rule set a consumer receives.
 
 config:
   validation: true

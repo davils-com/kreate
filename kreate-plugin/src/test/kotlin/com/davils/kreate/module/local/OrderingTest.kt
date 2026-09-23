@@ -28,24 +28,26 @@ import org.junit.jupiter.api.Test
 /**
  * Tests for the order a workspace is published in.
  *
- * Getting this wrong is not a visible failure. Publishing `leaf` before `arc` succeeds, and
- * installs a `leaf` compiled against the *released* `arc` — a confident wrong answer, which is the
- * expensive kind. Every ordering property is therefore asserted rather than assumed.
+ * Getting this wrong is not a visible failure. Publishing a library before the one it depends on
+ * succeeds, and installs a build compiled against the *released* version of the thing that just
+ * changed — a confident wrong answer, which is the expensive kind. Every ordering property is
+ * therefore asserted rather than assumed.
  */
 @DisplayName("workspace ordering")
 class OrderingTest {
 
     /**
-     * The real Davils graph as of 3.2.0, which is the shape the feature has to handle.
+     * A layered graph with a shared root, a fan-out and an unrelated library — between them the
+     * shapes a real workspace produces.
      */
-    private val davils = listOf(
-        library("arc"),
-        library("rise", "arc"),
-        library("leaf", "arc", "rise"),
-        library("sira", "arc", "rise", "leaf"),
-        library("novy", "sira"),
-        library("fexo", "sira"),
-        library("shield")
+    private val graph = listOf(
+        library("core"),
+        library("net", "core"),
+        library("json", "core", "net"),
+        library("http", "core", "net", "json"),
+        library("ui", "http"),
+        library("cli", "http"),
+        library("standalone")
     )
 
     private fun library(name: String, vararg dependencies: String) = WorkspaceLibrary(
@@ -62,27 +64,27 @@ class OrderingTest {
         @Test
         @DisplayName("puts every library after everything it depends on")
         fun dependenciesComeFirst() {
-            val ordered = topologicalOrder(davils).map { it.name }
+            val ordered = topologicalOrder(graph).map { it.name }
 
-            ordered.indexOf("arc") shouldBe 0
-            ordered.indexOf("rise") shouldBe ordered.indexOf("arc") + 1
-            (ordered.indexOf("leaf") > ordered.indexOf("rise")) shouldBe true
-            (ordered.indexOf("sira") > ordered.indexOf("leaf")) shouldBe true
-            (ordered.indexOf("novy") > ordered.indexOf("sira")) shouldBe true
-            (ordered.indexOf("fexo") > ordered.indexOf("sira")) shouldBe true
+            ordered.indexOf("core") shouldBe 0
+            (ordered.indexOf("net") > ordered.indexOf("core")) shouldBe true
+            (ordered.indexOf("json") > ordered.indexOf("net")) shouldBe true
+            (ordered.indexOf("http") > ordered.indexOf("json")) shouldBe true
+            (ordered.indexOf("ui") > ordered.indexOf("http")) shouldBe true
+            (ordered.indexOf("cli") > ordered.indexOf("http")) shouldBe true
         }
 
         @Test
         @DisplayName("includes a library nothing depends on and that depends on nothing")
         fun isolatedLibrary() {
-            topologicalOrder(davils).map { it.name } shouldContain "shield"
+            topologicalOrder(graph).map { it.name } shouldContain "standalone"
         }
 
         @Test
         @DisplayName("is stable, so two runs of the same workspace can be compared")
         fun stable() {
-            val first = topologicalOrder(davils).map { it.name }
-            val second = topologicalOrder(davils.reversed()).map { it.name }
+            val first = topologicalOrder(graph).map { it.name }
+            val second = topologicalOrder(graph.reversed()).map { it.name }
 
             second shouldBe first
         }
@@ -101,31 +103,31 @@ class OrderingTest {
         @Test
         @DisplayName("includes the root and everything that transitively depends on it")
         fun fansOut() {
-            val selected = downstreamOf(davils, setOf("rise")).map { it.name }
+            val selected = downstreamOf(graph, setOf("net")).map { it.name }
 
-            selected shouldBe listOf("rise", "leaf", "sira", "fexo", "novy")
+            selected shouldBe listOf("net", "json", "http", "cli", "ui")
         }
 
         @Test
         @DisplayName("leaves upstream libraries alone")
         fun doesNotIncludeUpstream() {
-            val selected = downstreamOf(davils, setOf("leaf")).map { it.name }
+            val selected = downstreamOf(graph, setOf("json")).map { it.name }
 
-            // Republishing `arc` would cost time and overwrite a snapshot someone may be relying
-            // on, and nothing about a change in `leaf` makes it necessary.
-            (selected.contains("arc") || selected.contains("rise")) shouldBe false
+            // Republishing `core` would cost time and overwrite a snapshot someone may be relying
+            // on, and nothing about a change in `json` makes it necessary.
+            (selected.contains("core") || selected.contains("net")) shouldBe false
         }
 
         @Test
         @DisplayName("selects only the root when nothing depends on it")
         fun leafLibrary() {
-            downstreamOf(davils, setOf("novy")).map { it.name } shouldBe listOf("novy")
+            downstreamOf(graph, setOf("ui")).map { it.name } shouldBe listOf("ui")
         }
 
         @Test
         @DisplayName("selects the whole graph from its root")
         fun fromTheRoot() {
-            downstreamOf(davils, setOf("arc")).map { it.name }.size shouldBe davils.size - 1
+            downstreamOf(graph, setOf("core")).map { it.name }.size shouldBe graph.size - 1
         }
     }
 
@@ -151,20 +153,20 @@ class OrderingTest {
         @Test
         @DisplayName("names an edge pointing at a library the workspace does not declare")
         fun undeclaredDependency() {
-            val incomplete = listOf(library("rise", "arc"))
+            val incomplete = listOf(library("net", "core"))
 
             val failure = shouldThrow<GradleException> { topologicalOrder(incomplete) }
 
-            failure.message.orEmpty() shouldContain "rise depends on 'arc'"
+            failure.message.orEmpty() shouldContain "net depends on 'core'"
         }
 
         @Test
         @DisplayName("names an unknown root, and lists what is available")
         fun unknownRoot() {
-            val failure = shouldThrow<GradleException> { downstreamOf(davils, setOf("mica")) }
+            val failure = shouldThrow<GradleException> { downstreamOf(graph, setOf("absent")) }
 
-            failure.message.orEmpty() shouldContain "does not declare mica"
-            failure.message.orEmpty() shouldContain "arc"
+            failure.message.orEmpty() shouldContain "does not declare absent"
+            failure.message.orEmpty() shouldContain "core"
         }
     }
 }

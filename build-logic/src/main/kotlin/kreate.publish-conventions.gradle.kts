@@ -48,15 +48,26 @@ if (localPublish && !version.toString().endsWith(SNAPSHOT_SUFFIX)) {
 
 group = Project.Identity.GROUP
 
+// What this build publishes. The defaults are the plugin's own coordinates, because for three
+// major versions the plugin was the only artefact this repository produced. A sibling build states
+// its own in its `gradle.properties`, which is per build and therefore cannot be read from the
+// wrong project.
+val publishedArtifactId = providers.gradleProperty("kreate.publish.artifactId")
+    .getOrElse(Project.Identity.NAME.lowercase())
+val publishedName = providers.gradleProperty("kreate.publish.name")
+    .getOrElse(Project.Identity.NAME)
+val publishedDescription = providers.gradleProperty("kreate.publish.description")
+    .getOrElse(Project.Identity.DESCRIPTION)
+
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
     signAllPublications()
 
-    coordinates(Project.Identity.GROUP, Project.Identity.NAME.lowercase(), version.toString())
+    coordinates(Project.Identity.GROUP, publishedArtifactId, version.toString())
 
     pom {
-        name = Project.Identity.NAME
-        description = Project.Identity.DESCRIPTION
+        name = publishedName
+        description = publishedDescription
         inceptionYear = Project.Identity.INCEPTION_YEAR.toString()
         url = Project.Organization.WEBSITE_URL
 
@@ -96,7 +107,7 @@ mavenPublishing {
     }
 }
 
-val primaryCoordinate = "${Project.Identity.GROUP}:${Project.Identity.NAME.lowercase()}"
+val primaryCoordinate = "${Project.Identity.GROUP}:$publishedArtifactId"
 
 // Read outside the task configuration action: inside it, `version` resolves to the task's own
 // property rather than the project's.
@@ -108,12 +119,12 @@ val resolvedVersion = version.toString()
 // registers it. See `com.davils.buildlogic.LocalDevelopment` for the shared contract.
 tasks.register<LocalPublishTask>(LOCAL_PUBLISH_TASK) {
     group = LOCAL_TASK_GROUP
-    description = "Installs this plugin and its plugin markers into the local Maven repository."
+    description = "Installs this build and any plugin markers into the local Maven repository."
 
     dependsOn(tasks.named("publishToMavenLocal"))
 
     publishedGroup = Project.Identity.GROUP
-    library = Project.Identity.NAME.lowercase()
+    library = publishedArtifactId
     publishedVersion = resolvedVersion
     runningInCi = isContinuousIntegration(providers)
     gradleUserHome = layout.dir(provider { gradle.gradleUserHomeDir })

@@ -11,8 +11,9 @@ against the *released* version of the thing that just changed, which is a confid
 
 ## Declaring a workspace
 
-One repository declares the shape. In Davils that is `tooling/workspace`, which exists for nothing
-else.
+One repository declares the shape. A small repository that exists for nothing else is the usual
+arrangement — it keeps the declaration out of any library that would otherwise have to know about
+its siblings.
 
 ```kotlin
 plugins {
@@ -25,14 +26,14 @@ kreate {
             // Defaults to the parent of this repository.
             root = file("../..")
 
-            library("arc")  { path = "libraries/arc" }
-            library("rise") { path = "libraries/rise"; dependsOn("arc") }
-            library("leaf") { path = "libraries/leaf"; dependsOn("arc", "rise") }
-            library("sira") { path = "libraries/sira"; dependsOn("arc", "rise", "leaf") }
-            library("novy") {
-                path = "libraries/novy"
-                dependsOn("sira")
-                tasks("kreateLocalPublish", ":novy-gradle:publishToMavenLocal")
+            library("core")  { path = "libraries/core" }
+            library("net") { path = "libraries/net"; dependsOn("core") }
+            library("http") { path = "libraries/http"; dependsOn("core", "net") }
+            library("json") { path = "libraries/json"; dependsOn("core", "net", "http") }
+            library("ui") {
+                path = "libraries/ui"
+                dependsOn("json")
+                tasks("kreateLocalPublish", ":ui-gradle:publishToMavenLocal")
             }
         }
     }
@@ -55,8 +56,8 @@ usually the one that is not in the catalog yet.
 ### The `tasks` override
 
 A repository that also builds a Gradle plugin of its own as an included build has two things to
-install, and the library's own task cannot reach the second. `novy-gradle` and
-`mica-openapi-gradle` are both consumed as ordinary artefacts, so both need naming.
+install, and the library's own task cannot reach the second. Consumers resolve that plugin as an
+ordinary artifact, so it has to be named here.
 
 ## Running it
 
@@ -64,11 +65,11 @@ install, and the library's own task cannot reach the second. `novy-gradle` and
 # Everything, in dependency order.
 ./gradlew kreateLocalPublishAll
 
-# arc changed — republish it and everything that depends on it.
-./gradlew kreateLocalPublishAll --from arc
+# core changed — republish it and everything that depends on it.
+./gradlew kreateLocalPublishAll --from core
 
 # Exactly these, nothing downstream.
-./gradlew kreateLocalPublishAll --only leaf,sira
+./gradlew kreateLocalPublishAll --only http,json
 ```
 
 `--from` is the normal case. `--only` is for when you know the downstream libraries do not need
@@ -82,11 +83,11 @@ unrelated builds would mean one JVM holding every plugin classpath in the worksp
 The run stops at the first failure and says what did not run:
 
 ```
-Publishing 'leaf' failed (exit 1).
+Publishing 'http' failed (exit 1).
 
-    Repository: /workspace/libraries/leaf
+    Repository: /workspace/libraries/http
     Tasks:      kreateLocalPublish
-    Not run:    sira, novy, fexo
+    Not run:    json, ui, cli
 
 The libraries published before this one are still installed; the workspace is half
 updated until this is fixed and rerun.

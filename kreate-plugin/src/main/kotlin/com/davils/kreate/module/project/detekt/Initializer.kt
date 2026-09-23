@@ -65,6 +65,7 @@ internal fun Project.initializeDetekt(extension: KreateExtension) {
 
     configureDetektExtension(detektExtension)
     configureDetektTasks(detektExtension)
+    addKreateRuleSet(detektExtension)
     registerAnalyseTask()
     analyseOnCheck()
 }

@@ -26,7 +26,7 @@ import org.gradle.api.initialization.Settings
 import org.gradle.kotlin.dsl.create
 
 /**
- * Makes a build resolve locally published Davils artefacts.
+ * Makes a build resolve artifacts that a sibling checkout published locally.
  *
  * ```kotlin
  * // settings.gradle.kts

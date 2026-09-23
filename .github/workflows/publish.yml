@@ -54,5 +54,11 @@ jobs:
       - name: Verify
         run: ./gradlew build --stacktrace
 
+      # Both artefacts, in one invocation: the plugin pins the rule set to its own version, so
+      # a release that shipped only the plugin would configure a `detektPlugins` dependency that
+      # cannot resolve.
       - name: Publish
-        run: ./gradlew :kreate-plugin:publishToMavenCentral --stacktrace
+        run: >
+          ./gradlew
+          :kreate-plugin:publishToMavenCentral :kreate-detekt-rules:publishToMavenCentral
+          --stacktrace

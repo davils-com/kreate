@@ -28,28 +28,28 @@ import java.io.Serializable
  *
  * @since 3.2.0
  */
-internal const val LOCAL_PROPERTY: String = "davils.local"
+internal const val LOCAL_PROPERTY: String = "kreate.local"
 
 /**
  * The environment variable equivalent of [LOCAL_PROPERTY].
  *
  * @since 3.2.0
  */
-internal const val LOCAL_VARIABLE: String = "DAVILS_LOCAL"
+internal const val LOCAL_VARIABLE: String = "KREATE_LOCAL"
 
 /**
  * The Gradle property that narrows local mode to a subset of the published libraries.
  *
  * @since 3.2.0
  */
-internal const val LOCAL_ONLY_PROPERTY: String = "davils.local.only"
+internal const val LOCAL_ONLY_PROPERTY: String = "kreate.local.only"
 
 /**
  * The Gradle property that requests a local publish without naming the task.
  *
  * @since 3.2.0
  */
-internal const val LOCAL_PUBLISH_PROPERTY: String = "davils.local.publish"
+internal const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
 
 /**
  * The environment variables whose presence means the build is running in CI.
@@ -60,7 +60,8 @@ internal val DEFAULT_CI_VARIABLES: List<String> =
     listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
 
 /**
- * Whether Kreate resolves Davils artefacts from the local Maven repository for this build.
+ * Whether Kreate resolves locally published artifacts from the local Maven repository for this
+ * build.
  *
  * @since 3.2.0
  */

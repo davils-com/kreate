@@ -40,7 +40,7 @@ private const val PUBLISH_TO_MAVEN_LOCAL_TASK: String = "publishToMavenLocal"
  *
  * @since 3.2.0
  */
-private const val CLEAN_ALL_PROPERTY: String = "davils.local.clean.all"
+private const val CLEAN_ALL_PROPERTY: String = "kreate.local.clean.all"
 
 /**
  * Registers the local development tasks.

@@ -85,6 +85,7 @@ Static analysis helps maintain a high-quality codebase by:
 - **Automated Reporting**: Generates HTML, SARIF, XML, and Markdown reports by default.
 - **Baseline Support**: Easily use custom `detekt.yaml` configurations.
 - **Extensible**: Add third-party rule sets like `detekt-formatting` with ease.
+- **Kreate rule set**: Kreate's own comment and KDoc rules, active by default. See [](Detekt-Rules.md).
 
 
 
@@ -92,6 +93,7 @@ Static analysis helps maintain a high-quality codebase by:
 <seealso>
     <category ref="project">
         <a href="Detekt-Configuration.md">Configuration</a>
+        <a href="Detekt-Rules.md">Kreate rule set</a>
         <a href="Detekt-Reports.md">Reports</a>
     </category>
 </seealso>

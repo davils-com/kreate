@@ -34,4 +34,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "kreate"
 includeBuild("kreate-plugin")
+
+// Included rather than merely published: `:example` puts the rule set on its `detektPlugins`
+// configuration, and dependency substitution is what makes it resolve the working copy instead of
+// a version that does not exist on Maven Central until the release is cut.
+includeBuild("kreate-detekt-rules")
 include(":example")

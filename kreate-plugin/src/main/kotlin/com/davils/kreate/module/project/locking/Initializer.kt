@@ -67,7 +67,7 @@ internal fun Project.initializeDependencyLocking(extension: KreateExtension) {
 }
 
 /**
- * Whether this build resolves Davils artefacts from the local Maven repository.
+ * Whether this build resolves locally published artifacts from the local Maven repository.
  *
  * @param extension The main Kreate extension.
  * @return The resolved mode.
@@ -122,7 +122,7 @@ private fun Project.deactivateLockingForLocalMode() {
 
                 or write the locks with local mode off:
 
-                    ./gradlew ${KreateTasks.DependencyLocking.RESOLVE_AND_LOCK_ALL} --write-locks -Pdavils.local=false
+                    ./gradlew ${KreateTasks.DependencyLocking.RESOLVE_AND_LOCK_ALL} --write-locks -Pkreate.local=false
             """.trimIndent()
         )
     }

@@ -124,7 +124,7 @@ public abstract class LocalPublish : Task(
         check(version.endsWith(SNAPSHOT_SUFFIX)) {
             "Refusing to record '$version' as a local build: a local publication has to carry " +
                 "the '$SNAPSHOT_SUFFIX' suffix so that it can never shadow a release. Run the " +
-                "task by name, or pass -Pdavils.local.publish=true."
+                "task by name, or pass -Pkreate.local.publish=true."
         }
 
         val modules = coordinates.get().mapNotNull(LocalModule.Companion::parse)

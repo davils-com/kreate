@@ -126,11 +126,11 @@ internal class LocalResolutionAction(
      * Rewrites every request for a locally published coordinate onto the local version.
      *
      * Substitution rather than `eachDependency { useVersion(...) }`, and the difference is not
-     * stylistic. The Davils libraries are consumed through BOMs: a module is requested without a
-     * version and a platform contributes the constraint. `useVersion` applies before conflict
-     * resolution, which then compares `1.1.0-SNAPSHOT` against the BOM's `1.1.0` and prefers the
-     * release — silently undoing the substitution. `useTarget` rewrites the selector itself, so
-     * there is no later comparison to lose.
+     * stylistic. A library published as a set of modules is normally consumed through a BOM: the
+     * module is requested without a version and a platform contributes the constraint.
+     * `useVersion` applies before conflict resolution, which then compares `1.1.0-SNAPSHOT`
+     * against the BOM's `1.1.0` and prefers the release — silently undoing the substitution.
+     * `useTarget` rewrites the selector itself, so there is no later comparison to lose.
      *
      * [ResolutionStrategy.force] is applied to the same coordinates as a second line: it wins
      * outright if a constraint ever reaches conflict resolution by a route substitution missed.

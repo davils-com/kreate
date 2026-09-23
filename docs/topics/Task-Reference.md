@@ -297,7 +297,7 @@ tasks do nothing until one is run by name, and all of them refuse to run in CI. 
             Runs <code>publishToMavenLocal</code> at a snapshot version and records the
             coordinates, so that other checkouts resolve this build.
         </td>
-        <td><code>$GRADLE_USER_HOME/davils/local/&lt;group&gt;.&lt;library&gt;.properties</code></td>
+        <td><code>$GRADLE_USER_HOME/kreate/local/&lt;group&gt;.&lt;library&gt;.properties</code></td>
     </tr>
     <tr>
         <td><code>kreateLocalPublishAll</code></td>
@@ -320,7 +320,7 @@ tasks do nothing until one is run by name, and all of them refuse to run in CI. 
         <td><code>kreateLocalClean</code></td>
         <td>
             Removes exactly the coordinates the records name, and the records. Widened to a full
-            sweep with <code>-Pdavils.local.clean.all=true</code>.
+            sweep with <code>-Pkreate.local.clean.all=true</code>.
         </td>
         <td>None</td>
     </tr>

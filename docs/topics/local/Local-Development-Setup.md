@@ -46,9 +46,17 @@ That is the whole change. **No** edit to `gradle/libs.versions.toml`, **no** edi
 
 ## The project plugin
 
-Nothing to do. `com.davils.kreate` registers the local development tasks on the root project
-already, provided the root project applies it — which it does in every Davils library, through the
-`docs` and `compliance-security` conventions.
+Nothing to do, provided the **root project** applies `com.davils.kreate`. The tasks are
+registered there rather than per module, because a local publish is an act on a whole repository.
+
+If your root project applies no convention of its own, add the plugin to it:
+
+```kotlin
+// build.gradle.kts, at the root
+plugins {
+    id("%plugin_id%") version "%version%"
+}
+```
 
 ## Check it works
 
@@ -58,7 +66,7 @@ already, provided the root project applies it — which it does in every Davils 
 
 ```
 Local Maven repository: /home/dev/.m2/repository
-State directory:        /home/dev/.gradle/davils/local
+State directory:        /home/dev/.gradle/kreate/local
 
 Nothing is published locally.
 
@@ -76,7 +84,7 @@ kreateSettings {
     enabled = false
 
     // The name the injected repository is reported under in resolution errors.
-    repositoryName = "DavilsLocal"
+    repositoryName = "KreateLocal"
 
     // The variables whose presence means CI. Must match the project plugin's list.
     ciEnvironmentVariables = listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
@@ -101,15 +109,15 @@ kreate {
 
 | Property                      | Effect                                                              |
 |-------------------------------|---------------------------------------------------------------------|
-| `-Pdavils.local=false`        | switches local mode off for one build                               |
-| `-Pdavils.local=true`         | demands it, and fails if nothing is published                       |
-| `-Pdavils.local.only=arc,rise`| narrows it to the named libraries                                    |
-| `-Pdavils.local.publish=true` | requests a local publish without naming the task                    |
-| `-Pdavils.local.clean.all=true`| widens `kreateLocalClean` into a full sweep                        |
-| `-Pdavils.local.state.dir=…`  | relocates the state directory; for tests and unusual setups          |
+| `-Pkreate.local=false`        | switches local mode off for one build                               |
+| `-Pkreate.local=true`         | demands it, and fails if nothing is published                       |
+| `-Pkreate.local.only=core,net`| narrows it to the named libraries                                    |
+| `-Pkreate.local.publish=true` | requests a local publish without naming the task                    |
+| `-Pkreate.local.clean.all=true`| widens `kreateLocalClean` into a full sweep                        |
+| `-Pkreate.local.state.dir=…`  | relocates the state directory; for tests and unusual setups          |
 
-`DAVILS_LOCAL` works as an environment variable equivalent of `davils.local`, for a machine that
-should never take part. Put `davils.local=false` in `~/.gradle/gradle.properties` for the same
+`KREATE_LOCAL` works as an environment variable equivalent of `kreate.local`, for a machine that
+should never take part. Put `kreate.local=false` in `~/.gradle/gradle.properties` for the same
 effect.
 
 <seealso>

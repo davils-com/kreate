@@ -57,16 +57,16 @@ We are open to new ideas! For major changes, please open an **Issue** first to d
 
 ## Development Standards
 
-> **The plugin lives in an included build.** `kreate-plugin` is pulled in with `includeBuild`, and a
-> task name given at the root does **not** reach it — `./gradlew test` runs the example's tests and
-> none of the plugin's, and reports success. Every command below names the build explicitly for that
-> reason. This is the same pitfall the
-> [CI integration guide](docs/topics/CI-Integration.md) warns about.
+> **The plugin lives in an included build, and so does its Detekt rule set.** `kreate-plugin` and
+> `kreate-detekt-rules` are pulled in with `includeBuild`, and a task name given at the root does
+> **not** reach them — `./gradlew test` runs the example's tests and none of theirs, and reports
+> success. Every command below names the builds explicitly for that reason. This is the same pitfall
+> the [CI integration guide](docs/topics/CI-Integration.md) warns about.
 
 ### One command before you push
 
 ```bash
-./gradlew :kreate-plugin:build build
+./gradlew :kreate-plugin:build :kreate-detekt-rules:build build
 ```
 
 That is exactly what CI runs, and it covers compilation, detekt, both test suites, coverage
@@ -81,8 +81,13 @@ verification and the API check.
 - Warnings are errors. So is every detekt rule — the configuration runs with `allRules`.
 
 ```bash
-./gradlew :kreate-plugin:detekt :example:detekt
+./gradlew :kreate-plugin:detekt :kreate-detekt-rules:detekt :example:detekt
 ```
+
+The rules in `kreate-detekt-rules` are **not** applied to this repository's own sources. They
+enforce the Kreate standard for consumers — no `//` comments, KDoc on the published surface only —
+and the plugin's sources deliberately carry both. `:example` is where the rule set is exercised
+end to end, as a consumer would get it.
 
 ### Documentation in code
 
@@ -98,6 +103,8 @@ All new features and bug fixes should include unit or functional tests.
   are the assertion library. Kotest's own spec styles are not used.
 - Unit tests live in `kreate-plugin/src/test`. Anything that needs a real Gradle build goes in
   `kreate-plugin/src/functionalTest`, which drives TestKit.
+- A Detekt rule's tests live in `kreate-detekt-rules/src/test` and lint a snippet through
+  `dev.detekt:detekt-test`. Cover what the rule leaves alone, not only what it reports.
 
 ```bash
 ./gradlew :kreate-plugin:test :kreate-plugin:functionalTest
@@ -111,12 +118,12 @@ The functional suite is the slower of the two. While iterating on something unre
 
 ### The public API is a gate
 
-`kreate-plugin/api/kreate-plugin.api` records the plugin's binary interface and is checked by
-`apiCheck` on every build. If you deliberately change the public API, re-record it and commit the
-result in the same change:
+`kreate-plugin/api/kreate-plugin.api` and `kreate-detekt-rules/api/kreate-detekt-rules.api` record
+the published binary interfaces and are checked by `apiCheck` on every build. If you deliberately
+change a public API, re-record it and commit the result in the same change:
 
 ```bash
-./gradlew :kreate-plugin:apiDump
+./gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump
 ```
 
 ### Documentation

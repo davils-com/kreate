@@ -131,7 +131,7 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
   job; a runner that carries it fails rather than resolving from it.
 - **Lock files untouched**: locking is deactivated and `--write-locks` refused, so a snapshot can
   never reach a committed lock file.
-- **Whole workspaces**: `kreateLocalPublishAll --from arc` republishes a library and everything
+- **Whole workspaces**: `kreateLocalPublishAll --from core` republishes a library and everything
   downstream of it, in dependency order.
 
 ### C-Interoperability (Kotlin/Native)
@@ -278,6 +278,7 @@ kreate {
 | `project.docs`                    | `enabled`                  | Dokka documentation                        | `false`      |
 | `project.tests`                   | `enabled`                  | Test execution and reporting               | `true`       |
 | `project.detekt`                  | `enabled`                  | Static analysis configuration              | `false`      |
+| `project.detekt`                  | `kreateRules`              | Kreate comment and KDoc rules for Detekt   | `true`       |
 | `project.coverage`                | `enabled`                  | Code coverage through Kover                | `false`      |
 | `project.coverage.verify`         | `minLineCoverage`          | Coverage threshold enforced on `check`     | unset        |
 | `project.coverage.aggregate`      | `enabled`                  | Merge subproject coverage into one report  | `false`      |
@@ -331,7 +332,8 @@ Contributions are welcome. To keep the quality bar where it is:
 - **Tests**: new or changed behaviour needs a test. The suite drives real Gradle builds through
   TestKit, so a behavioural change is genuinely verifiable.
 - **Documentation**: API and behaviour changes must be reflected in `docs/topics/`.
-- **Public API**: run `./gradlew apiDump` and commit the result if the DSL changed.
+- **Public API**: run `./gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump` and commit the
+  result if a published signature changed.
 - **Standards**: follow the KDoc rules in `.junie/AGENTS.md` — every public declaration carries
   `@param`, `@return`, and `@since`, and Detekt enforces it.
 

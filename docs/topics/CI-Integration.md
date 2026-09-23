@@ -85,7 +85,7 @@ toolchain and assert it is present:
 ## Guarding against local development state
 
 The [local development workflow](Local-Development-Overview.md) keeps its state under
-`$GRADLE_USER_HOME/davils/local`. Every pipeline that points `GRADLE_USER_HOME` inside the build
+`$GRADLE_USER_HOME/kreate/local`. Every pipeline that points `GRADLE_USER_HOME` inside the build
 directory recreates it per job, so the directory cannot survive — and a build that finds it
 anyway fails rather than resolving from it.
 
@@ -96,7 +96,7 @@ local-state:
   stage: security
   needs: []
   script:
-    - test ! -d "$GRADLE_USER_HOME/davils/local"
+    - test ! -d "$GRADLE_USER_HOME/kreate/local"
 ```
 
 An artifact built against a locally published dependency cannot be reproduced by anyone else, and

@@ -5,18 +5,18 @@
 <card-summary>publishToMavenLocal at a snapshot version, plus a record consumers read.</card-summary>
 
 ```bash
-cd libraries/arc && ./gradlew kreateLocalPublish
+cd libraries/core && ./gradlew kreateLocalPublish
 ```
 
 ```
-Published arc:3.0.0-SNAPSHOT to /home/dev/.m2/repository.
-    com.davils:arc
-    com.davils:arc-android
-    com.davils:arc-jvm
-    com.davils:arc-wasm-js
+Published core:3.0.0-SNAPSHOT to /home/dev/.m2/repository.
+    com.example:core
+    com.example:core-android
+    com.example:core-jvm
+    com.example:core-wasm-js
 
 Other checkouts will now resolve these instead of the released versions.
-Undo with ./gradlew kreateLocalClean. Recorded in /home/dev/.gradle/davils/local/com.davils.arc.properties.
+Undo with ./gradlew kreateLocalClean. Recorded in /home/dev/.gradle/kreate/local/com.example.core.properties.
 ```
 
 ## What it does
@@ -34,7 +34,7 @@ result.
 The version comes from wherever it normally comes from — the configured environment variable, then
 the configured project property — and then carries `-SNAPSHOT`:
 
-| `arc.version` | `./gradlew build` | `./gradlew kreateLocalPublish` |
+| `core.version` | `./gradlew build` | `./gradlew kreateLocalPublish` |
 |---------------|-------------------|--------------------------------|
 | `3.0.0`       | `3.0.0`           | `3.0.0-SNAPSHOT`               |
 
@@ -56,7 +56,7 @@ a unit.
 
 ## Requesting it another way
 
-`-Pdavils.local.publish=true` requests the same thing without naming the task. This is what
+`-Pkreate.local.publish=true` requests the same thing without naming the task. This is what
 `kreateLocalPublishAll` passes to each repository it drives, and what to use from a script.
 
 ## Publishing %product% itself

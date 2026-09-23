@@ -23,7 +23,7 @@ that decides which %product% the repository's conventions compile against.
 **Did you republish after the last edit?** The banner shows an age for exactly this reason:
 
 ```
-    arc            3.0.0-SNAPSHOT       2 h ago        4 module(s)  /workspace/libraries/arc
+    core            3.0.0-SNAPSHOT       2 h ago        4 module(s)  /workspace/libraries/core
 ```
 
 **Is the library name right?** In a workspace declaration the name has to match the root project
@@ -38,13 +38,13 @@ If it did appear but the library is not listed, the coordinate was not part of t
 `kreateLocalStatus` lists every coordinate a publication installed; substitution matches those
 exactly and nothing else.
 
-## Could not find `com.davils:…:3.0.0-SNAPSHOT`
+## Could not find `com.example:…:3.0.0-SNAPSHOT`
 
 The record and the artifacts disagree — usually a `kreateLocalClean` in another shell, or a manual
 `rm` under `~/.m2`. Republish:
 
 ```bash
-cd libraries/arc && ./gradlew kreateLocalPublish
+cd libraries/core && ./gradlew kreateLocalPublish
 ```
 
 If `maven.repo.local` is set for one shell and not another, the publish and the resolution are
@@ -63,13 +63,33 @@ rebase or a branch change, clearing and republishing is faster than working out 
 
 Almost always a lock file that was regenerated while local mode was on — which 3.2.0 refuses, but
 a file committed before the upgrade can still carry it. Check for a `-SNAPSHOT` in any
-`gradle.lockfile`, and regenerate with `-Pdavils.local=false`.
+`gradle.lockfile`, and regenerate with `-Pkreate.local=false`.
+
+## My own tests drive a local publish and fail only on CI
+
+A test harness that runs Gradle builds — Gradle TestKit, or anything that shells out to a wrapper —
+hands the **current** environment to the build it starts. On a CI agent that environment contains
+`CI` and `GITHUB_ACTIONS`, so the generated build concludes it is a pipeline: `kreateLocalPublish`
+refuses to run and local mode never activates. The symptom is a suite that is green on a laptop and
+red on the agent, for a reason that is the feature working as designed.
+
+Strip the CI variables from the environment you hand to the build, and put them back only in the
+tests that are *about* CI detection. With TestKit:
+
+```kotlin
+runner.withEnvironment(
+    System.getenv().filterKeys { it !in setOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID") }
+)
+```
+
+Point `-Pkreate.local.state.dir` at a temporary directory in the same place, so that a test's
+publications cannot leak into the developer's own workspace.
 
 ## I want this machine to never take part
 
 ```properties
 # ~/.gradle/gradle.properties
-davils.local=false
+kreate.local=false
 ```
 
 ## Undo everything
@@ -78,7 +98,7 @@ davils.local=false
 ./gradlew kreateLocalClean
 
 # If the repository is inconsistent because records were removed before the artifacts:
-./gradlew kreateLocalClean -Pdavils.local.clean.all=true
+./gradlew kreateLocalClean -Pkreate.local.clean.all=true
 ```
 
 <seealso>

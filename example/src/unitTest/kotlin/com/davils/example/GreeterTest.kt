@@ -39,12 +39,13 @@ class GreeterTest {
     /**
      * Verifies the fallback for a blank name.
      *
+     * This covers the other side of the condition. Without it the class still reaches full line
+     * coverage, which is the gap a branch coverage bound is there to catch.
+     *
      * @since 1.0.0
      */
     @Test
     fun fallsBackWhenNameIsBlank() {
-        // Covers the other side of the condition. Without this the class still reaches full
-        // line coverage, which is the gap a branch coverage bound is there to catch.
         assertEquals("Hello!", Greeter().greet("  "))
     }
 }

@@ -78,14 +78,14 @@ public const val LOCAL_TASK_GROUP: String = "kreate local"
  *
  * @since 3.2.0
  */
-public const val LOCAL_PUBLISH_PROPERTY: String = "davils.local.publish"
+public const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
 
 /**
  * The directory under the Gradle user home that records what is currently published locally.
  *
  * @since 3.2.0
  */
-private const val STATE_DIRECTORY: String = "davils/local"
+private const val STATE_DIRECTORY: String = "kreate/local"
 
 /**
  * Environment variables whose presence means the build is running in CI.

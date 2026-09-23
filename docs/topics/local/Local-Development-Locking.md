@@ -4,9 +4,9 @@
 
 <card-summary>Locking is off while local mode is on. The committed file is never read or written.</card-summary>
 
-Every Davils library enables dependency locking, and every module has a committed `gradle.lockfile`
-pinning exact versions. A locally published snapshot is by definition not one of them, so the two
-features have to be reconciled.
+A project with dependency locking enabled has a committed `gradle.lockfile` pinning exact
+versions. A locally published snapshot is by definition not one of them, so the two features have
+to be reconciled.
 
 ## The rule
 
@@ -18,7 +18,7 @@ While local mode is on:
 - the committed lock files are **not modified** — before, during or after.
 
 ```
-Kreate local mode: dependency locking is off for ':leaf-core'. No lock file is read or written.
+Kreate local mode: dependency locking is off for ':http-core'. No lock file is read or written.
 ```
 
 ## Why deactivate rather than relax
@@ -40,7 +40,7 @@ else. Refusing it outright is the only response that is proportionate:
 ./gradlew kreateResolveAndLockAll --write-locks
 
 # …or write the locks with local mode switched off.
-./gradlew kreateResolveAndLockAll --write-locks -Pdavils.local=false
+./gradlew kreateResolveAndLockAll --write-locks -Pkreate.local=false
 ```
 
 ## Regenerating locks after a real release

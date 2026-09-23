@@ -25,10 +25,10 @@ import javax.inject.Inject
 /**
  * Declares the repositories a local publish can be orchestrated across.
  *
- * A Davils workspace is a dozen checkouts side by side, and a change at the root of the
- * dependency graph has to be pushed through every library above it before it can be tried in the
- * one that matters. Doing that by hand means remembering both the set and the order, and getting
- * the order wrong produces a build that resolves a stale snapshot without saying so.
+ * A workspace is a set of checkouts side by side, and a change at the root of the dependency
+ * graph has to be pushed through every library above it before it can be tried in the one that
+ * matters. Doing that by hand means remembering both the set and the order, and getting the order
+ * wrong produces a build that resolves a stale snapshot without saying so.
  *
  * The edges are declared here rather than derived from each repository's version catalog. That is
  * deliberate: the catalog records what a library was last *released* against, and the edge that
@@ -40,9 +40,9 @@ import javax.inject.Inject
  *         workspace {
  *             root = file("../..")
  *
- *             library("arc")  { path = "libraries/arc" }
- *             library("rise") { path = "libraries/rise"; dependsOn("arc") }
- *             library("leaf") { path = "libraries/leaf"; dependsOn("arc", "rise") }
+ *             library("core") { path = "libraries/core" }
+ *             library("net")  { path = "libraries/net";  dependsOn("core") }
+ *             library("http") { path = "libraries/http"; dependsOn("core", "net") }
  *         }
  *     }
  * }

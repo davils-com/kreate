@@ -18,7 +18,11 @@ import com.davils.buildlogic.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    `java-gradle-plugin`
+    // `java` rather than `java-gradle-plugin`. `kreate-plugin` gets the latter from `kotlin-dsl`,
+    // and `kreate-detekt-rules` must not have it at all: it adds `gradleApi()` to the `api`
+    // configuration, which would put the Gradle API into the POM of a rule set JAR that is
+    // resolved onto Detekt's analysis classpath.
+    java
 }
 
 java {

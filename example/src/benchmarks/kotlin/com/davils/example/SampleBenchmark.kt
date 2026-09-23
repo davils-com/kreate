@@ -26,6 +26,8 @@ import kotlinx.benchmark.State
  * It exists so that this project exercises the same pipeline a consumer would: Kreate
  * creates the `benchmarks` source set, associates it with `main`, applies `allopen` so JMH
  * can subclass this `@State` class, and compares the run against `benchmarks/baseline.json`.
+ *
+ * @since 2.1.0
  */
 @State(Scope.Benchmark)
 class SampleBenchmark {
@@ -33,6 +35,9 @@ class SampleBenchmark {
 
     /**
      * Sums a small list, which is enough work to produce a stable number quickly.
+     *
+     * @return The sum.
+     * @since 2.1.0
      */
     @Benchmark
     fun sum(): Int = values.sum()

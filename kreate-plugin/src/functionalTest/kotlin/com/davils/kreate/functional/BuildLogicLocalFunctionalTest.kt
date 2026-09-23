@@ -28,12 +28,12 @@ import java.io.File
  *
  * ### Why this test exists
  *
- * A Davils repository resolves the Kreate plugin marker as an ordinary `implementation`
- * dependency of its `build-logic` included build, and `build-logic` never applies
- * `com.davils.kreate`. Anything installed by the project plugin is therefore unreachable from
- * exactly the place that decides which Kreate the repository compiles against — which is why the
- * feature needs a settings plugin at all. This suite is what makes that claim a fact rather than
- * an argument.
+ * A repository that keeps its conventions in a `build-logic` included build resolves the Kreate
+ * plugin marker as an ordinary `implementation` dependency of that build, and `build-logic` never
+ * applies `com.davils.kreate` itself. Anything installed by the project plugin is therefore
+ * unreachable from exactly the place that decides which Kreate the repository compiles against —
+ * which is why the feature needs a settings plugin at all. This suite is what makes that claim a
+ * fact rather than an argument.
  *
  * The second case is the one that hurts in practice: `build-logic` calls
  * `dependencyLocking { lockAllConfigurations() }` and has a committed `gradle.lockfile` pinning
@@ -130,13 +130,14 @@ class BuildLogicLocalFunctionalTest {
             repositories {
                 mavenCentral()
                 // Stands in for the GitLab package registry: where the released version comes
-                // from when local mode is off. The injected DavilsLocal repository is a second,
+                // from when local mode is off. The injected KreateLocal repository is a second,
                 // narrower declaration that only ever serves locally published coordinates.
                 mavenLocal()
             }
 
-            // The shape every Davils repository has, and the reason a project plugin cannot do
-            // this job: `build-logic` compiles the conventions and never applies Kreate itself.
+            // The shape a conventions build normally has, and the reason a project plugin
+            // cannot do this job: `build-logic` compiles the conventions and never applies
+            // Kreate itself.
             dependencyLocking {
                 lockAllConfigurations()
             }
@@ -180,7 +181,7 @@ class BuildLogicLocalFunctionalTest {
         // The real sequence: a release exists, a lock file pins it, and only then does someone
         // publish locally. Without a committed lock file the test proves nothing, because
         // locking a configuration that has no lock state does not constrain anything.
-        conventions.build("publishToMavenLocal", "-Pdavils.local=false")
+        conventions.build("publishToMavenLocal", "-Pkreate.local=false")
 
         val app = consumerWithBuildLogic(conventions)
         app.build("-p", "build-logic", "printResolved", "--write-locks")

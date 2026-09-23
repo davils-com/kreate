@@ -217,7 +217,7 @@ class LocalResolutionFunctionalTest {
                 library("com.example:library:1.1.0")
                 library("com.example:sibling:2.5.0")
                 """.trimIndent(),
-                // Unfiltered, so the sibling is reachable. The injected DavilsLocal repository is
+                // Unfiltered, so the sibling is reachable. The injected KreateLocal repository is
                 // a second, narrower declaration and is the only one that may serve `library`.
                 extraRepositories = "mavenLocal()"
             )
@@ -260,14 +260,14 @@ class LocalResolutionFunctionalTest {
     inner class SwitchedOff {
 
         @Test
-        @DisplayName("resolves the released version again with -Pdavils.local=false")
+        @DisplayName("resolves the released version again with -Pkreate.local=false")
         fun explicitOptOut() {
             val library = producer(version = "1.1.0")
             library.build("kreateLocalPublish")
 
             // The release has to exist for this to resolve at all, which is the point: with the
             // feature off, the consumer is back to ordinary resolution.
-            library.build("publishToMavenLocal", "-Pdavils.local=false")
+            library.build("publishToMavenLocal", "-Pkreate.local=false")
 
             val app = consumer(
                 library,
@@ -275,7 +275,7 @@ class LocalResolutionFunctionalTest {
                 extraRepositories = "mavenLocal()"
             )
 
-            val result = app.build("printResolved", "-Pdavils.local=false")
+            val result = app.build("printResolved", "-Pkreate.local=false")
 
             result.output shouldContain "RESOLVED com.example:library:1.1.0"
             result.output shouldNotContain "1.1.0-SNAPSHOT"

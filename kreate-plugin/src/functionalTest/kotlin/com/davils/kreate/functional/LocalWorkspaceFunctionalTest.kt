@@ -109,7 +109,7 @@ class LocalWorkspaceFunctionalTest {
     }
 
     /**
-     * The chain the Davils graph actually has: each library depends on the one before it.
+     * The common shape: each library depends on the one before it.
      */
     private val chain = """
         library("alpha")
@@ -148,7 +148,7 @@ class LocalWorkspaceFunctionalTest {
 
         // Without this the sub-build would publish a release version into the local repository,
         // because it has no other way to know it was asked for a local publish.
-        alpha shouldContain "-Pdavils.local.publish=true"
+        alpha shouldContain "-Pkreate.local.publish=true"
     }
 
     @Test
@@ -185,8 +185,8 @@ class LocalWorkspaceFunctionalTest {
 
         tooling.build("kreateLocalPublishAll")
 
-        // This is how `novy-gradle` and `mica-openapi-gradle` are installed alongside their
-        // library: they are ordinary artefacts that the library's own task cannot reach.
+        // This is how a repository installs a second artifact alongside its library — a Gradle
+        // plugin of its own, say, which the library's own task cannot reach.
         invocations().single() shouldContain ":nested:publishToMavenLocal"
     }
 

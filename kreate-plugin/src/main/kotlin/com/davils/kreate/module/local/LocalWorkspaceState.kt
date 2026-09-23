@@ -29,17 +29,18 @@ import java.util.Properties
  * The directory under the Gradle user home that records what is currently published locally.
  *
  * The Gradle user home rather than a file in the repository, and that choice is the feature's
- * main safety property rather than a matter of taste. GitLab's shared pipeline points
- * `GRADLE_USER_HOME` at `$CI_PROJECT_DIR/.gradle`, which is created fresh for every job, so this
- * directory cannot exist in CI. A file in the repository would instead be one `git add -A` away
- * from turning a developer's local state into everyone's.
+ * main safety property rather than a matter of taste. A CI pipeline that points
+ * `GRADLE_USER_HOME` inside its own workspace — the usual arrangement, so that the dependency
+ * cache is scoped to the job — recreates this directory empty every time, so it cannot carry
+ * local state between jobs or from a developer's machine. A file in the repository would instead
+ * be one `git add -A` away from turning one developer's local state into everyone's.
  *
  * It also sits next to `gradle.properties`, which is already where a developer keeps the GitLab
  * token — the same trust boundary, and the same "never in a repository" property.
  *
  * @since 3.2.0
  */
-internal const val STATE_DIRECTORY: String = "davils/local"
+internal const val STATE_DIRECTORY: String = "kreate/local"
 
 /**
  * The extension of a state file.
@@ -62,7 +63,7 @@ internal const val STATE_EXTENSION: String = ".properties"
  *
  * @since 3.2.0
  */
-internal const val STATE_DIRECTORY_PROPERTY: String = "davils.local.state.dir"
+internal const val STATE_DIRECTORY_PROPERTY: String = "kreate.local.state.dir"
 
 /**
  * Resolves the directory holding the local development state.

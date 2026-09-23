@@ -38,7 +38,7 @@ import java.io.File
  * same repository — put there by a Maven build, or by a `publishToMavenLocal` predating this
  * feature — is never touched.
  *
- * `-Pdavils.local.clean.all=true` additionally sweeps every snapshot under the recorded groups,
+ * `-Pkreate.local.clean.all=true` additionally sweeps every snapshot under the recorded groups,
  * which is the escape hatch for a repository left inconsistent by a record that was deleted
  * before the artefacts it named.
  *

@@ -39,11 +39,11 @@ public abstract class KreateSettingsExtension @Inject constructor(
     factory: ObjectFactory
 ) {
     /**
-     * Whether this build resolves locally published Davils artefacts.
+     * Whether this build resolves locally published artifacts.
      *
      * Defaults to `true`. Switching it off here is a decision about the repository — a build that
      * must never resolve anything local, whatever a developer has installed. For switching it off
-     * once, `-Pdavils.local=false` on the command line is the right instrument.
+     * once, `-Pkreate.local=false` on the command line is the right instrument.
      *
      * @since 3.2.0
      */
@@ -52,13 +52,13 @@ public abstract class KreateSettingsExtension @Inject constructor(
     /**
      * The name the injected local Maven repository is reported under.
      *
-     * Defaults to `DavilsLocal`. It appears in resolution errors and in `--info` output, and a
-     * recognisable name is what turns "could not find com.davils:arc" into an obvious diagnosis.
+     * Defaults to `KreateLocal`. It appears in resolution errors and in `--info` output, and a
+     * recognisable name is what turns a "could not find" into an obvious diagnosis.
      *
      * @since 3.2.0
      */
     public val repositoryName: Property<String> =
-        factory.property(String::class.java).convention("DavilsLocal")
+        factory.property(String::class.java).convention("KreateLocal")
 
     /**
      * The environment variables whose presence means the build is running in CI.

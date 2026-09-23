@@ -26,11 +26,12 @@ import javax.inject.Inject
 /**
  * Extension for the local development workflow.
  *
- * Before 3.2.0 a fix in one Davils library could only be tried in another by tagging a release
- * and waiting for a pipeline to push it to a registry — which made the cost of testing a one line
- * change the same as the cost of shipping one. This feature closes that loop: a producer installs
- * itself into the local Maven repository at a snapshot version, and consumers substitute it in
- * without a single file in either repository being edited.
+ * When a codebase is split across several repositories, a fix in one of them can only be tried in
+ * another once it exists somewhere both builds can resolve. Without this, that means tagging a
+ * release and waiting for a pipeline to push it to a registry — which makes testing a one line
+ * change cost the same as shipping one. This feature closes that loop: a producer installs itself
+ * into the local Maven repository at a snapshot version, and consumers substitute it in without a
+ * single file in either repository being edited.
  *
  * The feature has two halves and needs both. This extension owns the producer half — publishing
  * and the tasks that manage it. Resolution is owned by the separate `com.davils.kreate.settings`

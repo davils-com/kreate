@@ -67,12 +67,15 @@ jobs:
       - name: Verify CMake
         run: cmake --version
 
-      # `kreate-plugin` is an included build. The root `build` task only reaches it far
-      # enough to produce the JAR that `:example` consumes — it runs none of the plugin's
-      # own tests, Detekt, or apiCheck. Both targets are therefore named explicitly, or CI
-      # would report green without a single plugin test having run.
+      # `kreate-plugin` and `kreate-detekt-rules` are included builds. The root `build` task
+      # only reaches them far enough to produce the JARs that `:example` consumes — it runs
+      # none of their own tests, Detekt, or apiCheck. Every target is therefore named
+      # explicitly, or CI would report green without a single plugin test having run.
       - name: Build and check
-        run: ./gradlew :kreate-plugin:build build --configuration-cache --stacktrace
+        run: >
+          ./gradlew
+          :kreate-plugin:build :kreate-detekt-rules:build build
+          --configuration-cache --stacktrace
 
       - name: Verify the example consumer end to end
         # Exercises the published DSL the way a consumer does: scaffolds, generates headers,

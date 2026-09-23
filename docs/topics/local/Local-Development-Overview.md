@@ -12,11 +12,11 @@ shipping one, and produced a registry full of versions that existed only to be t
 The local development workflow closes that loop:
 
 ```bash
-cd libraries/arc && ./gradlew kreateLocalPublish
-cd ../leaf       && ./gradlew build
+cd libraries/core && ./gradlew kreateLocalPublish
+cd ../http       && ./gradlew build
 ```
 
-The second build resolves the `arc` that was just built. Nothing in either repository is edited —
+The second build resolves the `core` that was just built. Nothing in either repository is edited —
 not the version catalog, not `gradle.properties`, not a lock file.
 
 ## The two halves
@@ -44,9 +44,9 @@ itself:
 
 ```
 Kreate local mode is ON — 1 library resolved from /home/dev/.m2/repository:
-    arc            3.0.0-SNAPSHOT       4 min ago      4 module(s)  /workspace/libraries/arc
+    core            3.0.0-SNAPSHOT       4 min ago      4 module(s)  /workspace/libraries/core
   Dependency locking is off. No lock file is read or written.
-  Switch off with -Pdavils.local=false; clear with ./gradlew kreateLocalClean.
+  Switch off with -Pkreate.local=false; clear with ./gradlew kreateLocalClean.
 ```
 
 ## What makes it safe

@@ -112,14 +112,14 @@ class MavenLocalTest {
         @Test
         @DisplayName("maps a group onto its directory path")
         fun groupPath() {
-            groupDirectory(home, "com.davils") shouldBe File(home, "com/davils")
+            groupDirectory(home, "com.example") shouldBe File(home, "com/example")
         }
 
         @Test
         @DisplayName("maps a module version onto its directory")
         fun modulePath() {
-            moduleDirectory(home, LocalModule("com.davils", "rise-core"), "1.1.0-SNAPSHOT") shouldBe
-                File(home, "com/davils/rise-core/1.1.0-SNAPSHOT")
+            moduleDirectory(home, LocalModule("com.example", "library-core"), "1.1.0-SNAPSHOT") shouldBe
+                File(home, "com/example/library-core/1.1.0-SNAPSHOT")
         }
     }
 
@@ -128,30 +128,30 @@ class MavenLocalTest {
     inner class Verification {
 
         private fun library(vararg modules: String) = LocalLibrary(
-            library = "rise",
-            group = "com.davils",
-            repository = File("/workspace/rise"),
+            library = "library",
+            group = "com.example",
+            repository = File("/workspace/library"),
             version = "1.1.0-SNAPSHOT",
             publishedAt = null,
             kreateVersion = "3.2.0",
-            modules = modules.map { LocalModule("com.davils", it) }
+            modules = modules.map { LocalModule("com.example", it) }
         )
 
         @Test
         @DisplayName("reports nothing missing when every coordinate is installed")
         fun allPresent() {
-            File(home, "com/davils/rise-core/1.1.0-SNAPSHOT").mkdirs()
+            File(home, "com/example/library-core/1.1.0-SNAPSHOT").mkdirs()
 
-            missingArtifacts(home, library("rise-core")) shouldBe emptyList()
+            missingArtifacts(home, library("library-core")) shouldBe emptyList()
         }
 
         @Test
         @DisplayName("names the coordinates that were removed after the record was written")
         fun someMissing() {
-            File(home, "com/davils/rise-core/1.1.0-SNAPSHOT").mkdirs()
+            File(home, "com/example/library-core/1.1.0-SNAPSHOT").mkdirs()
 
-            missingArtifacts(home, library("rise-core", "rise-retry")) shouldContainExactly
-                listOf("com.davils:rise-retry:1.1.0-SNAPSHOT")
+            missingArtifacts(home, library("library-core", "library-retry")) shouldContainExactly
+                listOf("com.example:library-retry:1.1.0-SNAPSHOT")
         }
     }
 
@@ -162,36 +162,37 @@ class MavenLocalTest {
         @Test
         @DisplayName("finds a version directory nested below a same-named group")
         fun nestedGroup() {
-            // Kreate is exactly this shape: `com.davils:kreate` sits at com/davils/kreate/<v>
-            // while the marker `com.davils.kreate:com.davils.kreate.gradle.plugin` sits one
-            // level further down. A depth limited walk would leave the marker behind, pinning
-            // a plugin version whose artefact is gone.
-            artifact(home, "com/davils/kreate/3.2.0-SNAPSHOT")
-            artifact(home, "com/davils/kreate/com.davils.kreate.gradle.plugin/3.2.0-SNAPSHOT")
+            // A Gradle plugin is exactly this shape: `com.example:tool` sits at
+            // com/example/tool/<v> while the marker `com.example.tool:com.example.tool.gradle.plugin`
+            // sits one level further down, because the group is a prefix of the artifact. A depth
+            // limited walk would leave the marker behind, pinning a plugin version whose artefact
+            // is gone.
+            artifact(home, "com/example/tool/3.2.0-SNAPSHOT")
+            artifact(home, "com/example/tool/com.example.tool.gradle.plugin/3.2.0-SNAPSHOT")
 
-            snapshotDirectories(home, "com.davils").map { it.relativeTo(home).path } shouldContainExactly
+            snapshotDirectories(home, "com.example").map { it.relativeTo(home).path } shouldContainExactly
                 listOf(
-                    "com/davils/kreate/3.2.0-SNAPSHOT",
-                    "com/davils/kreate/com.davils.kreate.gradle.plugin/3.2.0-SNAPSHOT"
+                    "com/example/tool/3.2.0-SNAPSHOT",
+                    "com/example/tool/com.example.tool.gradle.plugin/3.2.0-SNAPSHOT"
                 )
         }
 
         @Test
         @DisplayName("leaves releases alone, because something else put them there")
         fun ignoresReleases() {
-            artifact(home, "com/davils/arc/3.0.0")
-            artifact(home, "com/davils/arc/3.0.0-SNAPSHOT")
+            artifact(home, "com/example/extra/3.0.0")
+            artifact(home, "com/example/extra/3.0.0-SNAPSHOT")
 
-            snapshotDirectories(home, "com.davils").map { it.name } shouldContainExactly
+            snapshotDirectories(home, "com.example").map { it.name } shouldContainExactly
                 listOf("3.0.0-SNAPSHOT")
         }
 
         @Test
         @DisplayName("ignores an empty directory that merely looks like a version")
         fun ignoresEmptyDirectories() {
-            File(home, "com/davils/weird-SNAPSHOT").mkdirs()
+            File(home, "com/example/weird-SNAPSHOT").mkdirs()
 
-            snapshotDirectories(home, "com.davils") shouldBe emptyList()
+            snapshotDirectories(home, "com.example") shouldBe emptyList()
         }
 
         @Test

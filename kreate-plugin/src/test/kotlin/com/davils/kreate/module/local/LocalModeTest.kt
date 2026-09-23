@@ -39,12 +39,12 @@ class LocalModeTest {
         libraries.map { name ->
             LocalLibrary(
                 library = name,
-                group = "com.davils",
+                group = "com.example",
                 repository = java.io.File("/workspace/$name"),
                 version = "1.0.0-SNAPSHOT",
                 publishedAt = null,
                 kreateVersion = "3.2.0",
-                modules = listOf(LocalModule("com.davils", name))
+                modules = listOf(LocalModule("com.example", name))
             )
         }
     )
@@ -56,7 +56,7 @@ class LocalModeTest {
         ciVariable: String? = null
     ) = LocalModeInputs(
         workspace = workspace,
-        stateDirectory = "/home/dev/.gradle/davils/local",
+        stateDirectory = "/home/dev/.gradle/kreate/local",
         requested = requested,
         only = only,
         continuousIntegration = ciVariable != null,
@@ -70,7 +70,7 @@ class LocalModeTest {
         @Test
         @DisplayName("wins over everything, including a populated state directory")
         fun offWins() {
-            val mode = resolveLocalMode(inputs(workspace("arc"), requested = false))
+            val mode = resolveLocalMode(inputs(workspace("core"), requested = false))
 
             mode.shouldBeInstanceOf<LocalMode.Inactive>().reason shouldContain "switched off"
         }
@@ -79,7 +79,7 @@ class LocalModeTest {
         @DisplayName("wins over CI detection, so it never turns a refusal into a failure")
         fun offWinsOverCi() {
             val mode = resolveLocalMode(
-                inputs(workspace("arc"), requested = false, ciVariable = "GITLAB_CI")
+                inputs(workspace("core"), requested = false, ciVariable = "GITLAB_CI")
             )
 
             mode.isActive shouldBe false
@@ -102,12 +102,12 @@ class LocalModeTest {
         @DisplayName("fails the build when the runner carries local state")
         fun failsInCiWithState() {
             val failure = shouldThrow<GradleException> {
-                resolveLocalMode(inputs(workspace("arc", "rise"), ciVariable = "GITHUB_ACTIONS"))
+                resolveLocalMode(inputs(workspace("core", "net"), ciVariable = "GITHUB_ACTIONS"))
             }
 
             failure.message.orEmpty() shouldContain "while running in CI"
             failure.message.orEmpty() shouldContain "GITHUB_ACTIONS"
-            failure.message.orEmpty() shouldContain "arc"
+            failure.message.orEmpty() shouldContain "core"
         }
     }
 
@@ -137,10 +137,10 @@ class LocalModeTest {
         @DisplayName("names the narrowing filter when one excluded everything")
         fun failureNamesTheFilter() {
             val failure = shouldThrow<GradleException> {
-                resolveLocalMode(inputs(workspace("arc"), requested = true, only = setOf("leaf")))
+                resolveLocalMode(inputs(workspace("core"), requested = true, only = setOf("json")))
             }
 
-            failure.message.orEmpty() shouldContain "davils.local.only=leaf"
+            failure.message.orEmpty() shouldContain "kreate.local.only=json"
         }
     }
 
@@ -151,18 +151,18 @@ class LocalModeTest {
         @Test
         @DisplayName("switches local mode on without anyone asking for it")
         fun activeWithoutRequest() {
-            val mode = resolveLocalMode(inputs(workspace("arc")))
+            val mode = resolveLocalMode(inputs(workspace("core")))
 
             mode.shouldBeInstanceOf<LocalMode.Active>().workspace.libraries.map { it.library } shouldBe
-                listOf("arc")
+                listOf("core")
         }
 
         @Test
         @DisplayName("is narrowed by the only filter")
         fun narrowed() {
-            val mode = resolveLocalMode(inputs(workspace("arc", "rise"), only = setOf("rise")))
+            val mode = resolveLocalMode(inputs(workspace("core", "net"), only = setOf("net")))
 
-            mode.workspace.libraries.map { it.library } shouldBe listOf("rise")
+            mode.workspace.libraries.map { it.library } shouldBe listOf("net")
         }
     }
 
@@ -192,7 +192,7 @@ class LocalModeTest {
         @Test
         @DisplayName("splits the only filter and drops empty entries")
         fun onlyFilter() {
-            parseLocalOnly(" arc , rise ,, ") shouldBe setOf("arc", "rise")
+            parseLocalOnly(" core , net ,, ") shouldBe setOf("core", "net")
             parseLocalOnly(null) shouldBe emptySet()
         }
     }

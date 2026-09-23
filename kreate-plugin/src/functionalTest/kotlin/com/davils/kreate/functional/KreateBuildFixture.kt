@@ -306,8 +306,28 @@ class KreateBuildFixture(
      */
     fun buildWithEnvironment(environment: Map<String, String>, vararg arguments: String): BuildResult =
         runner(arguments.toList())
-            .withEnvironment(System.getenv() + environment)
+            .withEnvironment(environmentWith(environment))
             .build()
+
+    /**
+     * The environment handed to a build this fixture drives.
+     *
+     * The CI variables are stripped unless a test asked for them, and that is not tidiness — it is
+     * what makes the suite runnable on a CI agent at all. TestKit forks the build with the
+     * runner's own environment, so on GitHub Actions every generated build would see
+     * `CI=true` and `GITHUB_ACTIONS=true` and conclude, correctly, that it is a pipeline:
+     * `kreateLocalPublish` refuses to run there and local mode never activates. Every test of the
+     * local development workflow would then fail, on the agent only, for a reason that is the
+     * feature working as designed.
+     *
+     * A test that is *about* CI detection passes the variable explicitly, and it survives this
+     * because the caller's entries are applied last.
+     *
+     * @param extra The variables the test asked for.
+     * @return The environment for the forked build.
+     */
+    private fun environmentWith(extra: Map<String, String>): Map<String, String> =
+        System.getenv().filterKeys { key -> key !in CI_VARIABLES } + extra
 
     private fun runner(arguments: List<String>): GradleRunner = GradleRunner.create()
         .withProjectDir(rootDirectory)
@@ -321,22 +341,30 @@ class KreateBuildFixture(
                 // write into the developer's own Maven repository and Gradle user home if they
                 // were not redirected here.
                 "-Dmaven.repo.local=${effectiveMavenRepository.absolutePath}",
-                "-Pdavils.local.state.dir=${stateDirectory.absolutePath}"
+                "-Pkreate.local.state.dir=${stateDirectory.absolutePath}"
             )
         )
         .forwardOutput()
         .let { runner -> gradleVersion?.let(runner::withGradleVersion) ?: runner }
-        // `withEnvironment` replaces the environment wholesale rather than adding to it, so the
-        // build would lose JAVA_HOME and PATH and never start. Only call it when a test asked
-        // for variables of its own.
-        .let { runner ->
-            if (environment.isEmpty()) runner else runner.withEnvironment(System.getenv() + environment)
-        }
+        // Always set, rather than only when a test asked for variables: on a CI agent the
+        // inherited environment is itself the thing that has to be corrected. See
+        // [environmentWith].
+        .withEnvironment(environmentWith(environment))
 
     /**
      * Companion object holding shared fixture snippets.
      */
     companion object {
+        /**
+         * The environment variables Kreate reads as "this is a pipeline".
+         *
+         * Kept in step with `LocalExtension.ciEnvironmentVariables` and
+         * `KreateSettingsExtension.ciEnvironmentVariables`. A variable added there and not here
+         * makes the suite fail on an agent that sets it, and nowhere else.
+         */
+        val CI_VARIABLES: Set<String> =
+            setOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
+
         /**
          * The Java version the generated builds target.
          *
