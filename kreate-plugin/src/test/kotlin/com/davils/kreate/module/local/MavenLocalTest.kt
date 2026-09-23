@@ -170,11 +170,15 @@ class MavenLocalTest {
             artifact(home, "com/example/tool/3.2.0-SNAPSHOT")
             artifact(home, "com/example/tool/com.example.tool.gradle.plugin/3.2.0-SNAPSHOT")
 
-            snapshotDirectories(home, "com.example").map { it.relativeTo(home).path } shouldContainExactly
-                listOf(
-                    "com/example/tool/3.2.0-SNAPSHOT",
-                    "com/example/tool/com.example.tool.gradle.plugin/3.2.0-SNAPSHOT"
-                )
+            // `invariantSeparatorsPath`, not `path`: the latter is `\` separated on Windows and
+            // the assertion would compare a real result against a Unix-shaped literal.
+            val found = snapshotDirectories(home, "com.example")
+                .map { it.relativeTo(home).invariantSeparatorsPath }
+
+            found shouldContainExactly listOf(
+                "com/example/tool/3.2.0-SNAPSHOT",
+                "com/example/tool/com.example.tool.gradle.plugin/3.2.0-SNAPSHOT"
+            )
         }
 
         @Test
