@@ -114,6 +114,82 @@ class GradleCompatibilityFunctionalTest {
         result.task(":koverVerify")?.outcome shouldBe TaskOutcome.SUCCESS
     }
 
+    @ParameterizedTest(name = "resolves local publications on Gradle {0}")
+    @MethodSource("supportedGradleVersions")
+    fun localDevelopmentWorksOnSupportedVersions(gradleVersion: String) {
+        // The settings plugin uses the newest Gradle API in the whole plugin —
+        // `Gradle.getLifecycle()` and `IsolatedAction`, both incubating when they were
+        // introduced. Nothing else here would notice if the declared minimum did not have them:
+        // the plugin compiles against the version this build uses, and the failure would be a
+        // `NoSuchMethodError` on a consumer's machine.
+        val producerDirectory = File(projectDir, "producer").apply { mkdirs() }
+        val consumerDirectory = File(projectDir, "consumer").apply { mkdirs() }
+
+        val producer = KreateBuildFixture(producerDirectory, gradleVersion)
+        producer.writeSettings("library")
+        producer.writeBuild(
+            kreateBlock = """
+                ${KreateBuildFixture.platformBlock}
+
+                project {
+                    name = "library"
+                    version { property = "library.version" }
+                    publish {
+                        enabled = true
+                        repositories { gitlab { enabled = true } }
+                    }
+                }
+            """.trimIndent()
+        )
+        producer.write("gradle.properties", "library.version=1.0.0")
+        producer.writeKotlin("com/example/Library.kt", "package com.example\n\nclass Library")
+        producer.build("kreateLocalPublish")
+
+        val consumer = KreateBuildFixture(consumerDirectory, gradleVersion)
+        consumer.resolvingFrom(producer)
+        consumer.write(
+            "settings.gradle.kts",
+            """
+            plugins {
+                id("com.davils.kreate.settings")
+            }
+
+            rootProject.name = "consumer"
+            """.trimIndent()
+        )
+        consumer.write(
+            "build.gradle.kts",
+            """
+            plugins {
+                id("org.jetbrains.kotlin.jvm")
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            val library = configurations.create("library")
+
+            dependencies {
+                library("com.example:library:1.0.0")
+            }
+
+            tasks.register("printResolved") {
+                val resolved = library.incoming.resolutionResult.rootComponent.map { root ->
+                    root.dependencies
+                        .filterIsInstance<org.gradle.api.artifacts.result.ResolvedDependencyResult>()
+                        .map { it.selected.moduleVersion?.toString() }
+                }
+                doLast { resolved.get().forEach { println("RESOLVED ${'$'}it") } }
+            }
+            """.trimIndent()
+        )
+
+        val result = consumer.build("printResolved")
+
+        result.output.contains("RESOLVED com.example:library:1.0.0-SNAPSHOT") shouldBe true
+    }
+
     private companion object {
         /**
          * The Gradle versions the plugin is verified against.

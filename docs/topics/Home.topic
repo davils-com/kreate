@@ -44,6 +44,10 @@
                summary="Signed releases to Maven Central and the GitLab Package Registry with full POM metadata.">
                 Publishing
             </a>
+            <a href="Local-Development-Overview.md"
+               summary="Test a fix in one repository from another without tagging a release.">
+                Local development
+            </a>
         </primary>
 
         <secondary>

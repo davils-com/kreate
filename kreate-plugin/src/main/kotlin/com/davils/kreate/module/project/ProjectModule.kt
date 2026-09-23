@@ -18,6 +18,7 @@ package com.davils.kreate.module.project
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.module.Module
+import com.davils.kreate.module.local.requestsLocalPublish
 import com.davils.kreate.module.project.api.initializeApiValidation
 import com.davils.kreate.module.project.benchmark.initializeBenchmark
 import com.davils.kreate.module.project.configuration.initializeConfigurationSchema
@@ -70,7 +71,9 @@ internal object ProjectModule : Module {
 
             configureVersion(
                 env = extension.project.version.environment.get(),
-                prop = extension.project.version.property.get()
+                prop = extension.project.version.property.get(),
+                localPublish = extension.local.enabled.get() &&
+                    requestsLocalPublish(gradle, providers)
             )
             initializeProject(projectExtension = extension.project)
             initializeBuildConstants(extension)

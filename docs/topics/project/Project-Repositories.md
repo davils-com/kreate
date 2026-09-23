@@ -16,6 +16,15 @@ Two opt-in conveniences that are off by default — and the reason that matters 
 %product% deliberately does not modify your dependency resolution or apply compiler plugins you
 did not ask for. Both behaviours are available, and both are off unless you enable them.
 
+<note>
+There is exactly one repository %product% injects without being asked, and it does not contradict
+the principle above. The
+<a href="Local-Development-Overview.md">local development workflow</a>'s settings plugin adds the
+local Maven repository — but only while something is published there, only filtered to the exact
+coordinates that publish installed, and only with <code>snapshotsOnly()</code>, so it can never
+answer a question a mirror would have answered. It cannot be active in CI at all.
+</note>
+
 ## Repositories
 
 ```kotlin

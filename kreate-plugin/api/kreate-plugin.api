@@ -6,9 +6,11 @@ public final class com/davils/kreate/Kreate : org/gradle/api/Plugin {
 
 public abstract class com/davils/kreate/KreateExtension {
 	public fun <init> ()V
+	public abstract fun getLocal ()Lcom/davils/kreate/module/local/extension/LocalExtension;
 	public abstract fun getPlatform ()Lcom/davils/kreate/module/platform/PlatformExtension;
 	public abstract fun getProject ()Lcom/davils/kreate/module/project/ProjectExtension;
 	public abstract fun getTrivy ()Lcom/davils/kreate/module/trivy/extension/TrivyExtension;
+	public final fun local (Lorg/gradle/api/Action;)V
 	public final fun platform (Lorg/gradle/api/Action;)V
 	public final fun project (Lorg/gradle/api/Action;)V
 	public final fun trivy (Lorg/gradle/api/Action;)V
@@ -81,6 +83,15 @@ public final class com/davils/kreate/KreateTasks$Jni {
 	public final fun nativeJar (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public final class com/davils/kreate/KreateTasks$Local {
+	public static final field CLEAN Ljava/lang/String;
+	public static final field GROUP Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Local;
+	public static final field PUBLISH Ljava/lang/String;
+	public static final field PUBLISH_ALL Ljava/lang/String;
+	public static final field STATUS Ljava/lang/String;
+}
+
 public final class com/davils/kreate/KreateTasks$Tests {
 	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Tests;
 	public static final field INTEGRATION Ljava/lang/String;
@@ -100,6 +111,88 @@ public final class com/davils/kreate/KreateTasks$Trivy {
 public abstract class com/davils/kreate/jobs/Task : org/gradle/api/DefaultTask {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/davils/kreate/module/local/WorkspaceLibrary : java/io/Serializable {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lcom/davils/kreate/module/local/WorkspaceLibrary;
+	public static synthetic fun copy$default (Lcom/davils/kreate/module/local/WorkspaceLibrary;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/davils/kreate/module/local/WorkspaceLibrary;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependencies ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getTasks ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/module/local/extension/LocalExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getSnapshotSuffix ()Lorg/gradle/api/provider/Property;
+	public abstract fun getWorkspace ()Lcom/davils/kreate/module/local/extension/LocalWorkspaceExtension;
+	public final fun workspace (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/module/local/extension/LocalLibrarySpec : org/gradle/api/Named {
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun dependsOn ([Ljava/lang/String;)V
+	public final fun getDependencies ()Lorg/gradle/api/provider/ListProperty;
+	public fun getName ()Ljava/lang/String;
+	public final fun getPath ()Lorg/gradle/api/provider/Property;
+	public final fun getTasks ()Lorg/gradle/api/provider/ListProperty;
+	public final fun tasks ([Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/module/local/extension/LocalWorkspaceExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getLibraries ()Lorg/gradle/api/NamedDomainObjectContainer;
+	public abstract fun getRoot ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun library (Ljava/lang/String;)V
+	public final fun library (Ljava/lang/String;Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/module/local/tasks/LocalClean : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public final fun clean ()V
+	public abstract fun getContinuousIntegration ()Lorg/gradle/api/provider/Property;
+	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getSweepAll ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/module/local/tasks/LocalPublish : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public abstract fun getContinuousIntegration ()Lorg/gradle/api/provider/Property;
+	public abstract fun getCoordinates ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getKreateVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLibrary ()Lorg/gradle/api/provider/Property;
+	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPublishedVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getRepositoryDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun record ()V
+}
+
+public abstract class com/davils/kreate/module/local/tasks/LocalPublishAll : com/davils/kreate/jobs/Task {
+	public fun <init> (Lorg/gradle/process/ExecOperations;)V
+	public abstract fun getFrom ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getLibraries ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getOnly ()Lorg/gradle/api/provider/ListProperty;
+	public final fun publishAll ()V
+}
+
+public abstract class com/davils/kreate/module/local/tasks/LocalStatus : com/davils/kreate/jobs/Task {
+	public fun <init> ()V
+	public abstract fun getInactiveReason ()Lorg/gradle/api/provider/Property;
+	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun report ()V
 }
 
 public abstract class com/davils/kreate/module/platform/PlatformExtension {
@@ -1157,5 +1250,18 @@ public final class com/davils/kreate/repository/GitlabRegistrySpec {
 	public final fun setTokenProperty (Ljava/lang/String;)V
 	public final fun setTokenVariable (Ljava/lang/String;)V
 	public final fun setUrl (Ljava/lang/String;)V
+}
+
+public final class com/davils/kreate/settings/KreateSettings : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/initialization/Settings;)V
+}
+
+public abstract class com/davils/kreate/settings/KreateSettingsExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getRepositoryName ()Lorg/gradle/api/provider/Property;
 }
 

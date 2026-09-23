@@ -17,6 +17,7 @@
 package com.davils.kreate
 
 import com.davils.kreate.module.builder.modules
+import com.davils.kreate.module.local.LocalWorkflowModule
 import com.davils.kreate.module.platform.PlatformModule
 import com.davils.kreate.module.project.ProjectModule
 import com.davils.kreate.module.trivy.TrivyModule
@@ -50,6 +51,9 @@ private fun Project.addModules(extension: KreateExtension) {
         add(ProjectModule)
         add(PlatformModule)
         add(TrivyModule)
+
+        // Last, so that its `afterEvaluate` runs after ProjectModule has resolved the version.
+        add(LocalWorkflowModule)
     }
     modules.applyAll()
 }

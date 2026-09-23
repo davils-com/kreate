@@ -22,6 +22,23 @@ plugins {
 Everything else follows from what you enable in the `kreate { }` block. Enabling a feature is the
 decision; applying the plugin behind it is bookkeeping, and %product% does it.
 
+## The second plugin id
+
+Since 3.2.0 %product% ships **two** plugin ids from the one artifact. The one above is applied to
+projects; `com.davils.kreate.settings` is applied to `Settings`, and owns nothing but dependency
+resolution for the [local development workflow](Local-Development-Overview.md):
+
+```kotlin
+// settings.gradle.kts, and build-logic/settings.gradle.kts
+plugins {
+    id("com.davils.kreate.settings") version "%version%"
+}
+```
+
+It is separate because substitution has to be installed before any configuration resolves, and has
+to reach `build-logic` — which never applies the project plugin. Applying it changes nothing until
+something is published locally.
+
 ## What gets applied, and when
 
 Nothing is applied speculatively. A plugin appears only when the feature that needs it is enabled.

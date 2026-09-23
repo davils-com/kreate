@@ -18,8 +18,14 @@ package com.davils.kreate.module.project.locking
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.KreateTasks
+import com.davils.kreate.module.local.LocalMode
+import com.davils.kreate.module.local.gatherLocalModeInputs
+import com.davils.kreate.module.local.isActive
+import com.davils.kreate.module.local.resolveLocalMode
+import com.davils.kreate.module.local.workspace
 import com.davils.kreate.module.project.tests.suite.enabledSuites
 import com.davils.kreate.module.project.tests.suite.lowerCamelCaseName
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -37,6 +43,11 @@ internal fun Project.initializeDependencyLocking(extension: KreateExtension) {
     val lockingExtension = extension.project.dependencyLocking
     if (!lockingExtension.enabled.get()) return
 
+    if (localModeOf(extension).isActive) {
+        deactivateLockingForLocalMode()
+        return
+    }
+
     // Read once, at configuration time: the task action below must not reach back into the
     // extension, or the task would carry a reference to the whole project model.
     val lockedClasspaths = lockingExtension.lockedClasspaths.get() +
@@ -53,6 +64,75 @@ internal fun Project.initializeDependencyLocking(extension: KreateExtension) {
     }
 
     registerResolveAndLockAll(if (lockEverything) null else lockedClasspaths)
+}
+
+/**
+ * Whether this build resolves Davils artefacts from the local Maven repository.
+ *
+ * @param extension The main Kreate extension.
+ * @return The resolved mode.
+ * @since 3.2.0
+ */
+private fun Project.localModeOf(extension: KreateExtension): LocalMode = resolveLocalMode(
+    gatherLocalModeInputs(
+        providers,
+        gradle.gradleUserHomeDir,
+        extension.local.ciEnvironmentVariables.get()
+    )
+)
+
+/**
+ * Turns dependency locking off for a build that resolves local publications.
+ *
+ * A lock file pins exact versions, and a locally published snapshot is by definition not one of
+ * them, so enforcing the lock against one would be enforcing a constraint that can never be
+ * satisfied. (Gradle 9.6 was not in fact observed to enforce it against a substituted selector —
+ * see `DeactivateLockingAction` — so this is a precaution rather than a fix for an observed
+ * failure.)
+ *
+ * What must not give way is the committed lock file itself. `--write-locks` would rewrite it with
+ * snapshot versions that exist on one machine — a change that looks plausible in review, passes
+ * locally, and breaks every pipeline and every colleague. That is why this refuses outright
+ * rather than warning: a warning during a long build is a line nobody reads, and the damage is
+ * already committed by the time anyone would.
+ *
+ * @throws GradleException If the build was also asked to write lock files.
+ * @since 3.2.0
+ */
+private fun Project.deactivateLockingForLocalMode() {
+    if (gradle.startParameter.isWriteDependencyLocks) {
+        val substituted = resolveLocalMode(
+            gatherLocalModeInputs(providers, gradle.gradleUserHomeDir, emptyList())
+        ).workspace.substitutions.entries.sortedBy { it.key }
+
+        throw GradleException(
+            """
+                Refusing to write lock files while resolving from the local Maven repository.
+
+                These versions would have been recorded into a committed lock file:
+
+                ${substituted.joinToString("\n                ") { "${it.key}:${it.value}" }}
+
+                They exist on this machine only, so the lock file would break every pipeline and
+                every other checkout.
+
+                Clear the local publications first:
+
+                    ./gradlew ${KreateTasks.Local.CLEAN}
+
+                or write the locks with local mode off:
+
+                    ./gradlew ${KreateTasks.DependencyLocking.RESOLVE_AND_LOCK_ALL} --write-locks -Pdavils.local=false
+            """.trimIndent()
+        )
+    }
+
+    // `unlockAllConfigurations` rather than merely skipping activation, because a consumer may
+    // also call `lockAllConfigurations()` in its own script.
+    dependencyLocking.unlockAllConfigurations()
+    logger.lifecycle(
+        "Kreate local mode: dependency locking is off for '$path'. No lock file is read or written."
+    )
 }
 
 /**

@@ -49,6 +49,52 @@ class KreateBuildFixture(
     val nativeProjectDirectory: File get() = rootDirectory.resolve("jni/sample")
 
     /**
+     * The local Maven repository the build publishes into and resolves from.
+     *
+     * Redirected away from `~/.m2` for every build, not only the ones that publish. The suite runs
+     * in parallel forks against a shared Gradle user home, and a test that installed an artefact
+     * into a developer's real repository would leak into their next build of an unrelated project.
+     */
+    val mavenRepository: File get() = rootDirectory.resolve("maven-local")
+
+    /**
+     * The directory recording what this fixture has published locally.
+     *
+     * Redirected for the same reason as [mavenRepository], and additionally because the default
+     * lives in the Gradle user home that TestKit shares between tests: one test's publication
+     * would otherwise switch local mode on for every other test running at that moment.
+     */
+    var stateDirectory: File = rootDirectory.resolve("local-state")
+
+    /**
+     * Points this fixture at another fixture's local state and Maven repository.
+     *
+     * This is what makes a consumer build see what a producer build published. The two are
+     * separate checkouts in separate directories, exactly as they are in a real workspace, and the
+     * only thing they share is the pair of machine level locations the feature is built around.
+     *
+     * @param producer The fixture whose publications this one should resolve.
+     */
+    fun resolvingFrom(producer: KreateBuildFixture) {
+        sharedLocations(producer.stateDirectory, producer.mavenRepository)
+    }
+
+    /**
+     * Points this fixture at a state directory and Maven repository shared with other fixtures.
+     *
+     * @param state The shared state directory.
+     * @param maven The shared local Maven repository.
+     */
+    fun sharedLocations(state: File, maven: File) {
+        stateDirectory = state
+        sharedMavenRepository = maven
+    }
+
+    private var sharedMavenRepository: File? = null
+
+    private val effectiveMavenRepository: File get() = sharedMavenRepository ?: mavenRepository
+
+    /**
      * Writes the settings file. Repositories are declared here rather than relying on the
      * plugin injecting them, matching how an enterprise build is set up.
      */
@@ -266,7 +312,18 @@ class KreateBuildFixture(
     private fun runner(arguments: List<String>): GradleRunner = GradleRunner.create()
         .withProjectDir(rootDirectory)
         .withPluginClasspath()
-        .withArguments(arguments + listOf("--stacktrace", "--configuration-cache"))
+        .withArguments(
+            arguments + listOf(
+                "--stacktrace",
+                "--configuration-cache",
+                // Both locations are machine level by design, which is what makes the local
+                // development feature work across checkouts — and what would make this suite
+                // write into the developer's own Maven repository and Gradle user home if they
+                // were not redirected here.
+                "-Dmaven.repo.local=${effectiveMavenRepository.absolutePath}",
+                "-Pdavils.local.state.dir=${stateDirectory.absolutePath}"
+            )
+        )
         .forwardOutput()
         .let { runner -> gradleVersion?.let(runner::withGradleVersion) ?: runner }
         // `withEnvironment` replaces the environment wholesale rather than adding to it, so the

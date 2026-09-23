@@ -318,6 +318,53 @@ public object KreateTasks {
     }
 
     /**
+     * Task names and the group for the local development workflow.
+     *
+     * These are the tasks that let a fix in one library be tried in another without a release.
+     * Before 3.2.0 the only way to do that was to tag a version and wait for a pipeline to push
+     * it to a registry, which made the cost of trying a one line change the same as the cost of
+     * shipping one.
+     *
+     * @since 3.2.0
+     */
+    public object Local {
+        /**
+         * Installs this build into the local Maven repository at a snapshot version and records
+         * it, so that consumers substitute it in.
+         *
+         * @since 3.2.0
+         */
+        public const val PUBLISH: String = "kreateLocalPublish"
+
+        /**
+         * Runs [PUBLISH] across a declared workspace in dependency order.
+         *
+         * @since 3.2.0
+         */
+        public const val PUBLISH_ALL: String = "kreateLocalPublishAll"
+
+        /**
+         * Reports what is currently published locally, or why local mode is off.
+         *
+         * @since 3.2.0
+         */
+        public const val STATUS: String = "kreateLocalStatus"
+
+        /**
+         * Removes the local publications and the state that records them.
+         *
+         * @since 3.2.0
+         */
+        public const val CLEAN: String = "kreateLocalClean"
+
+        /**
+         * The task group for local development tasks.
+         * @since 3.2.0
+         */
+        public const val GROUP: String = "kreate local"
+    }
+
+    /**
      * Task names and the group for static analysis.
      *
      * @since 3.0.0

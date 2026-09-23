@@ -138,3 +138,16 @@ Resolved 'org.apache.commons:commons-io:1.3.2' which is not part of the dependen
 ```
 
 Re-run `kreateResolveAndLockAll --write-locks` and commit the updated file.
+
+## Local development
+
+While the [local development workflow](Local-Development-Overview.md) is active, locking is
+deactivated and `--write-locks` is refused. A lock file records released versions and cannot
+contain a machine-local snapshot, so enforcing it against one would be enforcing a constraint that
+can never be satisfied — and recording one would produce a file that passes on the machine that
+wrote it and breaks everywhere else.
+
+The committed lock files are never read or written in that mode. Once the local publications are
+cleared, locking behaves exactly as it did before 3.2.0.
+
+See [](Local-Development-Locking.md).

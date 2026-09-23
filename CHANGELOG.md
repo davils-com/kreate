@@ -5,6 +5,82 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.2.0
+
+One feature, and it removes a cost that had been paid on every change for three major versions: a
+fix in one Davils library could only be tried in another by tagging a release and waiting for a
+pipeline to push it to a registry. That made testing a one line change cost the same as shipping
+one, and filled the registry with versions that existed only to be thrown away.
+
+### Added
+
+- **A local development workflow.** `./gradlew kreateLocalPublish` in a producer, an ordinary build
+  in a consumer, and the consumer resolves the working copy. Neither repository is edited — not the
+  version catalog, not `gradle.properties`, not a lock file.
+
+  The feature ships as **two** plugin ids from the one artifact, and a repository needs both:
+
+  - `com.davils.kreate` — the project plugin, unchanged in what it already did, now also
+    registering `kreateLocalPublish`, `kreateLocalPublishAll`, `kreateLocalStatus` and
+    `kreateLocalClean`.
+  - `com.davils.kreate.settings` — new, applied in `settings.gradle.kts` **and**
+    `build-logic/settings.gradle.kts`. It owns resolution only.
+
+  A settings plugin rather than more of the project plugin, for two reasons that are not matters of
+  taste. Dependency substitution has to be installed before any configuration resolves, and the
+  Kotlin Multiplatform and Android plugins both resolve during their own `afterEvaluate` — a
+  project plugin would work on most days, which is not a standard dependency resolution can be held
+  to. And it has to reach `build-logic`, which is where the Kreate plugin marker itself is resolved
+  and which never applies the project plugin.
+
+  **Nothing is switched on by a flag.** Publishing is what activates local mode and
+  `kreateLocalClean` is what ends it. An opt-in flag is a thing to forget, and forgetting it looks
+  exactly like the feature not working. Every affected build prints what it is substituting, so a
+  build that resolves something other than its catalog says explains itself.
+
+  **The state lives at `$GRADLE_USER_HOME/davils/local`, not in the repository.** GitLab's shared
+  pipeline points `GRADLE_USER_HOME` at `$CI_PROJECT_DIR/.gradle`, recreated per job, so the
+  directory cannot exist in CI — a structural guarantee rather than a check that can be forgotten.
+  A file in the repository would instead be one `git add -A` away from turning one developer's
+  local state into everyone's.
+
+  **Lock files are neither read nor written in local mode, and that is a guarantee rather than an
+  intention.** `--write-locks` is refused outright, naming the snapshot versions it would have
+  recorded. A lock file pinning `3.0.0-SNAPSHOT` looks ordinary in review, passes on the machine
+  that wrote it, and breaks every pipeline and every colleague; a warning in the middle of a long
+  build is not a proportionate response to that.
+
+  Publishing to a shared registry from a build that resolved local artifacts is refused for the
+  same reason. Substitution matches only the exact coordinates a publish recorded, never a group
+  wildcard, and the injected repository is declared `snapshotsOnly()` and filtered to those
+  modules — so a release can never be shadowed and a sibling artifact that was not published
+  locally resolves exactly as it always did.
+
+  `kreateLocalPublishAll` orchestrates a whole workspace in dependency order, from a declaration in
+  `kreate { local { workspace { } } }`. The edges are declared rather than derived from each
+  repository's version catalog: a catalog records what a library was last *released* against, and
+  during a refactor the edge that matters is usually the one not in the catalog yet. `--from arc`
+  republishes `arc` and everything downstream, which is the normal case.
+
+  **Not `includeBuild`.** Gradle's own answer substitutes by matching `group:name` against each
+  *project* of the included build, and a multiplatform producer publishes `arc-jvm`, `arc-android`
+  and `arc-wasm-js` as variants of one project — there is no `project(":…")` to substitute them
+  with. It would also rebuild the producer inside every consumer build, and need a committed
+  settings edit per experiment.
+
+### Fixed
+
+- **`kreate-plugin` had no version.** The composite root's `gradle.properties` is the single source
+  of truth for the version, and Gradle does not propagate it into an included build. Nothing
+  bridged that gap, so every invocation that did not set `CI_COMMIT_TAG` or pass `-Pversion=`
+  produced artifacts versioned `unspecified` — which is why the only hand-installed Kreate anyone
+  ever had in `~/.m2` was whatever version they had typed out by hand. The convention now reads the
+  root's file directly. Releases were never affected; they are tagged.
+
+- The plugin JAR now carries `Implementation-Title` and `Implementation-Version`, so Kreate can
+  name its own version at runtime. It records it alongside every local publication, which is what
+  lets a record written by an older Kreate be recognised as such.
+
 ## 3.1.0
 
 One feature, and it is the counterpart to the one 2.1.0 added. Binary compatibility validation made

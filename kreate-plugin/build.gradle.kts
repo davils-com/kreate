@@ -74,6 +74,25 @@ gradlePlugin {
                 "davils"
             )
         }
+
+        // A second plugin, from the same artifact, applied to `Settings` rather than `Project`.
+        // Dependency substitution has to be in place before anything resolves and has to reach
+        // `build-logic`, which never applies the project plugin — neither is reachable from a
+        // project plugin, however early it runs.
+        create("${Project.Identity.NAME.lowercase()}Settings") {
+            id = "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.settings"
+            description = "Resolves locally published Davils artifacts, for local development."
+            displayName = "${Project.Identity.NAME} settings"
+            implementationClass =
+                "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.settings.KreateSettings"
+            tags = listOf(
+                "kotlin",
+                "local-development",
+                "dependency-substitution",
+                "conventions",
+                "davils"
+            )
+        }
     }
 }
 

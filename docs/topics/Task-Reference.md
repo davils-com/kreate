@@ -279,6 +279,53 @@ Registered when `project.dependencyLocking.enabled` is `true`. See
     </tr>
 </table>
 
+## Local development
+
+Registered on the **root project** when `local.enabled` is `true`, which it is by default. The
+tasks do nothing until one is run by name, and all of them refuse to run in CI. See
+[Local development](Local-Development-Overview.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateLocalPublish</code></td>
+        <td>
+            Runs <code>publishToMavenLocal</code> at a snapshot version and records the
+            coordinates, so that other checkouts resolve this build.
+        </td>
+        <td><code>$GRADLE_USER_HOME/davils/local/&lt;group&gt;.&lt;library&gt;.properties</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateLocalPublishAll</code></td>
+        <td>
+            Runs the above across a declared workspace in dependency order. Accepts
+            <code>--from</code> and <code>--only</code>. Registered only where a workspace is
+            declared.
+        </td>
+        <td>One record per repository</td>
+    </tr>
+    <tr>
+        <td><code>kreateLocalStatus</code></td>
+        <td>
+            Reports what is published locally and verifies it is really installed, or names the
+            reason local mode is off.
+        </td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td><code>kreateLocalClean</code></td>
+        <td>
+            Removes exactly the coordinates the records name, and the records. Widened to a full
+            sweep with <code>-Pdavils.local.clean.all=true</code>.
+        </td>
+        <td>None</td>
+    </tr>
+</table>
+
 ## Build constants
 
 <table>
@@ -421,6 +468,7 @@ Tasks are grouped so that `./gradlew tasks` stays readable.
 | `kreate c-interop` | The C-interop pipeline |
 | `kreate trivy` | The security scans |
 | `kreate build-constants` | Constant generation |
+| `kreate local` | The local development workflow |
 | `verification` | The test suites, beside Gradle's own `test` and `check` |
 
 ## Caching and up-to-date behaviour

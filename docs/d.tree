@@ -109,6 +109,16 @@
         </toc-element>
     </toc-element>
 
+    <toc-element toc-title="Local development">
+        <toc-element topic="Local-Development-Overview.md"/>
+        <toc-element topic="Local-Development-Setup.md"/>
+        <toc-element topic="Local-Development-Publishing.md"/>
+        <toc-element topic="Local-Development-Workspace.md"/>
+        <toc-element topic="Local-Development-Locking.md"/>
+        <toc-element topic="Local-Development-Safety.md"/>
+        <toc-element topic="Local-Development-Troubleshooting.md"/>
+    </toc-element>
+
     <toc-element toc-title="Operations">
         <toc-element topic="CI-Integration.md"/>
     </toc-element>

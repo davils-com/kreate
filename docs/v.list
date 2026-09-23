@@ -4,7 +4,7 @@
     <!-- Product identity -->
     <var name="product" value="Kreate"/>
     <var name="plugin_id" value="com.davils.kreate"/>
-    <var name="version" value="3.1.0"/>
+    <var name="version" value="3.2.0"/>
 
     <!-- Compatibility. These are the single source of truth for every version stated in
          the documentation; the same values are asserted by the functional test matrix. -->

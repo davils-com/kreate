@@ -53,3 +53,20 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     dirPermissions { unix("rwxr-xr-x") }
     filePermissions { unix("rw-r--r--") }
 }
+
+// The plugin has to be able to name its own version at runtime — it records it alongside every
+// local publication, so that a record left behind by an older Kreate can be recognised as such.
+// The manifest is the only place that survives into the published artefact.
+//
+// Both values are derived from the build's own inputs, so reproducibility above is unaffected.
+val manifestVersion = provider { project.version.toString() }
+val manifestTitle = Project.Identity.NAME
+
+tasks.withType<Jar>().configureEach {
+    manifest {
+        attributes(
+            "Implementation-Title" to manifestTitle,
+            "Implementation-Version" to manifestVersion
+        )
+    }
+}

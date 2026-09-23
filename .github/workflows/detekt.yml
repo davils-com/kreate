@@ -91,7 +91,7 @@ jobs:
       - name: Check the API dump is up to date
         run: |
           ./gradlew :kreate-plugin:apiCheck --stacktrace || {
-            echo "::error::The public API changed. Run './gradlew apiDump' and commit kreate-plugin/api/kreate-plugin.api."
+            echo "::error::The public API changed. Run './gradlew :kreate-plugin:apiDump' and commit kreate-plugin/api/kreate-plugin.api."
             exit 1
           }
 

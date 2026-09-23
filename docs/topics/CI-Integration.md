@@ -82,6 +82,27 @@ toolchain and assert it is present:
 <code-block lang="bash">cmake --version || exit 1</code-block>
 </warning>
 
+## Guarding against local development state
+
+The [local development workflow](Local-Development-Overview.md) keeps its state under
+`$GRADLE_USER_HOME/davils/local`. Every pipeline that points `GRADLE_USER_HOME` inside the build
+directory recreates it per job, so the directory cannot survive — and a build that finds it
+anyway fails rather than resolving from it.
+
+A dedicated job makes that structural property an asserted one, for the cost of one `test`:
+
+```yaml
+local-state:
+  stage: security
+  needs: []
+  script:
+    - test ! -d "$GRADLE_USER_HOME/davils/local"
+```
+
+An artifact built against a locally published dependency cannot be reproduced by anyone else, and
+nothing in its published metadata would say so. This is the one failure mode worth a job of its
+own.
+
 ## GitHub Actions
 
 <code-block lang="yaml" collapsible="true" collapsed-title=".github/workflows/ci.yml">
