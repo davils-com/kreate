@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK 17
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '17'
@@ -40,12 +40,15 @@ jobs:
         with:
           validate-wrappers: true
 
-      # `kreate-plugin` is an included build, so its tasks have to be addressed explicitly;
-      # a bare `detekt` only matches the `:example` consumer project. `--continue` so that a
-      # finding in one module still produces the reports of the others.
+      # `kreate-plugin` and `kreate-detekt-rules` are included builds, so their tasks have to
+      # be addressed explicitly; a bare `detekt` only matches the `:example` consumer project.
+      # `--continue` so that a finding in one module still produces the reports of the others.
       - name: Run Detekt
         id: detekt
-        run: ./gradlew :kreate-plugin:detekt :example:detekt --continue --stacktrace
+        run: >
+          ./gradlew
+          :kreate-plugin:detekt :kreate-detekt-rules:detekt :example:detekt
+          --continue --stacktrace
 
       - name: Upload SARIF to code scanning
         # Runs even when Detekt failed — that is precisely when the findings matter.
@@ -76,7 +79,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up JDK 17
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: '17'
@@ -90,8 +93,8 @@ jobs:
       # breaking change to a consumer's build script cannot be merged unnoticed.
       - name: Check the API dump is up to date
         run: |
-          ./gradlew :kreate-plugin:apiCheck --stacktrace || {
-            echo "::error::The public API changed. Run './gradlew apiDump' and commit kreate-plugin/api/kreate-plugin.api."
+          ./gradlew :kreate-plugin:apiCheck :kreate-detekt-rules:apiCheck --stacktrace || {
+            echo "::error::The public API changed. Run './gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump' and commit the api/ dumps."
             exit 1
           }
 

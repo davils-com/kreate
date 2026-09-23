@@ -18,7 +18,11 @@ import com.davils.buildlogic.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    `java-gradle-plugin`
+    // `java` rather than `java-gradle-plugin`. `kreate-plugin` gets the latter from `kotlin-dsl`,
+    // and `kreate-detekt-rules` must not have it at all: it adds `gradleApi()` to the `api`
+    // configuration, which would put the Gradle API into the POM of a rule set JAR that is
+    // resolved onto Detekt's analysis classpath.
+    java
 }
 
 java {
@@ -52,4 +56,21 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     isReproducibleFileOrder = true
     dirPermissions { unix("rwxr-xr-x") }
     filePermissions { unix("rw-r--r--") }
+}
+
+// The plugin has to be able to name its own version at runtime — it records it alongside every
+// local publication, so that a record left behind by an older Kreate can be recognised as such.
+// The manifest is the only place that survives into the published artefact.
+//
+// Both values are derived from the build's own inputs, so reproducibility above is unaffected.
+val manifestVersion = provider { project.version.toString() }
+val manifestTitle = Project.Identity.NAME
+
+tasks.withType<Jar>().configureEach {
+    manifest {
+        attributes(
+            "Implementation-Title" to manifestTitle,
+            "Implementation-Version" to manifestVersion
+        )
+    }
 }

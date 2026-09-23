@@ -16,6 +16,7 @@
 
 package com.davils.kreate
 
+import com.davils.kreate.module.local.extension.LocalExtension
 import com.davils.kreate.module.platform.PlatformExtension
 import com.davils.kreate.module.project.ProjectExtension
 import com.davils.kreate.module.trivy.extension.TrivyExtension
@@ -56,6 +57,14 @@ public abstract class KreateExtension @Inject constructor() {
     public abstract val trivy: TrivyExtension
 
     /**
+     * Configuration for the local development workflow.
+     *
+     * @since 3.2.0
+     */
+    @get:Nested
+    public abstract val local: LocalExtension
+
+    /**
      * Configures the project-level settings.
      *
      * @param action The configuration action for [ProjectExtension].
@@ -82,5 +91,15 @@ public abstract class KreateExtension @Inject constructor() {
      */
     public fun trivy(action: Action<TrivyExtension>) {
         action.execute(trivy)
+    }
+
+    /**
+     * Configures the [LocalExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 3.2.0
+     */
+    public fun local(action: Action<LocalExtension>) {
+        action.execute(local)
     }
 }

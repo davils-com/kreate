@@ -17,6 +17,7 @@
 package com.davils.kreate.module.project
 
 import com.davils.kreate.module.getProjectVersion
+import com.davils.kreate.module.local.snapshotVersionOf
 import org.gradle.api.Project
 
 /**
@@ -24,10 +25,18 @@ import org.gradle.api.Project
  *
  * @param env The environment variable name to check.
  * @param prop The project property name to check.
+ * @param localPublish Whether this invocation installs the build into the local Maven repository,
+ * in which case the version carries the snapshot suffix.
  * @since 1.0.0
  */
-internal fun Project.configureVersion(env: String, prop: String) {
-    val projectVersion = getProjectVersion(env, prop)
+internal fun Project.configureVersion(env: String, prop: String, localPublish: Boolean = false) {
+    val resolved = getProjectVersion(env, prop)
+
+    // The suffix has to be applied here rather than by the publishing task, because
+    // `maven-publish` reads the version while the task graph is configured and the configuration
+    // cache then bakes it in. By the time a task action runs, the coordinates are already fixed.
+    val projectVersion = if (localPublish) snapshotVersionOf(resolved) else resolved
+
     if (projectVersion != version.toString()) {
         version = projectVersion
     }

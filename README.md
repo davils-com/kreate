@@ -120,6 +120,20 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 - **Scoped by default**: locks `compileClasspath` and `runtimeClasspath` rather than everything,
   so a vulnerability scan reports on what you ship instead of on Dokka's XML parser.
 
+### Local Development
+
+- **Test a fix across repositories without a release**: `./gradlew kreateLocalPublish` in the
+  producer, an ordinary build in the consumer. Neither repository is edited — not the version
+  catalog, not `gradle.properties`, not a lock file.
+- **Nothing to switch on**: publishing activates it, `kreateLocalClean` ends it, and every
+  affected build announces what it is substituting.
+- **Impossible in CI**: the state lives under `GRADLE_USER_HOME`, which pipelines recreate per
+  job; a runner that carries it fails rather than resolving from it.
+- **Lock files untouched**: locking is deactivated and `--write-locks` refused, so a snapshot can
+  never reach a committed lock file.
+- **Whole workspaces**: `kreateLocalPublishAll --from core` republishes a library and everything
+  downstream of it, in dependency order.
+
 ### C-Interoperability (Kotlin/Native)
 
 - **Multi-language**: Rust via Cargo, C and C++ via CMake.
@@ -168,7 +182,7 @@ dependencyResolutionManagement {
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.0"
-    id("com.davils.kreate") version "3.0.0"
+    id("com.davils.kreate") version "3.1.0"
 }
 ```
 
@@ -237,6 +251,9 @@ kreate {
 ./gradlew kreateApiDump             # record the public binary interface
 ./gradlew kreateResolveAndLockAll --write-locks   # write the dependency lock file
 ./gradlew kreateBenchmarkCheck      # run benchmarks and compare against the baseline
+./gradlew kreateLocalPublish        # install this repository for other checkouts to resolve
+./gradlew kreateLocalStatus         # what is published locally, or why local mode is off
+./gradlew kreateLocalClean          # undo it
 ```
 
 ---
@@ -261,6 +278,7 @@ kreate {
 | `project.docs`                    | `enabled`                  | Dokka documentation                        | `false`      |
 | `project.tests`                   | `enabled`                  | Test execution and reporting               | `true`       |
 | `project.detekt`                  | `enabled`                  | Static analysis configuration              | `false`      |
+| `project.detekt`                  | `kreateRules`              | Kreate comment and KDoc rules for Detekt   | `true`       |
 | `project.coverage`                | `enabled`                  | Code coverage through Kover                | `false`      |
 | `project.coverage.verify`         | `minLineCoverage`          | Coverage threshold enforced on `check`     | unset        |
 | `project.coverage.aggregate`      | `enabled`                  | Merge subproject coverage into one report  | `false`      |
@@ -314,7 +332,8 @@ Contributions are welcome. To keep the quality bar where it is:
 - **Tests**: new or changed behaviour needs a test. The suite drives real Gradle builds through
   TestKit, so a behavioural change is genuinely verifiable.
 - **Documentation**: API and behaviour changes must be reflected in `docs/topics/`.
-- **Public API**: run `./gradlew apiDump` and commit the result if the DSL changed.
+- **Public API**: run `./gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump` and commit the
+  result if a published signature changed.
 - **Standards**: follow the KDoc rules in `.junie/AGENTS.md` — every public declaration carries
   `@param`, `@return`, and `@since`, and Detekt enforces it.
 

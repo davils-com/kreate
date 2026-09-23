@@ -1,0 +1,10 @@
+public final class com/davils/kreate/detekt/KreateRuleSetProvider : dev/detekt/api/RuleSetProvider {
+	public fun <init> ()V
+	public fun getRuleSetId ()Ldev/detekt/api/RuleSetId;
+	public fun instance ()Ldev/detekt/api/RuleSet;
+}
+
+public final class com/davils/kreate/detekt/KreateRuleSetProviderKt {
+	public static final field KREATE_RULE_SET_ID Ljava/lang/String;
+}
+

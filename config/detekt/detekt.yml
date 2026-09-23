@@ -59,6 +59,9 @@ libraries:
     active: true
 
 style:
+  ReturnCount:
+    max: 4
+    excludeGuardClauses: true
   # Explicit API mode already requires the `public` modifier everywhere.
   RedundantVisibilityModifier:
     active: false

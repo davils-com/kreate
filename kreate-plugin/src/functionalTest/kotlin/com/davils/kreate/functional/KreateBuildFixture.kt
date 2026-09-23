@@ -49,6 +49,52 @@ class KreateBuildFixture(
     val nativeProjectDirectory: File get() = rootDirectory.resolve("jni/sample")
 
     /**
+     * The local Maven repository the build publishes into and resolves from.
+     *
+     * Redirected away from `~/.m2` for every build, not only the ones that publish. The suite runs
+     * in parallel forks against a shared Gradle user home, and a test that installed an artefact
+     * into a developer's real repository would leak into their next build of an unrelated project.
+     */
+    val mavenRepository: File get() = rootDirectory.resolve("maven-local")
+
+    /**
+     * The directory recording what this fixture has published locally.
+     *
+     * Redirected for the same reason as [mavenRepository], and additionally because the default
+     * lives in the Gradle user home that TestKit shares between tests: one test's publication
+     * would otherwise switch local mode on for every other test running at that moment.
+     */
+    var stateDirectory: File = rootDirectory.resolve("local-state")
+
+    /**
+     * Points this fixture at another fixture's local state and Maven repository.
+     *
+     * This is what makes a consumer build see what a producer build published. The two are
+     * separate checkouts in separate directories, exactly as they are in a real workspace, and the
+     * only thing they share is the pair of machine level locations the feature is built around.
+     *
+     * @param producer The fixture whose publications this one should resolve.
+     */
+    fun resolvingFrom(producer: KreateBuildFixture) {
+        sharedLocations(producer.stateDirectory, producer.mavenRepository)
+    }
+
+    /**
+     * Points this fixture at a state directory and Maven repository shared with other fixtures.
+     *
+     * @param state The shared state directory.
+     * @param maven The shared local Maven repository.
+     */
+    fun sharedLocations(state: File, maven: File) {
+        stateDirectory = state
+        sharedMavenRepository = maven
+    }
+
+    private var sharedMavenRepository: File? = null
+
+    private val effectiveMavenRepository: File get() = sharedMavenRepository ?: mavenRepository
+
+    /**
      * Writes the settings file. Repositories are declared here rather than relying on the
      * plugin injecting them, matching how an enterprise build is set up.
      */
@@ -221,6 +267,25 @@ class KreateBuildFixture(
     fun build(vararg arguments: String): BuildResult = runner(arguments.toList()).build()
 
     /**
+     * Runs Gradle and expects the build to succeed, without the Kotlin plugin's own test tasks.
+     *
+     * For multiplatform builds that reach `check`. The Wasm target's test task unpacks a Node.js
+     * and a Yarn distribution into the TestKit Gradle user home, which every functional test
+     * shares. The suite runs in parallel forks against that one user home, and two of them
+     * unpacking at the same moment is a race Windows loses on a file it cannot replace while it is
+     * open — an `UnexpectedBuildFailure` in whichever build happened to be second. No test asserts
+     * anything about what the Wasm target runs, so leaving those tasks out costs nothing.
+     *
+     * A task named on the command line still runs; only what `check` would have pulled in through
+     * the aggregate is dropped.
+     *
+     * @param arguments The Gradle command line arguments.
+     * @return The build result.
+     */
+    fun buildWithoutKotlinTestTasks(vararg arguments: String): BuildResult =
+        build(*arguments, "-x", "allTests", "-x", "wasmJsNodeTest")
+
+    /**
      * Runs Gradle and expects the build to fail.
      *
      * @param arguments The Gradle command line arguments.
@@ -241,26 +306,65 @@ class KreateBuildFixture(
      */
     fun buildWithEnvironment(environment: Map<String, String>, vararg arguments: String): BuildResult =
         runner(arguments.toList())
-            .withEnvironment(System.getenv() + environment)
+            .withEnvironment(environmentWith(environment))
             .build()
+
+    /**
+     * The environment handed to a build this fixture drives.
+     *
+     * The CI variables are stripped unless a test asked for them, and that is not tidiness — it is
+     * what makes the suite runnable on a CI agent at all. TestKit forks the build with the
+     * runner's own environment, so on GitHub Actions every generated build would see
+     * `CI=true` and `GITHUB_ACTIONS=true` and conclude, correctly, that it is a pipeline:
+     * `kreateLocalPublish` refuses to run there and local mode never activates. Every test of the
+     * local development workflow would then fail, on the agent only, for a reason that is the
+     * feature working as designed.
+     *
+     * A test that is *about* CI detection passes the variable explicitly, and it survives this
+     * because the caller's entries are applied last.
+     *
+     * @param extra The variables the test asked for.
+     * @return The environment for the forked build.
+     */
+    private fun environmentWith(extra: Map<String, String>): Map<String, String> =
+        System.getenv().filterKeys { key -> key !in CI_VARIABLES } + extra
 
     private fun runner(arguments: List<String>): GradleRunner = GradleRunner.create()
         .withProjectDir(rootDirectory)
         .withPluginClasspath()
-        .withArguments(arguments + listOf("--stacktrace", "--configuration-cache"))
+        .withArguments(
+            arguments + listOf(
+                "--stacktrace",
+                "--configuration-cache",
+                // Both locations are machine level by design, which is what makes the local
+                // development feature work across checkouts — and what would make this suite
+                // write into the developer's own Maven repository and Gradle user home if they
+                // were not redirected here.
+                "-Dmaven.repo.local=${effectiveMavenRepository.absolutePath}",
+                "-Pkreate.local.state.dir=${stateDirectory.absolutePath}"
+            )
+        )
         .forwardOutput()
         .let { runner -> gradleVersion?.let(runner::withGradleVersion) ?: runner }
-        // `withEnvironment` replaces the environment wholesale rather than adding to it, so the
-        // build would lose JAVA_HOME and PATH and never start. Only call it when a test asked
-        // for variables of its own.
-        .let { runner ->
-            if (environment.isEmpty()) runner else runner.withEnvironment(System.getenv() + environment)
-        }
+        // Always set, rather than only when a test asked for variables: on a CI agent the
+        // inherited environment is itself the thing that has to be corrected. See
+        // [environmentWith].
+        .withEnvironment(environmentWith(environment))
 
     /**
      * Companion object holding shared fixture snippets.
      */
     companion object {
+        /**
+         * The environment variables Kreate reads as "this is a pipeline".
+         *
+         * Kept in step with `LocalExtension.ciEnvironmentVariables` and
+         * `KreateSettingsExtension.ciEnvironmentVariables`. A variable added there and not here
+         * makes the suite fail on an agent that sets it, and nowhere else.
+         */
+        val CI_VARIABLES: Set<String> =
+            setOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
+
         /**
          * The Java version the generated builds target.
          *

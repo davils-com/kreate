@@ -14,28 +14,60 @@
  * limitations under the License.
  */
 
+import com.davils.buildlogic.LOCAL_PUBLISH_TASK
+import com.davils.buildlogic.LOCAL_TASK_GROUP
+import com.davils.buildlogic.LocalPublishTask
 import com.davils.buildlogic.Project
+import com.davils.buildlogic.SNAPSHOT_SUFFIX
+import com.davils.buildlogic.compositeVersion
+import com.davils.buildlogic.isContinuousIntegration
+import com.davils.buildlogic.publishedPluginCoordinates
+import com.davils.buildlogic.requestsLocalPublish
 
 plugins {
     id("com.vanniktech.maven.publish")
     signing
 }
 
+// The composite root's `gradle.properties` is the single source of truth for the version, and an
+// included build does not inherit it. Without this line the plugin's version is `unspecified` in
+// every invocation that does not set `CI_COMMIT_TAG` or pass `-Pversion=`.
+version = compositeVersion(providers, layout.settingsDirectory)
+
 // The tag when CI publishes a release, and otherwise whatever `gradle.properties` says. The
 // fallback used to be a literal, which went stale the moment a release was tagged and left the
 // two places that name a version disagreeing.
 System.getenv("CI_COMMIT_TAG")?.removePrefix("v")?.let { tagged -> version = tagged }
+
+// A local publish carries the snapshot suffix so that it cannot shadow a release. This has to be
+// decided before `coordinates(...)` below reads the version, which rules out a task doing it.
+val localPublish = requestsLocalPublish(gradle, providers)
+if (localPublish && !version.toString().endsWith(SNAPSHOT_SUFFIX)) {
+    version = "$version$SNAPSHOT_SUFFIX"
+}
+
 group = Project.Identity.GROUP
+
+// What this build publishes. The defaults are the plugin's own coordinates, because for three
+// major versions the plugin was the only artefact this repository produced. A sibling build states
+// its own in its `gradle.properties`, which is per build and therefore cannot be read from the
+// wrong project.
+val publishedArtifactId = providers.gradleProperty("kreate.publish.artifactId")
+    .getOrElse(Project.Identity.NAME.lowercase())
+val publishedName = providers.gradleProperty("kreate.publish.name")
+    .getOrElse(Project.Identity.NAME)
+val publishedDescription = providers.gradleProperty("kreate.publish.description")
+    .getOrElse(Project.Identity.DESCRIPTION)
 
 mavenPublishing {
     publishToMavenCentral(automaticRelease = true)
     signAllPublications()
 
-    coordinates(Project.Identity.GROUP, Project.Identity.NAME.lowercase(), version.toString())
+    coordinates(Project.Identity.GROUP, publishedArtifactId, version.toString())
 
     pom {
-        name = Project.Identity.NAME
-        description = Project.Identity.DESCRIPTION
+        name = publishedName
+        description = publishedDescription
         inceptionYear = Project.Identity.INCEPTION_YEAR.toString()
         url = Project.Organization.WEBSITE_URL
 
@@ -73,4 +105,33 @@ mavenPublishing {
             developerConnection = Project.VersionControl.SCM_DEVELOPER_CONNECTION
         }
     }
+}
+
+val primaryCoordinate = "${Project.Identity.GROUP}:$publishedArtifactId"
+
+// Read outside the task configuration action: inside it, `version` resolves to the task's own
+// property rather than the project's.
+val resolvedVersion = version.toString()
+
+// Kreate cannot apply itself — `build-logic` compiles the conventions that build the plugin, so a
+// dependency on the plugin's own artefact would be a cycle. This task is therefore the only
+// hand-written copy of `kreateLocalPublish` in the repository; everywhere else the plugin
+// registers it. See `com.davils.buildlogic.LocalDevelopment` for the shared contract.
+tasks.register<LocalPublishTask>(LOCAL_PUBLISH_TASK) {
+    group = LOCAL_TASK_GROUP
+    description = "Installs this build and any plugin markers into the local Maven repository."
+
+    dependsOn(tasks.named("publishToMavenLocal"))
+
+    publishedGroup = Project.Identity.GROUP
+    library = publishedArtifactId
+    publishedVersion = resolvedVersion
+    runningInCi = isContinuousIntegration(providers)
+    gradleUserHome = layout.dir(provider { gradle.gradleUserHomeDir })
+    repositoryDirectory = layout.settingsDirectory.dir("..")
+
+    // Resolved in the task configuration action rather than at the top of the script: Gradle
+    // realises a task once every project has been evaluated, so `gradlePlugin { plugins { } }`
+    // in the consuming build file is complete by now.
+    coordinates = publishedPluginCoordinates(project, primaryCoordinate)
 }

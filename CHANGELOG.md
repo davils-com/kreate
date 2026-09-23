@@ -5,6 +5,195 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.3.0
+
+One feature. The comment and KDoc part of the Kreate Kotlin standard was written down, argued about
+in reviews, and enforced nowhere — which meant it was enforced unevenly, and that a script which
+deleted comments in bulk had become the closest thing to a tool for it. A script that edits source
+files cannot tell a sentence that should have been a name from one that records a decision nobody
+else wrote down. Detekt can find both and refuses to choose.
+
+### Added
+
+- **A Detekt rule set, `com.davils:kreate-detekt-rules`.** Six rules, all reporting, none
+  rewriting:
+
+  - `ForbiddenLineComment` — every `//` comment, standalone or trailing. Block comments and KDoc are
+    untouched, so a copyright header is unaffected.
+  - `KDocOnNonPublicDeclaration` — KDoc on a declaration no consumer can see. Effective visibility,
+    so a `public` member of an `internal` class and anything declared in a function body count;
+    Detekt's own rules cover `private` functions and properties only, and not `internal` at all.
+  - `KDocWithoutSinceTag` — a documented public declaration that does not say which version
+    introduced it.
+  - `SingleLineKDocWithBlockTag` — `/** A key exchanger. @since 1.0.0 */`, which does not say what
+    it looks like it says: the KDoc lexer recognises a tag only at the start of a line, so no tooling
+    ever sees that version.
+  - `KDocClosingMarkerOnSharedLine` — a multi-line block whose closing marker shares a line with
+    content.
+  - `KDocSeparatedFromDeclaration` — a blank line between a block and the declaration it documents.
+
+  **Nothing is switched on by a flag.** A project with Detekt enabled gets the rule set on its
+  `detektPlugins` configuration and every rule active, because the artifact ships its own default
+  configuration and Kreate runs with `buildUponDefaultConfig = true`. A rule set that has to be asked
+  for is one that gets forgotten, and a forgotten one looks exactly like a codebase with no findings.
+
+  **The rules report; they never rewrite, and none is auto-correctable.** A comment is deleted by the
+  person who knows whether the sentence it holds belongs in a name, in a test, or nowhere. That
+  judgement is the work.
+
+  The artifact is published from this repository at this repository's version, in the same release,
+  and Kreate pins it to the version of itself that is running — so the rules a project is analysed by
+  are the ones the Kreate it applies was built with. It is a plain Detekt rule set: any build can put
+  it on `detektPlugins` without applying Kreate at all.
+
+  Switching it off is ordinary Detekt configuration (`kreate: active: false`, or per rule). To keep
+  the artifact off the analysis classpath entirely, `project { detekt { kreateRules = false } }`.
+
+  On an existing codebase the first run reports in the thousands. Record a Detekt baseline and work
+  it down per module rather than per rule: the comments in one file are usually one person's
+  explanation of one design, and they are worth reading together. See
+  [Kreate rule set](https://davils-com.github.io/kreate/detekt-rules.html).
+
+### Changed
+
+- `style>ReturnCount` is configured rather than left at its default in the repository's own Detekt
+  configuration: `max: 4` with `excludeGuardClauses: true`. A guard clause per precondition is the
+  house style, and the default of two turns each added precondition into a nested `if`.
+
+## 3.2.0
+
+One feature, and it removes a cost that any codebase split across several repositories pays on
+every change: a fix in one library can only be tried in another once it exists somewhere both
+builds can resolve, which meant tagging a release and waiting for a pipeline to push it to a
+registry. That made testing a one line change cost the same as shipping one, and filled the
+registry with versions that existed only to be thrown away.
+
+### Added
+
+- **A local development workflow.** `./gradlew kreateLocalPublish` in a producer, an ordinary build
+  in a consumer, and the consumer resolves the working copy. Neither repository is edited — not the
+  version catalog, not `gradle.properties`, not a lock file.
+
+  The feature ships as **two** plugin ids from the one artifact, and a repository needs both:
+
+  - `com.davils.kreate` — the project plugin, unchanged in what it already did, now also
+    registering `kreateLocalPublish`, `kreateLocalPublishAll`, `kreateLocalStatus` and
+    `kreateLocalClean`.
+  - `com.davils.kreate.settings` — new, applied in `settings.gradle.kts` **and**
+    `build-logic/settings.gradle.kts`. It owns resolution only.
+
+  A settings plugin rather than more of the project plugin, for two reasons that are not matters of
+  taste. Dependency substitution has to be installed before any configuration resolves, and the
+  Kotlin Multiplatform and Android plugins both resolve during their own `afterEvaluate` — a
+  project plugin would work on most days, which is not a standard dependency resolution can be held
+  to. And it has to reach `build-logic`, which is where the Kreate plugin marker itself is resolved
+  and which never applies the project plugin.
+
+  **Nothing is switched on by a flag.** Publishing is what activates local mode and
+  `kreateLocalClean` is what ends it. An opt-in flag is a thing to forget, and forgetting it looks
+  exactly like the feature not working. Every affected build prints what it is substituting, so a
+  build that resolves something other than its catalog says explains itself.
+
+  **The state lives at `$GRADLE_USER_HOME/kreate/local`, not in the repository.** A pipeline that
+  points `GRADLE_USER_HOME` inside its own workspace — the usual arrangement — recreates that
+  directory empty every job, so it cannot carry local state into a build. That is a structural
+  guarantee rather than a check that can be forgotten. A file in the repository would instead be
+  one `git add -A` away from turning one developer's local state into everyone's.
+
+  **Lock files are neither read nor written in local mode, and that is a guarantee rather than an
+  intention.** `--write-locks` is refused outright, naming the snapshot versions it would have
+  recorded. A lock file pinning `3.0.0-SNAPSHOT` looks ordinary in review, passes on the machine
+  that wrote it, and breaks every pipeline and every colleague; a warning in the middle of a long
+  build is not a proportionate response to that.
+
+  Publishing to a shared registry from a build that resolved local artifacts is refused for the
+  same reason. Substitution matches only the exact coordinates a publish recorded, never a group
+  wildcard, and the injected repository is declared `snapshotsOnly()` and filtered to those
+  modules — so a release can never be shadowed and a sibling artifact that was not published
+  locally resolves exactly as it always did.
+
+  `kreateLocalPublishAll` orchestrates a whole workspace in dependency order, from a declaration in
+  `kreate { local { workspace { } } }`. The edges are declared rather than derived from each
+  repository's version catalog: a catalog records what a library was last *released* against, and
+  during a refactor the edge that matters is usually the one not in the catalog yet.
+  `--from <library>` republishes it and everything downstream, which is the normal case.
+
+  **Not `includeBuild`.** Gradle's own answer substitutes by matching `group:name` against each
+  *project* of the included build, and a multiplatform producer publishes its `-jvm`, `-android`
+  and `-wasm-js` modules as variants of one project — there is no `project(":…")` to substitute
+  them with. It would also rebuild the producer inside every consumer build, and need a committed
+  settings edit per experiment.
+
+### Fixed
+
+- **`kreate-plugin` had no version.** The composite root's `gradle.properties` is the single source
+  of truth for the version, and Gradle does not propagate it into an included build. Nothing
+  bridged that gap, so every invocation that did not set `CI_COMMIT_TAG` or pass `-Pversion=`
+  produced artifacts versioned `unspecified` — which is why the only hand-installed Kreate anyone
+  ever had in `~/.m2` was whatever version they had typed out by hand. The convention now reads the
+  root's file directly. Releases were never affected; they are tagged.
+
+- The plugin JAR now carries `Implementation-Title` and `Implementation-Version`, so Kreate can
+  name its own version at runtime. It records it alongside every local publication, which is what
+  lets a record written by an older Kreate be recognised as such.
+
+## 3.1.0
+
+One feature, and it is the counterpart to the one 2.1.0 added. Binary compatibility validation made
+a change to a published signature something a reviewer approves deliberately; this does the same for
+a configuration schema, which is a promise to every file already written against it.
+
+### Added
+
+- **Configuration schema export and compatibility checking.** Making a field required, narrowing a
+  type or removing an enum constant breaks every deployed document, none of those looks dangerous in
+  a source diff — they look like ordinary edits — and the first anybody hears of one is a validation
+  failure at a customer's boot. Nothing in a build checked it.
+
+  `kreate { project { configurationSchema { } } }` registers three tasks:
+
+  - `kreateConfigSchemaDump` writes each declared schema's JSON Schema export to
+    `<module>/config-schema/<name>.json`. Commit it, and give the directory the CODEOWNERS
+    treatment the `api/` directory has.
+  - `kreateConfigSchemaCheck` compares against the checked-in export and fails on a breaking change.
+    It runs as part of `check`, and it is never run in the same invocation as the dump — the two
+    read and write the same files, and Gradle refuses the implicit dependency.
+  - `kreateConfigValidate` runs a dry run over the repository's own configuration files and fails on
+    any that would not load, reporting every one of them rather than stopping at the first.
+
+  **Kreate depends on no configuration library.** Everything is read by reflection over the project's
+  own runtime classpath, in a class loader of its own parented to the platform loader — parenting to
+  Gradle's would let whatever Gradle happens to carry answer for a class the project declares, which
+  is how a build quietly starts depending on the version of a library it never named. A project that
+  uses no such library is unaffected, and one that does is not pinned to whichever version this
+  plugin was built against.
+
+  A schema is built by Kotlin code rather than written down as data, so there is nothing for a build
+  to find by looking. A declaration is addressed by a holder class and a no-argument accessor, both
+  spellings of a Kotlin property accepted and members of an `object` reached through `INSTANCE`,
+  because which of the two a property compiles to is not something a build file should have to know.
+
+  **What decides that a change is breaking is the library, not this.** A change that would stop an
+  existing document loading is breaking when the schema version has not moved, because nothing will
+  run to repair it, and merely a migration when it has. The failure message says so, because the
+  usual fix is to raise the version and write the migration rather than to re-record the export.
+
+  The dry run names an accessor handing back the reports rather than assembling one. A dry run has to
+  resolve the sources, the prefix and the secret resolvers a real load would resolve — a required
+  field an environment variable supplies is not missing, and a reference nothing can resolve is a
+  failure rather than a value — so a build that assembled those would be a second place the
+  declaration is written, and the two would disagree the first time either moved.
+
+  The two facade names the reflection looks for are constants, because a Kotlin top level function is
+  a static method on a class named after its file and nothing marks it. A missing facade is reported
+  by name with what it belongs to, rather than as a `ClassNotFoundException` out of the middle of a
+  task.
+
+### Documentation
+
+- A topic for the feature under Project, and an entry in the task reference for each of the three
+  tasks.
+
 ## 3.0.0
 
 A major release for two reasons: the conventional `test` source set is no longer built by default,

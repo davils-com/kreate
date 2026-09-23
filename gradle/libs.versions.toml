@@ -9,7 +9,7 @@ kover = "0.9.9"
 
 # test & tooling
 junit = "6.1.3"
-kotest = "6.2.4"
+kotest = "6.2.5"
 asm = "9.10.1"
 bcv = "0.18.2"
 benchmark = "0.5.0"
@@ -28,6 +28,11 @@ kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", ver
 # detekt rule sets applied to the plugin's own sources via `detektPlugins`
 detekt-rules-ktlintWrapper = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-rules-libraries = { module = "dev.detekt:detekt-rules-libraries", version.ref = "detekt" }
+
+# The API `:kreate-detekt-rules` is written against. `compileOnly` there: Detekt puts its own copy
+# on the analysis classpath, and a rule set that shipped a second one would load two of everything.
+detekt-api = { module = "dev.detekt:detekt-api", version.ref = "detekt" }
+detekt-test = { module = "dev.detekt:detekt-test", version.ref = "detekt" }
 
 # testing
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
@@ -48,7 +53,9 @@ kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", ve
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+# `:kreate-detekt-rules` is a plain Kotlin/JVM library, so it names the Kotlin plugin explicitly
+# rather than inheriting the one `kotlin-dsl` embeds in the plugin build.
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]
 build-logic = [

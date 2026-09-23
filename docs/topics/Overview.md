@@ -73,6 +73,13 @@ kreate {
         project type — including ones that use no other %product% feature.
         See <a href="Trivy-Overview.md">Security and compliance</a>.
     </def>
+    <def title="local">
+        Publishing this repository to the local Maven repository so that another checkout can
+        resolve it, without a release. At the top level for the same reason as
+        <code>trivy</code>: it is about the repository rather than the artifact. Resolving what
+        was published is the job of the companion settings plugin.
+        See <a href="Local-Development-Overview.md">Local development</a>.
+    </def>
 </deflist>
 
 ## Platform configuration

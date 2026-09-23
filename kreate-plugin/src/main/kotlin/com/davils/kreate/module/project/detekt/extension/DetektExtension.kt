@@ -56,6 +56,23 @@ public abstract class DetektExtension @Inject constructor(factory: ObjectFactory
     public val buildUponDefaultConfig: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
     /**
+     * Whether the Kreate rule set is added to Detekt's analysis classpath.
+     *
+     * The rule set is `com.davils:kreate-detekt-rules`, published with this plugin and versioned
+     * with it. It enforces the comment and KDoc part of the Kreate Kotlin standard: no `//`
+     * comments, KDoc on the published surface only, and `@since` on everything documented. Every
+     * rule reports; none rewrites a file.
+     *
+     * On by default, because a rule set that has to be asked for is a rule set that is forgotten,
+     * and a forgotten one looks exactly like a codebase that has no findings. Individual rules are
+     * switched off the ordinary way, under the `kreate` section of the project's Detekt
+     * configuration; this property is for keeping the artifact off the classpath entirely.
+     *
+     * @since 3.3.0
+     */
+    public val kreateRules: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
      * The Detekt configuration file.
      *
      * Defaults to `detekt.yaml` in the root project directory.

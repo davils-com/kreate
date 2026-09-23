@@ -227,6 +227,43 @@ public object KreateTasks {
     }
 
     /**
+     * Names of the configuration schema tasks.
+     *
+     * The same pair as [ApiValidation] and for the same reason: a configuration schema is a promise
+     * to every document already written against it, exactly as a published signature is a promise to
+     * everything compiled against one. `DUMP` and `CHECK` must never run in one invocation - they
+     * read and write the same files, and Gradle refuses the implicit dependency.
+     *
+     * @since 3.1.0
+     */
+    public object ConfigurationSchema {
+        /**
+         * Records every declared schema in its checked-in JSON Schema export. New in 3.1.0.
+         * @since 3.1.0
+         */
+        public const val DUMP: String = "kreateConfigSchemaDump"
+
+        /**
+         * Verifies every declared schema against its export, failing on a breaking change. New in
+         * 3.1.0.
+         * @since 3.1.0
+         */
+        public const val CHECK: String = "kreateConfigSchemaCheck"
+
+        /**
+         * Reports what loading this repository's own configuration files would do. New in 3.1.0.
+         * @since 3.1.0
+         */
+        public const val VALIDATE: String = "kreateConfigValidate"
+
+        /**
+         * The task group for configuration schema tasks.
+         * @since 3.1.0
+         */
+        public const val GROUP: String = "kreate configuration"
+    }
+
+    /**
      * Names of the benchmark tasks.
      *
      * None of these is wired into `check` or `build`. A benchmark run takes minutes, and
@@ -278,6 +315,53 @@ public object KreateTasks {
          * @since 2.1.0
          */
         public const val GROUP: String = "kreate locking"
+    }
+
+    /**
+     * Task names and the group for the local development workflow.
+     *
+     * These are the tasks that let a fix in one library be tried in another without a release.
+     * Before 3.2.0 the only way to do that was to tag a version and wait for a pipeline to push
+     * it to a registry, which made the cost of trying a one line change the same as the cost of
+     * shipping one.
+     *
+     * @since 3.2.0
+     */
+    public object Local {
+        /**
+         * Installs this build into the local Maven repository at a snapshot version and records
+         * it, so that consumers substitute it in.
+         *
+         * @since 3.2.0
+         */
+        public const val PUBLISH: String = "kreateLocalPublish"
+
+        /**
+         * Runs [PUBLISH] across a declared workspace in dependency order.
+         *
+         * @since 3.2.0
+         */
+        public const val PUBLISH_ALL: String = "kreateLocalPublishAll"
+
+        /**
+         * Reports what is currently published locally, or why local mode is off.
+         *
+         * @since 3.2.0
+         */
+        public const val STATUS: String = "kreateLocalStatus"
+
+        /**
+         * Removes the local publications and the state that records them.
+         *
+         * @since 3.2.0
+         */
+        public const val CLEAN: String = "kreateLocalClean"
+
+        /**
+         * The task group for local development tasks.
+         * @since 3.2.0
+         */
+        public const val GROUP: String = "kreate local"
     }
 
     /**
