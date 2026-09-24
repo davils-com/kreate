@@ -29,6 +29,7 @@ jobs:
       ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
       ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
       KREATE_REQUIRE_CMAKE: 'true'
+      KREATE_REQUIRE_TRIVY: 'true'
 
     steps:
       - name: Checkout
@@ -48,6 +49,13 @@ jobs:
 
       - name: Install CMake
         run: sudo apt-get update && sudo apt-get install -y cmake
+
+      # The example's secret scan runs as part of `check`, so `build` below needs Trivy.
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.74.0
+          path: ${{ runner.temp }}
 
       # A tag build must not be the first time the suite runs. Verifying before publishing
       # is the difference between a bad release and a red build.

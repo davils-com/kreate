@@ -19,6 +19,8 @@ env:
   # Turns a missing CMake into a test failure instead of a silent skip. Locally the native
   # tests may be skipped; in CI they must not be.
   KREATE_REQUIRE_CMAKE: 'true'
+  # The same for Trivy: without it the secret scan functional tests would be skipped.
+  KREATE_REQUIRE_TRIVY: 'true'
 
 jobs:
   build:
@@ -66,6 +68,24 @@ jobs:
 
       - name: Verify CMake
         run: cmake --version
+
+      # The example applies the Trivy module, and the secret scan hangs off `check`, so the
+      # root `build` below cannot pass without Trivy on the PATH.
+      #
+      # Installed into the runner's temp directory on purpose. The action's default is
+      # `$HOME/.local/bin`, which Git Bash on Windows writes to the PATH as `/c/Users/...` -
+      # a path only bash understands, so Gradle would not find the binary. A relative path
+      # fails too: the scan runs with `example/` as its working directory.
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.74.0
+          path: ${{ runner.temp }}
+
+      # Runs in the job's default shell, not bash, so it proves the PATH entry works for the
+      # processes Gradle starts, and fails here instead of minutes into the build.
+      - name: Verify Trivy
+        run: trivy --version
 
       # `kreate-plugin`, `kreate-settings` and `kreate-detekt-rules` are included builds. The root `build` task
       # only reaches them far enough to produce the JARs that `:example` consumes — it runs
@@ -118,6 +138,14 @@ jobs:
 
       - name: Install CMake
         run: sudo apt-get update && sudo apt-get install -y cmake
+
+      # The functional tests include the secret scan, and KREATE_REQUIRE_TRIVY turns a
+      # missing Trivy into a failure rather than a skip.
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.74.0
+          path: ${{ runner.temp }}
 
       - name: Measure and verify coverage
         run: >
