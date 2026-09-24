@@ -16,6 +16,7 @@
 
 package com.davils.kreate.module.local
 
+import com.davils.kreate.InternalKreateApi
 import java.io.Serializable
 
 /**
@@ -28,14 +29,16 @@ import java.io.Serializable
  *
  * @since 3.2.0
  */
-internal const val SNAPSHOT_SUFFIX: String = "-SNAPSHOT"
+@InternalKreateApi
+public const val SNAPSHOT_SUFFIX: String = "-SNAPSHOT"
 
 /**
  * The version Gradle reports for a project that never had one assigned.
  *
  * @since 3.2.0
  */
-internal const val UNSPECIFIED_VERSION: String = "unspecified"
+@InternalKreateApi
+public const val UNSPECIFIED_VERSION: String = "unspecified"
 
 /**
  * The separator between the group and the name of a module coordinate.
@@ -55,7 +58,8 @@ private const val COORDINATE_SEPARATOR: Char = ':'
  *
  * @since 3.2.0
  */
-internal data class LocalModule(
+@InternalKreateApi
+public data class LocalModule(
     /**
      * The group of the module.
      * @since 3.2.0
@@ -74,7 +78,13 @@ internal data class LocalModule(
      */
     val coordinate: String get() = "$group$COORDINATE_SEPARATOR$name"
 
-    internal companion object {
+    /**
+     * Construction helpers, shared between Kreate's artefacts.
+     *
+     * @since 3.4.0
+     */
+    @InternalKreateApi
+    public companion object {
         /**
          * The serial version identifier.
          *
@@ -92,7 +102,7 @@ internal data class LocalModule(
          * @return The parsed module, or `null` if the value is not a `group:name` pair.
          * @since 3.2.0
          */
-        fun parse(value: String): LocalModule? {
+        public fun parse(value: String): LocalModule? {
             val trimmed = value.trim()
             val group = trimmed.substringBefore(COORDINATE_SEPARATOR).trim()
             val name = trimmed.substringAfter(COORDINATE_SEPARATOR, missingDelimiterValue = "").trim()
@@ -118,7 +128,8 @@ internal data class LocalModule(
  * `unspecified-SNAPSHOT` is not a version anyone should be able to publish.
  * @since 3.2.0
  */
-internal fun snapshotVersionOf(version: String): String {
+@InternalKreateApi
+public fun snapshotVersionOf(version: String): String {
     val trimmed = version.trim()
     require(trimmed.isNotEmpty() && trimmed != UNSPECIFIED_VERSION) {
         "Cannot derive a local version from '$version'. Kreate resolves the version from the " +

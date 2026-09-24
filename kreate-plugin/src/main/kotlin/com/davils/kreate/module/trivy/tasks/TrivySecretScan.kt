@@ -31,7 +31,10 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 import javax.inject.Inject
+
+private const val SECRETS_FOUND: Int = 1
 
 /**
  * Scans source files for secrets using Trivy.
@@ -87,34 +90,37 @@ public abstract class TrivySecretScan @Inject constructor(
      * Executes the secret scan by running Trivy on each source file.
      *
      * Runs the Trivy CLI in filesystem mode specifically for secret scanning.
-     * Throws a [GradleException] if secrets are found and [failOnFindings] is true.
+     * Throws a [GradleException] if secrets are found and [failOnFindings] is true, naming every
+     * file with a finding - a failure that only said "secrets were found" left the reader to search
+     * a log of one summary table per scanned file for the one that was not empty.
      *
      * @since 1.2.0
      */
     @TaskAction
     public fun execute() {
-        var hasSecrets = false
+        val withSecrets = sourceFiles.files.filter { file -> scan(file) == SECRETS_FOUND }
 
-        sourceFiles.forEach { file ->
-            val result = exec.exec {
-                isIgnoreExitValue = true
-                commandLine(
-                    resolveTrivyCommand(), "fs",
-                    "--scanners", "secret",
-                    "--secret-config", secretConfig.get().asFile.absolutePath,
-                    "--severity", severity.get().joinToString(","),
-                    "--exit-code", if (failOnFindings.get()) "1" else "0",
-                    "--format", "table",
-                    file.absolutePath
-                )
-            }
-            if (result.exitValue == 1) {
-                hasSecrets = true
-            }
+        if (withSecrets.isEmpty() || !failOnFindings.get()) {
+            return
         }
-
-        if (hasSecrets && failOnFindings.get()) {
-            throw GradleException("Trivy found secrets in source files!")
-        }
+        val named = withSecrets.map { file -> file.invariantSeparatorsPath }.sorted()
+        throw GradleException(
+            "Trivy found secrets in ${named.size} source file(s):\n" +
+                named.joinToString("\n") { "  $it" } +
+                "\nEach file's findings are printed with its summary table above."
+        )
     }
+
+    private fun scan(file: File): Int = exec.exec {
+        isIgnoreExitValue = true
+        commandLine(
+            resolveTrivyCommand(), "fs",
+            "--scanners", "secret",
+            "--secret-config", secretConfig.get().asFile.absolutePath,
+            "--severity", severity.get().joinToString(","),
+            "--exit-code", if (failOnFindings.get()) SECRETS_FOUND.toString() else "0",
+            "--format", "table",
+            file.absolutePath
+        )
+    }.exitValue
 }

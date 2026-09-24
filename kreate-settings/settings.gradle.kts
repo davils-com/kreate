@@ -36,7 +36,11 @@ dependencyResolutionManagement {
     }
 }
 
-// The settings plugin and the local development core this plugin shares with it.
-includeBuild("../kreate-settings")
-
-rootProject.name = "kreate-plugin"
+// A build of its own rather than part of `kreate-plugin`, for one reason: a settings plugin is
+// loaded into the settings class loader, which is the parent of every project class loader in the
+// build, and Gradle loads parent first. `kreate-plugin` carries the Kotlin, Dokka, Detekt, Kover and
+// publishing plugins as runtime dependencies, so while the settings plugin shipped in the same
+// artefact, applying it pinned every one of those plugins at Kreate's version for the whole build -
+// a consumer declaring Kotlin 2.4.20 in its own catalog compiled with Kreate's 2.4.0 (ARC-66). This
+// artefact depends on the Gradle API and nothing else.
+rootProject.name = "kreate-settings"

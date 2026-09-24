@@ -70,13 +70,9 @@ To execute the license scan individually, use the following Gradle command:
 ]]>
 </code-block>
 
-Alternatively, the scan is automatically included when running the lifecycle task:
-
-<code-block lang="bash">
-<![CDATA[
-./gradlew check
-]]>
-</code-block>
+It is **not** part of `check`. The license scan needs Trivy's database, which has to be
+downloaded, and that is the wrong thing to put on every build. Run it on its own, as a CI job, or
+through `kreateTrivyScan`.
 
 <seealso>
     <category ref="security">

@@ -16,6 +16,7 @@
 
 package com.davils.kreate.module.local
 
+import com.davils.kreate.InternalKreateApi
 import org.gradle.api.provider.ProviderFactory
 import java.io.File
 import java.io.Serializable
@@ -40,14 +41,16 @@ import java.util.Properties
  *
  * @since 3.2.0
  */
-internal const val STATE_DIRECTORY: String = "kreate/local"
+@InternalKreateApi
+public const val STATE_DIRECTORY: String = "kreate/local"
 
 /**
  * The extension of a state file.
  *
  * @since 3.2.0
  */
-internal const val STATE_EXTENSION: String = ".properties"
+@InternalKreateApi
+public const val STATE_EXTENSION: String = ".properties"
 
 /**
  * The Gradle property that relocates the state directory.
@@ -63,7 +66,8 @@ internal const val STATE_EXTENSION: String = ".properties"
  *
  * @since 3.2.0
  */
-internal const val STATE_DIRECTORY_PROPERTY: String = "kreate.local.state.dir"
+@InternalKreateApi
+public const val STATE_DIRECTORY_PROPERTY: String = "kreate.local.state.dir"
 
 /**
  * Resolves the directory holding the local development state.
@@ -73,7 +77,8 @@ internal const val STATE_DIRECTORY_PROPERTY: String = "kreate.local.state.dir"
  * @return The state directory, which may not exist.
  * @since 3.2.0
  */
-internal fun stateDirectoryOf(providers: ProviderFactory, gradleUserHome: File): File =
+@InternalKreateApi
+public fun stateDirectoryOf(providers: ProviderFactory, gradleUserHome: File): File =
     providers.gradleProperty(STATE_DIRECTORY_PROPERTY)
         .orNull
         ?.trim()
@@ -94,7 +99,8 @@ private const val KEY_MODULES: String = "modules"
  *
  * @since 3.2.0
  */
-internal data class LocalLibrary(
+@InternalKreateApi
+public data class LocalLibrary(
     /**
      * The name the state file is keyed by, normally the producer's root project name.
      * @since 3.2.0
@@ -137,7 +143,13 @@ internal data class LocalLibrary(
      */
     val modules: List<LocalModule>
 ) : Serializable {
-    internal companion object {
+    /**
+     * Construction helpers, shared between Kreate's artefacts.
+     *
+     * @since 3.4.0
+     */
+    @InternalKreateApi
+    public companion object {
         /**
          * The serial version identifier.
          * @since 3.2.0
@@ -154,7 +166,8 @@ internal data class LocalLibrary(
  *
  * @since 3.2.0
  */
-internal data class LocalWorkspace(
+@InternalKreateApi
+public data class LocalWorkspace(
     /**
      * The recorded libraries, ordered by name.
      * @since 3.2.0
@@ -197,7 +210,13 @@ internal data class LocalWorkspace(
             .sorted()
     }
 
-    internal companion object {
+    /**
+     * Construction helpers, shared between Kreate's artefacts.
+     *
+     * @since 3.4.0
+     */
+    @InternalKreateApi
+    public companion object {
         /**
          * The serial version identifier.
          * @since 3.2.0
@@ -209,7 +228,7 @@ internal data class LocalWorkspace(
          *
          * @since 3.2.0
          */
-        val EMPTY: LocalWorkspace = LocalWorkspace(emptyList())
+        public val EMPTY: LocalWorkspace = LocalWorkspace(emptyList())
     }
 }
 
@@ -223,7 +242,8 @@ internal data class LocalWorkspace(
  * @return The narrowed workspace.
  * @since 3.2.0
  */
-internal fun LocalWorkspace.restrictedTo(names: Set<String>): LocalWorkspace =
+@InternalKreateApi
+public fun LocalWorkspace.restrictedTo(names: Set<String>): LocalWorkspace =
     LocalWorkspace(libraries.filter { it.library in names })
 
 /**
@@ -239,7 +259,8 @@ internal fun LocalWorkspace.restrictedTo(names: Set<String>): LocalWorkspace =
  * @return The libraries currently published locally, ordered by name.
  * @since 3.2.0
  */
-internal fun readLocalWorkspace(directory: File): LocalWorkspace {
+@InternalKreateApi
+public fun readLocalWorkspace(directory: File): LocalWorkspace {
     val files = directory.listFiles { file -> file.isFile && file.name.endsWith(STATE_EXTENSION) }
         ?: return LocalWorkspace.EMPTY
 
@@ -308,7 +329,8 @@ private fun buildLocalLibrary(properties: Properties): LocalLibrary? {
  * @throws IllegalArgumentException If the version does not carry [SNAPSHOT_SUFFIX].
  * @since 3.2.0
  */
-internal fun writeLocalLibrary(directory: File, library: LocalLibrary): File {
+@InternalKreateApi
+public fun writeLocalLibrary(directory: File, library: LocalLibrary): File {
     require(library.version.endsWith(SNAPSHOT_SUFFIX)) {
         "Refusing to record '${library.group}:${library.library}:${library.version}' as a local " +
             "build: a local publication has to carry the '$SNAPSHOT_SUFFIX' suffix so that it " +
@@ -357,7 +379,8 @@ internal fun writeLocalLibrary(directory: File, library: LocalLibrary): File {
  * @return The file, which may not exist.
  * @since 3.2.0
  */
-internal fun stateFileOf(directory: File, group: String, library: String): File =
+@InternalKreateApi
+public fun stateFileOf(directory: File, group: String, library: String): File =
     File(directory, "$group.$library$STATE_EXTENSION")
 
 /**
@@ -366,5 +389,6 @@ internal fun stateFileOf(directory: File, group: String, library: String): File 
  * @return The instant, or `null` if the record carries none or one that cannot be read.
  * @since 3.2.0
  */
-internal fun LocalLibrary.publishedAtInstant(): Instant? =
+@InternalKreateApi
+public fun LocalLibrary.publishedAtInstant(): Instant? =
     publishedAt?.let { recorded -> runCatching { Instant.parse(recorded) }.getOrNull() }

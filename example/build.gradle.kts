@@ -107,9 +107,10 @@ kreate {
             severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
             failOnFindings = true
             secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
-            sourceFiles.from(
+            sourceFiles.setFrom(
                 fileTree(projectDir) {
                     include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.yml", "**/*.env", "**/*.properties", "**/*.json")
+                    exclude("**/build/**", "**/.gradle/**", "**/.kotlin/**")
                 }
             )
         }

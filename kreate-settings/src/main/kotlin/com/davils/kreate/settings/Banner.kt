@@ -16,10 +16,10 @@
 
 package com.davils.kreate.settings
 
-import com.davils.kreate.KreateTasks
 import com.davils.kreate.module.local.LOCAL_PROPERTY
 import com.davils.kreate.module.local.LocalLibrary
 import com.davils.kreate.module.local.LocalMode
+import com.davils.kreate.module.local.LocalTaskNames
 import com.davils.kreate.module.local.publishedAtInstant
 import org.gradle.api.initialization.Settings
 import org.gradle.api.logging.Logging
@@ -75,7 +75,7 @@ internal fun Settings.announceLocalMode(mode: LocalMode.Active, repository: File
 
     logger.lifecycle("  Dependency locking is off. No lock file is read or written.")
     logger.lifecycle(
-        "  Switch off with -P$LOCAL_PROPERTY=false; clear with ./gradlew ${KreateTasks.Local.CLEAN}."
+        "  Switch off with -P$LOCAL_PROPERTY=false; clear with ./gradlew ${LocalTaskNames.CLEAN}."
     )
     logger.lifecycle("")
 }

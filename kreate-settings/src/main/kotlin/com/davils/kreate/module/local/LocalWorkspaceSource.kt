@@ -16,6 +16,7 @@
 
 package com.davils.kreate.module.local
 
+import com.davils.kreate.InternalKreateApi
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -43,19 +44,21 @@ import java.io.File
  *
  * @since 3.2.0
  */
-internal abstract class LocalWorkspaceSource : ValueSource<LocalWorkspace, LocalWorkspaceSource.Parameters> {
+@InternalKreateApi
+public abstract class LocalWorkspaceSource : ValueSource<LocalWorkspace, LocalWorkspaceSource.Parameters> {
     /**
      * The parameters of [LocalWorkspaceSource].
      *
      * @since 3.2.0
      */
-    internal interface Parameters : ValueSourceParameters {
+    @InternalKreateApi
+    public interface Parameters : ValueSourceParameters {
         /**
          * The directory holding the state files.
          *
          * @since 3.2.0
          */
-        val stateDirectory: DirectoryProperty
+        public val stateDirectory: DirectoryProperty
     }
 
     /**
@@ -76,7 +79,8 @@ internal abstract class LocalWorkspaceSource : ValueSource<LocalWorkspace, Local
  * @return A provider that re-reads the state directory on every build.
  * @since 3.2.0
  */
-internal fun localWorkspaceProvider(
+@InternalKreateApi
+public fun localWorkspaceProvider(
     providers: ProviderFactory,
     stateDirectory: File
 ): Provider<LocalWorkspace> = providers.of(LocalWorkspaceSource::class.java) {

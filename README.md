@@ -332,7 +332,7 @@ Contributions are welcome. To keep the quality bar where it is:
 - **Tests**: new or changed behaviour needs a test. The suite drives real Gradle builds through
   TestKit, so a behavioural change is genuinely verifiable.
 - **Documentation**: API and behaviour changes must be reflected in `docs/topics/`.
-- **Public API**: run `./gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump` and commit the
+- **Public API**: run `./gradlew :kreate-plugin:apiDump :kreate-settings:apiDump :kreate-detekt-rules:apiDump` and commit the
   result if a published signature changed.
 - **Standards**: follow the KDoc rules in `.junie/AGENTS.md` — every public declaration carries
   `@param`, `@return`, and `@since`, and Detekt enforces it.

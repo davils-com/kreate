@@ -33,6 +33,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kreate"
+includeBuild("kreate-settings")
 includeBuild("kreate-plugin")
 
 // Included rather than merely published: `:example` puts the rule set on its `detektPlugins`

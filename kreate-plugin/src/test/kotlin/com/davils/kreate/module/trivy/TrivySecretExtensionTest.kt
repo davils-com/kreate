@@ -21,6 +21,7 @@ import com.davils.kreate.KreateExtension
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.shouldBe
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.DisplayName
@@ -72,6 +73,27 @@ class TrivySecretExtensionTest {
 
     private fun scannedNames(project: Project): List<String> =
         project.secrets().sourceFiles.files.map { it.name }.sorted()
+
+    @Nested
+    @DisplayName("running on check")
+    inner class RunOnCheck {
+
+        @Test
+        @DisplayName("is on by default")
+        fun onByDefault() {
+            project().secrets().runOnCheck.get() shouldBe true
+        }
+
+        @Test
+        @DisplayName("can be turned off")
+        fun canBeTurnedOff() {
+            val secrets = project().secrets()
+
+            secrets.runOnCheck.set(false)
+
+            secrets.runOnCheck.get() shouldBe false
+        }
+    }
 
     @Nested
     @DisplayName("the default scope")

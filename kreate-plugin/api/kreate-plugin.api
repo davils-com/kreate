@@ -1189,6 +1189,7 @@ public abstract class com/davils/kreate/module/trivy/extension/TrivyLicenseExten
 public abstract class com/davils/kreate/module/trivy/extension/TrivySecretExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
 	public final fun getSecretConfig ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getSourceFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
@@ -1251,18 +1252,5 @@ public final class com/davils/kreate/repository/GitlabRegistrySpec {
 	public final fun setTokenProperty (Ljava/lang/String;)V
 	public final fun setTokenVariable (Ljava/lang/String;)V
 	public final fun setUrl (Ljava/lang/String;)V
-}
-
-public final class com/davils/kreate/settings/KreateSettings : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/initialization/Settings;)V
-}
-
-public abstract class com/davils/kreate/settings/KreateSettingsExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getRepositoryName ()Lorg/gradle/api/provider/Property;
 }
 

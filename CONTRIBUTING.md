@@ -57,16 +57,16 @@ We are open to new ideas! For major changes, please open an **Issue** first to d
 
 ## Development Standards
 
-> **The plugin lives in an included build, and so does its Detekt rule set.** `kreate-plugin` and
-> `kreate-detekt-rules` are pulled in with `includeBuild`, and a task name given at the root does
-> **not** reach them — `./gradlew test` runs the example's tests and none of theirs, and reports
+> **The plugin lives in an included build, and so do its settings plugin and its Detekt rule set.**
+> `kreate-plugin`, `kreate-settings` and `kreate-detekt-rules` are pulled in with `includeBuild`, and
+> a task name given at the root does **not** reach them — `./gradlew test` runs the example's tests and none of theirs, and reports
 > success. Every command below names the builds explicitly for that reason. This is the same pitfall
 > the [CI integration guide](docs/topics/CI-Integration.md) warns about.
 
 ### One command before you push
 
 ```bash
-./gradlew :kreate-plugin:build :kreate-detekt-rules:build build
+./gradlew :kreate-plugin:build :kreate-settings:build :kreate-detekt-rules:build build
 ```
 
 That is exactly what CI runs, and it covers compilation, detekt, both test suites, coverage
@@ -81,7 +81,7 @@ verification and the API check.
 - Warnings are errors. So is every detekt rule — the configuration runs with `allRules`.
 
 ```bash
-./gradlew :kreate-plugin:detekt :kreate-detekt-rules:detekt :example:detekt
+./gradlew :kreate-plugin:detekt :kreate-settings:detekt :kreate-detekt-rules:detekt :example:detekt
 ```
 
 The rules in `kreate-detekt-rules` are **not** applied to this repository's own sources. They
@@ -118,12 +118,13 @@ The functional suite is the slower of the two. While iterating on something unre
 
 ### The public API is a gate
 
-`kreate-plugin/api/kreate-plugin.api` and `kreate-detekt-rules/api/kreate-detekt-rules.api` record
+`kreate-plugin/api/kreate-plugin.api`, `kreate-settings/api/kreate-settings.api` and
+`kreate-detekt-rules/api/kreate-detekt-rules.api` record
 the published binary interfaces and are checked by `apiCheck` on every build. If you deliberately
 change a public API, re-record it and commit the result in the same change:
 
 ```bash
-./gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump
+./gradlew :kreate-plugin:apiDump :kreate-settings:apiDump :kreate-detekt-rules:apiDump
 ```
 
 ### Documentation
