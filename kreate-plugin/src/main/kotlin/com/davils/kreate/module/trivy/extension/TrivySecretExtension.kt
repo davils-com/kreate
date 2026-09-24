@@ -67,6 +67,26 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
     /**
      * The collection of source files to scan for secrets.
      *
+     * The default covers the sources and the configuration files a credential is actually pasted
+     * into: Kotlin and Java under `src`, and YAML, `.env`, properties and JSON anywhere in the
+     * project, which is what reaches a build script, a version catalog and a deployment descriptor.
+     *
+     * **Generated output is excluded, and that is not only about noise.** A secret under `build` is a
+     * copy of one in a file this scan already reads, so reporting it twice adds no finding and costs
+     * the time it takes to scan every artifact in the directory. The harder reason is that Gradle
+     * refuses a build whose task declares an input overlapping another task's output: with `build`
+     * left in, `kreateTrivySecretScan` in the same invocation as any task that writes a matching file
+     * there - a `processResources`, a Kotlin compilation's caches - fails with a message about an
+     * undeclared dependency rather than about secrets. `.gradle` and `.kotlin` are excluded for the
+     * same reason.
+     *
+     * **`from` adds to this default; only `setFrom` replaces it.** That is Gradle's semantics for
+     * every file collection, and it is worth spelling out here because the mistake is invisible: a
+     * project that narrows the scan with `sourceFiles.from(fileTree(projectDir) { exclude(...) })`
+     * still scans everything the default matched, since its own excludes apply to its own tree and
+     * not to the default one beside it. Use `setFrom` to state the whole scope, and `from` only to
+     * add to it.
+     *
      * @since 1.2.0
      */
     public val sourceFiles: ConfigurableFileCollection = factory.fileCollection().from(
@@ -79,6 +99,11 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
                 "**/*.env",
                 "**/*.properties",
                 "**/*.json"
+            )
+            exclude(
+                "**/build/**",
+                "**/.gradle/**",
+                "**/.kotlin/**"
             )
         }
     )
