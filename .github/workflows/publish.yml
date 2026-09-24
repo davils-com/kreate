@@ -60,5 +60,5 @@ jobs:
       - name: Publish
         run: >
           ./gradlew
-          :kreate-plugin:publishToMavenCentral :kreate-detekt-rules:publishToMavenCentral
+          :kreate-plugin:publishToMavenCentral :kreate-settings:publishToMavenCentral :kreate-detekt-rules:publishToMavenCentral
           --stacktrace

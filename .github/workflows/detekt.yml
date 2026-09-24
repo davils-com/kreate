@@ -40,14 +40,14 @@ jobs:
         with:
           validate-wrappers: true
 
-      # `kreate-plugin` and `kreate-detekt-rules` are included builds, so their tasks have to
+      # `kreate-plugin`, `kreate-settings` and `kreate-detekt-rules` are included builds, so their tasks have to
       # be addressed explicitly; a bare `detekt` only matches the `:example` consumer project.
       # `--continue` so that a finding in one module still produces the reports of the others.
       - name: Run Detekt
         id: detekt
         run: >
           ./gradlew
-          :kreate-plugin:detekt :kreate-detekt-rules:detekt :example:detekt
+          :kreate-plugin:detekt :kreate-settings:detekt :kreate-detekt-rules:detekt :example:detekt
           --continue --stacktrace
 
       - name: Upload SARIF to code scanning
@@ -93,8 +93,8 @@ jobs:
       # breaking change to a consumer's build script cannot be merged unnoticed.
       - name: Check the API dump is up to date
         run: |
-          ./gradlew :kreate-plugin:apiCheck :kreate-detekt-rules:apiCheck --stacktrace || {
-            echo "::error::The public API changed. Run './gradlew :kreate-plugin:apiDump :kreate-detekt-rules:apiDump' and commit the api/ dumps."
+          ./gradlew :kreate-plugin:apiCheck :kreate-settings:apiCheck :kreate-detekt-rules:apiCheck --stacktrace || {
+            echo "::error::The public API changed. Run './gradlew :kreate-plugin:apiDump :kreate-settings:apiDump :kreate-detekt-rules:apiDump' and commit the api/ dumps."
             exit 1
           }
 

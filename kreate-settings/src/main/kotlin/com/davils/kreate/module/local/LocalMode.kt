@@ -16,7 +16,7 @@
 
 package com.davils.kreate.module.local
 
-import com.davils.kreate.KreateTasks
+import com.davils.kreate.InternalKreateApi
 import org.gradle.api.GradleException
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.ProviderFactory
@@ -28,35 +28,40 @@ import java.io.Serializable
  *
  * @since 3.2.0
  */
-internal const val LOCAL_PROPERTY: String = "kreate.local"
+@InternalKreateApi
+public const val LOCAL_PROPERTY: String = "kreate.local"
 
 /**
  * The environment variable equivalent of [LOCAL_PROPERTY].
  *
  * @since 3.2.0
  */
-internal const val LOCAL_VARIABLE: String = "KREATE_LOCAL"
+@InternalKreateApi
+public const val LOCAL_VARIABLE: String = "KREATE_LOCAL"
 
 /**
  * The Gradle property that narrows local mode to a subset of the published libraries.
  *
  * @since 3.2.0
  */
-internal const val LOCAL_ONLY_PROPERTY: String = "kreate.local.only"
+@InternalKreateApi
+public const val LOCAL_ONLY_PROPERTY: String = "kreate.local.only"
 
 /**
  * The Gradle property that requests a local publish without naming the task.
  *
  * @since 3.2.0
  */
-internal const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
+@InternalKreateApi
+public const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
 
 /**
  * The environment variables whose presence means the build is running in CI.
  *
  * @since 3.2.0
  */
-internal val DEFAULT_CI_VARIABLES: List<String> =
+@InternalKreateApi
+public val DEFAULT_CI_VARIABLES: List<String> =
     listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
 
 /**
@@ -65,13 +70,15 @@ internal val DEFAULT_CI_VARIABLES: List<String> =
  *
  * @since 3.2.0
  */
-internal sealed interface LocalMode : Serializable {
+@InternalKreateApi
+public sealed interface LocalMode : Serializable {
     /**
      * Local mode is on.
      *
      * @since 3.2.0
      */
-    data class Active(
+    @InternalKreateApi
+    public data class Active(
         /**
          * The libraries whose coordinates are substituted.
          * @since 3.2.0
@@ -95,7 +102,8 @@ internal sealed interface LocalMode : Serializable {
      *
      * @since 3.2.0
      */
-    data class Inactive(
+    @InternalKreateApi
+    public data class Inactive(
         /**
          * A sentence naming what turned local mode off.
          * @since 3.2.0
@@ -117,14 +125,16 @@ internal sealed interface LocalMode : Serializable {
  *
  * @since 3.2.0
  */
-internal val LocalMode.isActive: Boolean get() = this is LocalMode.Active
+@InternalKreateApi
+public val LocalMode.isActive: Boolean get() = this is LocalMode.Active
 
 /**
  * The workspace being substituted, or an empty one when local mode is off.
  *
  * @since 3.2.0
  */
-internal val LocalMode.workspace: LocalWorkspace
+@InternalKreateApi
+public val LocalMode.workspace: LocalWorkspace
     get() = (this as? LocalMode.Active)?.workspace ?: LocalWorkspace.EMPTY
 
 /**
@@ -136,7 +146,8 @@ internal val LocalMode.workspace: LocalWorkspace
  *
  * @since 3.2.0
  */
-internal data class LocalModeInputs(
+@InternalKreateApi
+public data class LocalModeInputs(
     /**
      * What the state directory records.
      * @since 3.2.0
@@ -192,7 +203,8 @@ internal data class LocalModeInputs(
  * @throws GradleException In the two cases above that must not be allowed to pass quietly.
  * @since 3.2.0
  */
-internal fun resolveLocalMode(inputs: LocalModeInputs): LocalMode {
+@InternalKreateApi
+public fun resolveLocalMode(inputs: LocalModeInputs): LocalMode {
     // The escape hatch comes first and nothing below may override it — including the CI check,
     // which would otherwise turn an explicit opt-out into a build failure.
     if (inputs.requested == false) {
@@ -286,11 +298,11 @@ private fun failIfDemandedButUnavailable(inputs: LocalModeInputs, available: Loc
 
             Publish a library first:
 
-                cd <library> && ./gradlew ${KreateTasks.Local.PUBLISH}
+                cd <library> && ./gradlew ${LocalTaskNames.PUBLISH}
 
             or, for a whole workspace at once:
 
-                ./gradlew ${KreateTasks.Local.PUBLISH_ALL}
+                ./gradlew ${LocalTaskNames.PUBLISH_ALL}
         """.trimIndent()
     )
 }
@@ -317,7 +329,8 @@ private fun narrowedBy(only: Set<String>): String =
  * @throws GradleException If the value is neither `true` nor `false`.
  * @since 3.2.0
  */
-internal fun parseLocalRequest(value: String?): Boolean? {
+@InternalKreateApi
+public fun parseLocalRequest(value: String?): Boolean? {
     val trimmed = value?.trim()?.takeIf { it.isNotEmpty() } ?: return null
 
     return when {
@@ -336,7 +349,8 @@ internal fun parseLocalRequest(value: String?): Boolean? {
  * @return The library names, empty when unset.
  * @since 3.2.0
  */
-internal fun parseLocalOnly(value: String?): Set<String> =
+@InternalKreateApi
+public fun parseLocalOnly(value: String?): Set<String> =
     value?.split(',')
         ?.map { it.trim() }
         ?.filter { it.isNotEmpty() }
@@ -357,7 +371,8 @@ internal fun parseLocalOnly(value: String?): Set<String> =
  * @return The gathered inputs.
  * @since 3.2.0
  */
-internal fun gatherLocalModeInputs(
+@InternalKreateApi
+public fun gatherLocalModeInputs(
     providers: ProviderFactory,
     gradleUserHome: File,
     ciVariables: List<String>
@@ -399,7 +414,8 @@ internal fun gatherLocalModeInputs(
  * @return `true` when the version should carry the snapshot suffix.
  * @since 3.2.0
  */
-internal fun requestsLocalPublish(gradle: Gradle, providers: ProviderFactory): Boolean {
+@InternalKreateApi
+public fun requestsLocalPublish(gradle: Gradle, providers: ProviderFactory): Boolean {
     val requestedByProperty = providers.gradleProperty(LOCAL_PUBLISH_PROPERTY)
         .map { it.equals("true", ignoreCase = true) }
         .getOrElse(false)
@@ -409,6 +425,6 @@ internal fun requestsLocalPublish(gradle: Gradle, providers: ProviderFactory): B
     while (root.parent != null) root = requireNotNull(root.parent)
 
     return root.startParameter.taskNames.any { requested ->
-        requested.substringAfterLast(':') == KreateTasks.Local.PUBLISH
+        requested.substringAfterLast(':') == LocalTaskNames.PUBLISH
     }
 }

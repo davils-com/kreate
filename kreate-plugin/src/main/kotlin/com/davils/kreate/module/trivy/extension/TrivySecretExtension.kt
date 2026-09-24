@@ -56,6 +56,25 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
     ).convention(true)
 
     /**
+     * Whether `check` depends on the secret scan, so that `./gradlew build` runs it.
+     *
+     * On by default. The secret scan reads files that are already on disk and needs no database
+     * download, so it costs seconds - and a scan that only runs when somebody remembers to call it
+     * lets a credential reach a push that a green `build` appeared to clear. A secret is leaked by the
+     * push, not by the merge, so a check that first runs in CI runs too late for this one.
+     *
+     * Turn it off where `check` runs somewhere Trivy is not installed and the scan runs as a job of
+     * its own instead. The license and vulnerability scans are never wired into `check`: they
+     * depend on a database that has to be downloaded, which is the wrong thing to put on every
+     * build.
+     *
+     * @since 3.4.0
+     */
+    public val runOnCheck: Property<Boolean> = factory.property(
+        Boolean::class.java
+    ).convention(true)
+
+    /**
      * The configuration file for Trivy secret scanning.
      *
      * @since 1.2.0

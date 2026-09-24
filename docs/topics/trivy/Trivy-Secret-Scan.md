@@ -115,13 +115,34 @@ To execute the secret scan individually, use the following Gradle command:
 ]]>
 </code-block>
 
-Alternatively, the scan is automatically included when running the lifecycle task:
+It also runs as part of the lifecycle task, so `./gradlew build` includes it:
 
 <code-block lang="bash">
 <![CDATA[
 ./gradlew check
 ]]>
 </code-block>
+
+That is on by default since 3.4.0. The secret scan reads files already on disk and needs no
+database download, and a secret is leaked by the push rather than by the merge - a scan that only
+ran when somebody remembered to call it let a credential through a green `build`. Turn it off with
+`runOnCheck = false` where `check` runs on a machine without Trivy and the scan has a CI job of its
+own:
+
+<code-block lang="kotlin">
+<![CDATA[
+kreate {
+    trivy {
+        secrets {
+            runOnCheck = false
+        }
+    }
+}
+]]>
+</code-block>
+
+When it fails, the message names every file with a finding; the findings themselves are printed
+with that file's summary table above it.
 
 <seealso>
     <category ref="security">

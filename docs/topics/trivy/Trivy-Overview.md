@@ -173,7 +173,7 @@ Once enabled, Kreate automatically registers the following Gradle tasks for your
 Kreate provides multiple ways to run Trivy scans, ranging from running all checks at once to executing specific, targeted scans.
 
 ### Run All Enabled Scans
-The most common way to run scans is through the standard Gradle `check` lifecycle task. Kreate registers a central `kreateTrivyScan` task that aggregates all individual scanners and attaches it to the `check` task.
+Kreate registers a central `kreateTrivyScan` task that aggregates all individual scanners. It is **not** attached to `check`: the license and vulnerability scans need Trivy's database, which has to be downloaded. The secret scan alone is attached to `check` by default (`secrets { runOnCheck }`), because it runs offline in seconds and a secret has to be caught before the push.
 
 To run all security checks:
 <code-block lang="bash">

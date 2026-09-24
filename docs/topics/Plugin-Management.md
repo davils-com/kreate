@@ -24,9 +24,9 @@ decision; applying the plugin behind it is bookkeeping, and %product% does it.
 
 ## The second plugin id
 
-Since 3.2.0 %product% ships **two** plugin ids from the one artifact. The one above is applied to
-projects; `com.davils.kreate.settings` is applied to `Settings`, and owns nothing but dependency
-resolution for the [local development workflow](Local-Development-Overview.md):
+Since 3.2.0 %product% ships **two** plugin ids. The one above is applied to projects;
+`com.davils.kreate.settings` is applied to `Settings`, and owns nothing but dependency resolution
+for the [local development workflow](Local-Development-Overview.md):
 
 ```kotlin
 // settings.gradle.kts, and build-logic/settings.gradle.kts
@@ -38,6 +38,16 @@ plugins {
 It is separate because substitution has to be installed before any configuration resolves, and has
 to reach `build-logic` — which never applies the project plugin. Applying it changes nothing until
 something is published locally.
+
+Since 3.4.0 it is also a separate **artifact**, `com.davils:kreate-settings`, and that one carries
+nothing but the Gradle API. Until then both ids shipped in one artifact together with the Kotlin,
+Dokka, Detekt, Kover and publishing plugins the project plugin depends on - and a settings plugin is
+loaded into the settings class loader, the parent of every project class loader, from which Gradle
+loads first. Applying the settings plugin therefore pinned all of those plugins at %product%'s
+versions for the whole build: a build whose own catalog declared Kotlin 2.4.20 compiled with
+%product%'s 2.4.0 and never said so. The artifact's build now fails if anything appears on its
+runtime classpath. Nothing changes in how the plugin is applied; the plugin id resolves to the new
+artifact by itself.
 
 ## What gets applied, and when
 

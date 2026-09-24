@@ -16,6 +16,7 @@
 
 package com.davils.kreate
 
+import com.davils.kreate.module.local.LocalTaskNames
 import com.davils.kreate.system.platformTaskSuffix
 
 /**
@@ -334,28 +335,28 @@ public object KreateTasks {
          *
          * @since 3.2.0
          */
-        public const val PUBLISH: String = "kreateLocalPublish"
+        public const val PUBLISH: String = LocalTaskNames.PUBLISH
 
         /**
          * Runs [PUBLISH] across a declared workspace in dependency order.
          *
          * @since 3.2.0
          */
-        public const val PUBLISH_ALL: String = "kreateLocalPublishAll"
+        public const val PUBLISH_ALL: String = LocalTaskNames.PUBLISH_ALL
 
         /**
          * Reports what is currently published locally, or why local mode is off.
          *
          * @since 3.2.0
          */
-        public const val STATUS: String = "kreateLocalStatus"
+        public const val STATUS: String = LocalTaskNames.STATUS
 
         /**
          * Removes the local publications and the state that records them.
          *
          * @since 3.2.0
          */
-        public const val CLEAN: String = "kreateLocalClean"
+        public const val CLEAN: String = LocalTaskNames.CLEAN
 
         /**
          * The task group for local development tasks.

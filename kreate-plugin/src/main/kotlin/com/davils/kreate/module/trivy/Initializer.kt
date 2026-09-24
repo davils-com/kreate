@@ -24,6 +24,19 @@ import com.davils.kreate.module.trivy.tasks.TrivySecretScan
 import com.davils.kreate.module.trivy.tasks.TrivyVulnerabilityScan
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import org.gradle.language.base.plugins.LifecycleBasePlugin
+
+/**
+ * The tasks that write scaffolding into the source tree the secret scan reads.
+ *
+ * Gradle refuses a task whose input overlaps another task's output unless the two are ordered, and
+ * with the secret scan on `check` the two meet in any build that initialises a native project. The
+ * scan runs after them, which is also the order that scans what they wrote.
+ */
+private val SOURCE_SCAFFOLDING_TASKS: Set<String> = setOf(
+    KreateTasks.Jni.INITIALIZE,
+    KreateTasks.CInterop.INITIALIZE
+)
 
 /**
  * Initializes the Trivy module for the project.
@@ -46,6 +59,12 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         secretConfig.set(trivySecretExtension.secretConfig)
         severity.set(trivySecretExtension.severity.map { it.map { s -> s.name } })
         sourceFiles.setFrom(trivySecretExtension.sourceFiles)
+        mustRunAfter(tasks.matching { it.name in SOURCE_SCAFFOLDING_TASKS })
+    }
+    if (trivySecretExtension.runOnCheck.get()) {
+        tasks.matching { it.name == LifecycleBasePlugin.CHECK_TASK_NAME }.configureEach {
+            dependsOn(secretScan)
+        }
     }
 
     val trivyLicenseExtension = trivyExtension.license

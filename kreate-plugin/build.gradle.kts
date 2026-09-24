@@ -30,6 +30,11 @@ dependencies {
     implementation(gradleApi())
     implementation(libs.bundles.kreate.plugin)
 
+    // The settings plugin and the local development core it shares with this plugin live in their
+    // own artefact, so that applying the settings plugin does not load this plugin's Gradle plugin
+    // dependencies into the settings class loader (ARC-66). Substituted by the included build.
+    implementation("${Project.Identity.GROUP}:kreate-settings:$version")
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.kreate.test)
@@ -41,6 +46,12 @@ dependencies {
  * TestKit based tests live in their own source set so that a slow, tool dependent
  * suite (CMake, Cargo, Trivy) never blocks the fast unit tests.
  */
+kotlin {
+    compilerOptions {
+        optIn.add("com.davils.kreate.InternalKreateApi")
+    }
+}
+
 val functionalTest: SourceSet = sourceSets.create("functionalTest")
 
 configurations[functionalTest.implementationConfigurationName]
@@ -70,25 +81,6 @@ gradlePlugin {
                 "detekt",
                 "trivy",
                 "publishing",
-                "conventions",
-                "davils"
-            )
-        }
-
-        // A second plugin, from the same artifact, applied to `Settings` rather than `Project`.
-        // Dependency substitution has to be in place before anything resolves and has to reach
-        // `build-logic`, which never applies the project plugin — neither is reachable from a
-        // project plugin, however early it runs.
-        create("${Project.Identity.NAME.lowercase()}Settings") {
-            id = "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.settings"
-            description = "Resolves locally published Davils artifacts, for local development."
-            displayName = "${Project.Identity.NAME} settings"
-            implementationClass =
-                "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.settings.KreateSettings"
-            tags = listOf(
-                "kotlin",
-                "local-development",
-                "dependency-substitution",
                 "conventions",
                 "davils"
             )

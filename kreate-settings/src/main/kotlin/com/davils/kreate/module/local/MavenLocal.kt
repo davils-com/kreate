@@ -16,6 +16,7 @@
 
 package com.davils.kreate.module.local
 
+import com.davils.kreate.InternalKreateApi
 import org.gradle.api.provider.ProviderFactory
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
@@ -39,7 +40,8 @@ private const val USER_HOME_PROPERTY: String = "user.home"
  * @return The directory holding the local Maven repository, which may not exist yet.
  * @since 3.2.0
  */
-internal fun mavenLocalOf(providers: ProviderFactory): File {
+@InternalKreateApi
+public fun mavenLocalOf(providers: ProviderFactory): File {
     val configured = providers.systemProperty(MAVEN_REPO_LOCAL_PROPERTY).orNull
     val userHome = File(providers.systemProperty(USER_HOME_PROPERTY).getOrElse(""))
 
@@ -54,7 +56,8 @@ internal fun mavenLocalOf(providers: ProviderFactory): File {
  *
  * @since 3.2.0
  */
-internal const val MAVEN_REPO_LOCAL_PROPERTY: String = "maven.repo.local"
+@InternalKreateApi
+public const val MAVEN_REPO_LOCAL_PROPERTY: String = "maven.repo.local"
 
 /**
  * The default location of the local Maven repository, relative to the user's home.
@@ -94,7 +97,8 @@ private const val LOCAL_REPOSITORY_ELEMENT: String = "localRepository"
  * @return The directory holding the local Maven repository, which may not exist yet.
  * @since 3.2.0
  */
-internal fun resolveMavenLocal(
+@InternalKreateApi
+public fun resolveMavenLocal(
     systemProperties: Map<String, String>,
     userHome: File
 ): File {
@@ -166,7 +170,8 @@ private const val HOME_PREFIX: String = "~/"
  * @return The directory, which may not exist.
  * @since 3.2.0
  */
-internal fun moduleDirectory(repository: File, module: LocalModule, version: String): File =
+@InternalKreateApi
+public fun moduleDirectory(repository: File, module: LocalModule, version: String): File =
     File(groupDirectory(repository, module.group), "${module.name}/$version")
 
 /**
@@ -177,7 +182,8 @@ internal fun moduleDirectory(repository: File, module: LocalModule, version: Str
  * @return The directory, which may not exist.
  * @since 3.2.0
  */
-internal fun groupDirectory(repository: File, group: String): File =
+@InternalKreateApi
+public fun groupDirectory(repository: File, group: String): File =
     File(repository, group.replace('.', '/'))
 
 /**
@@ -193,7 +199,8 @@ internal fun groupDirectory(repository: File, group: String): File =
  * @return The missing coordinates, empty when everything is present.
  * @since 3.2.0
  */
-internal fun missingArtifacts(repository: File, library: LocalLibrary): List<String> =
+@InternalKreateApi
+public fun missingArtifacts(repository: File, library: LocalLibrary): List<String> =
     library.modules
         .filterNot { module -> moduleDirectory(repository, module, library.version).isDirectory }
         .map { module -> "${module.coordinate}:${library.version}" }
@@ -220,7 +227,8 @@ internal fun missingArtifacts(repository: File, library: LocalLibrary): List<Str
  * @return The snapshot version directories, ordered by path.
  * @since 3.2.0
  */
-internal fun snapshotDirectories(repository: File, group: String): List<File> {
+@InternalKreateApi
+public fun snapshotDirectories(repository: File, group: String): List<File> {
     val root = groupDirectory(repository, group)
     if (!root.isDirectory) return emptyList()
 

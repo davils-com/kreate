@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 3.4.0
+
+### Fixed
+
+- **Applying the settings plugin no longer pins the build's Kotlin, Dokka, Detekt and Kover
+  versions.** `com.davils.kreate.settings` shipped in the same artifact as the project plugin, and
+  that artifact carries the Kotlin, Dokka, Detekt, Kover, benchmark, serialization, allopen and
+  publishing plugins as runtime dependencies. A settings plugin is loaded into the settings class
+  loader, which is the parent of every project class loader, and Gradle loads parent first - so
+  every one of those plugins came from Kreate's dependency, whatever the build declared. Found in
+  Arc (ARC-66): its catalog said Kotlin 2.4.20, its `build-logic` resolved 2.4.20, and the Kotlin
+  extension was loaded from `kotlin-gradle-plugin-2.4.0`. The only visible symptom was a lock file
+  that pinned `kotlin-stdlib` 2.4.0 when it was rewritten.
+
+  The settings plugin is now its own artifact, `com.davils:kreate-settings`, with nothing but the
+  Gradle API on its runtime classpath - checked by the build, which fails if anything appears there.
+  The plugin id is unchanged and resolves to the new artifact by itself; nothing has to change in a
+  consuming build. The local development core both plugins share moved with it and is marked
+  `@InternalKreateApi`, which keeps it out of the recorded binary interface.
+
+### Changed
+
+- **The secret scan runs as part of `check`.** `kreateTrivySecretScan` was only ever run when
+  somebody called it, so `./gradlew build` could pass with a credential in the tree - found in Arc
+  (ARC-67), where three test fixtures shaped like secrets went through a green build and were only
+  caught when the scan was run by hand. A secret is leaked by the push, not by the merge, so a scan
+  that first runs in CI runs too late. The secret scan reads files already on disk and needs no
+  database, so it now hangs off `check` whenever the Trivy module is enabled. `secrets { runOnCheck =
+  false }` turns it off for a build whose `check` runs somewhere Trivy is not installed.
+
+  The license and vulnerability scans stay off `check`: both need Trivy's database, which has to be
+  downloaded. The documentation claimed that the secret and license scans were already part of
+  `check`; neither was, and both topics now say what actually happens.
+
+- **The secret scan runs after the native scaffolding tasks.** `kreateJniInitialize` and
+  `kreateCInteropInitialize` write into the source tree the scan reads, and with the scan on `check`
+  Gradle would otherwise refuse the two in one build as an undeclared overlap. The example project's
+  own secret scope used the `from` pattern described under *Fixed* below and now uses `setFrom`.
+
+- **A failed secret scan names the files it failed on.** The message used to be "Trivy found secrets
+  in source files!", which left the reader to search one summary table per scanned file for the one
+  that was not empty. It now lists every file with a finding.
 
 ### Fixed
 
