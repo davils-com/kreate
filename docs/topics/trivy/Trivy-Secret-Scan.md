@@ -68,13 +68,12 @@ writes a matching file there fails with a message about an undeclared task depen
 about secrets.
 
 <warning>
-<p><code>from</code> <b>adds</b> to that default scope; only <code>setFrom</code> replaces it. This is
+<code>from</code> <b>adds</b> to that default scope; only <code>setFrom</code> replaces it. This is
 Gradle's behaviour for every file collection, and getting it wrong is invisible: a build that narrows
 the scan with <code>sourceFiles.from(fileTree(projectDir) { exclude(...) })</code> still scans
 everything the default matched, because the excludes apply to its own tree and not to the default one
-beside it.</p>
-<p>Use <code>setFrom</code> to state the whole scope, and <code>from</code> only when you mean to add
-to it.</p>
+beside it. Use <code>setFrom</code> to state the whole scope, and <code>from</code> only when you
+mean to add to it.
 </warning>
 
 ### Severity Levels

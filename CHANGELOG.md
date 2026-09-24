@@ -33,6 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   Use `setFrom` to state the whole scope. Nothing has to change in a project that does.
 
+- **The documentation build no longer fails on an unresolved category.** The seven local development
+  topics added in 3.2.0 point their `<seealso>` block at a category `local`, and `docs/c.list` was
+  never given one - it has not been touched since 2.0.0. Writerside reports an unresolved reference
+  per topic, which fails the `test` job of the documentation workflow. The category is now declared,
+  named after the section the topics already sit in, and `reference` and `external` move down one
+  place to keep it beside `project` rather than after the external links.
+
 ## 3.3.0
 
 One feature. The comment and KDoc part of the Kreate Kotlin standard was written down, argued about
