@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- **The secret scan no longer puts generated output in its own scope.** The default `sourceFiles`
+  matched `**/*.yaml`, `**/*.properties` and `**/*.json` anywhere under the project directory, with
+  nothing excluded, so `build`, `.gradle` and `.kotlin` were scanned along with the sources. The
+  visible symptom was not a slow scan but a refused build: Gradle rejects a task whose declared input
+  overlaps another task's output, so `./gradlew build kreateTrivySecretScan` failed with
+
+  ```
+  Task ':kreateTrivySecretScan' uses this output of task ':compileKotlinWasmJs' without declaring an
+  explicit or implicit dependency.
+  ```
+
+  naming a directory under `build` and neither the scan nor any secret. Running the scan on its own
+  was green, which made it look like a problem with whatever else was in the invocation. The three
+  directories are now excluded from the default.
+
+  A project that narrowed the scope itself was not protected by doing so: **`sourceFiles.from(...)`
+  adds to the default rather than replacing it**, so its own `exclude("**/build/**")` applied to its
+  own tree while the unfiltered default sat beside it. That is ordinary Gradle file collection
+  behaviour and is left as it is; what changes is that the default no longer carries the directories
+  that make it a problem, and that the property's KDoc and the secret scanning topic now say which of
+  `from` and `setFrom` does what. The documented example used `from` and did not do what it claimed.
+
+  Use `setFrom` to state the whole scope. Nothing has to change in a project that does.
+
+- **The documentation build no longer fails on an unresolved category.** The seven local development
+  topics added in 3.2.0 point their `<seealso>` block at a category `local`, and `docs/c.list` was
+  never given one - it has not been touched since 2.0.0. Writerside reports an unresolved reference
+  per topic, which fails the `test` job of the documentation workflow. The category is now declared,
+  named after the section the topics already sit in, and `reference` and `external` move down one
+  place to keep it beside `project` rather than after the external links.
+
 ## 3.3.0
 
 One feature. The comment and KDoc part of the Kreate Kotlin standard was written down, argued about

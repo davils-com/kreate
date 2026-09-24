@@ -7,6 +7,7 @@
     <category id="native" name="Native integration" order="3"/>
     <category id="security" name="Security &amp; compliance" order="4"/>
     <category id="project" name="Project" order="5"/>
-    <category id="reference" name="Reference" order="6"/>
-    <category id="external" name="External documentation" order="7"/>
+    <category id="local" name="Local development" order="6"/>
+    <category id="reference" name="Reference" order="7"/>
+    <category id="external" name="External documentation" order="8"/>
 </categories>

@@ -23,8 +23,8 @@ kreate {
             // Define which severities should be reported
             severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH)
 
-            // Define which files to scan
-            sourceFiles.from(fileTree(projectDir) {
+            // Define which files to scan. setFrom replaces the default scope; from would add to it
+            sourceFiles.setFrom(fileTree(projectDir) {
                 include("src/**/*.kt", "src/**/*.java", "**/*.yaml", "**/*.properties", "**/*.json")
                 exclude("**/build/**")
             })
@@ -56,6 +56,26 @@ secrets:
 
 The `kreateTrivySecretScan` task runs Trivy in `fs` (file system) mode with the `secret` scanner enabled. It specifically targets the files defined in `sourceFiles`.
 
+### The default scope, and how to change it
+
+Out of the box the scan covers Kotlin and Java under `src`, plus YAML, `.env`, properties and JSON
+anywhere in the project. Generated output is deliberately left out - `build`, `.gradle` and
+`.kotlin` - for two reasons. A secret under `build` is a copy of one in a file the scan already
+reads, so it is a duplicate finding that costs the time it takes to walk every artifact there. More
+importantly, Gradle refuses a build in which one task declares an input that is another task's
+output: with `build` in scope, running `kreateTrivySecretScan` in the same invocation as a task that
+writes a matching file there fails with a message about an undeclared task dependency rather than
+about secrets.
+
+<warning>
+<code>from</code> <b>adds</b> to that default scope; only <code>setFrom</code> replaces it. This is
+Gradle's behaviour for every file collection, and getting it wrong is invisible: a build that narrows
+the scan with <code>sourceFiles.from(fileTree(projectDir) { exclude(...) })</code> still scans
+everything the default matched, because the excludes apply to its own tree and not to the default one
+beside it. Use <code>setFrom</code> to state the whole scope, and <code>from</code> only when you
+mean to add to it.
+</warning>
+
 ### Severity Levels
 
 Severity levels help assess the risk of a finding:
@@ -80,7 +100,9 @@ Once a secret is published, it must be considered compromised. Rotating the secr
 </warning>
 
 <tip>
-Use the <code>exclude</code> block in the <code>fileTree</code> of <code>sourceFiles</code> to exclude generated files or test resources that contain harmless test keys from the scan.
+Use <code>setFrom</code> with an <code>exclude</code> in the <code>fileTree</code> to keep test
+resources holding harmless test keys out of the scan. Generated output is already excluded by the
+default scope.
 </tip>
 
 ## How to Run

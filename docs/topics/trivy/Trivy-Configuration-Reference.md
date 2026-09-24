@@ -47,7 +47,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 | `failOnFindings` | `Property<Boolean>`            | `true`                          | Fails the build if secrets are detected.     |
 | `severity`       | `ListProperty<SecretSeverity>` | `[CRITICAL, HIGH, MEDIUM, LOW]` | Severities of secrets to include.            |
 | `secretConfig`   | `RegularFileProperty`          | `trivy-secret.yaml`             | Path to the Trivy secret configuration file. |
-| `sourceFiles`    | `ConfigurableFileCollection`   | (src/**/*.kt, etc.)             | The files to be scanned for secrets.         |
+| `sourceFiles`    | `ConfigurableFileCollection`   | sources and config files, excluding `build` | The files to be scanned for secrets. `from` adds to the default, `setFrom` replaces it. |
 
 ---
 
