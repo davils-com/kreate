@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- **Vulnerability scans in a multi-project build no longer crash Trivy.** Every
+  `kreateTrivyVulnerabilityScan` started its own Trivy process, and with the configuration cache on,
+  Gradle runs them in parallel. Each process updates the one vulnerability database in Trivy's cache,
+  replacing it while the others read it. Found in Rise, where a CI job with an empty cache ran ten
+  scans at once and got `SIGSEGV` and `SIGBUS` crashes in bbolt, plus `json decode error: EOF` for
+  the database metadata. The vulnerability scans now share a build service that admits one of them
+  at a time. After the first scan has downloaded the database, each of the others takes about a second.
+
+- **A Trivy failure is reported as a failure, not as a finding, and not as a pass.** All three scans
+  passed `--exit-code 1` and took exit code 1 to mean findings. Trivy also exits with 1 when it fails,
+  so a scan that could not open its database failed with "Trivy found CVEs in dependencies!". A crash
+  of the Go runtime exits with 2, which no scan checked, so four of Rise's ten modules passed without
+  having been scanned. Findings now use exit code 10. Every exit code other than 0 and 10 fails the
+  task and names the file Trivy did not finish.
+
 ## 3.4.0
 
 ### Fixed

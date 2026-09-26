@@ -17,7 +17,9 @@
 package com.davils.kreate.module.trivy.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.module.trivy.TRIVY_FINDINGS_EXIT_CODE
 import com.davils.kreate.module.trivy.resolveTrivyCommand
+import com.davils.kreate.module.trivy.trivyReportedFindings
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
@@ -84,7 +86,8 @@ public abstract class TrivyLicenseScan @Inject constructor(
      * Executes the license scan for each lock file in the collection.
      *
      * Runs the Trivy CLI in filesystem mode specifically for license scanning.
-     * Throws a [GradleException] if forbidden licenses are found and [failOnForbidden] is set to true.
+     * Throws a [GradleException] if forbidden licenses are found and [failOnForbidden] is set to true,
+     * and whenever Trivy itself fails, so that a scan that never finished is not reported as a finding.
      *
      * @since 1.2.0
      */
@@ -103,7 +106,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
                 val args = mutableListOf(
                     trivyCmd, "fs",
                     "--scanners", "license",
-                    "--exit-code", if (failOnForbidden.get()) "1" else "0",
+                    "--exit-code", if (failOnForbidden.get()) TRIVY_FINDINGS_EXIT_CODE.toString() else "0",
                     "--severity", severity.get().joinToString(","),
                     "--format", "table",
                 )
@@ -117,7 +120,7 @@ public abstract class TrivyLicenseScan @Inject constructor(
                 commandLine(args)
             }
 
-            if (result.exitValue == 1) {
+            if (trivyReportedFindings(result.exitValue, file)) {
                 isForbidden = true
             }
         }

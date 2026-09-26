@@ -17,7 +17,9 @@
 package com.davils.kreate.module.trivy.tasks
 
 import com.davils.kreate.jobs.Task
+import com.davils.kreate.module.trivy.TRIVY_FINDINGS_EXIT_CODE
 import com.davils.kreate.module.trivy.resolveTrivyCommand
+import com.davils.kreate.module.trivy.trivyReportedFindings
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -33,8 +35,6 @@ import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
-
-private const val SECRETS_FOUND: Int = 1
 
 /**
  * Scans source files for secrets using Trivy.
@@ -98,7 +98,7 @@ public abstract class TrivySecretScan @Inject constructor(
      */
     @TaskAction
     public fun execute() {
-        val withSecrets = sourceFiles.files.filter { file -> scan(file) == SECRETS_FOUND }
+        val withSecrets = sourceFiles.files.filter { file -> trivyReportedFindings(scan(file), file) }
 
         if (withSecrets.isEmpty() || !failOnFindings.get()) {
             return
@@ -118,7 +118,7 @@ public abstract class TrivySecretScan @Inject constructor(
             "--scanners", "secret",
             "--secret-config", secretConfig.get().asFile.absolutePath,
             "--severity", severity.get().joinToString(","),
-            "--exit-code", if (failOnFindings.get()) SECRETS_FOUND.toString() else "0",
+            "--exit-code", if (failOnFindings.get()) TRIVY_FINDINGS_EXIT_CODE.toString() else "0",
             "--format", "table",
             file.absolutePath
         )

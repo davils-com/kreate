@@ -80,6 +80,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         severity.set(trivyVulnerabilityExtension.score.map { it.map { s -> s.name } })
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
+        usesService(trivyDatabaseService())
     }
 
     tasks.register<TrivyScan>(KreateTasks.Trivy.SCAN) {
