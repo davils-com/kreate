@@ -9,6 +9,7 @@
 | Property           | Type                  | Default              | Purpose                                                     |
 |--------------------|-----------------------|----------------------|-------------------------------------------------------------|
 | `enabled`          | `Property<Boolean>`   | `false`              | Activates the feature and registers the two tasks            |
+| `klib`             | `Property<Boolean>`   | `false`              | Validates every multiplatform target, klibs included          |
 | `apiDirectory`     | `DirectoryProperty`   | `<project>/api`      | Directory holding the checked-in dump                        |
 | `dumpFileName`     | `Property<String>`    | `<project name>.api` | File name of the dump inside `apiDirectory`                  |
 | `nonPublicMarkers` | `SetProperty<String>` | empty                | Annotations that hide whatever they are applied to           |
@@ -51,6 +52,38 @@ apiValidation {
 The annotation must be retained in the class file — `AnnotationRetention.SOURCE` is gone by
 the time the bytecode is read, so it has no effect here. Applying the marker to a class
 also hides everything nested inside it.
+
+## Every target of a multiplatform project
+
+Kreate's own dump is read from class files, so in a Kotlin Multiplatform project it covers the JVM
+target and nothing else. `klib = true` hands validation to the ABI validation built into the Kotlin
+Gradle plugin, which reads class files and klibs alike:
+
+```kotlin
+kreate {
+    project {
+        apiValidation {
+            enabled = true
+            klib = true
+        }
+    }
+}
+```
+
+`kreateApiDump` and `kreateApiCheck` stay the tasks to run, and `apiDirectory`,
+`nonPublicMarkers`, `ignoredPackages` and `ignoredClasses` still apply. The dump takes the Kotlin
+plugin's layout inside `apiDirectory`:
+
+| Targets                         | Files                                                         |
+|---------------------------------|---------------------------------------------------------------|
+| One JVM target                  | `<project>.api`, as without `klib`                            |
+| Several JVM kind targets        | `jvm/<project>.api`, `android/<project>.api`, one per target  |
+| Wasm, JavaScript, Native        | `<project>.klib.api`, one file covering all of them           |
+
+`dumpFileName` is not used, because the Kotlin plugin always names its dumps after the project.
+Switching `klib` on changes the layout, so record the dumps once with `kreateApiDump` and commit
+them together with the change. It requires Kotlin 2.4 or later and has no effect on a project
+without the multiplatform plugin.
 
 ## Tasks
 

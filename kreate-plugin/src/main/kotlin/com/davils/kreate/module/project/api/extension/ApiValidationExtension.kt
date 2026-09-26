@@ -32,8 +32,9 @@ import javax.inject.Inject
  * and it is written in the same format the Kotlin `binary-compatibility-validator` plugin
  * uses — an existing dump can be carried over unchanged.
  *
- * Validation covers JVM bytecode. Kotlin/Native and JavaScript targets produce no class
- * files and are therefore not validated.
+ * By default validation covers JVM bytecode. Kotlin/Native, JavaScript and Wasm targets produce
+ * no class files, and an Android library target is not a Kotlin/JVM target, so none of them is
+ * validated unless [klib] is switched on for a Kotlin Multiplatform project.
  *
  * @since 2.1.0
  */
@@ -48,6 +49,34 @@ public abstract class ApiValidationExtension @Inject constructor(factory: Object
      * @since 2.1.0
      */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * Whether a Kotlin Multiplatform project validates every target, not only its JVM one.
+     *
+     * Kreate's own dump is read from class files, so it sees a multiplatform project's JVM target
+     * and nothing else: the Wasm, JavaScript and Native targets publish klibs, and the Android
+     * library target is not a Kotlin/JVM target. A declaration added in `wasmJsMain`, or a klib
+     * level break, passed the check.
+     *
+     * When this is `true` and the project applies the Kotlin Multiplatform plugin, validation is
+     * handed to the ABI validation built into the Kotlin Gradle plugin, which reads both class files
+     * and klibs. [KreateTasks.ApiValidation.DUMP][com.davils.kreate.KreateTasks.ApiValidation.DUMP]
+     * and [KreateTasks.ApiValidation.CHECK][com.davils.kreate.KreateTasks.ApiValidation.CHECK]
+     * stay the tasks to run, and [apiDirectory], [nonPublicMarkers], [ignoredPackages] and
+     * [ignoredClasses] still apply. The dump is laid out the way the Kotlin plugin writes it: one
+     * `.api` file per JVM kind target - directly in [apiDirectory] for a single JVM target, in a
+     * subdirectory named after each target when there are several, such as `jvm` and `android` -
+     * and one `<project>.klib.api` file covering every klib target. [dumpFileName] is not used,
+     * because the Kotlin plugin always names its dumps after the project.
+     *
+     * Requires Kotlin 2.4 or later. On a project without the multiplatform plugin it has no effect.
+     *
+     * Defaults to `false`, so an existing multiplatform dump keeps its layout until a project
+     * asks for the wider check.
+     *
+     * @since 3.5.0
+     */
+    public val klib: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * The directory holding the checked-in dump.

@@ -83,5 +83,7 @@ keep in step with your Kotlin release.
 ## Scope
 
 Validation reads JVM class files. In a Kotlin Multiplatform project the `jvm` target's main
-compilation is validated; Kotlin/Native and JavaScript targets produce no class files and
-are not covered.
+compilation is validated; Kotlin/Native, JavaScript and Wasm targets produce no class files and
+are not covered by default. `klib = true` covers every target, klibs and an Android library target
+included, through the Kotlin plugin's own ABI validation - see
+[API validation configuration](API-Validation-Configuration.md).

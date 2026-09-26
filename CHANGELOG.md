@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **`apiValidation { klib = true }` validates every target of a multiplatform project.** Kreate's
+  dump is read from class files, so a multiplatform project's Wasm, JavaScript, Native and Android
+  library targets were never validated: a declaration added in `wasmJsMain`, or a break at klib
+  level, passed `kreateApiCheck`. Found in Leaf (LEA-134), whose web artifacts carried an
+  unchecked surface. With `klib = true` on a Kotlin Multiplatform project, validation is handed to
+  the ABI validation built into the Kotlin Gradle plugin, which reads class files and klibs alike.
+  `kreateApiDump` and `kreateApiCheck` stay the entry points and the directory and filters carry
+  over; the dumps take the Kotlin plugin's layout, including a `<project>.klib.api`. Off by
+  default, so an existing dump keeps its layout until a project opts in. Requires Kotlin 2.4.
+
 ### Fixed
 
 - **Vulnerability scans in a multi-project build no longer crash Trivy.** Every

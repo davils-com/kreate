@@ -46,6 +46,10 @@ private const val MAIN_SOURCE_SET_NAME = "main"
 internal fun Project.initializeApiValidation(extension: KreateExtension) {
     val apiExtension = extension.project.apiValidation
     if (!apiExtension.enabled.get()) return
+    if (validatesThroughKotlinPlugin(apiExtension)) {
+        initializeKotlinAbiValidation(apiExtension)
+        return
+    }
 
     val classDirectories = collectMainClassDirectories()
     // Captured here on purpose: inside a task configuration block `path` is the task's own

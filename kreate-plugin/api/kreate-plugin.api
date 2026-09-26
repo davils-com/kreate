@@ -522,6 +522,7 @@ public abstract class com/davils/kreate/module/project/api/extension/ApiValidati
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getKlib ()Lorg/gradle/api/provider/Property;
 	public final fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 }
 
