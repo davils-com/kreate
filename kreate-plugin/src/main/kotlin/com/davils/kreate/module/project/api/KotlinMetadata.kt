@@ -27,6 +27,7 @@ import kotlin.metadata.jvm.fieldSignature
 import kotlin.metadata.jvm.getterSignature
 import kotlin.metadata.jvm.setterSignature
 import kotlin.metadata.jvm.signature
+import kotlin.metadata.jvm.syntheticMethodForAnnotations
 import kotlin.metadata.visibility
 
 /**
@@ -111,6 +112,31 @@ internal data class KotlinMetadataValues(
 }
 
 /**
+ * The declarations of a class that carry `@PublishedApi`.
+ *
+ * `@PublishedApi internal` is part of the binary interface although Kotlin callers cannot name
+ * it: a public inline function calls it from the consumer's own bytecode, so renaming or
+ * removing it breaks every consumer compiled against the old version. The annotation has binary
+ * retention and is read from the class file rather than from the Kotlin metadata, which does not
+ * record it.
+ *
+ * @since 3.5.0
+ */
+internal data class PublishedApiDeclarations(
+    /**
+     * Whether the class itself carries `@PublishedApi`.
+     * @since 3.5.0
+     */
+    val isPublishedClass: Boolean = false,
+    /**
+     * The `name descriptor` keys of the methods carrying `@PublishedApi`. For a property this is
+     * the synthetic method Kotlin puts the property's annotations on.
+     * @since 3.5.0
+     */
+    val methods: Set<String> = emptySet()
+)
+
+/**
  * Decides which declarations of a class are hidden from Kotlin callers even though the
  * bytecode marks them `public`.
  *
@@ -118,7 +144,9 @@ internal data class KotlinMetadataValues(
  * `internal` function compiles to a `public` method with a mangled name, and an
  * `internal` class to a `public` class. Dumping those would record declarations no
  * consumer can call, and every rename inside a module would then read as a breaking API
- * change.
+ * change. A declaration marked `@PublishedApi` is the exception: it is `internal` in Kotlin but
+ * called from inline functions compiled into the consumer, so it stays in the dump, as it does
+ * in the dump of the Kotlin `binary-compatibility-validator` plugin.
  *
  * @since 2.1.0
  */
@@ -230,10 +258,14 @@ internal class KotlinDeclarationFilter private constructor(
          *
          * @param values The collected annotation values, or `null` when the class carries
          *   no `kotlin.Metadata`.
+         * @param published The declarations of the class that carry `@PublishedApi`.
          * @return A filter for that class.
          * @since 2.1.0
          */
-        fun from(values: KotlinMetadataValues?): KotlinDeclarationFilter {
+        fun from(
+            values: KotlinMetadataValues?,
+            published: PublishedApiDeclarations = PublishedApiDeclarations()
+        ): KotlinDeclarationFilter {
             if (values == null) return PERMISSIVE
 
             val metadata = Metadata(
@@ -248,9 +280,9 @@ internal class KotlinDeclarationFilter private constructor(
 
             return runCatching {
                 when (val parsed = KotlinClassMetadata.readLenient(metadata)) {
-                    is KotlinClassMetadata.Class -> fromClass(parsed.kmClass)
-                    is KotlinClassMetadata.FileFacade -> fromPackage(parsed.kmPackage)
-                    is KotlinClassMetadata.MultiFileClassPart -> fromPackage(parsed.kmPackage)
+                    is KotlinClassMetadata.Class -> fromClass(parsed.kmClass, published)
+                    is KotlinClassMetadata.FileFacade -> fromPackage(parsed.kmPackage, published)
+                    is KotlinClassMetadata.MultiFileClassPart -> fromPackage(parsed.kmPackage, published)
                     is KotlinClassMetadata.MultiFileClassFacade -> emptyFileFacade()
                     else -> PERMISSIVE
                 }
@@ -263,38 +295,45 @@ internal class KotlinDeclarationFilter private constructor(
             nonPublicMembers = emptySet()
         )
 
-        private fun fromClass(kmClass: KmClass): KotlinDeclarationFilter {
-            val members = collectNonPublicMembers(kmClass).toMutableSet()
+        private fun fromClass(kmClass: KmClass, published: PublishedApiDeclarations): KotlinDeclarationFilter {
+            val members = collectNonPublicMembers(kmClass, published).toMutableSet()
 
             kmClass.constructors
                 .filter { it.visibility in NON_PUBLIC_VISIBILITIES }
                 .mapNotNull { it.signature }
+                .filterNot { it.asKey() in published.methods }
                 .forEach { members += it.asKey() }
 
+            val isNonPublicInKotlin = kmClass.visibility in NON_PUBLIC_VISIBILITIES
             return KotlinDeclarationFilter(
-                isNonPublicClass = kmClass.visibility in NON_PUBLIC_VISIBILITIES,
+                isNonPublicClass = isNonPublicInKotlin && !published.isPublishedClass,
                 isFileFacade = false,
                 nonPublicMembers = members
             )
         }
 
-        private fun fromPackage(kmPackage: KmPackage): KotlinDeclarationFilter =
+        private fun fromPackage(kmPackage: KmPackage, published: PublishedApiDeclarations): KotlinDeclarationFilter =
             KotlinDeclarationFilter(
                 isNonPublicClass = false,
                 isFileFacade = true,
-                nonPublicMembers = collectNonPublicMembers(kmPackage)
+                nonPublicMembers = collectNonPublicMembers(kmPackage, published)
             )
 
-        private fun collectNonPublicMembers(container: KmDeclarationContainer): Set<String> {
+        private fun collectNonPublicMembers(
+            container: KmDeclarationContainer,
+            published: PublishedApiDeclarations
+        ): Set<String> {
             val members = mutableSetOf<String>()
 
             container.functions
                 .filter { it.visibility in NON_PUBLIC_VISIBILITIES }
                 .mapNotNull { it.signature }
+                .filterNot { it.asKey() in published.methods }
                 .forEach { members += it.asKey() }
 
             container.properties
                 .filter { it.visibility in NON_PUBLIC_VISIBILITIES }
+                .filterNot { it.syntheticMethodForAnnotations?.asKey() in published.methods }
                 .forEach { property ->
                     listOfNotNull(
                         property.getterSignature,
@@ -331,6 +370,6 @@ internal class KotlinDeclarationFilter private constructor(
          * @return The `name descriptor` key.
          * @since 2.1.0
          */
-        private fun memberKey(name: String, descriptor: String): String = "$name $descriptor"
+        fun memberKey(name: String, descriptor: String): String = "$name $descriptor"
     }
 }

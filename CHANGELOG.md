@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`@PublishedApi internal` declarations are part of the dump.** The class file reader dropped
+  every declaration that is `internal` in Kotlin, including the ones marked `@PublishedApi`. Those
+  are called from public inline functions compiled into the consumer, so renaming or removing one
+  breaks every consumer - and `kreateApiCheck` passed. Found in Leaf (LEA-134), whose
+  `leaf-testing` inline capture helpers reach an internal `LogCapture` class that was missing from
+  its dump. The annotation is now read from the class, the method or constructor, and a property's
+  annotation holder, as the Kotlin `binary-compatibility-validator` plugin does. A project that has
+  such declarations sees them added the next time it runs `kreateApiCheck`; `kreateApiDump` records
+  them.
+
 - **Vulnerability scans in a multi-project build no longer crash Trivy.** Every
   `kreateTrivyVulnerabilityScan` started its own Trivy process, and with the configuration cache on,
   Gradle runs them in parallel. Each process updates the one vulnerability database in Trivy's cache,

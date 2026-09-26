@@ -67,6 +67,8 @@ internal object AbiExtractor {
     private const val PARSING_OPTIONS =
         ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG or ClassReader.SKIP_FRAMES
     private const val KOTLIN_METADATA_DESCRIPTOR = "Lkotlin/Metadata;"
+    private const val PUBLISHED_API_DESCRIPTOR = "Lkotlin/PublishedApi;"
+    private const val PROPERTY_ANNOTATIONS_SUFFIX = "\$annotations"
     private const val DUMMY_CONSTRUCTOR_DESCRIPTOR = "(Lkotlin/jvm/internal/DefaultConstructorMarker;)V"
 
     /**
@@ -150,8 +152,22 @@ internal object AbiExtractor {
         if (access and Opcodes.ACC_SYNTHETIC == 0) return false
 
         val isDummyConstructor = name == "<init>" && descriptor == DUMMY_CONSTRUCTOR_DESCRIPTOR
-        return name.startsWith("access$") || name.endsWith("\$annotations") || isDummyConstructor
+        return name.startsWith("access$") || name.endsWith(PROPERTY_ANNOTATIONS_SUFFIX) || isDummyConstructor
     }
+
+    /**
+     * Reports whether a method is the synthetic holder Kotlin puts a property's annotations on.
+     *
+     * The holder is never dumped, but it is the only place a property's `@PublishedApi` can be
+     * read from, so it is visited for that one annotation.
+     *
+     * @param name The JVM method name.
+     * @param access The ASM access flags.
+     * @return `true` when the method holds the annotations of a property.
+     * @since 3.5.0
+     */
+    private fun isPropertyAnnotationHolder(name: String, access: Int): Boolean =
+        access and Opcodes.ACC_SYNTHETIC != 0 && name.endsWith(PROPERTY_ANNOTATIONS_SUFFIX)
 
     /**
      * Collects the binary interface of a single class while ASM walks it.
@@ -171,8 +187,15 @@ internal object AbiExtractor {
         private var interfaces: List<String> = emptyList()
         private var isEnclosedInMethod = false
         private var isMarkedNonPublic = false
+        private var isPublishedApi = false
         private var metadata: KotlinMetadataValues? = null
         private val members = mutableListOf<PendingMember>()
+
+        /**
+         * The `name descriptor` keys of the methods carrying `@PublishedApi`, property
+         * annotation holders included.
+         */
+        private val publishedApiMethods = mutableSetOf<String>()
 
         /**
          * The extracted class, or `null` when it is not part of the binary interface.
@@ -204,6 +227,7 @@ internal object AbiExtractor {
 
         override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
             if (descriptor in options.markerDescriptors) isMarkedNonPublic = true
+            if (descriptor == PUBLISHED_API_DESCRIPTOR) isPublishedApi = true
             if (descriptor != KOTLIN_METADATA_DESCRIPTOR) return null
 
             return KotlinMetadataVisitor { metadata = it }
@@ -230,15 +254,20 @@ internal object AbiExtractor {
             signature: String?,
             exceptions: Array<out String>?
         ): MethodVisitor? {
+            val key = KotlinDeclarationFilter.memberKey(name, descriptor)
+            if (isPropertyAnnotationHolder(name, access)) {
+                return PublishedApiMethodVisitor { publishedApiMethods += key }
+            }
             if (!isExposed(access) || isCompilerPlumbing(name, descriptor, access)) return null
 
             val pending = PendingMember(AbiMemberKind.METHOD, access, name, descriptor)
             members += pending
-            return MarkerMethodVisitor(pending, options)
+            return MarkerMethodVisitor(pending, options) { publishedApiMethods += key }
         }
 
         override fun visitEnd() {
-            val filter = KotlinDeclarationFilter.from(metadata)
+            val published = PublishedApiDeclarations(isPublishedApi, publishedApiMethods)
+            val filter = KotlinDeclarationFilter.from(metadata, published)
             if (isExcluded(filter)) return
 
             val visibleMembers = members
@@ -314,10 +343,21 @@ internal object AbiExtractor {
 
     private class MarkerMethodVisitor(
         private val member: PendingMember,
-        private val options: AbiFilterOptions
+        private val options: AbiFilterOptions,
+        private val onPublishedApi: () -> Unit
     ) : MethodVisitor(ASM_API) {
         override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
             if (descriptor in options.markerDescriptors) member.isMarkedNonPublic = true
+            if (descriptor == PUBLISHED_API_DESCRIPTOR) onPublishedApi()
+            return null
+        }
+    }
+
+    private class PublishedApiMethodVisitor(
+        private val onPublishedApi: () -> Unit
+    ) : MethodVisitor(ASM_API) {
+        override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
+            if (descriptor == PUBLISHED_API_DESCRIPTOR) onPublishedApi()
             return null
         }
     }

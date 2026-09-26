@@ -90,6 +90,36 @@ class AbiExtractorTest {
     }
 
     @Test
+    @DisplayName("keeps an internal class published for inline functions")
+    fun keepsPublishedClass() {
+        val fixture = extract("PublishedClassFixture").single()
+
+        fixture.memberNames() shouldContain "function"
+        fixture.memberNames().none { it.startsWith("internalFunction") } shouldBe true
+    }
+
+    @Test
+    @DisplayName("keeps internal members published for inline functions")
+    fun keepsPublishedMembers() {
+        val fixture = extract("PublishedMembersFixture").single()
+
+        fixture.memberNames() shouldContain "publishedFunction"
+        fixture.memberNames() shouldContain "getPublishedProperty"
+        fixture.memberNames() shouldContain "publishedWithDefault"
+        fixture.memberNames() shouldContain "publishedWithDefault\$default"
+        fixture.members.count { it.name == "<init>" } shouldBe 2
+    }
+
+    @Test
+    @DisplayName("still drops internal members that are not published")
+    fun dropsUnpublishedMembers() {
+        val fixture = extract("PublishedMembersFixture").single()
+
+        fixture.memberNames().none { it.startsWith("internalFunction") } shouldBe true
+        fixture.memberNames().none { it.endsWith("\$annotations") } shouldBe true
+    }
+
+    @Test
     @DisplayName("drops a class hidden by a marker annotation")
     fun dropsMarkedClass() {
         extract("MarkedFixture") shouldBe emptyList()

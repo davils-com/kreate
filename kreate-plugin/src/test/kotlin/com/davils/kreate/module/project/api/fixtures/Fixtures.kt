@@ -84,3 +84,34 @@ enum class EnumFixture {
     FIRST,
     SECOND
 }
+
+/**
+ * A class that is `internal` in Kotlin but published for inline functions, so it belongs in the
+ * binary interface.
+ */
+@PublishedApi
+internal class PublishedClassFixture {
+    fun function() = Unit
+
+    internal fun internalFunction() = Unit
+}
+
+/**
+ * A class whose `internal` members are published for inline functions, next to one that is not.
+ */
+class PublishedMembersFixture @PublishedApi internal constructor(value: String) {
+    @PublishedApi
+    internal val publishedProperty: Int = value.length
+
+    constructor() : this("")
+
+    @PublishedApi
+    internal fun publishedFunction() = Unit
+
+    @PublishedApi
+    internal fun publishedWithDefault(value: Int = 1) = value
+
+    internal fun internalFunction() = Unit
+
+    inline fun inlined(offset: () -> Int): Int = offset() + publishedProperty + publishedWithDefault()
+}
