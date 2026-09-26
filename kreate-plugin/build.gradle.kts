@@ -117,6 +117,7 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "NEVER")
 }
 
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
