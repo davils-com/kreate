@@ -15,6 +15,8 @@
  */
 
 import com.davils.buildlogic.Project
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -118,6 +120,14 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
 tasks.test {
     useJUnitPlatform()
     systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "NEVER")
+}
+
+// CI only keeps the console log, and without this a failing test there is just "There were failing tests".
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
