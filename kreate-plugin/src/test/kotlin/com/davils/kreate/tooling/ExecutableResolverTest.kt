@@ -29,6 +29,20 @@ import java.io.File
 @DisplayName("ExecutableResolver")
 class ExecutableResolverTest {
 
+    private val pathDirectories: List<String> =
+        System.getenv("PATH").orEmpty().split(File.pathSeparatorChar).filter { it.isNotBlank() }
+
+    /**
+     * Whether [command] is installed in one of [directories], independently of the resolver.
+     *
+     * On Windows the file is `trivy.exe` rather than `trivy`. Looking for the bare name alone took
+     * an installed tool for a missing one there, so the fallback test ran against a real Trivy.
+     */
+    private fun installed(command: String, directories: List<String>): Boolean {
+        val names = listOf(command, "$command.exe", "$command.cmd", "$command.bat")
+        return directories.any { directory -> names.any { File(directory, it).canExecute() } }
+    }
+
     @Test
     @DisplayName("an explicit override always wins")
     fun overrideWins() {
@@ -53,11 +67,7 @@ class ExecutableResolverTest {
     @Test
     @DisplayName("resolves an absolute path for a tool that is installed")
     fun resolvesInstalledTool() {
-        val onPath = System.getenv("PATH")
-            .orEmpty()
-            .split(File.pathSeparatorChar)
-            .any { File(it, "cmake").canExecute() }
-        assumeTrue(onPath, "CMake is not installed on this machine")
+        assumeTrue(installed("cmake", pathDirectories), "CMake is not installed on this machine")
 
         val resolved = ExecutableResolver.resolve(ExternalTool.CMAKE)
 
@@ -68,12 +78,8 @@ class ExecutableResolverTest {
     @Test
     @DisplayName("falls back to the bare command name for a tool that is not installed")
     fun fallsBackToCommandName() {
-        val installed = System.getenv("PATH")
-            .orEmpty()
-            .split(File.pathSeparatorChar)
-            .any { File(it, "trivy").canExecute() } ||
-            ExternalTool.TRIVY.wellKnownDirectories.any { File(it, "trivy").canExecute() }
-        assumeTrue(!installed, "Trivy is installed, so the fallback cannot be observed")
+        val searched = pathDirectories + ExternalTool.TRIVY.wellKnownDirectories
+        assumeTrue(!installed("trivy", searched), "Trivy is installed, so the fallback cannot be observed")
 
         // Returning the bare name lets the operating system produce the error message,
         // which names the tool rather than an invented path.
