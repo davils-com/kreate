@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.0"
+kotlin = "2.4.20"
 poet = "2.4.0"
 dokka = "2.2.0"
 publish = "0.37.0"
