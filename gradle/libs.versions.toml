@@ -5,7 +5,7 @@ dokka = "2.2.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
 kore = "1.2.0"
-kover = "0.9.9"
+kover = "0.9.10"
 
 # test & tooling
 junit = "6.1.3"
