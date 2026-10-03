@@ -21,22 +21,29 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
 }
 
-// Kover is applied here directly rather than through Kreate's own `coverage { }` DSL: this is
-// the build that produces the plugin, so it cannot apply the plugin to itself. The consumer
-// path is exercised by :example instead.
+val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+val jacocoToolVersion: String = libs.findVersion("jacoco").get().requiredVersion
+
+val minimumLineCoverage: Int = coverageBound("kreate.quality.minimumLineCoverage")
+val minimumBranchCoverage: Int = coverageBound("kreate.quality.minimumBranchCoverage")
+
+fun coverageBound(propertyName: String): Int {
+    val property = providers.gradleProperty(propertyName)
+    val bound = property.map { value -> value.toInt() }
+    return bound.getOrElse(Project.Quality.MINIMUM_COVERAGE)
+}
 
 kover {
+    useJacoco(jacocoToolVersion)
+
+    currentProject {
+        sources {
+            excludedSourceSets.add("functionalTest")
+        }
+    }
+
     reports {
         total {
-            filters {
-                excludes {
-                    // Task name and project identity constants. They are data, and a coverage
-                    // number that counts them measures how many constants exist rather than
-                    // how much behaviour is tested.
-                    classes("com.davils.kreate.KreateTasks*")
-                }
-            }
-
             xml {
                 onCheck = false
             }
@@ -47,17 +54,15 @@ kover {
 
             log {
                 onCheck = false
-                // Matched by the GitLab `coverage:` expression documented in
-                // docs/topics/CI-Integration.md. Changing it means changing that too.
                 format = "<entity> line coverage: <value>%"
             }
 
             verify {
                 onCheck = true
 
-                rule("Minimum line coverage") {
-                    // The threshold, its rationale and its known blind spot live on the constant.
-                    minBound(Project.Quality.MINIMUM_LINE_COVERAGE, CoverageUnit.LINE)
+                rule("Minimum coverage") {
+                    minBound(minimumLineCoverage, CoverageUnit.LINE)
+                    minBound(minimumBranchCoverage, CoverageUnit.BRANCH)
                 }
             }
         }

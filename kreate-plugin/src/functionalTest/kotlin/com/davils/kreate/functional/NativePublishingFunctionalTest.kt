@@ -16,38 +16,46 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.util.zip.ZipFile
+import kotlin.io.path.createTempDirectory
 
-/**
- * Tests for publishing native libraries as one artifact per platform.
- *
- * The effect of this feature is only visible in what actually gets published, so these tests
- * drive `publishToMavenLocal` into a throwaway repository and read the artifacts back. Asserting
- * on task wiring alone would miss the two failures that matter: natives left in the main JAR, and
- * a main artifact that silently stops being published.
- */
-@DisplayName("Native publishing")
-class NativePublishingFunctionalTest {
+private const val LINUX_AARCH64: String = "linux-aarch64"
 
-    @TempDir
-    lateinit var projectDir: File
+private const val LINUX_X86_64: String = "linux-x86_64"
 
-    @TempDir
-    lateinit var repositoryDir: File
+private fun hostOperatingSystem(): String {
+    val os = System.getProperty("os.name").lowercase()
+    if (os.contains("win")) return "windows"
+    if (os.contains("mac") || os.contains("darwin")) return "macos"
+    return "linux"
+}
 
-    private lateinit var fixture: KreateBuildFixture
+private fun hostArchitecture(): String {
+    val arch = System.getProperty("os.arch").lowercase()
+    if (arch.contains("aarch64") || arch.contains("arm64")) return "aarch64"
+    return "x86_64"
+}
 
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+private fun hostPlatformLikeThePlugin(): String = "${hostOperatingSystem()}-${hostArchitecture()}"
+
+private fun linuxPlatformOtherThan(platform: String): String {
+    if (platform == LINUX_AARCH64) return LINUX_X86_64
+    return LINUX_AARCH64
+}
+
+class NativePublishingFunctionalTest : FunSpec({
+
+    val workspace = kreateWorkspace()
+
+    val hostPlatform = hostPlatformLikeThePlugin()
+
+    fun newFixture(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
         fixture.writeKotlin(
             "com/example/Sample.kt",
@@ -57,36 +65,21 @@ class NativePublishingFunctionalTest {
             class Sample
             """.trimIndent()
         )
+        return fixture
     }
 
-    /**
-     * The platform this test runs on, derived the same way the plugin derives it.
-     */
-    private val hostPlatform: String = run {
-        val os = System.getProperty("os.name").lowercase()
-        val osId = when {
-            os.contains("win") -> "windows"
-            os.contains("mac") || os.contains("darwin") -> "macos"
-            else -> "linux"
-        }
-        val arch = System.getProperty("os.arch").lowercase()
-        val archId = if (arch.contains("aarch64") || arch.contains("arm64")) "aarch64" else "x86_64"
-        "$osId-$archId"
-    }
+    fun newRepositoryDirectory(): File = createTempDirectory(workspace.toPath(), "repository").toFile()
 
-    /**
-     * Writes a build that publishes per platform into the throwaway repository.
-     *
-     * The JNI toolchain is not involved: a staged binary stands in for a compiled one, which is
-     * what lets these tests run without CMake and is also the mechanism a Linux-only pipeline
-     * uses to publish a platform it cannot build.
-     */
-    private fun writeBuild(platforms: String, stagePlatforms: List<String> = listOf(hostPlatform)) {
+    fun KreateBuildFixture.writeStagedPublishingBuild(
+        repositoryDir: File,
+        platforms: String,
+        stagePlatforms: List<String> = listOf(hostPlatform)
+    ) {
         stagePlatforms.forEach { platform ->
-            fixture.write("natives/$platform/libsample.so", "not a real binary, but a real file")
+            write("natives/$platform/libsample.so", "not a real binary, but a real file")
         }
 
-        fixture.writeBuild(
+        writeBuild(
             kreateBlock = """
                 ${KreateBuildFixture.platformBlock}
 
@@ -139,188 +132,183 @@ class NativePublishingFunctionalTest {
         )
     }
 
-    private fun publishedModule(artifactId: String): File =
+    fun publishedModule(repositoryDir: File, artifactId: String): File =
         repositoryDir.resolve("com/example/$artifactId")
 
-    private fun jarEntries(jar: File): List<String> =
-        ZipFile(jar).use { zip -> zip.entries().toList().map { it.name } }
-
-    @Test
-    @DisplayName("keeps the natives out of the main JAR")
-    fun mainJarCarriesNoNatives() {
-        // The whole point of the mode: no consumer receives whichever platform the library
-        // happened to be built on without asking for it.
-        writeBuild(""""$hostPlatform"""")
-
-        fixture.build("publish")
-
-        val mainJar = publishedModule("sample").walkTopDown()
-            .single { it.name.endsWith(".jar") && !it.name.contains("-sources") }
-
-        jarEntries(mainJar).none { it.startsWith("native/") } shouldBe true
+    fun publishedFile(repositoryDir: File, artifactId: String, isWanted: (File) -> Boolean): File {
+        val moduleFiles = publishedModule(repositoryDir, artifactId).walkTopDown()
+        return moduleFiles.single(isWanted)
     }
 
-    @Test
-    @DisplayName("publishes the main artifact alongside the platform artifact")
-    fun publishesBothArtifacts() {
-        // Regression guard for an ordering hazard: Kreate registers the main publication only
-        // when none exists yet, so a platform publication registered too early would replace the
-        // library with a bag of shared objects, and the release would still be green.
-        writeBuild(""""$hostPlatform"""")
-
-        fixture.build("publish")
-
-        publishedModule("sample").isDirectory shouldBe true
-        publishedModule("sample-$hostPlatform").isDirectory shouldBe true
+    fun jarEntries(jar: File): List<String> = ZipFile(jar).use { zip ->
+        val entries = zip.entries().toList()
+        entries.map { it.name }
     }
 
-    @Test
-    @DisplayName("the platform artifact contains that platform's library and nothing else")
-    fun platformJarCarriesTheLibrary() {
-        writeBuild(""""$hostPlatform"""")
+    context("Native publishing") {
+        test("keeps the natives out of the main JAR") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(repositoryDir, """"$hostPlatform"""")
 
-        fixture.build("publish")
+            fixture.build("publish")
 
-        val platformJar = publishedModule("sample-$hostPlatform").walkTopDown()
-            .single { it.name.endsWith(".jar") }
+            val mainJar = publishedFile(repositoryDir, "sample") {
+                it.name.endsWith(".jar") && !it.name.contains("-sources")
+            }
 
-        val entries = jarEntries(platformJar)
-        entries.any { it == "native/$hostPlatform/libsample.so" } shouldBe true
-        entries.none { it.endsWith(".class") } shouldBe true
-    }
+            jarEntries(mainJar).none { it.startsWith("native/") } shouldBe true
+        }
 
-    @Test
-    @DisplayName("the platform POM declares no dependencies")
-    fun platformPomHasNoDependencies() {
-        // It is a resource carrier. A dependency on the main library would point the wrong way:
-        // it is the consumer that pulls both.
-        writeBuild(""""$hostPlatform"""")
+        test("publishes the main artifact alongside the platform artifact") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(repositoryDir, """"$hostPlatform"""")
 
-        fixture.build("publish")
+            fixture.build("publish")
 
-        val pom = publishedModule("sample-$hostPlatform").walkTopDown()
-            .single { it.name.endsWith(".pom") }
+            publishedModule(repositoryDir, "sample").isDirectory shouldBe true
+            publishedModule(repositoryDir, "sample-$hostPlatform").isDirectory shouldBe true
+        }
 
-        pom.readText().contains("<dependencies>") shouldBe false
-    }
+        test("the platform artifact contains that platform's library and nothing else") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(repositoryDir, """"$hostPlatform"""")
 
-    @Test
-    @DisplayName("publishes a subset of platforms without complaining")
-    fun publishesSubset() {
-        // The requirement this feature exists for: infrastructure that can only build one
-        // platform still produces a valid release.
-        writeBuild(
-            platforms = """"$hostPlatform"""",
-            stagePlatforms = listOf(hostPlatform)
-        )
+            fixture.build("publish")
 
-        val result = fixture.build("publish")
+            val platformJar = publishedFile(repositoryDir, "sample-$hostPlatform") { it.name.endsWith(".jar") }
 
-        result.task(":publish")?.outcome shouldBe TaskOutcome.SUCCESS
-        publishedModule("sample-$hostPlatform").isDirectory shouldBe true
-    }
+            val entries = jarEntries(platformJar)
+            entries.any { it == "native/$hostPlatform/libsample.so" } shouldBe true
+            entries.none { it.endsWith(".class") } shouldBe true
+        }
 
-    @Test
-    @DisplayName("fails when a selected platform has no library")
-    fun failsOnSelectedButMissingPlatform() {
-        // Selecting fewer platforms is fine; selecting one you cannot deliver is always an
-        // accident, and one that would otherwise upload cleanly.
-        val absent = if (hostPlatform == "linux-aarch64") "linux-x86_64" else "linux-aarch64"
-        writeBuild(
-            platforms = """"$hostPlatform", "$absent"""",
-            stagePlatforms = listOf(hostPlatform)
-        )
+        test("the platform POM declares no dependencies") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(repositoryDir, """"$hostPlatform"""")
 
-        val result = fixture.buildAndFail("kreateJniVerifyPlatforms")
+            fixture.build("publish")
 
-        result.output shouldContain absent
-        result.output shouldContain "No native library was found"
-    }
+            val pom = publishedFile(repositoryDir, "sample-$hostPlatform") { it.name.endsWith(".pom") }
 
-    @Test
-    @DisplayName("rejects an identifier that is not a platform")
-    fun rejectsUnknownPlatform() {
-        writeBuild(platforms = """"linux-amd64"""")
+            pom.readText().contains("<dependencies>") shouldBe false
+        }
 
-        val result = fixture.buildAndFail("tasks")
+        test("publishes a subset of platforms without complaining") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(
+                repositoryDir,
+                platforms = """"$hostPlatform"""",
+                stagePlatforms = listOf(hostPlatform)
+            )
 
-        result.output shouldContain "linux-amd64"
-        result.output shouldContain "linux-x86_64"
-    }
+            val result = fixture.build("publish")
 
-    @Test
-    @DisplayName("the generated loader names the coordinate a consumer is missing")
-    fun loaderNamesTheCoordinate() {
-        // The message is the only thing standing between a consumer and an afternoon: with
-        // separate artifacts the usual cause of a failed load is an undeclared dependency.
-        fixture.write("natives/$hostPlatform/libsample.so", "stand-in for a compiled library")
+            result.task(":publish")?.outcome shouldBe TaskOutcome.SUCCESS
+            publishedModule(repositoryDir, "sample-$hostPlatform").isDirectory shouldBe true
+        }
 
-        fixture.writeBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+        test("fails when a selected platform has no library") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            val absent = linuxPlatformOtherThan(hostPlatform)
+            fixture.writeStagedPublishingBuild(
+                repositoryDir,
+                platforms = """"$hostPlatform", "$absent"""",
+                stagePlatforms = listOf(hostPlatform)
+            )
 
-                platform {
-                    jvm {
-                        jni {
-                            enabled = true
+            val result = fixture.buildAndFail("kreateJniVerifyPlatforms")
 
-                            packaging {
+            result.output shouldContain absent
+            result.output shouldContain "No native library was found"
+        }
+
+        test("rejects an identifier that is not a platform") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            fixture.writeStagedPublishingBuild(repositoryDir, platforms = """"linux-amd64"""")
+
+            val result = fixture.buildAndFail("tasks")
+
+            result.output shouldContain "linux-amd64"
+            result.output shouldContain "linux-x86_64"
+        }
+
+        test("the generated loader names the coordinate a consumer is missing") {
+            val fixture = newFixture()
+            fixture.write("natives/$hostPlatform/libsample.so", "stand-in for a compiled library")
+
+            fixture.writeBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    platform {
+                        jvm {
+                            jni {
                                 enabled = true
-                                generateLoader = true
 
-                                publishing {
+                                packaging {
                                     enabled = true
-                                    platforms = listOf("$hostPlatform")
-                                    stagingDirectory = layout.projectDirectory.dir("natives")
+                                    generateLoader = true
+
+                                    publishing {
+                                        enabled = true
+                                        platforms = listOf("$hostPlatform")
+                                        stagingDirectory = layout.projectDirectory.dir("natives")
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                project {
-                    name = "sample"
-                    description = "Fixture"
+                    project {
+                        name = "sample"
+                        description = "Fixture"
 
-                    publish {
-                        enabled = true
+                        publish {
+                            enabled = true
 
-                        repositories {
-                            mavenCentral { enabled = false }
-                            gitlab { enabled = true }
+                            repositories {
+                                mavenCentral { enabled = false }
+                                gitlab { enabled = true }
+                            }
                         }
                     }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("maven-publish")""")
-        )
+                """.trimIndent(),
+                extraPlugins = listOf("""id("maven-publish")""")
+            )
 
-        fixture.build("kreateJniLoader")
+            fixture.build("kreateJniLoader")
 
-        val loader = fixture.file("build/generated/jni/kotlin").walkTopDown()
-            .single { it.name == "KreateNativeLoader.kt" }
-            .readText()
+            val generatedSources = fixture.file("build/generated/jni/kotlin").walkTopDown()
+            val loaderSource = generatedSources.single { it.name == "KreateNativeLoader.kt" }
+            val loader = loaderSource.readText()
 
-        loader shouldContain "runtimeOnly"
-        loader shouldContain "com.example:sample-"
-        loader shouldContain "Platforms published with this version: $hostPlatform"
+            loader shouldContain "runtimeOnly"
+            loader shouldContain "com.example:sample-"
+            loader shouldContain "Platforms published with this version: $hostPlatform"
+        }
+
+        test("the command line overrides the configured selection") {
+            val fixture = newFixture()
+            val repositoryDir = newRepositoryDirectory()
+            val other = linuxPlatformOtherThan(hostPlatform)
+            fixture.writeStagedPublishingBuild(
+                repositoryDir,
+                platforms = """"$other"""",
+                stagePlatforms = listOf(hostPlatform)
+            )
+
+            val result = fixture.build("publish", "-Pkreate.jni.publishPlatforms=$hostPlatform")
+
+            result.task(":publish")?.outcome shouldBe TaskOutcome.SUCCESS
+            publishedModule(repositoryDir, "sample-$hostPlatform").isDirectory shouldBe true
+            publishedModule(repositoryDir, "sample-$other").exists() shouldBe false
+        }
     }
-
-    @Test
-    @DisplayName("the command line overrides the configured selection")
-    fun propertyOverridesSelection() {
-        // A pipeline that gains or loses a runner should not need a commit to change what a
-        // release publishes.
-        val other = if (hostPlatform == "linux-aarch64") "linux-x86_64" else "linux-aarch64"
-        writeBuild(
-            platforms = """"$other"""",
-            stagePlatforms = listOf(hostPlatform)
-        )
-
-        val result = fixture.build("publish", "-Pkreate.jni.publishPlatforms=$hostPlatform")
-
-        result.task(":publish")?.outcome shouldBe TaskOutcome.SUCCESS
-        publishedModule("sample-$hostPlatform").isDirectory shouldBe true
-        publishedModule("sample-$other").exists() shouldBe false
-    }
-}
+})

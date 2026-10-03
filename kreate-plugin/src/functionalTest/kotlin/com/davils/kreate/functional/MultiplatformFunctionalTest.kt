@@ -16,51 +16,29 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * Tests for the defaults that are named after what the Kotlin JVM plugin registers and therefore
- * match nothing under the Kotlin Multiplatform plugin.
- *
- * Each one fails the same way: the build stays green and the thing quietly stops happening. Nothing
- * here asserts that a task succeeded - that was already true while it was broken. Every assertion is
- * about a task having actually done its work.
- */
-@DisplayName("Kotlin Multiplatform")
-class MultiplatformFunctionalTest {
-    private companion object {
-        /**
-         * A Java version deliberately different from the one running the test.
-         *
-         * The pin is only worth asserting against a version the build would not have arrived at on
-         * its own - checking that a build on JDK 21 targets 21 passes just as well when nothing was
-         * pinned at all.
-         */
-        val PINNED_JAVA: Int = if (KreateBuildFixture.javaVersion == 17) 21 else 17
-    }
+private val PINNABLE_JAVA_VERSIONS: List<Int> = listOf(17, 21)
 
-    @TempDir
-    lateinit var projectDir: File
+private val SAMPLE_SOURCE_SETS: List<String> = listOf("commonMain", "jvmMain", "wasmJsMain")
 
-    private lateinit var fixture: KreateBuildFixture
+private const val DETEKT_PLUGIN: String = """id("dev.detekt")"""
 
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+class MultiplatformFunctionalTest : FunSpec({
+    val workspace = kreateWorkspace()
+
+    val javaVersionDifferentFromTheRunningOne: Int =
+        PINNABLE_JAVA_VERSIONS.first { version -> version != KreateBuildFixture.javaVersion }
+
+    fun newBuildWithSourcePerSet(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
 
-        // One file per source set, because a task with nothing to read reports NO-SOURCE and would
-        // let an assertion that it ran pass while it read nothing - the failure this whole class is
-        // about. The bodies do real work for the same reason: Detekt's default configuration
-        // objects to a function that only returns a constant.
-        for (sourceSet in listOf("commonMain", "jvmMain", "wasmJsMain")) {
+        for (sourceSet in SAMPLE_SOURCE_SETS) {
             fixture.writeKotlin(
                 sourceSet,
                 "com/example/${sourceSet.replaceFirstChar(Char::uppercase)}Sample.kt",
@@ -73,233 +51,207 @@ class MultiplatformFunctionalTest {
                 """.trimIndent()
             )
         }
+        return fixture
     }
 
-    @Test
-    @DisplayName("pins the JVM toolchain instead of compiling against whatever runs Gradle")
-    fun pinsToolchain() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                platform {
-                    javaVersion = JavaVersion.VERSION_$PINNED_JAVA
-                    explicitApi = false
-                    allWarningsAsErrors = false
-                }
+    fun checkWithoutTestExecution(fixture: KreateBuildFixture): BuildResult =
+        fixture.buildWithoutKotlinTestTasks("check")
 
-                project {
-                    name = "Sample"
-                    description = "Fixture"
-                }
-            """.trimIndent(),
-            // A toolchain is not visible in a task outcome, so the build is asked what the JVM
-            // target was actually configured with. `jvmToolchain` sets it; nothing else here does.
-            //
-            // Only this task is run, never a compilation, so no toolchain has to be provisioned -
-            // which is what lets the pinned version be one the test machine does not have.
-            extra = """
-                tasks.register("printJvmTarget") {
-                    val target = tasks
-                        .named("compileKotlinJvm", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java)
-                        .map { it.compilerOptions.jvmTarget.get().target }
-                    doLast { println("jvm-target=" + target.get()) }
-                }
-            """.trimIndent()
-        )
-
-        val result = fixture.build("printJvmTarget")
-
-        result.output shouldContain "jvm-target=$PINNED_JAVA"
-    }
-
-    @Test
-    @DisplayName("locks a classpath per target rather than the two the JVM plugin would have")
-    fun locksPerTargetClasspaths() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
-
-                project {
-                    name = "Sample"
-                    description = "Fixture"
-
-                    dependencyLocking {
-                        enabled = true
+    context("Kotlin Multiplatform") {
+        test("pins the JVM toolchain instead of compiling against whatever runs Gradle") {
+            val fixture = newBuildWithSourcePerSet()
+            val pinnedJava = javaVersionDifferentFromTheRunningOne
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    platform {
+                        javaVersion = JavaVersion.VERSION_$pinnedJava
+                        explicitApi = false
+                        allWarningsAsErrors = false
                     }
-                }
-            """.trimIndent()
-        )
 
-        val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
-
-        result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
-
-        // `compileClasspath` and `runtimeClasspath` do not exist here. Before the per-target names
-        // were derived, this file was written with nothing in it at all.
-        val locked = fixture.file("gradle.lockfile").readText()
-        locked shouldContain "jvmCompileClasspath"
-        locked shouldContain "jvmRuntimeClasspath"
-        locked shouldContain "wasmJsCompileClasspath"
-        locked shouldContain "wasmJsRuntimeClasspath"
-    }
-
-    /**
-     * Runs `check` without the Kotlin test tasks.
-     *
-     * Every assertion below is about what `check` reaches on the Detekt side; none is about test
-     * execution, so leaving those tasks out costs the tests nothing and avoids the Wasm toolchain
-     * race described on [KreateBuildFixture.buildWithoutKotlinTestTasks].
-     *
-     * @return The build result.
-     */
-    private fun checkWithoutTestExecution() = fixture.buildWithoutKotlinTestTasks("check")
-
-    @Test
-    @DisplayName("check analyses every source set instead of an aggregate task with no sources")
-    fun checkAnalysesSourceSets() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
-
-                project {
-                    name = "Sample"
-                    description = "Fixture"
-
-                    detekt {
-                        enabled = true
-                        allRules = false
-                        buildUponDefaultConfig = true
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
                     }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("dev.detekt")""")
-        )
-        fixture.write("detekt.yaml", "")
-
-        val result = checkWithoutTestExecution()
-
-        // The aggregate task has no sources under this plugin, so `check` depending on it alone is
-        // a quality gate that reads nothing.
-        result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":detektJvmMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":detektWasmJsMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-    }
-
-    @Test
-    @DisplayName("kreateDetekt analyses every source set, so a pipeline needs no list of task names")
-    fun analyseTaskCoversEverySourceSet() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
-
-                project {
-                    name = "Sample"
-                    description = "Fixture"
-
-                    detekt {
-                        enabled = true
-                        allRules = false
-                        buildUponDefaultConfig = true
+                """.trimIndent(),
+                extra = """
+                    tasks.register("printJvmTarget") {
+                        val target = tasks
+                            .named("compileKotlinJvm", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class.java)
+                            .map { it.compilerOptions.jvmTarget.get().target }
+                        doLast { println("jvm-target=" + target.get()) }
                     }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("dev.detekt")""")
-        )
-        fixture.write("detekt.yaml", "")
+                """.trimIndent()
+            )
 
-        val result = fixture.build("kreateDetekt")
+            val result = fixture.build("printJvmTarget")
 
-        // The point of the task: one name a CI job can run that reaches every target. Before it
-        // existed, every project spelled these out by hand and a target added later was analysed
-        // by nothing, silently.
-        result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":detektJvmMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":detektWasmJsMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
-    }
+            result.output shouldContain "jvm-target=$pinnedJava"
+        }
 
-    @Test
-    @DisplayName("gives each Detekt task its own report directory")
-    fun reportsPerTask() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+        test("locks a classpath per target rather than the two the JVM plugin would have") {
+            val fixture = newBuildWithSourcePerSet()
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
 
-                project {
-                    name = "Sample"
-                    description = "Fixture"
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
 
-                    detekt {
-                        enabled = true
-                        allRules = false
+                        dependencyLocking {
+                            enabled = true
+                        }
+                    }
+                """.trimIndent()
+            )
 
-                        reports {
-                            markdown {
-                                required = true
-                                outputLocation = layout.buildDirectory.file("reports/detekt/report.md")
+            val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
+
+            result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
+
+            val locked = fixture.file("gradle.lockfile").readText()
+            locked shouldContain "jvmCompileClasspath"
+            locked shouldContain "jvmRuntimeClasspath"
+            locked shouldContain "wasmJsCompileClasspath"
+            locked shouldContain "wasmJsRuntimeClasspath"
+        }
+
+        test("check analyses every source set instead of an aggregate task with no sources") {
+            val fixture = newBuildWithSourcePerSet()
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
+
+                        detekt {
+                            enabled = true
+                            allRules = false
+                            buildUponDefaultConfig = true
+                        }
+                    }
+                """.trimIndent(),
+                extraPlugins = listOf(DETEKT_PLUGIN)
+            )
+            fixture.write("detekt.yaml", "")
+
+            val result = checkWithoutTestExecution(fixture)
+
+            result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":detektJvmMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":detektWasmJsMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("kreateDetekt analyses every source set, so a pipeline needs no list of task names") {
+            val fixture = newBuildWithSourcePerSet()
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
+
+                        detekt {
+                            enabled = true
+                            allRules = false
+                            buildUponDefaultConfig = true
+                        }
+                    }
+                """.trimIndent(),
+                extraPlugins = listOf(DETEKT_PLUGIN)
+            )
+            fixture.write("detekt.yaml", "")
+
+            val result = fixture.build("kreateDetekt")
+
+            result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":detektJvmMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":detektWasmJsMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("gives each Detekt task its own report directory") {
+            val fixture = newBuildWithSourcePerSet()
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
+
+                        detekt {
+                            enabled = true
+                            allRules = false
+
+                            reports {
+                                markdown {
+                                    required = true
+                                    outputLocation = layout.buildDirectory.file("reports/detekt/report.md")
+                                }
                             }
                         }
                     }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("dev.detekt")""")
-        )
-        fixture.write("detekt.yaml", "")
+                """.trimIndent(),
+                extraPlugins = listOf(DETEKT_PLUGIN)
+            )
+            fixture.write("detekt.yaml", "")
 
-        checkWithoutTestExecution()
+            checkWithoutTestExecution(fixture)
 
-        // One shared path would have made these overlapping task outputs, and whichever ran last
-        // would be the only report left.
-        fixture.file("build/reports/detekt/detektCommonMainSourceSet/report.md").isFile shouldBe true
-        fixture.file("build/reports/detekt/detektJvmMainSourceSet/report.md").isFile shouldBe true
-        fixture.file("build/reports/detekt/detektWasmJsMainSourceSet/report.md").isFile shouldBe true
-    }
+            fixture.file("build/reports/detekt/detektCommonMainSourceSet/report.md").isFile shouldBe true
+            fixture.file("build/reports/detekt/detektJvmMainSourceSet/report.md").isFile shouldBe true
+            fixture.file("build/reports/detekt/detektWasmJsMainSourceSet/report.md").isFile shouldBe true
+        }
 
-    @Test
-    @DisplayName("keeps generated sources out of static analysis")
-    fun ignoresGeneratedSources() {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+        test("keeps generated sources out of static analysis") {
+            val fixture = newBuildWithSourcePerSet()
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
 
-                project {
-                    name = "Sample"
-                    description = "Fixture"
+                    project {
+                        name = "Sample"
+                        description = "Fixture"
 
-                    detekt {
-                        enabled = true
-                        allRules = false
+                        detekt {
+                            enabled = true
+                            allRules = false
+                        }
                     }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("dev.detekt")"""),
-            // A generated file on the source set, the way KSP puts a test launcher there. It is
-            // deliberately something Detekt would object to.
-            extra = """
-                val generate = tasks.register("generate") {
-                    val output = layout.buildDirectory.dir("generated/sample")
-                    outputs.dir(output)
-                    doLast {
-                        val file = output.get().file("com/example/Generated.kt").asFile
-                        file.parentFile.mkdirs()
-                        file.writeText(
-                            "package com.example\n\nclass Generated { fun size(v: String): Int = v.length }   \n"
-                        )
+                """.trimIndent(),
+                extraPlugins = listOf(DETEKT_PLUGIN),
+                extra = """
+                    val generate = tasks.register("generate") {
+                        val output = layout.buildDirectory.dir("generated/sample")
+                        outputs.dir(output)
+                        doLast {
+                            val file = output.get().file("com/example/Generated.kt").asFile
+                            file.parentFile.mkdirs()
+                            file.writeText(
+                                "package com.example\n\nclass Generated { fun size(v: String): Int = v.length }   \n"
+                            )
+                        }
                     }
-                }
 
-                kotlin.sourceSets.getByName("commonMain").kotlin.srcDir(generate)
-            """.trimIndent()
-        )
-        fixture.write(
-            "detekt.yaml",
-            """
-            style:
-              TrailingWhitespace:
-                active: true
-            """.trimIndent()
-        )
+                    kotlin.sourceSets.getByName("commonMain").kotlin.srcDir(generate)
+                """.trimIndent()
+            )
+            fixture.write(
+                "detekt.yaml",
+                """
+                style:
+                  TrailingWhitespace:
+                    active: true
+                """.trimIndent()
+            )
 
-        val result = checkWithoutTestExecution()
+            val result = checkWithoutTestExecution(fixture)
 
-        result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":detektCommonMainSourceSet")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
     }
-}
+})

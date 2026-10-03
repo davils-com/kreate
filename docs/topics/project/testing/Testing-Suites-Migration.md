@@ -25,7 +25,7 @@ kreate {
 }
 ```
 
-The enum lives in `com.davils.kreate.module.project.tests`, so the build script needs an import.
+The enum lives in `com.davils.kreate.testing`, so the build script needs an import.
 
 ## The policies
 
@@ -195,7 +195,7 @@ Two details in that diff:
 | Tests stopped running, build still green                    | files left in `src/test` under `DISABLE`            | move them, or switch to `FAIL` to be told                |
 | `Unresolved reference 'Test'` in adopted files              | the framework is still on `testImplementation`      | declare it on the suite                                  |
 | `Configuration with name 'unitTestImplementation' not found`| declared in the top level `dependencies { }`        | declare it in the suite's `dependencies { }`             |
-| `Unresolved reference 'LegacyTestPolicy'`                   | missing import in the build script                  | `import com.davils.kreate.module.project.tests.LegacyTestPolicy` |
+| `Unresolved reference 'LegacyTestPolicy'`                   | missing import in the build script                  | `import com.davils.kreate.testing.LegacyTestPolicy` |
 
 See [](Testing-Troubleshooting.md) for the rest.
 

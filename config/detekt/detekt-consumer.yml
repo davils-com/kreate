@@ -37,3 +37,16 @@ complexity:
       - 'also'
       - 'with'
       - 'configure'
+
+comments:
+  # Kreate's test suites live in `src/<suite>`, which Detekt's default test exclusions do not know.
+  UndocumentedPublicClass:
+    excludes: &testSources
+      - '**/test/**'
+      - '**/unitTest/**'
+      - '**/integrationTest/**'
+      - '**/contractTest/**'
+  UndocumentedPublicFunction:
+    excludes: *testSources
+  UndocumentedPublicProperty:
+    excludes: *testSources

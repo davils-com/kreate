@@ -1,568 +1,53 @@
-public final class com/davils/kreate/Kreate : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
-}
-
 public abstract class com/davils/kreate/KreateExtension {
 	public fun <init> ()V
-	public abstract fun getLocal ()Lcom/davils/kreate/module/local/extension/LocalExtension;
-	public abstract fun getPlatform ()Lcom/davils/kreate/module/platform/PlatformExtension;
-	public abstract fun getProject ()Lcom/davils/kreate/module/project/ProjectExtension;
-	public abstract fun getTrivy ()Lcom/davils/kreate/module/trivy/extension/TrivyExtension;
+	public abstract fun getLocal ()Lcom/davils/kreate/local/LocalExtension;
+	public abstract fun getPlatform ()Lcom/davils/kreate/platform/PlatformExtension;
+	public abstract fun getProject ()Lcom/davils/kreate/project/ProjectExtension;
+	public abstract fun getTrivy ()Lcom/davils/kreate/trivy/TrivyExtension;
 	public final fun local (Lorg/gradle/api/Action;)V
 	public final fun platform (Lorg/gradle/api/Action;)V
 	public final fun project (Lorg/gradle/api/Action;)V
 	public final fun trivy (Lorg/gradle/api/Action;)V
 }
 
-public final class com/davils/kreate/KreateTasks {
-	public static final field BUILD_CONSTANTS Ljava/lang/String;
-	public static final field BUILD_CONSTANTS_GROUP Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks;
-}
-
-public final class com/davils/kreate/KreateTasks$ApiValidation {
-	public static final field CHECK Ljava/lang/String;
-	public static final field DUMP Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$ApiValidation;
-}
-
-public final class com/davils/kreate/KreateTasks$Benchmark {
-	public static final field BASELINE Ljava/lang/String;
-	public static final field CHECK Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Benchmark;
-	public static final field REPORT Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$CInterop {
-	public static final field COMPILE Ljava/lang/String;
-	public static final field CONFIGURE Ljava/lang/String;
-	public static final field DEFINITIONS Ljava/lang/String;
-	public static final field DEPENDENCIES Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INITIALIZE Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$CInterop;
-	public static final field SCRIPT Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$ConfigurationSchema {
-	public static final field CHECK Ljava/lang/String;
-	public static final field DUMP Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$ConfigurationSchema;
-	public static final field VALIDATE Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$DependencyLocking {
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$DependencyLocking;
-	public static final field RESOLVE_AND_LOCK_ALL Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$Detekt {
-	public static final field ANALYSE Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Detekt;
-}
-
-public final class com/davils/kreate/KreateTasks$Jni {
-	public static final field BUILD Ljava/lang/String;
-	public static final field CONFIGURE Ljava/lang/String;
-	public static final field DIGEST_MANIFEST Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field HEADERS Ljava/lang/String;
-	public static final field INITIALIZE Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Jni;
-	public static final field LOADER Ljava/lang/String;
-	public static final field NATIVE_JARS Ljava/lang/String;
-	public static final field VERIFY_PLATFORMS Ljava/lang/String;
-	public final fun nativeJar (Ljava/lang/String;)Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$Local {
-	public static final field CLEAN Ljava/lang/String;
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Local;
-	public static final field PUBLISH Ljava/lang/String;
-	public static final field PUBLISH_ALL Ljava/lang/String;
-	public static final field STATUS Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$Tests {
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Tests;
-	public static final field INTEGRATION Ljava/lang/String;
-	public static final field LEGACY Ljava/lang/String;
-	public static final field UNIT Ljava/lang/String;
-}
-
-public final class com/davils/kreate/KreateTasks$Trivy {
-	public static final field GROUP Ljava/lang/String;
-	public static final field INSTANCE Lcom/davils/kreate/KreateTasks$Trivy;
-	public static final field LICENSES Ljava/lang/String;
-	public static final field SCAN Ljava/lang/String;
-	public static final field SECRETS Ljava/lang/String;
-	public static final field VULNERABILITIES Ljava/lang/String;
-}
-
-public abstract class com/davils/kreate/jobs/Task : org/gradle/api/DefaultTask {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class com/davils/kreate/module/local/WorkspaceLibrary : java/io/Serializable {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lcom/davils/kreate/module/local/WorkspaceLibrary;
-	public static synthetic fun copy$default (Lcom/davils/kreate/module/local/WorkspaceLibrary;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcom/davils/kreate/module/local/WorkspaceLibrary;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDependencies ()Ljava/util/List;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getPath ()Ljava/lang/String;
-	public final fun getTasks ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class com/davils/kreate/module/local/extension/LocalExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getSnapshotSuffix ()Lorg/gradle/api/provider/Property;
-	public abstract fun getWorkspace ()Lcom/davils/kreate/module/local/extension/LocalWorkspaceExtension;
-	public final fun workspace (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/local/extension/LocalLibrarySpec : org/gradle/api/Named {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun dependsOn ([Ljava/lang/String;)V
-	public final fun getDependencies ()Lorg/gradle/api/provider/ListProperty;
-	public fun getName ()Ljava/lang/String;
-	public final fun getPath ()Lorg/gradle/api/provider/Property;
-	public final fun getTasks ()Lorg/gradle/api/provider/ListProperty;
-	public final fun tasks ([Ljava/lang/String;)V
-}
-
-public abstract class com/davils/kreate/module/local/extension/LocalWorkspaceExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getLibraries ()Lorg/gradle/api/NamedDomainObjectContainer;
-	public abstract fun getRoot ()Lorg/gradle/api/file/DirectoryProperty;
-	public final fun library (Ljava/lang/String;)V
-	public final fun library (Ljava/lang/String;Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/local/tasks/LocalClean : com/davils/kreate/jobs/Task {
+public final class com/davils/kreate/KreatePlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
-	public final fun clean ()V
-	public abstract fun getContinuousIntegration ()Lorg/gradle/api/provider/Property;
-	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getSweepAll ()Lorg/gradle/api/provider/Property;
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public abstract class com/davils/kreate/module/local/tasks/LocalPublish : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public abstract fun getContinuousIntegration ()Lorg/gradle/api/provider/Property;
-	public abstract fun getCoordinates ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getKreateVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLibrary ()Lorg/gradle/api/provider/Property;
-	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getPublishedVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getRepositoryDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public final fun record ()V
-}
-
-public abstract class com/davils/kreate/module/local/tasks/LocalPublishAll : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public abstract fun getFrom ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getLibraries ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getOnly ()Lorg/gradle/api/provider/ListProperty;
-	public final fun publishAll ()V
-}
-
-public abstract class com/davils/kreate/module/local/tasks/LocalStatus : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public abstract fun getInactiveReason ()Lorg/gradle/api/provider/Property;
-	public abstract fun getMavenLocal ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getStateDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public final fun report ()V
-}
-
-public abstract class com/davils/kreate/module/platform/PlatformExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getAllWarningsAsErrors ()Lorg/gradle/api/provider/Property;
-	public final fun getExplicitApi ()Lorg/gradle/api/provider/Property;
-	public final fun getJavaVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJvm ()Lcom/davils/kreate/module/platform/jvm/JvmExtension;
-	public abstract fun getMultiplatform ()Lcom/davils/kreate/module/platform/multiplatform/MultiplatformExtension;
-	public final fun jvm (Lorg/gradle/api/Action;)V
-	public final fun multiplatform (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/JvmExtension {
-	public fun <init> ()V
-	public abstract fun getJni ()Lcom/davils/kreate/module/platform/jvm/jni/JniExtension;
-	public final fun jni (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/JniExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getBuildType ()Lorg/gradle/api/provider/Property;
-	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
-	public abstract fun getHeaders ()Lcom/davils/kreate/module/platform/jvm/jni/JniHeaderExtension;
-	public final fun getLibraryIncludePaths ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getLibraryRuntimePaths ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getNameOverride ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPackaging ()Lcom/davils/kreate/module/platform/jvm/jni/JniPackagingExtension;
-	public final fun getProjectDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public final fun headers (Lorg/gradle/api/Action;)V
-	public final fun packaging (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/JniHeaderExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getFileName ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/JniPackagingExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getDigestManifest ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getGenerateLoader ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPublishing ()Lcom/davils/kreate/module/platform/jvm/jni/JniPublishingExtension;
-	public final fun getResourcePath ()Lorg/gradle/api/provider/Property;
-	public final fun publishing (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/JniPublishingExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getPlatforms ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getStagingDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/BuildNative : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getBuildType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getCmakeBuildDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getCmakeCache ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJavaHome ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLibraryOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getNativeSources ()Lorg/gradle/api/file/ConfigurableFileCollection;
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/ConfigureNative : com/davils/kreate/jobs/Task {
-	public static final field Companion Lcom/davils/kreate/module/platform/jvm/jni/tasks/ConfigureNative$Companion;
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getBuildType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getCacheBoundPaths ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getCmakeBuildDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getCmakeCache ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
-	public abstract fun getCmakeListsFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getGeneratedHeaderDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getGenerator ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJavaHome ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLibraryIncludePaths ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getLibraryOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getSourceDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/jvm/jni/tasks/ConfigureNative$Companion {
-	public final fun getCMAKE_CONFIGURATIONS ()Ljava/util/List;
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest : com/davils/kreate/jobs/Task {
-	public static final field Companion Lcom/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest$Companion;
-	public static final field MANIFEST_FILE_NAME Ljava/lang/String;
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getLibraryDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getManifest ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getPlatformId ()Lorg/gradle/api/provider/Property;
-}
-
-public final class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateDigestManifest$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateJniHeaders : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getClassDirectories ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getHeaderFileName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateNativeLoader : com/davils/kreate/jobs/Task {
-	public static final field Companion Lcom/davils/kreate/module/platform/jvm/jni/tasks/GenerateNativeLoader$Companion;
-	public static final field LOADER_CLASS_NAME Ljava/lang/String;
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getArtifactCoordinate ()Lorg/gradle/api/provider/Property;
-	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPublishedPlatforms ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getResourcePath ()Lorg/gradle/api/provider/Property;
-}
-
-public final class com/davils/kreate/module/platform/jvm/jni/tasks/GenerateNativeLoader$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/InitializeCppProject : com/davils/kreate/jobs/Task {
-	public static final field CMAKE_FILE_NAME Ljava/lang/String;
-	public static final field Companion Lcom/davils/kreate/module/platform/jvm/jni/tasks/InitializeCppProject$Companion;
-	public static final field INCLUDE_DIRS_VARIABLE Ljava/lang/String;
-	public static final field SRC_DIR_NAME Ljava/lang/String;
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getProjectRoot ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/jvm/jni/tasks/InitializeCppProject$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/jvm/jni/tasks/VerifyNativePlatforms : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getCandidatePaths ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getPlatforms ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getSearchedDirectories ()Lorg/gradle/api/file/ConfigurableFileCollection;
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/MultiplatformExtension {
-	public fun <init> ()V
-	public final fun cInterop (Lorg/gradle/api/Action;)V
-	public abstract fun getCInterop ()Lcom/davils/kreate/module/platform/multiplatform/cinterop/CInteropExtension;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/TargetKt {
-	public static final fun currentOs (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;)V
-	public static final fun currentOs (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun currentOs$default (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/CInteropExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun defFile (Lorg/gradle/api/Action;)V
-	public abstract fun getDefFiles ()Lcom/davils/kreate/module/platform/multiplatform/cinterop/DefFilesExtension;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getLanguage ()Lorg/gradle/api/provider/Property;
-	public final fun getNameOverride ()Lorg/gradle/api/provider/Property;
-	public final fun getPackageNameOverride ()Lorg/gradle/api/provider/Property;
-	public final fun getProjectDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public final fun getRustTargets ()Lorg/gradle/api/provider/ListProperty;
-	public final fun linux (Lkotlin/jvm/functions/Function1;)V
-	public final fun macos (Lkotlin/jvm/functions/Function1;)V
-	public final fun mingw (Lkotlin/jvm/functions/Function1;)V
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/DefFilesExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getDirName ()Lorg/gradle/api/provider/Property;
-	public final fun getFileName ()Lorg/gradle/api/provider/Property;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage : java/lang/Enum {
-	public static final field C Lcom/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage;
-	public static final field CPP Lcom/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage;
-	public static final field RUST Lcom/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage;
-	public static fun values ()[Lcom/davils/kreate/module/platform/multiplatform/cinterop/NativeLanguage;
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/AddRustDependencies : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getRustBuildDependencies ()Lorg/gradle/api/provider/MapProperty;
-	public abstract fun getRustDependencies ()Lorg/gradle/api/provider/MapProperty;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/CompileNative : com/davils/kreate/jobs/Task {
-	public static final field BUILD_DIR_NAME Ljava/lang/String;
-	public static final field Companion Lcom/davils/kreate/module/platform/multiplatform/cinterop/tasks/CompileNative$Companion;
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getBuildType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getNativeSources ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getOutputDir ()Ljava/io/File;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/CompileNative$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/CompileRust : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getNativeSources ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getOutputDir ()Ljava/io/File;
-	public abstract fun getRustTargets ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/ConfigureCargo : com/davils/kreate/jobs/Task {
-	public static final field CARGO_TOML_FILE_NAME Ljava/lang/String;
-	public static final field Companion Lcom/davils/kreate/module/platform/multiplatform/cinterop/tasks/ConfigureCargo$Companion;
-	public fun <init> ()V
-	public final fun execute ()V
-	public final fun getExtendedCargoContent ()Ljava/lang/String;
-	public final fun getOutputFile ()Ljava/io/File;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/ConfigureCargo$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/GenerateDefinitionFiles : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getDefDirName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getDefFileName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLanguage ()Lorg/gradle/api/provider/Property;
-	public final fun getOutputDir ()Ljava/io/File;
-	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getRootDir ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getRustTargets ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/GenerateRustBuildScript : com/davils/kreate/jobs/Task {
-	public static final field BUILD_RUST_FILE_NAME Ljava/lang/String;
-	public static final field Companion Lcom/davils/kreate/module/platform/multiplatform/cinterop/tasks/GenerateRustBuildScript$Companion;
-	public fun <init> ()V
-	public final fun execute ()V
-	public final fun getOutputFile ()Ljava/io/File;
-	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/GenerateRustBuildScript$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/InitializeNativeProject : com/davils/kreate/jobs/Task {
-	public static final field CMAKE_FILE_NAME Ljava/lang/String;
-	public static final field Companion Lcom/davils/kreate/module/platform/multiplatform/cinterop/tasks/InitializeNativeProject$Companion;
-	public static final field INCLUDE_DIR_NAME Ljava/lang/String;
-	public static final field SRC_DIR_NAME Ljava/lang/String;
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getLanguage ()Lorg/gradle/api/provider/Property;
-	public final fun getOutputDir ()Ljava/io/File;
-	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public final class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/InitializeNativeProject$Companion {
-}
-
-public abstract class com/davils/kreate/module/platform/multiplatform/cinterop/tasks/InitializeRustProject : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public final fun getOutputDir ()Ljava/io/File;
-	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getWorkDir ()Lorg/gradle/api/file/DirectoryProperty;
-}
-
-public abstract class com/davils/kreate/module/project/ProjectExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun apiValidation (Lorg/gradle/api/Action;)V
-	public final fun benchmark (Lorg/gradle/api/Action;)V
-	public final fun buildConstant (Lorg/gradle/api/Action;)V
-	public final fun configurationSchema (Lorg/gradle/api/Action;)V
-	public final fun coverage (Lorg/gradle/api/Action;)V
-	public final fun dependencyLocking (Lorg/gradle/api/Action;)V
-	public final fun detekt (Lorg/gradle/api/Action;)V
-	public final fun docs (Lorg/gradle/api/Action;)V
-	public abstract fun getApiValidation ()Lcom/davils/kreate/module/project/api/extension/ApiValidationExtension;
-	public final fun getApplyDefaultRepositories ()Lorg/gradle/api/provider/Property;
-	public final fun getApplySerializationPlugin ()Lorg/gradle/api/provider/Property;
-	public abstract fun getBenchmark ()Lcom/davils/kreate/module/project/benchmark/extension/BenchmarkExtension;
-	public abstract fun getBuildConstants ()Lcom/davils/kreate/module/project/constants/BuildConstantsExtension;
-	public abstract fun getConfigurationSchema ()Lcom/davils/kreate/module/project/configuration/extension/ConfigurationSchemaExtension;
-	public abstract fun getCoverage ()Lcom/davils/kreate/module/project/coverage/extension/CoverageExtension;
-	public abstract fun getDependencyLocking ()Lcom/davils/kreate/module/project/locking/extension/DependencyLockingExtension;
-	public final fun getDescription ()Lorg/gradle/api/provider/Property;
-	public abstract fun getDetekt ()Lcom/davils/kreate/module/project/detekt/extension/DetektExtension;
-	public abstract fun getDocs ()Lcom/davils/kreate/module/project/docs/DocsExtension;
-	public final fun getName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPublish ()Lcom/davils/kreate/module/project/publish/extension/PublishExtension;
-	public abstract fun getTests ()Lcom/davils/kreate/module/project/tests/TestsExtension;
-	public abstract fun getVersion ()Lcom/davils/kreate/module/project/ProjectExtensionVersion;
-	public final fun publish (Lorg/gradle/api/Action;)V
-	public final fun tests (Lorg/gradle/api/Action;)V
-	public final fun version (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/project/ProjectExtensionVersion {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnvironment ()Lorg/gradle/api/provider/Property;
-	public final fun getProperty ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/project/api/extension/ApiValidationExtension {
+public abstract class com/davils/kreate/api/ApiValidationExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getApiDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public final fun getDumpFileName ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getKlib ()Lorg/gradle/api/provider/Property;
 	public final fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
 }
 
-public abstract class com/davils/kreate/module/project/api/tasks/ApiCheck : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getActualDumpFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getClassDirectories ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getDumpTaskPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getExpectedDumpFile ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getProjectPath ()Lorg/gradle/api/provider/Property;
+public final class com/davils/kreate/api/ApiValidationTaskNames {
+	public static final field CHECK Ljava/lang/String;
+	public static final field DUMP Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/api/ApiValidationTaskNames;
 }
 
-public abstract class com/davils/kreate/module/project/api/tasks/ApiDump : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getClassDirectories ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getDumpFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getIgnoredClasses ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
-	public abstract fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
-}
-
-public abstract class com/davils/kreate/module/project/benchmark/extension/BenchmarkExtension {
+public abstract class com/davils/kreate/benchmark/BenchmarkExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getApplyAllOpen ()Lorg/gradle/api/provider/Property;
 	public final fun getCreateSourceSet ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getJmhVersion ()Lorg/gradle/api/provider/Property;
 	public final fun getProfiles ()Lorg/gradle/api/NamedDomainObjectContainer;
-	public abstract fun getRegression ()Lcom/davils/kreate/module/project/benchmark/extension/BenchmarkRegressionExtension;
+	public abstract fun getRegression ()Lcom/davils/kreate/benchmark/BenchmarkRegressionExtension;
 	public final fun getRuntimeVersion ()Lorg/gradle/api/provider/Property;
 	public final fun getSourceSetName ()Lorg/gradle/api/provider/Property;
 	public final fun profiles (Lorg/gradle/api/Action;)V
 	public final fun regression (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/benchmark/extension/BenchmarkProfileExtension {
+public abstract class com/davils/kreate/benchmark/BenchmarkProfileExtension {
 	public fun <init> (Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun advanced (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun exclude (Ljava/lang/String;)V
@@ -582,7 +67,7 @@ public abstract class com/davils/kreate/module/project/benchmark/extension/Bench
 	public final fun param (Ljava/lang/String;[Ljava/lang/String;)V
 }
 
-public abstract class com/davils/kreate/module/project/benchmark/extension/BenchmarkRegressionExtension {
+public abstract class com/davils/kreate/benchmark/BenchmarkRegressionExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getBaselineFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -593,52 +78,61 @@ public abstract class com/davils/kreate/module/project/benchmark/extension/Bench
 	public final fun getThresholdOverrides ()Lorg/gradle/api/provider/MapProperty;
 }
 
-public abstract class com/davils/kreate/module/project/benchmark/tasks/BenchmarkBaseline : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getBaselineFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getNormalizedReports ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getProfile ()Lorg/gradle/api/provider/Property;
+public final class com/davils/kreate/benchmark/BenchmarkTaskNames {
+	public static final field BASELINE Ljava/lang/String;
+	public static final field CHECK Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/benchmark/BenchmarkTaskNames;
+	public static final field REPORT Ljava/lang/String;
 }
 
-public abstract class com/davils/kreate/module/project/benchmark/tasks/BenchmarkCheck : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getBaselineFile ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getBaselineTaskPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getComparisonReportFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getFailOnMissingBenchmark ()Lorg/gradle/api/provider/Property;
-	public abstract fun getMaxRegressionPercent ()Lorg/gradle/api/provider/Property;
-	public abstract fun getNormalizedReports ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getProfile ()Lorg/gradle/api/provider/Property;
-	public abstract fun getProjectPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getRequireSignificance ()Lorg/gradle/api/provider/Property;
-	public abstract fun getThresholdOverrides ()Lorg/gradle/api/provider/MapProperty;
+public abstract class com/davils/kreate/cinterop/CInteropExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun defFile (Lorg/gradle/api/Action;)V
+	public abstract fun getDefFiles ()Lcom/davils/kreate/cinterop/DefFilesExtension;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getLanguage ()Lorg/gradle/api/provider/Property;
+	public final fun getNameOverride ()Lorg/gradle/api/provider/Property;
+	public final fun getPackageNameOverride ()Lorg/gradle/api/provider/Property;
+	public final fun getProjectDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun getRustTargets ()Lorg/gradle/api/provider/ListProperty;
+	public final fun linux (Lkotlin/jvm/functions/Function1;)V
+	public final fun macos (Lkotlin/jvm/functions/Function1;)V
+	public final fun mingw (Lkotlin/jvm/functions/Function1;)V
 }
 
-public abstract class com/davils/kreate/module/project/benchmark/tasks/NormalizeBenchmarkReport : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getNormalizedDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getProfile ()Lorg/gradle/api/provider/Property;
-	public abstract fun getTimestampedReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+public final class com/davils/kreate/cinterop/CInteropTaskNames {
+	public static final field COMPILE Ljava/lang/String;
+	public static final field CONFIGURE Ljava/lang/String;
+	public static final field DEFINITIONS Ljava/lang/String;
+	public static final field DEPENDENCIES Ljava/lang/String;
+	public static final field INITIALIZE Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/cinterop/CInteropTaskNames;
+	public static final field SCRIPT Ljava/lang/String;
 }
 
-public final class com/davils/kreate/module/project/configuration/DeclaredSchema : java/io/Serializable {
-	public final fun getAccessor ()Ljava/lang/String;
-	public final fun getHolder ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public fun toString ()Ljava/lang/String;
+public abstract class com/davils/kreate/cinterop/DefFilesExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getDirName ()Lorg/gradle/api/provider/Property;
+	public final fun getFileName ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/configuration/extension/ConfigurationDefinition {
+public final class com/davils/kreate/cinterop/NativeLanguage : java/lang/Enum {
+	public static final field C Lcom/davils/kreate/cinterop/NativeLanguage;
+	public static final field CPP Lcom/davils/kreate/cinterop/NativeLanguage;
+	public static final field RUST Lcom/davils/kreate/cinterop/NativeLanguage;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/cinterop/NativeLanguage;
+	public static fun values ()[Lcom/davils/kreate/cinterop/NativeLanguage;
+}
+
+public abstract class com/davils/kreate/configuration/ConfigurationDefinition {
 	public fun <init> ()V
 	public abstract fun getAccessor ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHolder ()Lorg/gradle/api/provider/Property;
 	public abstract fun getName ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/configuration/extension/ConfigurationSchemaExtension {
+public abstract class com/davils/kreate/configuration/ConfigurationSchemaExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getDefinitions ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -648,35 +142,14 @@ public abstract class com/davils/kreate/module/project/configuration/extension/C
 	public final fun validation (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigSchemaCheck : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getDumpTaskPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getExpectedExports ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getOutcomeFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getSchemaDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getSchemas ()Lorg/gradle/api/provider/ListProperty;
+public final class com/davils/kreate/configuration/ConfigurationSchemaTaskNames {
+	public static final field CHECK Ljava/lang/String;
+	public static final field DUMP Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/configuration/ConfigurationSchemaTaskNames;
+	public static final field VALIDATE Ljava/lang/String;
 }
 
-public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigSchemaDump : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getSchemaDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getSchemas ()Lorg/gradle/api/provider/ListProperty;
-}
-
-public abstract class com/davils/kreate/module/project/configuration/tasks/ConfigValidate : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getConfigurationFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getReportFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getReports ()Lorg/gradle/api/provider/Property;
-	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
-}
-
-public abstract class com/davils/kreate/module/project/constants/BuildConstantsExtension {
+public abstract class com/davils/kreate/constants/BuildConstantsExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun constant (Ljava/lang/String;Ljava/lang/Object;)V
 	public final fun constant (Ljava/lang/String;Ljava/lang/String;)V
@@ -687,56 +160,33 @@ public abstract class com/davils/kreate/module/project/constants/BuildConstantsE
 	public final fun getPath ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/constants/GenerateBuildConstantsTask : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-	public abstract fun getClassName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getExplicitApi ()Lorg/gradle/api/provider/Property;
-	public abstract fun getFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getProperties ()Lorg/gradle/api/provider/MapProperty;
+public final class com/davils/kreate/constants/BuildConstantsTaskNames {
+	public static final field GENERATE Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/constants/BuildConstantsTaskNames;
 }
 
-public final class com/davils/kreate/module/project/coverage/Aggregation : java/lang/Enum {
-	public static final field COVERED_COUNT Lcom/davils/kreate/module/project/coverage/Aggregation;
-	public static final field COVERED_PERCENTAGE Lcom/davils/kreate/module/project/coverage/Aggregation;
-	public static final field MISSED_COUNT Lcom/davils/kreate/module/project/coverage/Aggregation;
-	public static final field MISSED_PERCENTAGE Lcom/davils/kreate/module/project/coverage/Aggregation;
+public final class com/davils/kreate/coverage/Aggregation : java/lang/Enum {
+	public static final field COVERED_COUNT Lcom/davils/kreate/coverage/Aggregation;
+	public static final field COVERED_PERCENTAGE Lcom/davils/kreate/coverage/Aggregation;
+	public static final field MISSED_COUNT Lcom/davils/kreate/coverage/Aggregation;
+	public static final field MISSED_PERCENTAGE Lcom/davils/kreate/coverage/Aggregation;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/coverage/Aggregation;
-	public static fun values ()[Lcom/davils/kreate/module/project/coverage/Aggregation;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/coverage/Aggregation;
+	public static fun values ()[Lcom/davils/kreate/coverage/Aggregation;
 }
 
-public final class com/davils/kreate/module/project/coverage/CoverageUnit : java/lang/Enum {
-	public static final field BRANCH Lcom/davils/kreate/module/project/coverage/CoverageUnit;
-	public static final field INSTRUCTION Lcom/davils/kreate/module/project/coverage/CoverageUnit;
-	public static final field LINE Lcom/davils/kreate/module/project/coverage/CoverageUnit;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/coverage/CoverageUnit;
-	public static fun values ()[Lcom/davils/kreate/module/project/coverage/CoverageUnit;
-}
-
-public final class com/davils/kreate/module/project/coverage/Grouping : java/lang/Enum {
-	public static final field APPLICATION Lcom/davils/kreate/module/project/coverage/Grouping;
-	public static final field CLASS Lcom/davils/kreate/module/project/coverage/Grouping;
-	public static final field PACKAGE Lcom/davils/kreate/module/project/coverage/Grouping;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/coverage/Grouping;
-	public static fun values ()[Lcom/davils/kreate/module/project/coverage/Grouping;
-}
-
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageAggregateExtension {
+public abstract class com/davils/kreate/coverage/CoverageAggregateExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getProjects ()Lorg/gradle/api/provider/ListProperty;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageBinaryReportSpec : com/davils/kreate/module/project/coverage/extension/CoverageReportSpec {
+public abstract class com/davils/kreate/coverage/CoverageBinaryReportSpec : com/davils/kreate/coverage/CoverageReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getFile ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageBoundSpec {
+public abstract class com/davils/kreate/coverage/CoverageBoundSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getAggregation ()Lorg/gradle/api/provider/Property;
 	public final fun getMax ()Lorg/gradle/api/provider/Property;
@@ -744,34 +194,34 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun getUnit ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageExtension {
+public abstract class com/davils/kreate/coverage/CoverageExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun aggregate (Lorg/gradle/api/Action;)V
 	public final fun filters (Lorg/gradle/api/Action;)V
-	public abstract fun getAggregate ()Lcom/davils/kreate/module/project/coverage/extension/CoverageAggregateExtension;
+	public abstract fun getAggregate ()Lcom/davils/kreate/coverage/CoverageAggregateExtension;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public abstract fun getFilters ()Lcom/davils/kreate/module/project/coverage/extension/CoverageFilterExtension;
-	public abstract fun getInstrumentation ()Lcom/davils/kreate/module/project/coverage/extension/CoverageInstrumentationExtension;
+	public abstract fun getFilters ()Lcom/davils/kreate/coverage/CoverageFilterExtension;
+	public abstract fun getInstrumentation ()Lcom/davils/kreate/coverage/CoverageInstrumentationExtension;
 	public final fun getJacocoVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getReports ()Lcom/davils/kreate/module/project/coverage/extension/CoverageReportExtension;
-	public abstract fun getSources ()Lcom/davils/kreate/module/project/coverage/extension/CoverageSourcesExtension;
+	public abstract fun getReports ()Lcom/davils/kreate/coverage/CoverageReportExtension;
+	public abstract fun getSources ()Lcom/davils/kreate/coverage/CoverageSourcesExtension;
 	public final fun getUseJacoco ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerify ()Lcom/davils/kreate/module/project/coverage/extension/CoverageVerifyExtension;
+	public abstract fun getVerify ()Lcom/davils/kreate/coverage/CoverageVerifyExtension;
 	public final fun instrumentation (Lorg/gradle/api/Action;)V
 	public final fun reports (Lorg/gradle/api/Action;)V
 	public final fun sources (Lorg/gradle/api/Action;)V
 	public final fun verify (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageFilterExtension {
+public abstract class com/davils/kreate/coverage/CoverageFilterExtension {
 	public fun <init> ()V
 	public final fun excludes (Lorg/gradle/api/Action;)V
-	public abstract fun getExcludes ()Lcom/davils/kreate/module/project/coverage/extension/CoverageFilterSpec;
-	public abstract fun getIncludes ()Lcom/davils/kreate/module/project/coverage/extension/CoverageFilterSpec;
+	public abstract fun getExcludes ()Lcom/davils/kreate/coverage/CoverageFilterSpec;
+	public abstract fun getIncludes ()Lcom/davils/kreate/coverage/CoverageFilterSpec;
 	public final fun includes (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageFilterSpec {
+public abstract class com/davils/kreate/coverage/CoverageFilterSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getAnnotatedBy ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getClasses ()Lorg/gradle/api/provider/ListProperty;
@@ -779,14 +229,14 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun getPackages ()Lorg/gradle/api/provider/ListProperty;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageHtmlReportSpec : com/davils/kreate/module/project/coverage/extension/CoverageReportSpec {
+public abstract class com/davils/kreate/coverage/CoverageHtmlReportSpec : com/davils/kreate/coverage/CoverageReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getCharset ()Lorg/gradle/api/provider/Property;
 	public final fun getDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public final fun getTitle ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageInstrumentationExtension {
+public abstract class com/davils/kreate/coverage/CoverageInstrumentationExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getDisabledForAll ()Lorg/gradle/api/provider/Property;
 	public final fun getDisabledForTestTasks ()Lorg/gradle/api/provider/ListProperty;
@@ -794,7 +244,7 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun getIncludedClasses ()Lorg/gradle/api/provider/ListProperty;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageLogReportSpec : com/davils/kreate/module/project/coverage/extension/CoverageReportSpec {
+public abstract class com/davils/kreate/coverage/CoverageLogReportSpec : com/davils/kreate/coverage/CoverageReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getAggregation ()Lorg/gradle/api/provider/Property;
 	public final fun getCoverageUnit ()Lorg/gradle/api/provider/Property;
@@ -803,24 +253,24 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun getHeader ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageReportExtension {
+public abstract class com/davils/kreate/coverage/CoverageReportExtension {
 	public fun <init> ()V
 	public final fun binary (Lorg/gradle/api/Action;)V
-	public abstract fun getBinary ()Lcom/davils/kreate/module/project/coverage/extension/CoverageBinaryReportSpec;
-	public abstract fun getHtml ()Lcom/davils/kreate/module/project/coverage/extension/CoverageHtmlReportSpec;
-	public abstract fun getLog ()Lcom/davils/kreate/module/project/coverage/extension/CoverageLogReportSpec;
-	public abstract fun getXml ()Lcom/davils/kreate/module/project/coverage/extension/CoverageXmlReportSpec;
+	public abstract fun getBinary ()Lcom/davils/kreate/coverage/CoverageBinaryReportSpec;
+	public abstract fun getHtml ()Lcom/davils/kreate/coverage/CoverageHtmlReportSpec;
+	public abstract fun getLog ()Lcom/davils/kreate/coverage/CoverageLogReportSpec;
+	public abstract fun getXml ()Lcom/davils/kreate/coverage/CoverageXmlReportSpec;
 	public final fun html (Lorg/gradle/api/Action;)V
 	public final fun log (Lorg/gradle/api/Action;)V
 	public final fun xml (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageReportSpec {
+public abstract class com/davils/kreate/coverage/CoverageReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getOnCheck ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageRuleSpec : org/gradle/api/Named {
+public abstract class com/davils/kreate/coverage/CoverageRuleSpec : org/gradle/api/Named {
 	public fun <init> (Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun bound (Lorg/gradle/api/Action;)V
 	public final fun getBounds ()Lorg/gradle/api/provider/ListProperty;
@@ -828,23 +278,32 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun getGroupBy ()Lorg/gradle/api/provider/Property;
 	public fun getName ()Ljava/lang/String;
 	public final fun maxBound (I)V
-	public final fun maxBound (ILcom/davils/kreate/module/project/coverage/CoverageUnit;)V
-	public final fun maxBound (ILcom/davils/kreate/module/project/coverage/CoverageUnit;Lcom/davils/kreate/module/project/coverage/Aggregation;)V
-	public static synthetic fun maxBound$default (Lcom/davils/kreate/module/project/coverage/extension/CoverageRuleSpec;ILcom/davils/kreate/module/project/coverage/CoverageUnit;Lcom/davils/kreate/module/project/coverage/Aggregation;ILjava/lang/Object;)V
+	public final fun maxBound (ILcom/davils/kreate/coverage/CoverageUnit;)V
+	public final fun maxBound (ILcom/davils/kreate/coverage/CoverageUnit;Lcom/davils/kreate/coverage/Aggregation;)V
+	public static synthetic fun maxBound$default (Lcom/davils/kreate/coverage/CoverageRuleSpec;ILcom/davils/kreate/coverage/CoverageUnit;Lcom/davils/kreate/coverage/Aggregation;ILjava/lang/Object;)V
 	public final fun minBound (I)V
-	public final fun minBound (ILcom/davils/kreate/module/project/coverage/CoverageUnit;)V
-	public final fun minBound (ILcom/davils/kreate/module/project/coverage/CoverageUnit;Lcom/davils/kreate/module/project/coverage/Aggregation;)V
-	public static synthetic fun minBound$default (Lcom/davils/kreate/module/project/coverage/extension/CoverageRuleSpec;ILcom/davils/kreate/module/project/coverage/CoverageUnit;Lcom/davils/kreate/module/project/coverage/Aggregation;ILjava/lang/Object;)V
+	public final fun minBound (ILcom/davils/kreate/coverage/CoverageUnit;)V
+	public final fun minBound (ILcom/davils/kreate/coverage/CoverageUnit;Lcom/davils/kreate/coverage/Aggregation;)V
+	public static synthetic fun minBound$default (Lcom/davils/kreate/coverage/CoverageRuleSpec;ILcom/davils/kreate/coverage/CoverageUnit;Lcom/davils/kreate/coverage/Aggregation;ILjava/lang/Object;)V
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageSourcesExtension {
+public abstract class com/davils/kreate/coverage/CoverageSourcesExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getExcludeJava ()Lorg/gradle/api/provider/Property;
 	public final fun getExcludedSourceSets ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getIncludedSourceSets ()Lorg/gradle/api/provider/ListProperty;
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageVerifyExtension {
+public final class com/davils/kreate/coverage/CoverageUnit : java/lang/Enum {
+	public static final field BRANCH Lcom/davils/kreate/coverage/CoverageUnit;
+	public static final field INSTRUCTION Lcom/davils/kreate/coverage/CoverageUnit;
+	public static final field LINE Lcom/davils/kreate/coverage/CoverageUnit;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/coverage/CoverageUnit;
+	public static fun values ()[Lcom/davils/kreate/coverage/CoverageUnit;
+}
+
+public abstract class com/davils/kreate/coverage/CoverageVerifyExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getGroupBy ()Lorg/gradle/api/provider/Property;
 	public final fun getMinBranchCoverage ()Lorg/gradle/api/provider/Property;
@@ -856,58 +315,72 @@ public abstract class com/davils/kreate/module/project/coverage/extension/Covera
 	public final fun rules (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/coverage/extension/CoverageXmlReportSpec : com/davils/kreate/module/project/coverage/extension/CoverageReportSpec {
+public abstract class com/davils/kreate/coverage/CoverageXmlReportSpec : com/davils/kreate/coverage/CoverageReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getTitle ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektCheckstyleReportSpec : com/davils/kreate/module/project/detekt/extension/DetektReportSpec {
+public final class com/davils/kreate/coverage/Grouping : java/lang/Enum {
+	public static final field APPLICATION Lcom/davils/kreate/coverage/Grouping;
+	public static final field CLASS Lcom/davils/kreate/coverage/Grouping;
+	public static final field PACKAGE Lcom/davils/kreate/coverage/Grouping;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/coverage/Grouping;
+	public static fun values ()[Lcom/davils/kreate/coverage/Grouping;
+}
+
+public abstract class com/davils/kreate/detekt/DetektCheckstyleReportSpec : com/davils/kreate/detekt/DetektReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektExtension {
+public abstract class com/davils/kreate/detekt/DetektExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getAllRules ()Lorg/gradle/api/provider/Property;
 	public final fun getBuildUponDefaultConfig ()Lorg/gradle/api/provider/Property;
 	public final fun getConfig ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getKreateRules ()Lorg/gradle/api/provider/Property;
-	public abstract fun getReports ()Lcom/davils/kreate/module/project/detekt/extension/DetektReportExtension;
+	public abstract fun getReports ()Lcom/davils/kreate/detekt/DetektReportExtension;
 	public final fun reports (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektHtmlReportSpec : com/davils/kreate/module/project/detekt/extension/DetektReportSpec {
+public abstract class com/davils/kreate/detekt/DetektHtmlReportSpec : com/davils/kreate/detekt/DetektReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektMarkdownReportSpec : com/davils/kreate/module/project/detekt/extension/DetektReportSpec {
+public abstract class com/davils/kreate/detekt/DetektMarkdownReportSpec : com/davils/kreate/detekt/DetektReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektReportExtension {
+public abstract class com/davils/kreate/detekt/DetektReportExtension {
 	public fun <init> ()V
 	public final fun checkstyle (Lorg/gradle/api/Action;)V
-	public abstract fun getCheckstyle ()Lcom/davils/kreate/module/project/detekt/extension/DetektCheckstyleReportSpec;
-	public abstract fun getHtml ()Lcom/davils/kreate/module/project/detekt/extension/DetektHtmlReportSpec;
-	public abstract fun getMarkdown ()Lcom/davils/kreate/module/project/detekt/extension/DetektMarkdownReportSpec;
-	public abstract fun getSarif ()Lcom/davils/kreate/module/project/detekt/extension/DetektSarifReportSpec;
+	public abstract fun getCheckstyle ()Lcom/davils/kreate/detekt/DetektCheckstyleReportSpec;
+	public abstract fun getHtml ()Lcom/davils/kreate/detekt/DetektHtmlReportSpec;
+	public abstract fun getMarkdown ()Lcom/davils/kreate/detekt/DetektMarkdownReportSpec;
+	public abstract fun getSarif ()Lcom/davils/kreate/detekt/DetektSarifReportSpec;
 	public final fun html (Lorg/gradle/api/Action;)V
 	public final fun markdown (Lorg/gradle/api/Action;)V
 	public final fun sarif (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektReportSpec {
+public abstract class com/davils/kreate/detekt/DetektReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getOutputLocation ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getRequired ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/detekt/extension/DetektSarifReportSpec : com/davils/kreate/module/project/detekt/extension/DetektReportSpec {
+public abstract class com/davils/kreate/detekt/DetektSarifReportSpec : com/davils/kreate/detekt/DetektReportSpec {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 }
 
-public abstract class com/davils/kreate/module/project/docs/DocsExtension {
+public final class com/davils/kreate/detekt/DetektTaskNames {
+	public static final field ANALYSE Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/detekt/DetektTaskNames;
+}
+
+public abstract class com/davils/kreate/docs/DocsExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getCopyright ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -915,86 +388,170 @@ public abstract class com/davils/kreate/module/project/docs/DocsExtension {
 	public final fun getOutputDirectory ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/locking/extension/DependencyLockingExtension {
+public abstract class com/davils/kreate/jni/JniExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getBuildType ()Lorg/gradle/api/provider/Property;
+	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
+	public abstract fun getHeaders ()Lcom/davils/kreate/jni/JniHeaderExtension;
+	public final fun getLibraryIncludePaths ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getLibraryRuntimePaths ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getNameOverride ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPackaging ()Lcom/davils/kreate/jni/JniPackagingExtension;
+	public final fun getProjectDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun headers (Lorg/gradle/api/Action;)V
+	public final fun packaging (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/jni/JniHeaderExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFileName ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/jni/JniPackagingExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getDigestManifest ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getGenerateLoader ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPublishing ()Lcom/davils/kreate/jni/JniPublishingExtension;
+	public final fun getResourcePath ()Lorg/gradle/api/provider/Property;
+	public final fun publishing (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/jni/JniPublishingExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getPlatforms ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getStagingDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
+public final class com/davils/kreate/jni/JniTaskNames {
+	public static final field BUILD Ljava/lang/String;
+	public static final field CONFIGURE Ljava/lang/String;
+	public static final field DIGEST_MANIFEST Ljava/lang/String;
+	public static final field HEADERS Ljava/lang/String;
+	public static final field INITIALIZE Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/jni/JniTaskNames;
+	public static final field LOADER Ljava/lang/String;
+	public static final field NATIVE_JARS Ljava/lang/String;
+	public static final field VERIFY_PLATFORMS Ljava/lang/String;
+	public final fun nativeJar (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/local/LocalExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getWorkspace ()Lcom/davils/kreate/local/LocalWorkspaceExtension;
+	public final fun workspace (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/local/LocalLibrarySpec : org/gradle/api/Named {
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun dependsOn ([Ljava/lang/String;)V
+	public final fun getDependencies ()Lorg/gradle/api/provider/ListProperty;
+	public fun getName ()Ljava/lang/String;
+	public final fun getPath ()Lorg/gradle/api/provider/Property;
+	public final fun getTasks ()Lorg/gradle/api/provider/ListProperty;
+	public final fun tasks ([Ljava/lang/String;)V
+}
+
+public final class com/davils/kreate/local/LocalWorkflowTaskNames {
+	public static final field CLEAN Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/local/LocalWorkflowTaskNames;
+	public static final field PUBLISH Ljava/lang/String;
+	public static final field PUBLISH_ALL Ljava/lang/String;
+	public static final field STATUS Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/local/LocalWorkspaceExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getLibraries ()Lorg/gradle/api/NamedDomainObjectContainer;
+	public abstract fun getRoot ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun library (Ljava/lang/String;)V
+	public final fun library (Ljava/lang/String;Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/locking/DependencyLockingExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getLockAllConfigurations ()Lorg/gradle/api/provider/Property;
 	public final fun getLockedClasspaths ()Lorg/gradle/api/provider/SetProperty;
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/PublishExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getInceptionYear ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPom ()Lcom/davils/kreate/module/project/publish/extension/pom/PomExtension;
-	public abstract fun getRepositories ()Lcom/davils/kreate/module/project/publish/extension/repository/MavenRepositoriesExtension;
-	public final fun getWebsite ()Lorg/gradle/api/provider/Property;
-	public final fun pom (Lorg/gradle/api/Action;)V
-	public final fun repositories (Lorg/gradle/api/Action;)V
+public final class com/davils/kreate/locking/DependencyLockingTaskNames {
+	public static final field INSTANCE Lcom/davils/kreate/locking/DependencyLockingTaskNames;
+	public static final field RESOLVE_AND_LOCK_ALL Ljava/lang/String;
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomCiManagementExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getSystem ()Lorg/gradle/api/provider/Property;
-	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+public final class com/davils/kreate/platform/CurrentOsKt {
+	public static final fun currentOs (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;)V
+	public static final fun currentOs (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun currentOs$default (Lorg/jetbrains/kotlin/gradle/dsl/KotlinMultiplatformExtension;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomDeveloperExtension {
+public abstract class com/davils/kreate/platform/JvmExtension {
+	public fun <init> ()V
+	public abstract fun getJni ()Lcom/davils/kreate/jni/JniExtension;
+	public final fun jni (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/platform/MultiplatformExtension {
+	public fun <init> ()V
+	public final fun cInterop (Lorg/gradle/api/Action;)V
+	public abstract fun getCInterop ()Lcom/davils/kreate/cinterop/CInteropExtension;
+}
+
+public abstract class com/davils/kreate/platform/PlatformExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEmail ()Lorg/gradle/api/provider/Property;
-	public final fun getId ()Lorg/gradle/api/provider/Property;
+	public final fun getAllWarningsAsErrors ()Lorg/gradle/api/provider/Property;
+	public final fun getExplicitApi ()Lorg/gradle/api/provider/Property;
+	public final fun getJavaVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJvm ()Lcom/davils/kreate/platform/JvmExtension;
+	public abstract fun getMultiplatform ()Lcom/davils/kreate/platform/MultiplatformExtension;
+	public final fun jvm (Lorg/gradle/api/Action;)V
+	public final fun multiplatform (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/project/ProjectExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun apiValidation (Lorg/gradle/api/Action;)V
+	public final fun benchmark (Lorg/gradle/api/Action;)V
+	public final fun buildConstant (Lorg/gradle/api/Action;)V
+	public final fun configurationSchema (Lorg/gradle/api/Action;)V
+	public final fun coverage (Lorg/gradle/api/Action;)V
+	public final fun dependencyLocking (Lorg/gradle/api/Action;)V
+	public final fun detekt (Lorg/gradle/api/Action;)V
+	public final fun docs (Lorg/gradle/api/Action;)V
+	public abstract fun getApiValidation ()Lcom/davils/kreate/api/ApiValidationExtension;
+	public final fun getApplyDefaultRepositories ()Lorg/gradle/api/provider/Property;
+	public final fun getApplySerializationPlugin ()Lorg/gradle/api/provider/Property;
+	public abstract fun getBenchmark ()Lcom/davils/kreate/benchmark/BenchmarkExtension;
+	public abstract fun getBuildConstants ()Lcom/davils/kreate/constants/BuildConstantsExtension;
+	public abstract fun getConfigurationSchema ()Lcom/davils/kreate/configuration/ConfigurationSchemaExtension;
+	public abstract fun getCoverage ()Lcom/davils/kreate/coverage/CoverageExtension;
+	public abstract fun getDependencyLocking ()Lcom/davils/kreate/locking/DependencyLockingExtension;
+	public final fun getDescription ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDetekt ()Lcom/davils/kreate/detekt/DetektExtension;
+	public abstract fun getDocs ()Lcom/davils/kreate/docs/DocsExtension;
 	public final fun getName ()Lorg/gradle/api/provider/Property;
-	public final fun getOrganization ()Lorg/gradle/api/provider/Property;
-	public final fun getTimezone ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPublish ()Lcom/davils/kreate/publish/PublishExtension;
+	public abstract fun getTests ()Lcom/davils/kreate/testing/TestsExtension;
+	public abstract fun getVersion ()Lcom/davils/kreate/project/ProjectVersionExtension;
+	public final fun publish (Lorg/gradle/api/Action;)V
+	public final fun tests (Lorg/gradle/api/Action;)V
+	public final fun version (Lorg/gradle/api/Action;)V
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomDevelopersExtension {
-	public fun <init> ()V
-	public final fun developer (Lorg/gradle/api/Action;)V
-	public abstract fun getDeveloper ()Lcom/davils/kreate/module/project/publish/extension/pom/PomDeveloperExtension;
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomExtension {
-	public fun <init> ()V
-	public final fun ciManagement (Lorg/gradle/api/Action;)V
-	public final fun developers (Lorg/gradle/api/Action;)V
-	public abstract fun getCiManagement ()Lcom/davils/kreate/module/project/publish/extension/pom/PomCiManagementExtension;
-	public abstract fun getDevelopers ()Lcom/davils/kreate/module/project/publish/extension/pom/PomDevelopersExtension;
-	public abstract fun getIssueManagement ()Lcom/davils/kreate/module/project/publish/extension/pom/PomIssueManagementExtension;
-	public abstract fun getLicenses ()Lcom/davils/kreate/module/project/publish/extension/pom/PomLicensesExtension;
-	public abstract fun getScm ()Lcom/davils/kreate/module/project/publish/extension/pom/PomScmExtension;
-	public final fun issueManagement (Lorg/gradle/api/Action;)V
-	public final fun licenses (Lorg/gradle/api/Action;)V
-	public final fun scm (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomIssueManagementExtension {
+public abstract class com/davils/kreate/project/ProjectVersionExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getSystem ()Lorg/gradle/api/provider/Property;
-	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+	public final fun getEnvironment ()Lorg/gradle/api/provider/Property;
+	public final fun getProperty ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomLicenseExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getDistribution ()Lorg/gradle/api/provider/Property;
-	public final fun getName ()Lorg/gradle/api/provider/Property;
-	public final fun getUrl ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomLicensesExtension {
-	public fun <init> ()V
-	public abstract fun getLicense ()Lcom/davils/kreate/module/project/publish/extension/pom/PomLicenseExtension;
-	public final fun license (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/pom/PomScmExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getConnection ()Lorg/gradle/api/provider/Property;
-	public final fun getDeveloperConnection ()Lorg/gradle/api/provider/Property;
-	public final fun getUrl ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/repository/GitlabExtension {
+public abstract class com/davils/kreate/publish/GitLabExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getApiUrlEnv ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -1003,241 +560,11 @@ public abstract class com/davils/kreate/module/project/publish/extension/reposit
 	public final fun getTokenEnv ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/module/project/publish/extension/repository/MavenCentralExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getAutomaticRelease ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getSignPublications ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/project/publish/extension/repository/MavenRepositoriesExtension {
-	public fun <init> ()V
-	public abstract fun getGitlab ()Lcom/davils/kreate/module/project/publish/extension/repository/GitlabExtension;
-	public abstract fun getMavenCentral ()Lcom/davils/kreate/module/project/publish/extension/repository/MavenCentralExtension;
-	public final fun gitlab (Lorg/gradle/api/Action;)V
-	public final fun mavenCentral (Lorg/gradle/api/Action;)V
-}
-
-public final class com/davils/kreate/module/project/tests/LegacySourceDirectories : java/lang/Enum {
-	public static final field ADOPT Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
-	public static final field CLEAR Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
-	public static final field KEEP Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
-	public static fun values ()[Lcom/davils/kreate/module/project/tests/LegacySourceDirectories;
-}
-
-public final class com/davils/kreate/module/project/tests/LegacyTestPolicy : java/lang/Enum {
-	public static final field ALIAS Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-	public static final field DISABLE Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-	public static final field FAIL Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-	public static final field KEEP Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-	public static fun values ()[Lcom/davils/kreate/module/project/tests/LegacyTestPolicy;
-}
-
-public abstract class com/davils/kreate/module/project/tests/TestsExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getAlwaysRunTests ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getExcludeSuitesFromCoverage ()Lorg/gradle/api/provider/Property;
-	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
-	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
-	public abstract fun getKotest ()Lcom/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension;
-	public final fun getLegacySourceDirectories ()Lorg/gradle/api/provider/Property;
-	public final fun getLegacyTestSourceSet ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLogging ()Lcom/davils/kreate/module/project/tests/logging/TestsLoggingExtension;
-	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
-	public abstract fun getReport ()Lcom/davils/kreate/module/project/tests/report/TestsReportExtension;
-	public final fun getSuites ()Lorg/gradle/api/NamedDomainObjectContainer;
-	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
-	public final fun kotest (Lorg/gradle/api/Action;)V
-	public final fun logging (Lorg/gradle/api/Action;)V
-	public final fun report (Lorg/gradle/api/Action;)V
-	public final fun suites (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/project/tests/logging/TestsLoggingExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getLogPassedTests ()Lorg/gradle/api/provider/Property;
-	public final fun getLogSkippedTests ()Lorg/gradle/api/provider/Property;
-	public final fun getLogTestStarted ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class com/davils/kreate/module/project/tests/report/TestsReportExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getHtml ()Lorg/gradle/api/provider/Property;
-	public final fun getXml ()Lorg/gradle/api/provider/Property;
-}
-
-public final class com/davils/kreate/module/project/tests/suite/KotestModule : java/lang/Enum {
-	public static final field ASSERTIONS Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-	public static final field DATATEST Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-	public static final field JUNIT_XML Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-	public static final field PROPERTY Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-	public static fun values ()[Lcom/davils/kreate/module/project/tests/suite/KotestModule;
-}
-
-public abstract class com/davils/kreate/module/project/tests/suite/SuiteJvmTest : org/jetbrains/kotlin/gradle/targets/jvm/tasks/KotlinJvmTest {
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteDependencies {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun compileOnly (Ljava/lang/String;)V
-	public final fun implementation (Ljava/lang/String;)V
-	public final fun platform (Ljava/lang/String;)V
-	public final fun runtimeOnly (Ljava/lang/String;)V
-}
-
-public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteExtension {
-	public fun <init> (Ljava/lang/String;Lcom/davils/kreate/module/project/tests/TestsExtension;Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun dependencies (Lorg/gradle/api/Action;)V
-	public final fun getAlwaysRun ()Lorg/gradle/api/provider/Property;
-	public final fun getAssociateWithMain ()Lorg/gradle/api/provider/Property;
-	public final fun getDependsOnSuites ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getDescription ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getEnvironment ()Lorg/gradle/api/provider/MapProperty;
-	public final fun getExcludeTags ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
-	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
-	public final fun getIncludeTags ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getJvmArgs ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getKotest ()Lcom/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension;
-	public final fun getLogging ()Lcom/davils/kreate/module/project/tests/logging/TestsLoggingExtension;
-	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
-	public final fun getMustRunAfterSuites ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getReport ()Lcom/davils/kreate/module/project/tests/report/TestsReportExtension;
-	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
-	public final fun getSourceSetName ()Lorg/gradle/api/provider/Property;
-	public final fun getSrcDirs ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getSystemProperties ()Lorg/gradle/api/provider/MapProperty;
-	public final fun getTargets ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
-	public final fun kotest (Lorg/gradle/api/Action;)V
-	public final fun logging (Lorg/gradle/api/Action;)V
-	public final fun report (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/project/tests/suite/TestSuiteKotestExtension {
-	public static final field DEFAULT_JUNIT_PLATFORM_VERSION Ljava/lang/String;
-	public static final field DEFAULT_KOTEST_VERSION Ljava/lang/String;
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getAddJUnitPlatformLauncher ()Lorg/gradle/api/provider/Property;
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public final fun getJunitPlatformVersion ()Lorg/gradle/api/provider/Property;
-	public final fun getModules ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getVersion ()Lorg/gradle/api/provider/Property;
-}
-
-public final class com/davils/kreate/module/trivy/LicenseSeverity : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static final field HIGH Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static final field LOW Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static final field MEDIUM Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static final field UNKNOWN Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/trivy/LicenseSeverity;
-	public static fun values ()[Lcom/davils/kreate/module/trivy/LicenseSeverity;
-}
-
-public final class com/davils/kreate/module/trivy/Score : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/module/trivy/Score;
-	public static final field HIGH Lcom/davils/kreate/module/trivy/Score;
-	public static final field LOW Lcom/davils/kreate/module/trivy/Score;
-	public static final field MEDIUM Lcom/davils/kreate/module/trivy/Score;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/trivy/Score;
-	public static fun values ()[Lcom/davils/kreate/module/trivy/Score;
-}
-
-public final class com/davils/kreate/module/trivy/SecretSeverity : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/module/trivy/SecretSeverity;
-	public static final field HIGH Lcom/davils/kreate/module/trivy/SecretSeverity;
-	public static final field LOW Lcom/davils/kreate/module/trivy/SecretSeverity;
-	public static final field MEDIUM Lcom/davils/kreate/module/trivy/SecretSeverity;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/module/trivy/SecretSeverity;
-	public static fun values ()[Lcom/davils/kreate/module/trivy/SecretSeverity;
-}
-
-public abstract class com/davils/kreate/module/trivy/extension/TrivyExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
-	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLicense ()Lcom/davils/kreate/module/trivy/extension/TrivyLicenseExtension;
-	public abstract fun getSecrets ()Lcom/davils/kreate/module/trivy/extension/TrivySecretExtension;
-	public abstract fun getVulnerability ()Lcom/davils/kreate/module/trivy/extension/TrivyVulnerabilityExtension;
-	public final fun license (Lorg/gradle/api/Action;)V
-	public final fun secrets (Lorg/gradle/api/Action;)V
-	public final fun vulnerability (Lorg/gradle/api/Action;)V
-}
-
-public abstract class com/davils/kreate/module/trivy/extension/TrivyLicenseExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
-	public final fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
-	public final fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
-}
-
-public abstract class com/davils/kreate/module/trivy/extension/TrivySecretExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
-	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
-	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
-	public final fun getSecretConfig ()Lorg/gradle/api/file/RegularFileProperty;
-	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
-	public final fun getSourceFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-}
-
-public abstract class com/davils/kreate/module/trivy/extension/TrivyVulnerabilityExtension {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
-	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
-	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getScore ()Lorg/gradle/api/provider/ListProperty;
-}
-
-public abstract class com/davils/kreate/module/trivy/tasks/TrivyLicenseScan : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
-	public abstract fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
-}
-
-public abstract class com/davils/kreate/module/trivy/tasks/TrivyScan : com/davils/kreate/jobs/Task {
-	public fun <init> ()V
-	public final fun execute ()V
-}
-
-public abstract class com/davils/kreate/module/trivy/tasks/TrivySecretScan : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
-	public abstract fun getSecretConfig ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getSourceFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-}
-
-public abstract class com/davils/kreate/module/trivy/tasks/TrivyVulnerabilityScan : com/davils/kreate/jobs/Task {
-	public fun <init> (Lorg/gradle/process/ExecOperations;)V
-	public final fun execute ()V
-	public abstract fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public abstract fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
-}
-
-public final class com/davils/kreate/repository/GitlabPackageRegistryKt {
+public final class com/davils/kreate/publish/GitLabPackageRegistryKt {
 	public static final fun gitlabPackageRegistry (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/Action;)Lorg/gradle/api/artifacts/repositories/MavenArtifactRepository;
 }
 
-public final class com/davils/kreate/repository/GitlabRegistrySpec {
+public final class com/davils/kreate/publish/GitLabRegistrySpec {
 	public fun <init> ()V
 	public final fun content (Lorg/gradle/api/Action;)V
 	public final fun getJobTokenVariable ()Ljava/lang/String;
@@ -1252,5 +579,291 @@ public final class com/davils/kreate/repository/GitlabRegistrySpec {
 	public final fun setTokenProperty (Ljava/lang/String;)V
 	public final fun setTokenVariable (Ljava/lang/String;)V
 	public final fun setUrl (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/publish/MavenCentralExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAutomaticRelease ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getSignPublications ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/MavenRepositoriesExtension {
+	public fun <init> ()V
+	public abstract fun getGitlab ()Lcom/davils/kreate/publish/GitLabExtension;
+	public abstract fun getMavenCentral ()Lcom/davils/kreate/publish/MavenCentralExtension;
+	public final fun gitlab (Lorg/gradle/api/Action;)V
+	public final fun mavenCentral (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/publish/PomCiManagementExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getSystem ()Lorg/gradle/api/provider/Property;
+	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/PomDeveloperExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEmail ()Lorg/gradle/api/provider/Property;
+	public final fun getId ()Lorg/gradle/api/provider/Property;
+	public final fun getName ()Lorg/gradle/api/provider/Property;
+	public final fun getOrganization ()Lorg/gradle/api/provider/Property;
+	public final fun getTimezone ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/PomDevelopersExtension {
+	public fun <init> ()V
+	public final fun developer (Lorg/gradle/api/Action;)V
+	public abstract fun getDeveloper ()Lcom/davils/kreate/publish/PomDeveloperExtension;
+}
+
+public abstract class com/davils/kreate/publish/PomExtension {
+	public fun <init> ()V
+	public final fun ciManagement (Lorg/gradle/api/Action;)V
+	public final fun developers (Lorg/gradle/api/Action;)V
+	public abstract fun getCiManagement ()Lcom/davils/kreate/publish/PomCiManagementExtension;
+	public abstract fun getDevelopers ()Lcom/davils/kreate/publish/PomDevelopersExtension;
+	public abstract fun getIssueManagement ()Lcom/davils/kreate/publish/PomIssueManagementExtension;
+	public abstract fun getLicenses ()Lcom/davils/kreate/publish/PomLicensesExtension;
+	public abstract fun getScm ()Lcom/davils/kreate/publish/PomScmExtension;
+	public final fun issueManagement (Lorg/gradle/api/Action;)V
+	public final fun licenses (Lorg/gradle/api/Action;)V
+	public final fun scm (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/publish/PomIssueManagementExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getSystem ()Lorg/gradle/api/provider/Property;
+	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/PomLicenseExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getDistribution ()Lorg/gradle/api/provider/Property;
+	public final fun getName ()Lorg/gradle/api/provider/Property;
+	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/PomLicensesExtension {
+	public fun <init> ()V
+	public abstract fun getLicense ()Lcom/davils/kreate/publish/PomLicenseExtension;
+	public final fun license (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/publish/PomScmExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getConnection ()Lorg/gradle/api/provider/Property;
+	public final fun getDeveloperConnection ()Lorg/gradle/api/provider/Property;
+	public final fun getUrl ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/publish/PublishExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getInceptionYear ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPom ()Lcom/davils/kreate/publish/PomExtension;
+	public abstract fun getRepositories ()Lcom/davils/kreate/publish/MavenRepositoriesExtension;
+	public final fun getWebsite ()Lorg/gradle/api/provider/Property;
+	public final fun pom (Lorg/gradle/api/Action;)V
+	public final fun repositories (Lorg/gradle/api/Action;)V
+}
+
+public final class com/davils/kreate/testing/KotestModule : java/lang/Enum {
+	public static final field ASSERTIONS Lcom/davils/kreate/testing/KotestModule;
+	public static final field DATATEST Lcom/davils/kreate/testing/KotestModule;
+	public static final field JUNIT_XML Lcom/davils/kreate/testing/KotestModule;
+	public static final field PROPERTY Lcom/davils/kreate/testing/KotestModule;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/testing/KotestModule;
+	public static fun values ()[Lcom/davils/kreate/testing/KotestModule;
+}
+
+public final class com/davils/kreate/testing/LegacySourceDirectories : java/lang/Enum {
+	public static final field ADOPT Lcom/davils/kreate/testing/LegacySourceDirectories;
+	public static final field CLEAR Lcom/davils/kreate/testing/LegacySourceDirectories;
+	public static final field KEEP Lcom/davils/kreate/testing/LegacySourceDirectories;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/testing/LegacySourceDirectories;
+	public static fun values ()[Lcom/davils/kreate/testing/LegacySourceDirectories;
+}
+
+public final class com/davils/kreate/testing/LegacyTestPolicy : java/lang/Enum {
+	public static final field ALIAS Lcom/davils/kreate/testing/LegacyTestPolicy;
+	public static final field DISABLE Lcom/davils/kreate/testing/LegacyTestPolicy;
+	public static final field FAIL Lcom/davils/kreate/testing/LegacyTestPolicy;
+	public static final field KEEP Lcom/davils/kreate/testing/LegacyTestPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/testing/LegacyTestPolicy;
+	public static fun values ()[Lcom/davils/kreate/testing/LegacyTestPolicy;
+}
+
+public abstract class com/davils/kreate/testing/TestSuiteDependencies {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun compileOnly (Ljava/lang/String;)V
+	public final fun implementation (Ljava/lang/String;)V
+	public final fun platform (Ljava/lang/String;)V
+	public final fun runtimeOnly (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/testing/TestSuiteExtension {
+	public fun <init> (Ljava/lang/String;Lcom/davils/kreate/testing/TestsExtension;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun dependencies (Lorg/gradle/api/Action;)V
+	public final fun getAlwaysRun ()Lorg/gradle/api/provider/Property;
+	public final fun getAssociateWithMain ()Lorg/gradle/api/provider/Property;
+	public final fun getDependsOnSuites ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getDescription ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getEnvironment ()Lorg/gradle/api/provider/MapProperty;
+	public final fun getExcludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
+	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
+	public final fun getIncludeTags ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getJvmArgs ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getKotest ()Lcom/davils/kreate/testing/TestSuiteKotestExtension;
+	public final fun getLogging ()Lcom/davils/kreate/testing/TestsLoggingExtension;
+	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
+	public final fun getMustRunAfterSuites ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getReport ()Lcom/davils/kreate/testing/TestsReportExtension;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun getSourceSetName ()Lorg/gradle/api/provider/Property;
+	public final fun getSrcDirs ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getSystemProperties ()Lorg/gradle/api/provider/MapProperty;
+	public final fun getTargets ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
+	public final fun kotest (Lorg/gradle/api/Action;)V
+	public final fun logging (Lorg/gradle/api/Action;)V
+	public final fun report (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/testing/TestSuiteKotestExtension {
+	public static final field DEFAULT_JUNIT_PLATFORM_VERSION Ljava/lang/String;
+	public static final field DEFAULT_KOTEST_VERSION Ljava/lang/String;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAddJUnitPlatformLauncher ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getJunitPlatformVersion ()Lorg/gradle/api/provider/Property;
+	public final fun getModules ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getVersion ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/testing/TestSuiteNames {
+	public static final field INSTANCE Lcom/davils/kreate/testing/TestSuiteNames;
+	public static final field INTEGRATION Ljava/lang/String;
+	public static final field LEGACY Ljava/lang/String;
+	public static final field UNIT Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/testing/TestsExtension {
+	public static final field DEFAULT_TIMEOUT_MINUTES J
+	public static final field INTEGRATION_SUITE_DESCRIPTION Ljava/lang/String;
+	public static final field PROCESSORS_PER_FORK I
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAlwaysRunTests ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getExcludeSuitesFromCoverage ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnNoDiscoveredTests ()Lorg/gradle/api/provider/Property;
+	public final fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotest ()Lcom/davils/kreate/testing/TestSuiteKotestExtension;
+	public final fun getLegacySourceDirectories ()Lorg/gradle/api/provider/Property;
+	public final fun getLegacyTestSourceSet ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLogging ()Lcom/davils/kreate/testing/TestsLoggingExtension;
+	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
+	public abstract fun getReport ()Lcom/davils/kreate/testing/TestsReportExtension;
+	public final fun getSuites ()Lorg/gradle/api/NamedDomainObjectContainer;
+	public final fun getTimeoutMinutes ()Lorg/gradle/api/provider/Property;
+	public final fun kotest (Lorg/gradle/api/Action;)V
+	public final fun logging (Lorg/gradle/api/Action;)V
+	public final fun report (Lorg/gradle/api/Action;)V
+	public final fun suites (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/testing/TestsLoggingExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getLogPassedTests ()Lorg/gradle/api/provider/Property;
+	public final fun getLogSkippedTests ()Lorg/gradle/api/provider/Property;
+	public final fun getLogTestStarted ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/testing/TestsReportExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getHtml ()Lorg/gradle/api/provider/Property;
+	public final fun getXml ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/trivy/LicenseSeverity : java/lang/Enum {
+	public static final field CRITICAL Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static final field HIGH Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static final field LOW Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static final field MEDIUM Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static final field UNKNOWN Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/LicenseSeverity;
+	public static fun values ()[Lcom/davils/kreate/trivy/LicenseSeverity;
+}
+
+public final class com/davils/kreate/trivy/Score : java/lang/Enum {
+	public static final field CRITICAL Lcom/davils/kreate/trivy/Score;
+	public static final field HIGH Lcom/davils/kreate/trivy/Score;
+	public static final field LOW Lcom/davils/kreate/trivy/Score;
+	public static final field MEDIUM Lcom/davils/kreate/trivy/Score;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/Score;
+	public static fun values ()[Lcom/davils/kreate/trivy/Score;
+}
+
+public final class com/davils/kreate/trivy/SecretSeverity : java/lang/Enum {
+	public static final field CRITICAL Lcom/davils/kreate/trivy/SecretSeverity;
+	public static final field HIGH Lcom/davils/kreate/trivy/SecretSeverity;
+	public static final field LOW Lcom/davils/kreate/trivy/SecretSeverity;
+	public static final field MEDIUM Lcom/davils/kreate/trivy/SecretSeverity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/SecretSeverity;
+	public static fun values ()[Lcom/davils/kreate/trivy/SecretSeverity;
+}
+
+public abstract class com/davils/kreate/trivy/TrivyExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLicense ()Lcom/davils/kreate/trivy/TrivyLicenseExtension;
+	public abstract fun getSecrets ()Lcom/davils/kreate/trivy/TrivySecretExtension;
+	public abstract fun getVulnerability ()Lcom/davils/kreate/trivy/TrivyVulnerabilityExtension;
+	public final fun license (Lorg/gradle/api/Action;)V
+	public final fun secrets (Lorg/gradle/api/Action;)V
+	public final fun vulnerability (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/trivy/TrivyLicenseExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
+	public final fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class com/davils/kreate/trivy/TrivySecretExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun getSecretConfig ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getSourceFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+}
+
+public final class com/davils/kreate/trivy/TrivyTaskNames {
+	public static final field INSTANCE Lcom/davils/kreate/trivy/TrivyTaskNames;
+	public static final field LICENSES Ljava/lang/String;
+	public static final field SCAN Ljava/lang/String;
+	public static final field SECRETS Ljava/lang/String;
+	public static final field VULNERABILITIES Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/trivy/TrivyVulnerabilityExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
+	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun getScore ()Lorg/gradle/api/provider/ListProperty;
 }
 

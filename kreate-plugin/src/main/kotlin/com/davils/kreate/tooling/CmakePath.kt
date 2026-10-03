@@ -18,30 +18,6 @@ package com.davils.kreate.tooling
 
 import java.io.File
 
-/**
- * Converts a filesystem path into the form CMake expects.
- *
- * A backslash is an escape character in the CMake language, so a native Windows path handed to
- * CMake through `-D` is re-parsed as escape sequences the moment a module expands the variable.
- * With a JDK under `C:\hostedtoolcache\...`, `FindJNI` fails outright:
- *
- * ```
- * CMake Error at FindJNI.cmake:291 (foreach):
- *   Syntax error ... Invalid character escape '\h'.
- * ```
- *
- * Forward slashes are accepted on every platform CMake supports — which is why CMake's own
- * documentation and generated files use them throughout, including on Windows.
- *
- * @return The path with backslashes replaced by forward slashes.
- * @since 2.0.0
- */
 internal fun String.toCmakePath(): String = replace('\\', '/')
 
-/**
- * Returns the absolute path of this file in the form CMake expects.
- *
- * @return The absolute path with forward slashes.
- * @since 2.0.0
- */
 internal fun File.toCmakePath(): String = absolutePath.toCmakePath()

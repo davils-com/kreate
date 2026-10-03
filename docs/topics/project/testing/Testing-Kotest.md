@@ -92,7 +92,7 @@ kotest {
 ## A complete example
 
 ```kotlin
-import com.davils.kreate.module.project.tests.suite.KotestModule
+import com.davils.kreate.testing.KotestModule
 
 kreate {
     project {

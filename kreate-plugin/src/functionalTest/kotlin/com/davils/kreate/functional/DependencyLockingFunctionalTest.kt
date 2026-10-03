@@ -16,30 +16,19 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-/**
- * Tests for the dependency locking feature and its `kreateResolveAndLockAll` task.
- */
-@DisplayName("Dependency locking")
-class DependencyLockingFunctionalTest {
+class DependencyLockingFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var projectDir: File
+    val workspace = kreateWorkspace()
 
-    private lateinit var fixture: KreateBuildFixture
-
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+    fun newFixture(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
         fixture.writeKotlin(
             "com/example/Sample.kt",
@@ -49,10 +38,16 @@ class DependencyLockingFunctionalTest {
             class Sample
             """.trimIndent()
         )
+        return fixture
     }
 
-    private fun writeBuild(lockingBlock: String = "enabled = true") {
-        fixture.writeBuild(
+    fun KreateBuildFixture.writeLockedBuild(lockingBlock: String = "enabled = true") {
+        val dependencyNothingElsePullsIn = """
+            dependencies {
+                implementation("org.apache.commons:commons-lang3:3.14.0")
+            }
+        """.trimIndent()
+        writeBuild(
             kreateBlock = """
                 ${KreateBuildFixture.platformBlock}
 
@@ -65,184 +60,163 @@ class DependencyLockingFunctionalTest {
                     }
                 }
             """.trimIndent(),
-            // A dependency nothing else pulls in: the Kotlin plugin contributes a newer
-            // stdlib of its own, so pinning that would only ever exercise Gradle's conflict
-            // resolution rather than the lock state.
-            extra = """
-                dependencies {
-                    implementation("org.apache.commons:commons-lang3:3.14.0")
-                }
-            """.trimIndent()
+            extra = dependencyNothingElsePullsIn
         )
     }
 
-    private val lockFile: File get() = fixture.file("gradle.lockfile")
+    fun KreateBuildFixture.lockFile(): File = file("gradle.lockfile")
 
-    @Test
-    @DisplayName("writes a lock file for the locked classpaths")
-    fun writesLockFile() {
-        writeBuild()
+    context("Dependency locking") {
+        test("writes a lock file for the locked classpaths") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild()
 
-        val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
+            val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
 
-        result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
-        lockFile.isFile shouldBe true
-        lockFile.readText() shouldContain "org.apache.commons:commons-lang3:3.14.0"
-        lockFile.readText() shouldContain "compileClasspath"
-        lockFile.readText() shouldContain "runtimeClasspath"
-    }
+            result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
+            val lockFile = fixture.lockFile()
+            lockFile.isFile shouldBe true
+            lockFile.readText() shouldContain "org.apache.commons:commons-lang3:3.14.0"
+            lockFile.readText() shouldContain "compileClasspath"
+            lockFile.readText() shouldContain "runtimeClasspath"
+        }
 
-    @Test
-    @DisplayName("refuses to run without --write-locks and says what to type instead")
-    fun refusesWithoutWriteLocks() {
-        writeBuild()
+        test("refuses to run without --write-locks and says what to type instead") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild()
 
-        val result = fixture.buildAndFail("kreateResolveAndLockAll")
+            val result = fixture.buildAndFail("kreateResolveAndLockAll")
 
-        result.output shouldContain "only makes sense with --write-locks"
-        result.output shouldContain "./gradlew kreateResolveAndLockAll --write-locks"
-        lockFile.isFile shouldBe false
-    }
+            result.output shouldContain "only makes sense with --write-locks"
+            result.output shouldContain "./gradlew kreateResolveAndLockAll --write-locks"
+            fixture.lockFile().isFile shouldBe false
+        }
 
-    @Test
-    @DisplayName("locks only the configured classpaths")
-    fun locksOnlyConfiguredClasspaths() {
-        writeBuild(
-            """
-            enabled = true
-            lockedClasspaths = setOf("runtimeClasspath")
-            """.trimIndent()
-        )
-
-        fixture.build("kreateResolveAndLockAll", "--write-locks")
-
-        lockFile.readText() shouldContain "runtimeClasspath"
-        lockFile.readText() shouldNotContain "compileClasspath"
-    }
-
-    @Test
-    @DisplayName("locks the build tool classpaths too when asked to lock everything")
-    fun locksAllConfigurations() {
-        writeBuild(
-            """
-            enabled = true
-            lockAllConfigurations = true
-            """.trimIndent()
-        )
-
-        fixture.build("kreateResolveAndLockAll", "--write-locks")
-
-        // The point of the default is that this is what it avoids: the Kotlin compiler's
-        // own classpath ends up pinned alongside the dependencies that actually ship.
-        lockFile.readText() shouldContain "kotlinCompilerClasspath"
-    }
-
-    @Test
-    @DisplayName("fails a build that pulls in a dependency the lock file does not know")
-    fun failsOnDrift() {
-        writeBuild()
-        fixture.build("kreateResolveAndLockAll", "--write-locks")
-
-        // A version change alone is not drift: the lock is applied as a strict constraint,
-        // so a lower declared version is silently raised back to the locked one. What the
-        // lock does reject is a module that was not there when it was written.
-        fixture.write(
-            "build.gradle.kts",
-            fixture.file("build.gradle.kts").readText().replace(
-                """implementation("org.apache.commons:commons-lang3:3.14.0")""",
-                """implementation("org.apache.commons:commons-lang3:3.14.0")
-        implementation("org.apache.commons:commons-io:1.3.2")"""
+        test("locks only the configured classpaths") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild(
+                """
+                enabled = true
+                lockedClasspaths = setOf("runtimeClasspath")
+                """.trimIndent()
             )
-        )
-        val result = fixture.buildAndFail("build")
 
-        result.output shouldContain "dependency lock state"
-        result.output shouldContain "commons-io"
+            fixture.build("kreateResolveAndLockAll", "--write-locks")
+
+            val lockFile = fixture.lockFile()
+            lockFile.readText() shouldContain "runtimeClasspath"
+            lockFile.readText() shouldNotContain "compileClasspath"
+        }
+
+        test("locks the build tool classpaths too when asked to lock everything") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild(
+                """
+                enabled = true
+                lockAllConfigurations = true
+                """.trimIndent()
+            )
+
+            fixture.build("kreateResolveAndLockAll", "--write-locks")
+
+            fixture.lockFile().readText() shouldContain "kotlinCompilerClasspath"
+        }
+
+        test("fails a build that pulls in a dependency the lock file does not know") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild()
+            fixture.build("kreateResolveAndLockAll", "--write-locks")
+
+            val script = fixture.file("build.gradle.kts").readText()
+            val lockedDependency = """implementation("org.apache.commons:commons-lang3:3.14.0")"""
+            val unlockedDependency = """implementation("org.apache.commons:commons-io:1.3.2")"""
+            val withModuleTheLockDoesNotKnow = script.replace(
+                lockedDependency,
+                lockedDependency + "\n        " + unlockedDependency
+            )
+            fixture.write("build.gradle.kts", withModuleTheLockDoesNotKnow)
+            val result = fixture.buildAndFail("build")
+
+            result.output shouldContain "dependency lock state"
+            result.output shouldContain "commons-io"
+        }
+
+        test("locks a classpath whose artifacts cannot be chosen between") {
+            val fixture = newFixture()
+            fixture.write(
+                "settings.gradle.kts",
+                """
+                dependencyResolutionManagement {
+                    repositories {
+                        mavenCentral()
+                        gradlePluginPortal()
+                    }
+                }
+
+                rootProject.name = "sample"
+
+                include(":producer")
+                """.trimIndent()
+            )
+            fixture.write(
+                "producer/build.gradle.kts",
+                """
+                group = "com.example"
+
+                configurations.consumable("shared") {
+                    attributes {
+                        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "shared"))
+                    }
+                    outgoing.variants.create("first") {
+                        artifact(layout.projectDirectory.file("first.txt")) { type = "first" }
+                    }
+                    outgoing.variants.create("second") {
+                        artifact(layout.projectDirectory.file("second.txt")) { type = "second" }
+                    }
+                }
+                """.trimIndent()
+            )
+            fixture.write("producer/first.txt", "first")
+            fixture.write("producer/second.txt", "second")
+
+            fixture.writeLockedBuild(
+                """
+                enabled = true
+                lockedClasspaths = setOf("consumer")
+                """.trimIndent()
+            )
+            fixture.write(
+                "build.gradle.kts",
+                fixture.file("build.gradle.kts").readText() + """
+
+                val consumerDependencies = configurations.dependencyScope("consumerDependencies")
+
+                configurations.resolvable("consumer") {
+                    extendsFrom(consumerDependencies.get())
+                    attributes {
+                        attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "shared"))
+                    }
+                }
+
+                dependencies {
+                    add("consumerDependencies", project(":producer"))
+                }
+                """.trimIndent()
+            )
+
+            val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
+
+            result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.lockFile().readText() shouldContain "consumer"
+        }
+
+        test("registers no task while the feature is disabled") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild("enabled = false")
+
+            val result = fixture.build("tasks", "--all")
+
+            result.output shouldNotContain "kreateResolveAndLockAll"
+        }
     }
-
-    @Test
-    @DisplayName("locks a classpath whose artifacts cannot be chosen between")
-    fun locksClasspathWithAmbiguousArtifacts() {
-        // The shape the Android library plugin publishes, reduced to the part that matters: one
-        // consumable configuration carrying several artifact variants under the same attributes.
-        // A request that names no `artifactType` cannot choose between them, so asking for the
-        // files fails - while the graph, which is all a lock file records, resolves perfectly.
-        // `androidCompileClasspath` consuming another project in the same build is the real case;
-        // reproducing it this way needs no SDK, and what is under test is the resolution.
-        fixture.write(
-            "settings.gradle.kts",
-            """
-            dependencyResolutionManagement {
-                repositories {
-                    mavenCentral()
-                    gradlePluginPortal()
-                }
-            }
-
-            rootProject.name = "sample"
-
-            include(":producer")
-            """.trimIndent()
-        )
-        fixture.write(
-            "producer/build.gradle.kts",
-            """
-            group = "com.example"
-
-            configurations.consumable("shared") {
-                attributes {
-                    attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "shared"))
-                }
-                outgoing.variants.create("first") {
-                    artifact(layout.projectDirectory.file("first.txt")) { type = "first" }
-                }
-                outgoing.variants.create("second") {
-                    artifact(layout.projectDirectory.file("second.txt")) { type = "second" }
-                }
-            }
-            """.trimIndent()
-        )
-        fixture.write("producer/first.txt", "first")
-        fixture.write("producer/second.txt", "second")
-
-        writeBuild(
-            """
-            enabled = true
-            lockedClasspaths = setOf("consumer")
-            """.trimIndent()
-        )
-        fixture.write(
-            "build.gradle.kts",
-            fixture.file("build.gradle.kts").readText() + """
-
-            val consumerDependencies = configurations.dependencyScope("consumerDependencies")
-
-            configurations.resolvable("consumer") {
-                extendsFrom(consumerDependencies.get())
-                attributes {
-                    attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "shared"))
-                }
-            }
-
-            dependencies {
-                add("consumerDependencies", project(":producer"))
-            }
-            """.trimIndent()
-        )
-
-        val result = fixture.build("kreateResolveAndLockAll", "--write-locks")
-
-        result.task(":kreateResolveAndLockAll")?.outcome shouldBe TaskOutcome.SUCCESS
-        lockFile.readText() shouldContain "consumer"
-    }
-
-    @Test
-    @DisplayName("registers no task while the feature is disabled")
-    fun registersNothingWhenDisabled() {
-        writeBuild("enabled = false")
-
-        val result = fixture.build("tasks", "--all")
-
-        result.output shouldNotContain "kreateResolveAndLockAll"
-    }
-}
+})

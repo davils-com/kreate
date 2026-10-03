@@ -16,10 +16,10 @@
 
 package com.davils.kreate
 
-import com.davils.kreate.module.local.extension.LocalExtension
-import com.davils.kreate.module.platform.PlatformExtension
-import com.davils.kreate.module.project.ProjectExtension
-import com.davils.kreate.module.trivy.extension.TrivyExtension
+import com.davils.kreate.local.LocalExtension
+import com.davils.kreate.platform.PlatformExtension
+import com.davils.kreate.project.ProjectExtension
+import com.davils.kreate.trivy.TrivyExtension
 import org.gradle.api.Action
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
@@ -87,6 +87,7 @@ public abstract class KreateExtension @Inject constructor() {
     /**
      * Configures the [TrivyExtension] using the provided action.
      *
+     * @param action The configuration action.
      * @since 1.2.0
      */
     public fun trivy(action: Action<TrivyExtension>) {

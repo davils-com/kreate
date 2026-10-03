@@ -36,7 +36,8 @@ dependencyResolutionManagement {
     }
 }
 
-// The settings plugin and the local development core this plugin shares with it.
 includeBuild("../kreate-settings")
+
+includeBuild("../kreate-detekt-rules")
 
 rootProject.name = "kreate-plugin"

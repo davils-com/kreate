@@ -132,7 +132,7 @@ What happens to the conventional `test` source set once the suites take over. Fo
 in full in [](Testing-Suites-Migration.md):
 
 ```kotlin
-import com.davils.kreate.module.project.tests.LegacyTestPolicy
+import com.davils.kreate.testing.LegacyTestPolicy
 
 tests {
     legacyTestSourceSet = LegacyTestPolicy.FAIL

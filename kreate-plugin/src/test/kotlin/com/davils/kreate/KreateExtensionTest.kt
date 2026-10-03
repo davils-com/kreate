@@ -16,176 +16,106 @@
 
 package com.davils.kreate
 
-import com.davils.kreate.module.getProjectVersion
-import com.davils.kreate.module.platform.resolveFeatureProjectName
+import com.davils.kreate.gradle.resolveFeatureProjectName
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
-/**
- * Tests for the Kreate extension defaults and the naming and versioning helpers.
- *
- * Defaults are part of the published contract: changing one silently changes the behaviour
- * of every consumer that did not set the value explicitly.
- */
-@DisplayName("KreateExtension")
-class KreateExtensionTest {
+class KreateExtensionTest : FunSpec({
+    fun project(name: String = "sample"): Project {
+        val builder = ProjectBuilder.builder()
+        val project = builder.withName(name).build()
+        project.pluginManager.apply(KreatePlugin::class.java)
+        return project
+    }
 
-    private fun project(name: String = "sample"): Project =
-        ProjectBuilder.builder().withName(name).build().also {
-            it.pluginManager.apply(Kreate::class.java)
-        }
-
-    private fun extension(project: Project): KreateExtension =
+    fun extension(project: Project): KreateExtension =
         project.extensions.getByType(KreateExtension::class.java)
 
-    @Nested
-    @DisplayName("feature defaults")
-    inner class FeatureDefaults {
+    fun featureProjectNameOf(gradleProject: Project, kreate: KreateExtension): String =
+        gradleProject.resolveFeatureProjectName(kreate, kreate.platform.jvm.jni.nameOverride)
 
-        @Test
-        @DisplayName("every optional feature is off by default")
-        fun featuresAreOptIn() {
-            val kreate = extension(project())
+    context("KreateExtension") {
+        context("feature defaults") {
+            test("every optional feature is off by default") {
+                val kreate = extension(project())
 
-            kreate.platform.jvm.jni.enabled.get() shouldBe false
-            kreate.platform.multiplatform.cInterop.enabled.get() shouldBe false
-            kreate.trivy.enabled.get() shouldBe false
+                kreate.platform.jvm.jni.enabled.get() shouldBe false
+                kreate.platform.multiplatform.cInterop.enabled.get() shouldBe false
+                kreate.trivy.enabled.get() shouldBe false
+            }
+
+            test("the JNI build type defaults to Release") {
+                extension(project()).platform.jvm.jni.buildType.get() shouldBe "Release"
+            }
+
+            test("JNI header generation is on once the feature is enabled") {
+                extension(project()).platform.jvm.jni.headers.enabled.get() shouldBe true
+            }
+
+            test("JNI packaging is off so that upgrading does not change a JAR's contents") {
+                extension(project()).platform.jvm.jni.packaging.enabled.get() shouldBe false
+            }
+
+            test("packaged natives land under native/, where a Davils loader looks") {
+                extension(project()).platform.jvm.jni.packaging.resourcePath.get() shouldBe "native"
+            }
+
+            test("the generated loader is off, so the weakest loader is not the default one") {
+                extension(project()).platform.jvm.jni.packaging.generateLoader.get() shouldBe false
+            }
+
+            test("a digest manifest is written, because nobody should hash a release by hand") {
+                extension(project()).platform.jvm.jni.packaging.digestManifest.get() shouldBe true
+            }
+
+            test("does not inject repositories or a compiler plugin into the consumer") {
+                val kreate = extension(project())
+
+                kreate.project.applyDefaultRepositories.get() shouldBe false
+                kreate.project.applySerializationPlugin.get() shouldBe false
+            }
+
+            test("no CMake executable or generator is pinned by default") {
+                val jni = extension(project()).platform.jvm.jni
+
+                jni.cmakeExecutable.isPresent shouldBe false
+                jni.generator.isPresent shouldBe false
+            }
         }
 
-        @Test
-        @DisplayName("the JNI build type defaults to Release")
-        fun jniBuildType() {
-            extension(project()).platform.jvm.jni.buildType.get() shouldBe "Release"
-        }
+        context("feature project naming") {
+            test("falls back to the Gradle project name") {
+                val gradleProject = project("sample")
+                val kreate = extension(gradleProject)
 
-        @Test
-        @DisplayName("JNI header generation is on once the feature is enabled")
-        fun headerGenerationDefaultsOn() {
-            extension(project()).platform.jvm.jni.headers.enabled.get() shouldBe true
-        }
+                featureProjectNameOf(gradleProject, kreate) shouldBe "sample"
+            }
 
-        @Test
-        @DisplayName("JNI packaging is off so that upgrading does not change a JAR's contents")
-        fun packagingDefaultsOff() {
-            extension(project()).platform.jvm.jni.packaging.enabled.get() shouldBe false
-        }
+            test("prefers the Kreate project name over the Gradle one") {
+                val gradleProject = project("sample")
+                val kreate = extension(gradleProject)
+                kreate.project.name.set("Configured")
 
-        @Test
-        @DisplayName("packaged natives land under native/, where a Davils loader looks")
-        fun packagingResourcePath() {
-            extension(project()).platform.jvm.jni.packaging.resourcePath.get() shouldBe "native"
-        }
+                featureProjectNameOf(gradleProject, kreate) shouldBe "configured"
+            }
 
-        @Test
-        @DisplayName("the generated loader is off, so the weakest loader is not the default one")
-        fun loaderDefaultsOff() {
-            extension(project()).platform.jvm.jni.packaging.generateLoader.get() shouldBe false
-        }
+            test("prefers an explicit feature override over everything else") {
+                val gradleProject = project("sample")
+                val kreate = extension(gradleProject)
+                kreate.project.name.set("Configured")
+                kreate.platform.jvm.jni.nameOverride.set("mylib")
 
-        @Test
-        @DisplayName("a digest manifest is written, because nobody should hash a release by hand")
-        fun digestManifestDefaultsOn() {
-            extension(project()).platform.jvm.jni.packaging.digestManifest.get() shouldBe true
-        }
+                featureProjectNameOf(gradleProject, kreate) shouldBe "mylib"
+            }
 
-        @Test
-        @DisplayName("does not inject repositories or a compiler plugin into the consumer")
-        fun intrusiveDefaultsAreOptIn() {
-            // Until 2.0.0 both were unconditional. Injecting repositories breaks builds that
-            // resolve through an internal mirror, and applying the serialization compiler
-            // plugin charged every project for a feature most never used.
-            val kreate = extension(project())
+            test("sanitizes names so they are valid CMake targets and JNI symbols") {
+                val gradleProject = project("My-Sample")
+                val kreate = extension(gradleProject)
 
-            kreate.project.applyDefaultRepositories.get() shouldBe false
-            kreate.project.applySerializationPlugin.get() shouldBe false
-        }
-
-        @Test
-        @DisplayName("no CMake executable or generator is pinned by default")
-        fun toolchainDefaultsAreUnset() {
-            val jni = extension(project()).platform.jvm.jni
-
-            jni.cmakeExecutable.isPresent shouldBe false
-            jni.generator.isPresent shouldBe false
-        }
-    }
-
-    @Nested
-    @DisplayName("feature project naming")
-    inner class FeatureNaming {
-
-        @Test
-        @DisplayName("falls back to the Gradle project name")
-        fun fallsBackToProjectName() {
-            val gradleProject = project("sample")
-            val kreate = extension(gradleProject)
-
-            gradleProject.resolveFeatureProjectName(kreate, kreate.platform.jvm.jni.nameOverride) shouldBe "sample"
-        }
-
-        @Test
-        @DisplayName("prefers the Kreate project name over the Gradle one")
-        fun prefersKreateName() {
-            val gradleProject = project("sample")
-            val kreate = extension(gradleProject)
-            kreate.project.name.set("Configured")
-
-            gradleProject.resolveFeatureProjectName(kreate, kreate.platform.jvm.jni.nameOverride) shouldBe "configured"
-        }
-
-        @Test
-        @DisplayName("prefers an explicit feature override over everything else")
-        fun prefersOverride() {
-            val gradleProject = project("sample")
-            val kreate = extension(gradleProject)
-            kreate.project.name.set("Configured")
-            kreate.platform.jvm.jni.nameOverride.set("mylib")
-
-            gradleProject.resolveFeatureProjectName(kreate, kreate.platform.jvm.jni.nameOverride) shouldBe "mylib"
-        }
-
-        @Test
-        @DisplayName("sanitizes names so they are valid CMake targets and JNI symbols")
-        fun sanitizesName() {
-            val gradleProject = project("My-Sample")
-            val kreate = extension(gradleProject)
-
-            gradleProject.resolveFeatureProjectName(kreate, kreate.platform.jvm.jni.nameOverride) shouldBe "my_sample"
+                featureProjectNameOf(gradleProject, kreate) shouldBe "my_sample"
+            }
         }
     }
-
-    @Nested
-    @DisplayName("version resolution")
-    inner class VersionResolution {
-
-        @Test
-        @DisplayName("uses the project property when no CI tag is set")
-        fun usesProjectProperty() {
-            val gradleProject = ProjectBuilder.builder().build()
-            gradleProject.extensions.extraProperties.set("customVersion", "3.1.4")
-
-            gradleProject.getProjectVersion("KREATE_NO_SUCH_ENV", "customVersion") shouldBe "3.1.4"
-        }
-
-        @Test
-        @DisplayName("falls back to 1.0.0 when neither source provides a version")
-        fun fallsBackToDefault() {
-            val gradleProject = ProjectBuilder.builder().build()
-
-            gradleProject.getProjectVersion("KREATE_NO_SUCH_ENV", "alsoMissing") shouldBe "1.0.0"
-        }
-
-        @Test
-        @DisplayName("ignores Gradle's 'unspecified' placeholder")
-        fun ignoresUnspecified() {
-            val gradleProject = ProjectBuilder.builder().build()
-            gradleProject.extensions.extraProperties.set("placeholder", "unspecified")
-
-            gradleProject.getProjectVersion("KREATE_NO_SUCH_ENV", "placeholder") shouldBe "1.0.0"
-        }
-    }
-}
+})

@@ -51,7 +51,7 @@ The `language` property selects which native toolchain backs the interop. It acc
 `NativeLanguage` value:
 
 ```kotlin
-import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
+import com.davils.kreate.cinterop.NativeLanguage
 
 cInterop {
     enabled = true

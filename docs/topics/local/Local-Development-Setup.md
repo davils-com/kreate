@@ -97,10 +97,6 @@ kreate {
     local {
         // Do not register the local development tasks in this repository.
         enabled = false
-
-        // The suffix a local publication carries. Rarely worth changing — `snapshotsOnly()`
-        // on the consumer side is keyed to it.
-        snapshotSuffix = "-SNAPSHOT"
     }
 }
 ```

@@ -25,9 +25,6 @@ plugins {
 }
 
 dependencies {
-    // Nothing beyond the Gradle API, deliberately - see `settings.gradle.kts`. A dependency added
-    // here lands in the settings class loader of every build that applies the plugin and shadows
-    // whatever version that build declares itself.
     implementation(gradleApi())
 
     testImplementation(platform(libs.junit.bom))
@@ -37,7 +34,7 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        optIn.add("com.davils.kreate.InternalKreateApi")
+        optIn.add("com.davils.kreate.settings.InternalKreateApi")
     }
 }
 
@@ -50,7 +47,7 @@ gradlePlugin {
             id = "com.davils.kreate.settings"
             description = "Resolves locally published Davils artifacts, for local development."
             displayName = "Kreate settings"
-            implementationClass = "com.davils.kreate.settings.KreateSettings"
+            implementationClass = "com.davils.kreate.settings.KreateSettingsPlugin"
             tags = listOf(
                 "kotlin",
                 "local-development",
@@ -62,13 +59,6 @@ gradlePlugin {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
-// The whole point of this artefact is what it does not carry, so that is checked rather than
-// assumed. Anything on the runtime classpath here is loaded into the settings class loader of every
-// build that applies the plugin, and from there shadows that build's own version of it.
 val runtimeDependencies = configurations.runtimeClasspath.flatMap { classpath ->
     classpath.incoming.resolutionResult.rootComponent.map { root ->
         root.dependencies.map { it.requested.displayName }

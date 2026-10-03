@@ -36,9 +36,4 @@ dependencyResolutionManagement {
     }
 }
 
-// A build of its own rather than a subproject of `kreate-plugin`, for one reason: the rule set is
-// a plain library that ends up on Detekt's analysis classpath, while `kreate-plugin` is built with
-// `kotlin-dsl` and carries the Gradle API. Sharing a build would mean sharing that build script
-// classpath, and a rule set JAR that drags the Gradle API behind it is not a rule set anyone can
-// put on a `detektPlugins` configuration.
 rootProject.name = "kreate-detekt-rules"

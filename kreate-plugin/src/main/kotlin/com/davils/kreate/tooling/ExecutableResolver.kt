@@ -16,103 +16,73 @@
 
 package com.davils.kreate.tooling
 
-import com.davils.kreate.system.OsTarget
-import com.davils.kreate.system.getOs
+import com.davils.kreate.host.HostPlatform
+import com.davils.kreate.host.OperatingSystem
 import java.io.File
 
-/**
- * Locates the executables of the external tools Kreate invokes.
- *
- * Resolution happens in a deliberate order so that a build is both predictable and
- * overridable:
- *
- * 1. An explicit path configured through the DSL, which always wins.
- * 2. The directories on the `PATH` environment variable.
- * 3. The tool's conventional installation directories ([ExternalTool.wellKnownDirectories]
- *    and [ExternalTool.homeRelativeDirectories]).
- * 4. The bare command name, so that the operating system still gets a chance to resolve it
- *    and the resulting error message names the tool rather than a made-up path.
- *
- * Steps 3 and 4 exist because the Gradle daemon does not necessarily inherit the `PATH` of
- * the user's interactive shell. This is most visible for IDE launched builds on macOS, but
- * the same applies to minimal CI containers.
- *
- * @since 2.0.0
- */
-internal object ExecutableResolver {
-    /**
-     * Resolves the executable to invoke for the given tool.
-     *
-     * @param tool The tool to locate.
-     * @param override An explicit executable path configured by the user, if any. When it
-     *   is set it is returned unchanged, even if the file does not exist, so that the user
-     *   sees a failure naming their own configuration instead of a silent fallback.
-     * @return The command or absolute path to pass to the process builder.
-     * @since 2.0.0
-     */
+private const val PATH_VARIABLE: String = "PATH"
+
+private const val PATHEXT_VARIABLE: String = "PATHEXT"
+
+private const val USER_HOME_PROPERTY: String = "user.home"
+
+private val DEFAULT_WINDOWS_EXTENSIONS: List<String> = listOf(".EXE", ".CMD", ".BAT")
+
+internal class ExecutableResolver(
+    private val host: HostPlatform,
+    private val userHome: String?
+) {
     fun resolve(tool: ExternalTool, override: String? = null): String =
         override?.takeIf { it.isNotBlank() }
             ?: findOnPath(tool)?.absolutePath
             ?: findInWellKnownDirectories(tool)?.absolutePath
             ?: tool.commandName
 
-    /**
-     * Searches the `PATH` environment variable for the tool.
-     *
-     * On Windows the `PATHEXT` extensions are appended to the command name, because the
-     * executable is `cmake.exe` rather than `cmake`.
-     *
-     * @param tool The tool to locate.
-     * @return The executable file, or `null` when it is not on the `PATH`.
-     * @since 2.0.0
-     */
     private fun findOnPath(tool: ExternalTool): File? {
-        val pathValue = System.getenv("PATH") ?: return null
-        val candidateNames = candidateNames(tool)
-
-        return pathValue.split(File.pathSeparatorChar)
-            .asSequence()
-            .filter { it.isNotBlank() }
-            .flatMap { directory -> candidateNames.asSequence().map { File(directory, it) } }
-            .firstOrNull { it.isFile && it.canExecute() }
+        val pathValue = System.getenv(PATH_VARIABLE) ?: return null
+        val entries = pathValue.split(File.pathSeparatorChar)
+        val directories = entries.filter { it.isNotBlank() }.map(::File)
+        return findExecutable(directories, candidateNames(tool))
     }
 
-    /**
-     * Searches the tool's conventional installation directories.
-     *
-     * @param tool The tool to locate.
-     * @return The executable file, or `null` when none of the directories contain it.
-     * @since 2.0.0
-     */
     private fun findInWellKnownDirectories(tool: ExternalTool): File? {
-        val userHome = System.getProperty("user.home")
-        val directories = tool.wellKnownDirectories.map(::File) +
-            tool.homeRelativeDirectories.mapNotNull { relative ->
-                userHome?.let { File(it, relative) }
-            }
-        val candidateNames = candidateNames(tool)
-
-        return directories.asSequence()
-            .flatMap { directory -> candidateNames.asSequence().map { File(directory, it) } }
-            .firstOrNull { it.isFile && it.canExecute() }
+        val directories = tool.wellKnownDirectories.map(::File) + homeRelativeDirectories(tool)
+        return findExecutable(directories, candidateNames(tool))
     }
 
-    /**
-     * Builds the list of file names the tool may have on the current operating system.
-     *
-     * @param tool The tool to build the names for.
-     * @return The command name, plus its Windows executable variants where applicable.
-     * @since 2.0.0
-     */
+    private fun homeRelativeDirectories(tool: ExternalTool): List<File> {
+        val home = userHome ?: return emptyList()
+        return tool.homeRelativeDirectories.map { relative -> File(home, relative) }
+    }
+
+    private fun findExecutable(directories: List<File>, candidateNames: List<String>): File? {
+        val candidates = directories.asSequence().flatMap { directory -> candidatesIn(directory, candidateNames) }
+        return candidates.firstOrNull { it.isFile && it.canExecute() }
+    }
+
+    private fun candidatesIn(directory: File, candidateNames: List<String>): Sequence<File> =
+        candidateNames.asSequence().map { name -> File(directory, name) }
+
     private fun candidateNames(tool: ExternalTool): List<String> {
-        val os by getOs()
-        if (os != OsTarget.WINDOWS) return listOf(tool.commandName)
+        val isWindowsHost = host.operatingSystemOrNull() == OperatingSystem.WINDOWS
+        if (!isWindowsHost) return listOf(tool.commandName)
 
-        val extensions = System.getenv("PATHEXT")
-            ?.split(File.pathSeparatorChar)
-            ?.filter { it.isNotBlank() }
-            ?: listOf(".EXE", ".CMD", ".BAT")
+        val windowsNames = windowsExecutableExtensions().map { extension -> tool.commandName + extension.lowercase() }
+        return windowsNames + tool.commandName
+    }
 
-        return extensions.map { tool.commandName + it.lowercase() } + tool.commandName
+    private fun windowsExecutableExtensions(): List<String> {
+        val declaredExtensions = System.getenv(PATHEXT_VARIABLE) ?: return DEFAULT_WINDOWS_EXTENSIONS
+        val entries = declaredExtensions.split(File.pathSeparatorChar)
+        return entries.filter { it.isNotBlank() }
+    }
+
+    companion object {
+        fun resolve(tool: ExternalTool, override: String? = null): String = current().resolve(tool, override)
+
+        private fun current(): ExecutableResolver {
+            val userHome = System.getProperty(USER_HOME_PROPERTY)
+            return ExecutableResolver(HostPlatform.current(), userHome)
+        }
     }
 }

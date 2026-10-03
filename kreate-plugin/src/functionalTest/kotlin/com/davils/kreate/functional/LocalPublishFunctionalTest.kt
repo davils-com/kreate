@@ -16,35 +16,22 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * Tests for the producer half of the local development workflow.
- *
- * Every assertion here is about the moment a developer types `kreateLocalPublish` and about the
- * refusals that keep that from happening anywhere it should not. The consumer half — substituting
- * the result into another checkout — is covered separately, because it needs the settings plugin.
- */
-@DisplayName("kreateLocalPublish")
-class LocalPublishFunctionalTest {
+class LocalPublishFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var projectDirectory: File
+    val workspace = kreateWorkspace()
 
-    private fun producer(
+    fun producer(
         version: String = "1.4.0",
         extraPlugins: List<String> = emptyList(),
         extra: String = ""
     ): KreateBuildFixture {
-        val fixture = KreateBuildFixture(projectDirectory)
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings("producer")
         fixture.writeBuild(
             extraPlugins = extraPlugins,
@@ -76,263 +63,195 @@ class LocalPublishFunctionalTest {
         return fixture
     }
 
-    @Nested
-    @DisplayName("publishing")
-    inner class Publishing {
-
-        @Test
-        @DisplayName("installs the build at a snapshot version without anyone naming one")
-        fun installsSnapshot() {
-            val fixture = producer(version = "1.4.0")
-
-            val result = fixture.build("kreateLocalPublish")
-
-            result.task(":kreateLocalPublish")?.outcome shouldBe TaskOutcome.SUCCESS
-            fixture.mavenRepository.resolve("com/example/producer/1.4.0-SNAPSHOT")
-                .isDirectory shouldBe true
-        }
-
-        @Test
-        @DisplayName("leaves the released version alone, so a local build cannot shadow it")
-        fun doesNotTouchTheRelease() {
-            val fixture = producer(version = "1.4.0")
-
-            fixture.build("kreateLocalPublish")
-
-            // The suffix is the whole safety story: `1.4.0` and `1.4.0-SNAPSHOT` are different
-            // coordinates, and the consumer declares mavenLocal with `snapshotsOnly()`.
-            fixture.mavenRepository.resolve("com/example/producer/1.4.0").exists() shouldBe false
-        }
-
-        @Test
-        @DisplayName("records the coordinates it installed")
-        fun recordsCoordinates() {
-            val fixture = producer()
-
-            fixture.build("kreateLocalPublish")
-
-            val record = fixture.stateDirectory.resolve("com.example.producer.properties")
-            record.isFile shouldBe true
-
-            val contents = record.readText()
-            contents shouldContain "version=1.4.0-SNAPSHOT"
-            contents shouldContain "producer"
-        }
-
-        @Test
-        @DisplayName("does not suffix the version of an ordinary build")
-        fun ordinaryBuildIsUnaffected() {
-            val fixture = producer(version = "1.4.0")
-
-            val result = fixture.build("publishToMavenLocal")
-
-            result.task(":publishToMavenLocal")?.outcome shouldBe TaskOutcome.SUCCESS
-            fixture.mavenRepository.resolve("com/example/producer/1.4.0").isDirectory shouldBe true
-            fixture.stateDirectory.exists() shouldBe false
-        }
-
-        @Test
-        @DisplayName("invalidates the configuration cache, so the next build sees the new build")
-        fun publishingInvalidatesTheCache() {
-            val fixture = producer()
-
-            fixture.build("kreateLocalPublish")
-            val afterPublish = fixture.build("kreateLocalPublish")
-
-            // This is the ValueSource earning its place. Republishing the same snapshot version
-            // with changed content is the normal inner loop, and a consumer replaying a cached
-            // configuration would keep resolving the previous one without a word.
-            afterPublish.output shouldContain "configuration cache cannot be reused"
-            afterPublish.output shouldContain "LocalWorkspaceSource"
-        }
-
-        @Test
-        @DisplayName("leaves the configuration cache reusable when the local state is unchanged")
-        fun unchangedStateReusesTheCache() {
-            val fixture = producer()
-            fixture.build("kreateLocalPublish")
-
-            fixture.build("kreateLocalStatus")
-            val second = fixture.build("kreateLocalStatus")
-
-            second.output shouldContain "Reusing configuration cache"
-        }
+    fun KreateBuildFixture.enableDependencyLocking() {
+        val script = file("build.gradle.kts").readText()
+        val withLocking = script.replace(
+            "publish {",
+            """
+            dependencyLocking {
+                enabled = true
+            }
+            publish {
+            """.trimIndent()
+        )
+        write("build.gradle.kts", withLocking)
     }
 
-    @Nested
-    @DisplayName("refusals")
-    inner class Refusals {
+    context("kreateLocalPublish") {
+        context("publishing") {
+            test("installs the build at a snapshot version without anyone naming one") {
+                val fixture = producer(version = "1.4.0")
 
-        @Test
-        @DisplayName("will not run in CI, where a local publication has no meaning")
-        fun refusesInCi() {
-            val fixture = producer()
-            fixture.withEnvironment("GITLAB_CI", "true")
+                val result = fixture.build("kreateLocalPublish")
 
-            val result = fixture.buildAndFail("kreateLocalPublish")
+                result.task(":kreateLocalPublish")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.mavenRepository.resolve("com/example/producer/1.4.0-SNAPSHOT")
+                    .isDirectory shouldBe true
+            }
 
-            result.output shouldContain "must not run in CI"
+            test("leaves the released version alone, so a local build cannot shadow it") {
+                val fixture = producer(version = "1.4.0")
+
+                fixture.build("kreateLocalPublish")
+
+                val release = fixture.mavenRepository.resolve("com/example/producer/1.4.0")
+                release.exists() shouldBe false
+            }
+
+            test("records the coordinates it installed") {
+                val fixture = producer()
+
+                fixture.build("kreateLocalPublish")
+
+                val record = fixture.stateDirectory.resolve("com.example.producer.properties")
+                record.isFile shouldBe true
+
+                val contents = record.readText()
+                contents shouldContain "version=1.4.0-SNAPSHOT"
+                contents shouldContain "producer"
+            }
+
+            test("does not suffix the version of an ordinary build") {
+                val fixture = producer(version = "1.4.0")
+
+                val result = fixture.build("publishToMavenLocal")
+
+                result.task(":publishToMavenLocal")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.mavenRepository.resolve("com/example/producer/1.4.0").isDirectory shouldBe true
+                fixture.stateDirectory.exists() shouldBe false
+            }
+
+            test("invalidates the configuration cache, so the next build sees the new build") {
+                val fixture = producer()
+
+                fixture.build("kreateLocalPublish")
+                val afterPublish = fixture.build("kreateLocalPublish")
+
+                afterPublish.output shouldContain "configuration cache cannot be reused"
+                afterPublish.output shouldContain "LocalWorkspaceSource"
+            }
+
+            test("leaves the configuration cache reusable when the local state is unchanged") {
+                val fixture = producer()
+                fixture.build("kreateLocalPublish")
+
+                fixture.build("kreateLocalStatus")
+                val second = fixture.build("kreateLocalStatus")
+
+                second.output shouldContain "Reusing configuration cache"
+            }
         }
 
-        @Test
-        @DisplayName("says so when the build publishes nothing at all")
-        fun refusesWithoutPublications() {
-            val fixture = KreateBuildFixture(projectDirectory)
-            fixture.writeSettings("silent")
-            fixture.writeBuild(
-                kreateBlock = """
-                    project {
-                        name = "silent"
-                        version { property = "silent.version" }
-                    }
-                    ${KreateBuildFixture.platformBlock}
-                """.trimIndent()
-            )
-            fixture.write("gradle.properties", "silent.version=1.0.0")
-            fixture.writeKotlin("Sample.kt", "class Sample")
+        context("refusals") {
+            test("will not run in CI, where a local publication has no meaning") {
+                val fixture = producer()
+                fixture.withEnvironment("GITLAB_CI", "true")
 
-            val result = fixture.buildAndFail("kreateLocalPublish")
+                val result = fixture.buildAndFail("kreateLocalPublish")
 
-            result.output shouldContain "found no Maven publications"
-        }
-    }
+                result.output shouldContain "must not run in CI"
+            }
 
-    @Nested
-    @DisplayName("kreateLocalStatus")
-    inner class Status {
-
-        @Test
-        @DisplayName("says nothing is published before the first publish")
-        fun emptyStatus() {
-            val fixture = producer()
-
-            val result = fixture.build("kreateLocalStatus")
-
-            result.output shouldContain "Nothing is published locally"
-        }
-
-        @Test
-        @DisplayName("lists the publication and the version it will substitute")
-        fun listsPublication() {
-            val fixture = producer(version = "2.0.0")
-            fixture.build("kreateLocalPublish")
-
-            val result = fixture.build("kreateLocalStatus")
-
-            result.output shouldContain "producer"
-            result.output shouldContain "2.0.0-SNAPSHOT"
-            result.output shouldContain "Local mode is ON"
-        }
-    }
-
-    @Nested
-    @DisplayName("kreateLocalClean")
-    inner class Clean {
-
-        @Test
-        @DisplayName("removes exactly what was published, and the record with it")
-        fun removesPublication() {
-            val fixture = producer(version = "1.4.0")
-            fixture.build("kreateLocalPublish")
-
-            fixture.build("kreateLocalClean")
-
-            fixture.mavenRepository.resolve("com/example/producer/1.4.0-SNAPSHOT")
-                .exists() shouldBe false
-            fixture.stateDirectory.resolve("com.example.producer.properties")
-                .exists() shouldBe false
-        }
-
-        @Test
-        @DisplayName("leaves a release in the same repository untouched")
-        fun leavesReleasesAlone() {
-            val fixture = producer(version = "1.4.0")
-            fixture.build("publishToMavenLocal")
-            fixture.build("kreateLocalPublish")
-
-            fixture.build("kreateLocalClean")
-
-            // Something other than this feature put the release there — most likely the
-            // developer, deliberately. Removing it is not this task's business.
-            fixture.mavenRepository.resolve("com/example/producer/1.4.0").isDirectory shouldBe true
-        }
-
-        @Test
-        @DisplayName("is a no-op when nothing is published")
-        fun nothingToClean() {
-            val fixture = producer()
-
-            val result = fixture.build("kreateLocalClean")
-
-            result.output shouldContain "Nothing to clean"
-        }
-    }
-
-    @Nested
-    @DisplayName("guards that hold once local mode is on")
-    inner class Guards {
-
-        @Test
-        @DisplayName("refuses to write a lock file that would pin a local snapshot")
-        fun refusesToWriteLocks() {
-            val fixture = producer()
-            fixture.write(
-                "build.gradle.kts",
-                fixture.file("build.gradle.kts").readText().replace(
-                    "publish {",
-                    """
-                    dependencyLocking {
-                        enabled = true
-                    }
-                    publish {
+            test("says so when the build publishes nothing at all") {
+                val fixture = KreateBuildFixture.createIn(workspace)
+                fixture.writeSettings("silent")
+                fixture.writeBuild(
+                    kreateBlock = """
+                        project {
+                            name = "silent"
+                            version { property = "silent.version" }
+                        }
+                        ${KreateBuildFixture.platformBlock}
                     """.trimIndent()
                 )
-            )
-            fixture.build("kreateLocalPublish")
+                fixture.write("gradle.properties", "silent.version=1.0.0")
+                fixture.writeKotlin("Sample.kt", "class Sample")
 
-            val result = fixture.buildAndFail("kreateResolveAndLockAll", "--write-locks")
+                val result = fixture.buildAndFail("kreateLocalPublish")
 
-            // The single most valuable rail in the feature: a lock file pinning
-            // `1.4.0-SNAPSHOT` looks plausible in review and breaks every pipeline.
-            result.output shouldContain "Refusing to write lock files"
-            result.output shouldContain "com.example:producer:1.4.0-SNAPSHOT"
+                result.output shouldContain "found no Maven publications"
+            }
         }
 
-        @Test
-        @DisplayName("turns dependency locking off rather than failing every build")
-        fun deactivatesLocking() {
-            val fixture = producer()
-            fixture.write(
-                "build.gradle.kts",
-                fixture.file("build.gradle.kts").readText().replace(
-                    "publish {",
-                    """
-                    dependencyLocking {
-                        enabled = true
-                    }
-                    publish {
-                    """.trimIndent()
-                )
-            )
-            fixture.build("kreateLocalPublish")
+        context("kreateLocalStatus") {
+            test("says nothing is published before the first publish") {
+                val fixture = producer()
 
-            val result = fixture.build("kreateLocalStatus")
+                val result = fixture.build("kreateLocalStatus")
 
-            result.output shouldContain "dependency locking is off"
+                result.output shouldContain "Nothing is published locally"
+            }
+
+            test("lists the publication and the version it will substitute") {
+                val fixture = producer(version = "2.0.0")
+                fixture.build("kreateLocalPublish")
+
+                val result = fixture.build("kreateLocalStatus")
+
+                result.output shouldContain "producer"
+                result.output shouldContain "2.0.0-SNAPSHOT"
+                result.output shouldContain "Local mode is ON"
+            }
         }
 
-        @Test
-        @DisplayName("refuses to push a build made against local artefacts to a shared registry")
-        fun refusesRemotePublish() {
-            // `maven-publish` is declared explicitly so that the `publishing { }` accessor exists
-            // while the script compiles. Kreate applies the same plugin, but not until
-            // `afterEvaluate`, which is far too late for a type-safe accessor.
-            //
-            // A file backed repository stands in for the GitLab registry: what is under test is
-            // that the task is blocked, not where it would have uploaded to.
-            val fixture = producer(
-                extraPlugins = listOf("""id("maven-publish")"""),
-                extra = """
+        context("kreateLocalClean") {
+            test("removes exactly what was published, and the record with it") {
+                val fixture = producer(version = "1.4.0")
+                fixture.build("kreateLocalPublish")
+
+                fixture.build("kreateLocalClean")
+
+                fixture.mavenRepository.resolve("com/example/producer/1.4.0-SNAPSHOT")
+                    .exists() shouldBe false
+                fixture.stateDirectory.resolve("com.example.producer.properties")
+                    .exists() shouldBe false
+            }
+
+            test("leaves a release in the same repository untouched") {
+                val fixture = producer(version = "1.4.0")
+                fixture.build("publishToMavenLocal")
+                fixture.build("kreateLocalPublish")
+
+                fixture.build("kreateLocalClean")
+
+                val releasePutThereByTheDeveloper = fixture.mavenRepository.resolve("com/example/producer/1.4.0")
+                releasePutThereByTheDeveloper.isDirectory shouldBe true
+            }
+
+            test("is a no-op when nothing is published") {
+                val fixture = producer()
+
+                val result = fixture.build("kreateLocalClean")
+
+                result.output shouldContain "Nothing to clean"
+            }
+        }
+
+        context("guards that hold once local mode is on") {
+            test("refuses to write a lock file that would pin a local snapshot") {
+                val fixture = producer()
+                fixture.enableDependencyLocking()
+                fixture.build("kreateLocalPublish")
+
+                val result = fixture.buildAndFail("kreateResolveAndLockAll", "--write-locks")
+
+                result.output shouldContain "Refusing to write lock files"
+                result.output shouldContain "com.example:producer:1.4.0-SNAPSHOT"
+            }
+
+            test("turns dependency locking off rather than failing every build") {
+                val fixture = producer()
+                fixture.enableDependencyLocking()
+                fixture.build("kreateLocalPublish")
+
+                val result = fixture.build("kreateLocalStatus")
+
+                result.output shouldContain "dependency locking is off"
+            }
+
+            test("refuses to push a build made against local artefacts to a shared registry") {
+                val mavenPublishForTheTypeSafeAccessor = listOf("""id("maven-publish")""")
+                val fileBackedStandInForTheSharedRegistry = """
                     publishing {
                         repositories {
                             maven {
@@ -342,43 +261,39 @@ class LocalPublishFunctionalTest {
                         }
                     }
                 """.trimIndent()
-            )
-            fixture.build("kreateLocalPublish")
+                val fixture = producer(
+                    extraPlugins = mavenPublishForTheTypeSafeAccessor,
+                    extra = fileBackedStandInForTheSharedRegistry
+                )
+                fixture.build("kreateLocalPublish")
 
-            val result = fixture.buildAndFail("publishAllPublicationsToSharedRepository")
+                val result = fixture.buildAndFail("publishAllPublicationsToSharedRepository")
 
-            result.output shouldContain "Refusing to publish to a remote repository"
-            result.output shouldContain "producer:1.4.0-SNAPSHOT"
+                result.output shouldContain "Refusing to publish to a remote repository"
+                result.output shouldContain "producer:1.4.0-SNAPSHOT"
+            }
+
+            test("still allows the local publication itself, which is the point") {
+                val fixture = producer()
+                fixture.build("kreateLocalPublish")
+
+                val result = fixture.build("publishToMavenLocal")
+
+                result.task(":publishToMavenLocal")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
         }
 
-        @Test
-        @DisplayName("still allows the local publication itself, which is the point")
-        fun localPublishStillWorks() {
-            val fixture = producer()
-            fixture.build("kreateLocalPublish")
+        context("the task listing") {
+            test("groups the tasks so a developer can find them without documentation") {
+                val fixture = producer()
 
-            // `PublishToMavenLocal` is a sibling of `PublishToMavenRepository`, not a subclass,
-            // so the guard above does not reach it. Widening the guard would break the feature.
-            val result = fixture.build("publishToMavenLocal")
+                val result = fixture.build("tasks", "--group", "kreate local")
 
-            result.task(":publishToMavenLocal")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-    }
-
-    @Nested
-    @DisplayName("the task listing")
-    inner class Listing {
-
-        @Test
-        @DisplayName("groups the tasks so a developer can find them without documentation")
-        fun tasksAreDiscoverable() {
-            val fixture = producer()
-
-            val result = fixture.build("tasks", "--group", "kreate local")
-
-            listOf("kreateLocalPublish", "kreateLocalStatus", "kreateLocalClean").forEach { task ->
-                result.output.lines().map { it.substringBefore(" - ").trim() } shouldContain task
+                val listedTasks = result.output.lines().map { it.substringBefore(" - ").trim() }
+                listOf("kreateLocalPublish", "kreateLocalStatus", "kreateLocalClean").forEach { task ->
+                    listedTasks shouldContain task
+                }
             }
         }
     }
-}
+})

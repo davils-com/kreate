@@ -54,3 +54,5 @@ bin/
 
 ### example ###
 example/cinterop/example/target
+
+*.hprof

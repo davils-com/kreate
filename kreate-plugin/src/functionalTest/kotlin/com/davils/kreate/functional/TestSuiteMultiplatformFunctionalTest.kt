@@ -16,47 +16,24 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * Tests for the named test suites on Kotlin Multiplatform.
- *
- * Two of these are canaries rather than feature tests. Creating a source set tree by hand is
- * one `dependsOn` call away from switching off the Kotlin plugin's default hierarchy for the
- * whole project - `nativeMain` and every other shared source set simply stop existing, and the
- * build stays green while it happens. And a suite whose shared source set is never wired into
- * a compilation gives a directory that looks like tests and is never run. Both are asserted
- * here directly, because neither shows up as a failure anywhere else.
- */
-@DisplayName("test suites on Kotlin Multiplatform")
-class TestSuiteMultiplatformFunctionalTest {
+private const val JUNIT_VERSION: String = "6.1.3"
 
-    private companion object {
-        /**
-         * The JUnit version the generated builds declare.
-         */
-        const val JUNIT_VERSION: String = "6.1.3"
-    }
+private val SAMPLE_SOURCE_SETS: List<String> = listOf("commonMain", "jvmMain", "wasmJsMain")
 
-    @TempDir
-    lateinit var projectDir: File
+class TestSuiteMultiplatformFunctionalTest : FunSpec({
+    val workspace = kreateWorkspace()
 
-    private lateinit var fixture: KreateBuildFixture
-
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+    fun newBuild(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
 
-        for (sourceSet in listOf("commonMain", "jvmMain", "wasmJsMain")) {
+        for (sourceSet in SAMPLE_SOURCE_SETS) {
             fixture.writeKotlin(
                 sourceSet,
                 "com/example/${sourceSet.replaceFirstChar(Char::uppercase)}Sample.kt",
@@ -69,274 +46,243 @@ class TestSuiteMultiplatformFunctionalTest {
                 """.trimIndent()
             )
         }
+        return fixture
     }
 
-    /**
-     * Writes a multiplatform build with testing enabled.
-     *
-     * @param testsBlock Additional body for the `tests { }` block.
-     * @param extra Additional build script content.
-     */
-    private fun writeBuild(testsBlock: String = "", extra: String = "") {
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+    context("test suites on Kotlin Multiplatform") {
+        test("a test in the shared source set is compiled and run by the JVM target") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "SharedSuiteRan")
+            fixture.writeTestingBuild()
 
-                project {
-                    name = "Sample"
+            val result = fixture.build("jvmUnitTest")
 
-                    tests {
-                        enabled = true
-                        maxParallelForks = 1
+            result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.reportsOf("jvmUnitTest") shouldContain "SharedSuiteRan"
+        }
 
-                        report {
+        test("a test in the per-target source set is run by that target's task") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("jvmUnitTest", "TargetSuiteRan")
+            fixture.writeTestingBuild()
+
+            fixture.build("jvmUnitTest")
+
+            fixture.reportsOf("jvmUnitTest") shouldContain "TargetSuiteRan"
+        }
+
+        test("the default hierarchy survives, so nativeMain still exists") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "HierarchyCanary")
+            fixture.writeTestingBuild(
+                extra = """
+                    kotlin {
+                        linuxX64()
+                        mingwX64()
+                    }
+
+                    tasks.register("printSourceSets") {
+                        val names = kotlin.sourceSets.names.sorted().joinToString()
+                        doLast { println("SOURCE_SETS=" + names) }
+                    }
+                """.trimIndent()
+            )
+
+            val output = fixture.build("printSourceSets").output
+
+            val createdOnlyByTheDefaultHierarchy = "nativeMain"
+            output shouldContain createdOnlyByTheDefaultHierarchy
+            output shouldNotContain "KotlinDefaultHierarchyFallback"
+        }
+
+        test("names the per-target tasks the way the Kotlin plugin would") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "Named")
+            fixture.writeTestingBuild()
+
+            val output = fixture.build("tasks", "--all").output
+
+            output shouldContain "jvmUnitTest"
+            output shouldContain "jvmIntegrationTest"
+        }
+
+        test("the suite name runs every target's task") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "Aggregated")
+            fixture.writeTestingBuild()
+
+            val result = fixture.build("unitTest")
+
+            result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.reportsOf("jvmUnitTest") shouldContain "Aggregated"
+        }
+
+        test("check runs the unit suite and leaves the integration suite alone") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "OnCheck")
+            fixture.writeSuiteTest("commonIntegrationTest", "NotOnCheck")
+            fixture.writeTestingBuild()
+
+            val result = fixture.buildWithoutKotlinTestTasks("check")
+
+            result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":jvmIntegrationTest") shouldBe null
+        }
+
+        test("the conventional jvmTest task is skipped") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "Replacement")
+            fixture.writeTestingBuild()
+
+            val resultWithJvmTestNamedOnCommandLine = fixture.buildWithoutKotlinTestTasks("check", "jvmTest")
+
+            resultWithJvmTestNamedOnCommandLine.task(":jvmTest")?.outcome shouldBe TaskOutcome.SKIPPED
+        }
+
+        test("a target that cannot carry a suite is rejected instead of silently ignored") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "Rejected")
+            fixture.writeTestingBuild(
+                testsBlock = """
+                    suites {
+                        named("integrationTest") {
+                            targets = listOf("wasmJs")
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            val output = fixture.buildAndFail("check").output
+
+            output shouldContain "wasmJs"
+            output shouldContain "cannot carry a named test suite"
+        }
+
+        test("a suite's test task is seen by the coverage engine") {
+            val fixture = newBuild()
+            fixture.write(
+                "src/jvmUnitTest/kotlin/com/example/CoversJvmSample.kt",
+                """
+                package com.example
+
+                import org.junit.jupiter.api.Test
+
+                class CoversJvmSample {
+                    @Test
+                    fun covers() {
+                        assert(JvmMainSample().length("ab") == 2)
+                    }
+                }
+                """.trimIndent()
+            )
+            fixture.writeMultiplatformBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    project {
+                        name = "Sample"
+
+                        tests {
                             enabled = true
-                            xml = true
-                        }
+                            maxParallelForks = 1
 
-                        suites {
-                            named("unitTest") {
-                                dependencies {
-                                    implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
-                                }
-                            }
-
-                            named("integrationTest") {
-                                dependencies {
-                                    implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                            suites {
+                                named("unitTest") {
+                                    dependencies {
+                                        implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                                    }
                                 }
                             }
                         }
 
-                        $testsBlock
+                        coverage {
+                            enabled = true
+                        }
                     }
-                }
-            """.trimIndent(),
-            extra = extra
-        )
+                """.trimIndent(),
+                extraPlugins = listOf("""id("org.jetbrains.kotlinx.kover")""")
+            )
+
+            fixture.build("koverXmlReport").task(":koverXmlReport")?.outcome shouldBe TaskOutcome.SUCCESS
+
+            val report = fixture.file("build/reports/kover/report.xml").readText()
+            report shouldContain "JvmMainSample"
+            val somethingRecordedAsCovered = "covered="
+            report shouldContain somethingRecordedAsCovered
+            report shouldNotContain "CoversJvmSample"
+        }
+
+        test("reuses the configuration cache entry") {
+            val fixture = newBuild()
+            fixture.writeSuiteTest("commonUnitTest", "Cached")
+            fixture.writeTestingBuild()
+
+            fixture.buildWithoutKotlinTestTasks("check")
+
+            fixture.buildWithoutKotlinTestTasks("check").output shouldContain "Configuration cache entry reused"
+        }
     }
+})
 
-    /**
-     * Writes a JUnit 5 test into a multiplatform source set.
-     *
-     * @param sourceSet The source set name.
-     * @param className The test class name, also used as the test method name.
-     */
-    private fun writeTest(sourceSet: String, className: String) {
-        fixture.write(
-            "src/$sourceSet/kotlin/com/example/$className.kt",
-            """
-            package com.example
+private fun KreateBuildFixture.writeTestingBuild(testsBlock: String = "", extra: String = "") {
+    writeMultiplatformBuild(
+        kreateBlock = """
+            ${KreateBuildFixture.platformBlock}
 
-            import org.junit.jupiter.api.Test
+            project {
+                name = "Sample"
 
-            class $className {
-                @Test
-                fun $className() {
-                    assert(CommonMainSample().length("ab") == 2)
+                tests {
+                    enabled = true
+                    maxParallelForks = 1
+
+                    report {
+                        enabled = true
+                        xml = true
+                    }
+
+                    suites {
+                        named("unitTest") {
+                            dependencies {
+                                implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                            }
+                        }
+
+                        named("integrationTest") {
+                            dependencies {
+                                implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                            }
+                        }
+                    }
+
+                    $testsBlock
                 }
             }
-            """.trimIndent()
-        )
-    }
+        """.trimIndent(),
+        extra = extra
+    )
+}
 
-    /**
-     * Reads the XML reports of a test task.
-     *
-     * @param taskName The test task name.
-     * @return The concatenated report contents.
-     */
-    private fun reportsOf(taskName: String): String =
-        fixture.file("build/test-results/$taskName")
-            .walkTopDown()
-            .filter { it.extension == "xml" }
-            .joinToString("") { it.readText() }
+private fun KreateBuildFixture.writeSuiteTest(sourceSet: String, className: String) {
+    write(
+        "src/$sourceSet/kotlin/com/example/$className.kt",
+        """
+        package com.example
 
-    @Test
-    @DisplayName("a test in the shared source set is compiled and run by the JVM target")
-    fun sharedSourceSetRuns() {
-        writeTest("commonUnitTest", "SharedSuiteRan")
-        writeBuild()
+        import org.junit.jupiter.api.Test
 
-        val result = fixture.build("jvmUnitTest")
-
-        result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        // The report rather than the outcome: a shared source set that is wired to no
-        // compilation produces a task that succeeds without running anything.
-        reportsOf("jvmUnitTest") shouldContain "SharedSuiteRan"
-    }
-
-    @Test
-    @DisplayName("a test in the per-target source set is run by that target's task")
-    fun targetSourceSetRuns() {
-        writeTest("jvmUnitTest", "TargetSuiteRan")
-        writeBuild()
-
-        fixture.build("jvmUnitTest")
-
-        reportsOf("jvmUnitTest") shouldContain "TargetSuiteRan"
-    }
-
-    @Test
-    @DisplayName("the default hierarchy survives, so nativeMain still exists")
-    fun hierarchySurvives() {
-        writeTest("commonUnitTest", "HierarchyCanary")
-        writeBuild(
-            extra = """
-                kotlin {
-                    linuxX64()
-                    mingwX64()
-                }
-
-                tasks.register("printSourceSets") {
-                    val names = kotlin.sourceSets.names.sorted().joinToString()
-                    doLast { println("SOURCE_SETS=" + names) }
-                }
-            """.trimIndent()
-        )
-
-        val output = fixture.build("printSourceSets").output
-
-        // nativeMain is created by the default hierarchy template and by nothing else. Its
-        // absence is the signature of a manually added refines edge somewhere in the build.
-        output shouldContain "nativeMain"
-        output shouldNotContain "KotlinDefaultHierarchyFallback"
-    }
-
-    @Test
-    @DisplayName("names the per-target tasks the way the Kotlin plugin would")
-    fun taskNames() {
-        writeTest("commonUnitTest", "Named")
-        writeBuild()
-
-        val output = fixture.build("tasks", "--all").output
-
-        output shouldContain "jvmUnitTest"
-        output shouldContain "jvmIntegrationTest"
-    }
-
-    @Test
-    @DisplayName("the suite name runs every target's task")
-    fun aggregateTask() {
-        writeTest("commonUnitTest", "Aggregated")
-        writeBuild()
-
-        val result = fixture.build("unitTest")
-
-        result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        reportsOf("jvmUnitTest") shouldContain "Aggregated"
-    }
-
-    @Test
-    @DisplayName("check runs the unit suite and leaves the integration suite alone")
-    fun checkScope() {
-        writeTest("commonUnitTest", "OnCheck")
-        writeTest("commonIntegrationTest", "NotOnCheck")
-        writeBuild()
-
-        val result = fixture.buildWithoutKotlinTestTasks("check")
-
-        result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        result.task(":jvmIntegrationTest") shouldBe null
-    }
-
-    @Test
-    @DisplayName("the conventional jvmTest task is skipped")
-    fun legacyDisabled() {
-        writeTest("commonUnitTest", "Replacement")
-        writeBuild()
-
-        // `jvmTest` is named on the command line, so the exclusions leave it in the graph: what
-        // they drop is the Wasm side of `check`, which this assertion has no interest in.
-        fixture.buildWithoutKotlinTestTasks("check", "jvmTest")
-            .task(":jvmTest")?.outcome shouldBe TaskOutcome.SKIPPED
-    }
-
-    @Test
-    @DisplayName("a target that cannot carry a suite is rejected instead of silently ignored")
-    fun rejectsUnsupportedTarget() {
-        writeTest("commonUnitTest", "Rejected")
-        writeBuild(
-            testsBlock = """
-                suites {
-                    named("integrationTest") {
-                        targets = listOf("wasmJs")
-                    }
-                }
-            """.trimIndent()
-        )
-
-        val output = fixture.buildAndFail("check").output
-
-        output shouldContain "wasmJs"
-        output shouldContain "cannot carry a named test suite"
-    }
-
-    @Test
-    @DisplayName("a suite's test task is seen by the coverage engine")
-    fun coverageSeesSuiteTasks() {
-        fixture.write(
-            "src/jvmUnitTest/kotlin/com/example/CoversJvmSample.kt",
-            """
-            package com.example
-
-            import org.junit.jupiter.api.Test
-
-            class CoversJvmSample {
-                @Test
-                fun covers() {
-                    assert(JvmMainSample().length("ab") == 2)
-                }
+        class $className {
+            @Test
+            fun $className() {
+                assert(CommonMainSample().length("ab") == 2)
             }
-            """.trimIndent()
-        )
-        fixture.writeMultiplatformBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+        }
+        """.trimIndent()
+    )
+}
 
-                project {
-                    name = "Sample"
-
-                    tests {
-                        enabled = true
-                        maxParallelForks = 1
-
-                        suites {
-                            named("unitTest") {
-                                dependencies {
-                                    implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
-                                }
-                            }
-                        }
-                    }
-
-                    coverage {
-                        enabled = true
-                    }
-                }
-            """.trimIndent(),
-            extraPlugins = listOf("""id("org.jetbrains.kotlinx.kover")""")
-        )
-
-        fixture.build("koverXmlReport").task(":koverXmlReport")?.outcome shouldBe TaskOutcome.SUCCESS
-
-        val report = fixture.file("build/reports/kover/report.xml").readText()
-        report shouldContain "JvmMainSample"
-        // The suite's tasks are KotlinJvmTest tasks carrying a target name, which is the only
-        // shape the coverage engine's multiplatform locator recognises. A plain Test task here
-        // would leave every class at zero while the tests pass.
-        report shouldContain "covered="
-        report shouldNotContain "CoversJvmSample"
-    }
-
-    @Test
-    @DisplayName("reuses the configuration cache entry")
-    fun configurationCache() {
-        writeTest("commonUnitTest", "Cached")
-        writeBuild()
-
-        fixture.buildWithoutKotlinTestTasks("check")
-
-        fixture.buildWithoutKotlinTestTasks("check").output shouldContain "Configuration cache entry reused"
-    }
+private fun KreateBuildFixture.reportsOf(taskName: String): String {
+    val resultsDirectory = file("build/test-results/$taskName")
+    val reports = resultsDirectory.walkTopDown().filter { report -> report.extension == "xml" }
+    return reports.joinToString("") { report -> report.readText() }
 }

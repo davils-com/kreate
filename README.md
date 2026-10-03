@@ -182,7 +182,7 @@ dependencyResolutionManagement {
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.0"
-    id("com.davils.kreate") version "3.1.0"
+    id("com.davils.kreate") version "4.0.0"
 }
 ```
 
@@ -278,7 +278,7 @@ kreate {
 | `project.docs`                    | `enabled`                  | Dokka documentation                        | `false`      |
 | `project.tests`                   | `enabled`                  | Test execution and reporting               | `true`       |
 | `project.detekt`                  | `enabled`                  | Static analysis configuration              | `false`      |
-| `project.detekt`                  | `kreateRules`              | Kreate comment and KDoc rules for Detekt   | `true`       |
+| `project.detekt`                  | `kreateRules`              | Kreate code style rules for Detekt          | `true`       |
 | `project.coverage`                | `enabled`                  | Code coverage through Kover                | `false`      |
 | `project.coverage.verify`         | `minLineCoverage`          | Coverage threshold enforced on `check`     | unset        |
 | `project.coverage.aggregate`      | `enabled`                  | Merge subproject coverage into one report  | `false`      |

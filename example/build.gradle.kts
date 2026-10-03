@@ -1,14 +1,30 @@
-import com.davils.kreate.module.platform.multiplatform.cinterop.NativeLanguage
-import com.davils.kreate.module.project.coverage.Grouping
-import com.davils.kreate.module.project.tests.LegacyTestPolicy
-import com.davils.kreate.module.project.tests.suite.KotestModule
-import com.davils.kreate.module.trivy.LicenseSeverity
-import com.davils.kreate.module.trivy.SecretSeverity
-import com.davils.kreate.module.trivy.Score
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.davils.kreate.cinterop.NativeLanguage
+import com.davils.kreate.coverage.Grouping
+import com.davils.kreate.testing.KotestModule
+import com.davils.kreate.testing.LegacyTestPolicy
+import com.davils.kreate.trivy.LicenseSeverity
+import com.davils.kreate.trivy.Score
+import com.davils.kreate.trivy.SecretSeverity
 import java.time.Year
 
 plugins {
-    kotlin("jvm") version "2.4.10"
+    alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kreate)
     application
 }
@@ -18,11 +34,6 @@ application {
 }
 
 group = "com.example"
-
-dependencies {
-    // Nothing here for the test suites: a suite's configurations do not exist yet while this
-    // script runs, so its dependencies are declared in the suite itself.
-}
 
 kreate {
     platform {
@@ -44,17 +55,7 @@ kreate {
                     dirName = "defs"
                 }
 
-                mingw {
-                    // Configure MinGW-specific settings here
-                }
 
-                linux {
-                    // Configure Linux-specific settings here
-                }
-
-                macos {
-                    // Configure macOS-specific settings here
-                }
             }
         }
 
@@ -187,52 +188,31 @@ kreate {
                 html = true
             }
 
-            // The migration is finished here, so the build fails if anything reappears
-            // under src/test. Use ALIAS while moving, which runs an unmoved tree as the
-            // unit suite - remembering to move its dependencies onto the suite as well.
             legacyTestSourceSet = LegacyTestPolicy.FAIL
 
             kotest {
-                enabled = false
+                enabled = true
                 modules = listOf(KotestModule.ASSERTIONS)
             }
 
             suites {
                 named("unitTest") {
                     maxParallelForks = Runtime.getRuntime().availableProcessors()
-
-                    dependencies {
-                        // The JUnit 5 backed variant, named explicitly: the Kotlin plugin
-                        // only infers a variant for the conventional `test` configuration.
-                        implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.10")
-                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
-                    }
                 }
 
                 named("integrationTest") {
-                    // Left off `check` and ordered after the unit suite, which is what the
-                    // defaults already do; spelled out here because this is the example.
                     runOnCheck = false
                     mustRunAfterSuites = listOf("unitTest")
 
-                    // One fork: an integration suite usually shares an external service.
                     maxParallelForks = 1
                     timeoutMinutes = 30L
 
                     environment = mapOf("EXAMPLE_INTEGRATION" to "true")
-
-                    dependencies {
-                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
-                    }
                 }
 
                 register("contractTest") {
                     runOnCheck = false
                     includeTags = listOf("contract")
-
-                    dependencies {
-                        implementation("org.junit.jupiter:junit-jupiter:6.1.3")
-                    }
                 }
             }
         }
