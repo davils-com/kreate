@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 4.0.0 - Unreleased
+## 4.0.0
 
 Kreate 4.0.0 restructures the plugin into one package per feature, narrows the public API to the
 build script DSL and ships four more code style rules. Plugin ids, task names and every property of
@@ -77,6 +77,12 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Changed
 
+- **The license scan checks only what is shipped.** It used to read every configuration of a lock
+  file, so a dependency that only a test suite resolves failed the scan. Kotest pulls in JNA
+  (`LGPL-2.1-or-later`) through `kotlinx-coroutines-debug`, which failed the scan of every project
+  that runs its tests on Kotest. `kreateTrivyLicenseScan` now hands Trivy only the dependencies of
+  the main compile and runtime classpaths. The new `license { configurations }` property names
+  other configurations to check. The vulnerability scan still reads the whole lock file.
 - Kreate is built to its own standard: the Kreate rule set runs on Kreate's sources without a
   baseline, the tests run on Kotest, and the line and branch coverage bounds include the TestKit
   suite.

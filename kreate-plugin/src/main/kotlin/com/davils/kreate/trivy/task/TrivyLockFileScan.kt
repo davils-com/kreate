@@ -24,6 +24,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 
 @DisableCachingByDefault(because = "Trivy scans depend on external vulnerability databases and tools")
 internal abstract class TrivyLockFileScan(
@@ -37,6 +38,8 @@ internal abstract class TrivyLockFileScan(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val lockFiles: ConfigurableFileCollection
 
+    protected open fun scanTarget(lockFile: File): File = lockFile
+
     @TaskAction
     public fun execute() {
         if (lockFiles.isEmpty) {
@@ -44,7 +47,7 @@ internal abstract class TrivyLockFileScan(
             return
         }
 
-        val withFindings = lockFiles.files.filter { lockFile -> scanReportsFindings(lockFile) }
+        val withFindings = lockFiles.files.filter { lockFile -> scanReportsFindings(scanTarget(lockFile)) }
         if (withFindings.isEmpty() || !failOnFindings.get()) return
 
         throw GradleException(findingsMessage)
