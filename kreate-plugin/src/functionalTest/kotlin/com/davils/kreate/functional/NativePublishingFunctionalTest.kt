@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
@@ -51,7 +50,7 @@ private fun linuxPlatformOtherThan(platform: String): String {
 
 class NativePublishingFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val hostPlatform = hostPlatformLikeThePlugin()
 

@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -26,7 +25,7 @@ import kotlin.io.path.createTempDirectory
 
 class LocalWorkspaceFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val chain = """
         library("alpha")

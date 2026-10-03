@@ -18,7 +18,6 @@ package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
@@ -26,7 +25,7 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class GradleCompatibilityFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val supportedGradleVersions = supportedGradleVersions()
 

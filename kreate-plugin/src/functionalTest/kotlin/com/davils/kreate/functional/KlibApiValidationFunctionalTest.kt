@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -25,7 +24,7 @@ import java.io.File
 
 class KlibApiValidationFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun KreateBuildFixture.writeCommon(body: String) {
         writeKotlin("commonMain", "com/example/Sample.kt", "package com.example\n\n$body")

@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import java.io.File
@@ -30,7 +29,7 @@ private const val SHIPPED_DEPENDENCY: String = "com.example:shipped:1.0.0=compil
 private const val TEST_DEPENDENCY: String = "net.java.dev.jna:jna:5.9.0=unitTestRuntimeClasspath"
 
 class TrivyLicenseScanFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun KreateBuildFixture.writeLicenseBuild(licenseBlock: String) {
         write("gradle.lockfile", "$SHIPPED_DEPENDENCY\n$TEST_DEPENDENCY\nempty=\n")

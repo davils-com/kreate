@@ -17,11 +17,10 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.string.shouldContain
 
 class PluginOrderFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun KreateBuildFixture.writeKreateFirstBuild(isExplicitApi: Boolean) {
         write(

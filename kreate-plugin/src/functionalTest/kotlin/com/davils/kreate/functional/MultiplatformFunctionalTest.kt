@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.BuildResult
@@ -30,7 +29,7 @@ private val SAMPLE_SOURCE_SETS: List<String> = listOf("commonMain", "jvmMain", "
 private const val DETEKT_PLUGIN: String = """id("dev.detekt")"""
 
 class MultiplatformFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val javaVersionDifferentFromTheRunningOne: Int =
         PINNABLE_JAVA_VERSIONS.first { version -> version != KreateBuildFixture.javaVersion }
