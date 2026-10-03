@@ -53,10 +53,13 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     }
 
     val trivyLicenseExtension = trivyExtension.license
+    val productionConfigurations = provider { productionConfigurations() }
+    trivyLicenseExtension.configurations.convention(productionConfigurations)
     val licenseScan = tasks.register<TrivyLicenseScan>(TrivyTaskNames.LICENSES) {
         failOnFindings.set(trivyLicenseExtension.failOnForbidden)
         severity.set(trivyLicenseExtension.severity.names())
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
+        configurations.set(trivyLicenseExtension.configurations)
         lockFiles.setFrom(trivyLicenseExtension.lockFiles)
     }
 

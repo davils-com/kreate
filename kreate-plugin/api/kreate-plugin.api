@@ -836,6 +836,7 @@ public abstract class com/davils/kreate/trivy/TrivyExtension {
 
 public abstract class com/davils/kreate/trivy/TrivyLicenseExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;

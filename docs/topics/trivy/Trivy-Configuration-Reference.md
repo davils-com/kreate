@@ -26,6 +26,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 | `failOnForbidden` | `Property<Boolean>`             | `true`                      | Fails the build if forbidden licenses are detected.                        |
 | `severity`        | `ListProperty<LicenseSeverity>` | `[CRITICAL, HIGH, UNKNOWN]` | Severities to include in the scan.                                         |
 | `ignoredLicenses` | `ListProperty<String>`          | `[]`                        | List of licenses to ignore (e.g., "MIT", "Apache-2.0").                    |
+| `configurations`  | `SetProperty<String>`           | main compile and runtime classpaths | Lock file configurations whose dependencies are checked. Since 4.0.0.  |
 | `lockFiles`       | `ConfigurableFileCollection`    | `*.lockfile`                | The collection of lockfiles to be scanned.                                 |
 
 ---

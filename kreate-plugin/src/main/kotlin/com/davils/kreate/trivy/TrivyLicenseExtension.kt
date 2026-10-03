@@ -21,6 +21,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import javax.inject.Inject
 
 /**
@@ -57,6 +58,19 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     public val ignoredLicenses: ListProperty<String> = factory.listProperty(
         String::class.java
     ).convention(emptyList())
+
+    /**
+     * The dependency configurations of the lock files whose licenses are checked.
+     *
+     * A license binds what is shipped. A dependency that only a test suite or a benchmark resolves
+     * never reaches a consumer, so by default only the configurations that compile and run the main
+     * code are checked: `compileClasspath` and `runtimeClasspath` of every Kotlin target's `main`
+     * compilation. A dependency listed in the lock file is checked when at least one of its
+     * configurations is named here.
+     *
+     * @since 4.0.0
+     */
+    public val configurations: SetProperty<String> = factory.setProperty(String::class.java)
 
     /**
      * The collection of lock files to be scanned for license issues.
