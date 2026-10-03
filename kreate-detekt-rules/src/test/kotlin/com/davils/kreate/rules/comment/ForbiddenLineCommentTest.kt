@@ -14,33 +14,19 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.comment
 
 import dev.detekt.api.Config
 import dev.detekt.test.TestConfig
 import dev.detekt.test.lint
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
-/**
- * Tests for the rule that forbids `//` comments.
- *
- * The cases that matter are the ones a text based search gets wrong: a `//` inside a string
- * literal, a URL in a copyright header, and a KDoc block that happens to mention one.
- */
-@DisplayName("ForbiddenLineComment")
-class ForbiddenLineCommentTest {
+class ForbiddenLineCommentTest : FunSpec({
 
-    @Nested
-    @DisplayName("reports")
-    inner class Reports {
-
-        @Test
-        @DisplayName("a comment on a line of its own")
-        fun standaloneComment() {
+    context("reports") {
+        test("a comment on a line of its own") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     public fun run() {
@@ -53,9 +39,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a comment trailing code")
-        fun trailingComment() {
+        test("a comment trailing code") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     public val timeout: Int = 30 // seconds
@@ -65,9 +49,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("each comment separately, so a fix can be tracked line by line")
-        fun oneFindingPerComment() {
+        test("each comment separately, so a fix can be tracked line by line") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     // First.
@@ -80,15 +62,24 @@ class ForbiddenLineCommentTest {
 
             findings shouldHaveSize 3
         }
+
+        test("at the line the comment is on") {
+            val findings = ForbiddenLineComment(Config.empty).lint(
+                """
+                    public fun run() {
+                        // Retry once.
+                        attempt()
+                    }
+                """.trimIndent()
+            )
+
+            val location = findings.single().entity.location
+            location.source.line shouldBe 2
+        }
     }
 
-    @Nested
-    @DisplayName("leaves alone")
-    inner class LeavesAlone {
-
-        @Test
-        @DisplayName("a block comment, which is how a copyright header is written")
-        fun blockComment() {
+    context("leaves alone") {
+        test("a block comment, which ForbiddenBlockComment owns") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     /*
@@ -103,9 +94,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a KDoc block")
-        fun documentation() {
+        test("a KDoc block") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     /**
@@ -120,9 +109,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a double slash inside a string literal")
-        fun slashesInString() {
+        test("a double slash inside a string literal") {
             val findings = ForbiddenLineComment(Config.empty).lint(
                 """
                     public val endpoint: String = "https://example.com/keys"
@@ -133,13 +120,8 @@ class ForbiddenLineCommentTest {
         }
     }
 
-    @Nested
-    @DisplayName("allowedPattern")
-    inner class AllowedPattern {
-
-        @Test
-        @DisplayName("exempts a comment the pattern matches")
-        fun exemptsMatch() {
+    context("allowedPattern") {
+        test("exempts a comment the pattern matches") {
             val rule = ForbiddenLineComment(TestConfig("allowedPattern" to "^region\\b"))
 
             val findings = rule.lint(
@@ -152,9 +134,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("still reports a comment the pattern does not match")
-        fun reportsNonMatch() {
+        test("still reports a comment the pattern does not match") {
             val rule = ForbiddenLineComment(TestConfig("allowedPattern" to "^region\\b"))
 
             val findings = rule.lint(
@@ -167,11 +147,7 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("allows nothing when empty, rather than everything")
-        fun emptyPatternAllowsNothing() {
-            // An empty regular expression matches every string. Read naively, the default value
-            // would switch the rule off for every project that never configures it.
+        test("allows nothing when empty, although an empty expression matches every string") {
             val rule = ForbiddenLineComment(TestConfig("allowedPattern" to ""))
 
             val findings = rule.lint(
@@ -184,19 +160,4 @@ class ForbiddenLineCommentTest {
             findings shouldHaveSize 1
         }
     }
-
-    @Test
-    @DisplayName("points at the line the comment is on")
-    fun reportsAtTheComment() {
-        val findings = ForbiddenLineComment(Config.empty).lint(
-            """
-                public fun run() {
-                    // Retry once.
-                    attempt()
-                }
-            """.trimIndent()
-        )
-
-        findings.single().entity.location.source.line shouldBe 2
-    }
-}
+})

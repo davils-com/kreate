@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
+import com.davils.kreate.rules.RULE_DOCUMENTATION
 import com.intellij.psi.PsiWhiteSpace
 import dev.detekt.api.ActiveByDefault
 import dev.detekt.api.Config
@@ -24,18 +25,6 @@ import dev.detekt.api.Finding
 import dev.detekt.api.Rule
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-/**
- * Reports a blank line between a KDoc block and the declaration it documents.
- *
- * Kotlin still binds the comment across the blank line, so nothing is rendered as undocumented. What
- * the blank line costs is legibility for every reader that treats the file as text: in a diff the
- * comment reads as a floating note, and the annotation or modifier directly below it reads as the
- * start of something new rather than as part of the declaration the comment belongs to. The KDoc
- * guidelines ask for documentation directly above its declaration, and the distance between the two
- * is the only thing that makes one block visibly belong to one declaration.
- *
- * @since 3.3.0
- */
 @ActiveByDefault(since = "3.3.0")
 internal class KDocSeparatedFromDeclaration(config: Config) : Rule(
     config,
@@ -48,7 +37,8 @@ internal class KDocSeparatedFromDeclaration(config: Config) : Rule(
 
         val documentation = dcl.docComment ?: return
         val gap = documentation.nextSibling as? PsiWhiteSpace ?: return
-        if (gap.text.count { character -> character == '\n' } < BLANK_LINE_NEWLINES) return
+        val lineBreaks = gap.text.count { character -> character == '\n' }
+        if (lineBreaks < BLANK_LINE_NEWLINES) return
 
         report(
             Finding(
@@ -59,11 +49,6 @@ internal class KDocSeparatedFromDeclaration(config: Config) : Rule(
     }
 
     private companion object {
-        /**
-         * How many line breaks it takes to leave an empty line between two elements.
-         *
-         * @since 3.3.0
-         */
         private const val BLANK_LINE_NEWLINES: Int = 2
     }
 }

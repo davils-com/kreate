@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
 import dev.detekt.api.Config
 import dev.detekt.test.lint
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
-/**
- * Tests for the rule that keeps a KDoc block attached to its declaration.
- *
- * The case worth stating outright is the annotated declaration: the annotation belongs to the
- * declaration, so the blank line is still between the comment and the thing it documents.
- */
-@DisplayName("KDocSeparatedFromDeclaration")
-class KDocSeparatedFromDeclarationTest {
+class KDocSeparatedFromDeclarationTest : FunSpec({
 
-    @Nested
-    @DisplayName("reports")
-    inner class Reports {
-
-        @Test
-        @DisplayName("a blank line before a class")
-        fun blankLineBeforeClass() {
+    context("reports") {
+        test("a blank line before a class") {
             val findings = KDocSeparatedFromDeclaration(Config.empty).lint(
                 """
                     /**
@@ -54,9 +40,7 @@ class KDocSeparatedFromDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a blank line before an annotated declaration")
-        fun blankLineBeforeAnnotated() {
+        test("a blank line before an annotated declaration") {
             val findings = KDocSeparatedFromDeclaration(Config.empty).lint(
                 """
                     /**
@@ -73,9 +57,7 @@ class KDocSeparatedFromDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a blank line before a property inside a class body")
-        fun blankLineBeforeProperty() {
+        test("a blank line before a property inside a class body") {
             val findings = KDocSeparatedFromDeclaration(Config.empty).lint(
                 """
                     public class Exchanger {
@@ -94,13 +76,8 @@ class KDocSeparatedFromDeclarationTest {
         }
     }
 
-    @Nested
-    @DisplayName("leaves alone")
-    inner class LeavesAlone {
-
-        @Test
-        @DisplayName("a block that sits directly above its declaration")
-        fun attachedBlock() {
+    context("leaves alone") {
+        test("a block that sits directly above its declaration") {
             val findings = KDocSeparatedFromDeclaration(Config.empty).lint(
                 """
                     /**
@@ -115,9 +92,7 @@ class KDocSeparatedFromDeclarationTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a block that documents nothing below it")
-        fun blockWithoutDeclaration() {
+        test("a block that documents nothing below it") {
             val findings = KDocSeparatedFromDeclaration(Config.empty).lint(
                 """
                     public class Exchanger
@@ -131,4 +106,4 @@ class KDocSeparatedFromDeclarationTest {
             findings shouldHaveSize 0
         }
     }
-}
+})

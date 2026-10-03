@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
+import com.davils.kreate.rules.RULE_DOCUMENTATION
 import dev.detekt.api.ActiveByDefault
 import dev.detekt.api.Config
 import dev.detekt.api.Entity
@@ -23,19 +24,6 @@ import dev.detekt.api.Finding
 import dev.detekt.api.Rule
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-/**
- * Reports a KDoc block on a public declaration that does not say which version introduced it.
- *
- * `@since` is the one tag a reader cannot reconstruct from the code. It answers the question every
- * consumer of a library asks before they use a declaration — whether the version they are pinned to
- * has it — and it is the tag that makes a deprecation cycle legible years later.
- *
- * Only public declarations are reported. A declaration that should not carry KDoc at all is the
- * business of [KDocOnNonPublicDeclaration], and reporting both on the same comment would say twice
- * that something is wrong while leaving it ambiguous what to do.
- *
- * @since 3.3.0
- */
 @ActiveByDefault(since = "3.3.0")
 internal class KDocWithoutSinceTag(config: Config) : Rule(
     config,
@@ -60,11 +48,6 @@ internal class KDocWithoutSinceTag(config: Config) : Rule(
     }
 
     private companion object {
-        /**
-         * The tag that records the version a declaration appeared in.
-         *
-         * @since 3.3.0
-         */
         private const val SINCE_TAG: String = "since"
     }
 }

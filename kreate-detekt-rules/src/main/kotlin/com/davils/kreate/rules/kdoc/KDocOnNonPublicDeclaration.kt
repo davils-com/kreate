@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
+import com.davils.kreate.rules.RULE_DOCUMENTATION
 import dev.detekt.api.ActiveByDefault
 import dev.detekt.api.Config
 import dev.detekt.api.Configuration
@@ -25,23 +26,6 @@ import dev.detekt.api.Rule
 import dev.detekt.api.config
 import org.jetbrains.kotlin.psi.KtDeclaration
 
-/**
- * Reports a KDoc block on a declaration that no consumer of the artifact can see.
- *
- * KDoc is the contract of a published API. On an `internal` or `private` declaration it documents
- * nothing anyone can call, it is not rendered by Dokka, and it is the documentation most likely to
- * drift, because no consumer ever reads it and notices that it is wrong. The reasoning behind such
- * a declaration belongs in the code that reads it — a name, a smaller function, a test.
- *
- * The visibility considered is the effective one: a `public` member of an `internal` class is
- * reported, and so is anything declared inside a function body.
- *
- * Detekt's `DocumentationOverPrivateFunction` and `DocumentationOverPrivateProperty` cover a part
- * of this — `private` functions and properties. This rule covers every declaration kind and adds
- * `internal`, which is where a multi-module Kotlin codebase keeps most of its implementation.
- *
- * @since 3.3.0
- */
 @ActiveByDefault(since = "3.3.0")
 internal class KDocOnNonPublicDeclaration(config: Config) : Rule(
     config,
@@ -61,14 +45,17 @@ internal class KDocOnNonPublicDeclaration(config: Config) : Rule(
         val documentation = dcl.docComment ?: return
         val visibility = dcl.apiVisibility()
         if (visibility == ApiVisibility.PUBLIC) return
-        if (visibility == ApiVisibility.PROTECTED && allowProtected) return
 
+        val isAllowedProtected = visibility == ApiVisibility.PROTECTED && allowProtected
+        if (isAllowedProtected) return
+
+        val visibilityName = visibility.name.lowercase()
         report(
             Finding(
                 Entity.from(documentation),
-                "Remove this KDoc block: the declaration it documents is " +
-                    "${visibility.name.lowercase()}, so no consumer can call it. Anything worth " +
-                    "saying about it is worth saying in a name, a smaller function or a test."
+                "Remove this KDoc block: the declaration it documents is $visibilityName, so no " +
+                    "consumer can call it. Anything worth saying about it is worth saying in a " +
+                    "name, a smaller function or a test."
             )
         )
     }

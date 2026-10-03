@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.comment
 
+import com.davils.kreate.rules.RULE_DOCUMENTATION
 import com.intellij.psi.PsiComment
 import dev.detekt.api.ActiveByDefault
 import dev.detekt.api.Config
@@ -26,20 +27,6 @@ import dev.detekt.api.Rule
 import dev.detekt.api.config
 import org.jetbrains.kotlin.lexer.KtTokens
 
-/**
- * Reports every `//` comment, whether it stands on its own line or trails code.
- *
- * The Kreate code style asks for a name or a smaller function where a line comment would go. The
- * reason is not aesthetic: a comment is not compiled, not tested and not renamed with the thing it
- * describes, so it is the one part of a file that can be wrong without anything failing. A name is
- * checked by the compiler on every build.
- *
- * Detekt's own `ForbiddenComment` can be pointed at patterns such as `TODO:`; it cannot express
- * "none at all", and it treats KDoc and block comments the same way. This rule is about the `//`
- * form alone, which leaves the copyright header and every KDoc block untouched.
- *
- * @since 3.3.0
- */
 @ActiveByDefault(since = "3.3.0")
 internal class ForbiddenLineComment(config: Config) : Rule(
     config,
@@ -59,7 +46,8 @@ internal class ForbiddenLineComment(config: Config) : Rule(
 
         if (comment.tokenType != KtTokens.EOL_COMMENT) return
 
-        val content = comment.text.removePrefix(LINE_COMMENT_MARKER).trim()
+        val withoutMarker = comment.text.removePrefix(LINE_COMMENT_MARKER)
+        val content = withoutMarker.trim()
         if (isAllowed(content)) return
 
         report(
@@ -71,25 +59,12 @@ internal class ForbiddenLineComment(config: Config) : Rule(
         )
     }
 
-    /**
-     * Whether the configured exception covers this comment.
-     *
-     * An empty pattern means "allow nothing", so it is checked for explicitly: an empty regular
-     * expression matches every string, which would switch the rule off instead of tightening it.
-     *
-     * @param content The comment's text, without the marker.
-     * @return `true` when the comment must not be reported.
-     * @since 3.3.0
-     */
-    private fun isAllowed(content: String): Boolean =
-        allowedPattern.pattern.isNotEmpty() && allowedPattern.containsMatchIn(content)
+    private fun isAllowed(content: String): Boolean {
+        val hasPattern = allowedPattern.pattern.isNotEmpty()
+        return hasPattern && allowedPattern.containsMatchIn(content)
+    }
 
     private companion object {
-        /**
-         * The characters a line comment opens with.
-         *
-         * @since 3.3.0
-         */
         private const val LINE_COMMENT_MARKER: String = "//"
     }
 }

@@ -14,33 +14,18 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
 import dev.detekt.api.Config
 import dev.detekt.test.TestConfig
 import dev.detekt.test.lint
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 
-/**
- * Tests for the rule that keeps KDoc on the published surface.
- *
- * The interesting cases are the ones where the declaration's own modifier does not decide: a
- * `public` member of an `internal` class, a class declared inside a function, and a property
- * declared in a constructor whose own visibility is narrower than the type's.
- */
-@DisplayName("KDocOnNonPublicDeclaration")
-class KDocOnNonPublicDeclarationTest {
+class KDocOnNonPublicDeclarationTest : FunSpec({
 
-    @Nested
-    @DisplayName("reports")
-    inner class Reports {
-
-        @Test
-        @DisplayName("a private function")
-        fun privateFunction() {
+    context("reports") {
+        test("a private function") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     /**
@@ -55,9 +40,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("an internal class")
-        fun internalClass() {
+        test("an internal class") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     /**
@@ -72,9 +55,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a public member of an internal class, which no consumer can reach")
-        fun publicMemberOfInternalClass() {
+        test("a public member of an internal class, which no consumer can reach") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     internal class Exchanger {
@@ -91,9 +72,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a declaration inside a function body")
-        fun localDeclaration() {
+        test("a declaration inside a function body") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     public fun run() {
@@ -112,9 +91,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 1
         }
 
-        @Test
-        @DisplayName("a protected member, by default")
-        fun protectedMember() {
+        test("a protected member, by default") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     public open class Exchanger {
@@ -132,13 +109,8 @@ class KDocOnNonPublicDeclarationTest {
         }
     }
 
-    @Nested
-    @DisplayName("leaves alone")
-    inner class LeavesAlone {
-
-        @Test
-        @DisplayName("a public declaration")
-        fun publicDeclaration() {
+    context("leaves alone") {
+        test("a public declaration") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     /**
@@ -153,9 +125,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a declaration without documentation")
-        fun undocumentedDeclaration() {
+        test("a declaration without documentation") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     private fun exchange(): Unit = Unit
@@ -165,11 +135,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a property declared in a constructor that is narrower than its type")
-        fun propertyOfNarrowConstructor() {
-            // The constructor's visibility decides who may build the type, not who may read the
-            // property. `id` is as public as `Key`, so its KDoc belongs where it is.
+        test("a public property of a type whose constructor is private") {
             val findings = KDocOnNonPublicDeclaration(Config.empty).lint(
                 """
                     public class Key private constructor(
@@ -186,9 +152,7 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 0
         }
 
-        @Test
-        @DisplayName("a protected member when the project documents them")
-        fun protectedWhenAllowed() {
+        test("a protected member when the project documents them") {
             val rule = KDocOnNonPublicDeclaration(TestConfig("allowProtected" to true))
 
             val findings = rule.lint(
@@ -207,4 +171,4 @@ class KDocOnNonPublicDeclarationTest {
             findings shouldHaveSize 0
         }
     }
-}
+})

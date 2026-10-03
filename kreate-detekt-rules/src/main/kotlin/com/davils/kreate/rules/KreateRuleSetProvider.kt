@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules
 
+import com.davils.kreate.rules.comment.ForbiddenBlockComment
+import com.davils.kreate.rules.comment.ForbiddenLineComment
+import com.davils.kreate.rules.controlflow.ForbiddenElse
+import com.davils.kreate.rules.expression.ChainedCallLimit
+import com.davils.kreate.rules.kdoc.KDocClosingMarkerOnSharedLine
+import com.davils.kreate.rules.kdoc.KDocOnNonPublicDeclaration
+import com.davils.kreate.rules.kdoc.KDocSeparatedFromDeclaration
+import com.davils.kreate.rules.kdoc.KDocWithoutSinceTag
+import com.davils.kreate.rules.kdoc.SingleLineKDocWithBlockTag
+import com.davils.kreate.rules.structure.OneTopLevelTypePerFile
 import dev.detekt.api.RuleSet
 import dev.detekt.api.RuleSetId
 import dev.detekt.api.RuleSetProvider
@@ -28,15 +38,14 @@ import dev.detekt.api.RuleSetProvider
 public const val KREATE_RULE_SET_ID: String = "kreate"
 
 /**
- * Contributes the Kreate comment and KDoc rules to Detekt.
+ * Contributes the Kreate code style rules to Detekt.
  *
  * Detekt finds this class through `META-INF/services/dev.detekt.api.RuleSetProvider`, so the rules
  * run as soon as the artifact is on a `detektPlugins` configuration. Kreate puts it there for a
  * project that has Detekt enabled; nothing else has to be declared.
  *
- * Every rule in the set reports rather than rewrites. That is deliberate and it is the whole
- * difference between this rule set and the script it replaces: a comment is removed by the person
- * who knows whether the sentence it holds belongs in a name, in a test, or nowhere.
+ * Every rule in the set reports rather than rewrites. A comment, an `else` branch or a long call
+ * chain is resolved by the person who knows which name or which early return the code is missing.
  *
  * @since 3.3.0
  */
@@ -48,6 +57,10 @@ public class KreateRuleSetProvider : RuleSetProvider {
         ruleSetId,
         listOf(
             ::ForbiddenLineComment,
+            ::ForbiddenBlockComment,
+            ::ForbiddenElse,
+            ::ChainedCallLimit,
+            ::OneTopLevelTypePerFile,
             ::KDocOnNonPublicDeclaration,
             ::KDocWithoutSinceTag,
             ::SingleLineKDocWithBlockTag,

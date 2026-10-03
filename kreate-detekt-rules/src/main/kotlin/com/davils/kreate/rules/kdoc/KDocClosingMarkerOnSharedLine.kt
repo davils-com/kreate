@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules.kdoc
 
+import com.davils.kreate.rules.RULE_DOCUMENTATION
 import dev.detekt.api.ActiveByDefault
 import dev.detekt.api.Config
 import dev.detekt.api.Entity
@@ -24,18 +25,6 @@ import dev.detekt.api.Rule
 import org.jetbrains.kotlin.kdoc.psi.api.KDoc
 import org.jetbrains.kotlin.psi.KtFile
 
-/**
- * Reports a multi-line KDoc block that closes on a line which still holds content.
- *
- * A block whose last line reads `* @since 1.0.0` followed by the closing marker puts the version
- * and the end of the comment into one token as far as a reader skimming a diff is concerned, and
- * the next tag added to the block has to move the marker anyway. A closing marker on its own line
- * makes the block's extent obvious and keeps every later edit to a single line.
- *
- * A one-line comment is not reported: there the marker has no line of its own to move to.
- *
- * @since 3.3.0
- */
 @ActiveByDefault(since = "3.3.0")
 internal class KDocClosingMarkerOnSharedLine(config: Config) : Rule(
     config,
@@ -45,15 +34,10 @@ internal class KDocClosingMarkerOnSharedLine(config: Config) : Rule(
 
     override fun visitKtFile(file: KtFile) {
         super.visitKtFile(file)
-        file.kDocBlocks().forEach { documentation -> check(documentation) }
+        val blocks = file.kDocBlocks()
+        blocks.forEach { documentation -> check(documentation) }
     }
 
-    /**
-     * Reports the block when its closing marker shares a line with content.
-     *
-     * @param documentation The block to check.
-     * @since 3.3.0
-     */
     private fun check(documentation: KDoc) {
         if (documentation.isSingleLine) return
 
@@ -70,14 +54,12 @@ internal class KDocClosingMarkerOnSharedLine(config: Config) : Rule(
         )
     }
 
-    /**
-     * The line's own text, with the asterisk every KDoc line is indented by removed.
-     *
-     * Without this, a decoration-only line such as `*` counts as content and the rule reports a
-     * block that is already formatted the way it asks for.
-     *
-     * @return The text, or an empty string when the line carries decoration only.
-     * @since 3.3.0
-     */
-    private fun String.withoutDecoration(): String = trim().removePrefix("*").trim()
+    private fun String.withoutDecoration(): String {
+        val undecorated = trim().removePrefix(KDOC_LINE_DECORATION)
+        return undecorated.trim()
+    }
+
+    private companion object {
+        private const val KDOC_LINE_DECORATION: String = "*"
+    }
 }

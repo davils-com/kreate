@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.detekt
+package com.davils.kreate.rules
 
 import java.net.URI
 
-/**
- * The page every rule in this set points at.
- *
- * Detekt puts the URL of the reported rule into the SARIF report, which is what GitLab and GitHub
- * turn into the link a reviewer follows. A rule that cannot explain itself in one message gets
- * argued with instead of fixed.
- *
- * @since 3.3.0
- */
 internal val RULE_DOCUMENTATION: URI = URI("https://davils-com.github.io/kreate/detekt-rules.html")
