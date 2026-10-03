@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.davils.kreate.module.local
+package com.davils.kreate.settings.local
 
-import com.davils.kreate.InternalKreateApi
+import com.davils.kreate.settings.InternalKreateApi
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory

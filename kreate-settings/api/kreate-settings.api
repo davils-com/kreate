@@ -1,10 +1,4 @@
-public abstract interface annotation class com/davils/kreate/InternalKreateApi : java/lang/annotation/Annotation {
-}
-
-public final class com/davils/kreate/settings/KreateSettings : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/initialization/Settings;)V
+public abstract interface annotation class com/davils/kreate/settings/InternalKreateApi : java/lang/annotation/Annotation {
 }
 
 public abstract class com/davils/kreate/settings/KreateSettingsExtension {
@@ -12,5 +6,11 @@ public abstract class com/davils/kreate/settings/KreateSettingsExtension {
 	public final fun getCiEnvironmentVariables ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getRepositoryName ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/settings/KreateSettingsPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/initialization/Settings;)V
 }
 

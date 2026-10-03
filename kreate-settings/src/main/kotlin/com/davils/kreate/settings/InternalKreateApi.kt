@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.davils.kreate
+package com.davils.kreate.settings
 
 /**
  * Marks a declaration that is public only so that Kreate's own artefacts can share it.

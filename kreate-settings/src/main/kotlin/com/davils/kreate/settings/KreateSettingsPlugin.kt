@@ -16,14 +16,19 @@
 
 package com.davils.kreate.settings
 
-import com.davils.kreate.module.local.LocalMode
-import com.davils.kreate.module.local.gatherLocalModeInputs
-import com.davils.kreate.module.local.mavenLocalOf
-import com.davils.kreate.module.local.resolveLocalMode
-import com.davils.kreate.module.local.workspace
+import com.davils.kreate.settings.local.LocalMode
+import com.davils.kreate.settings.local.gatherLocalModeInputs
+import com.davils.kreate.settings.local.mavenLocalOf
+import com.davils.kreate.settings.local.resolveLocalMode
+import com.davils.kreate.settings.wiring.DeactivateLockingAction
+import com.davils.kreate.settings.wiring.LocalResolutionAction
+import com.davils.kreate.settings.wiring.announceLocalMode
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.kotlin.dsl.create
+import java.io.File
+
+private const val EXTENSION_NAME: String = "kreateSettings"
 
 /**
  * Makes a build resolve artifacts that a sibling checkout published locally.
@@ -57,45 +62,46 @@ import org.gradle.kotlin.dsl.create
  *
  * @since 3.2.0
  */
-public class KreateSettings : Plugin<Settings> {
+public class KreateSettingsPlugin : Plugin<Settings> {
     /**
      * Applies the plugin to the given settings.
+     *
+     * The extension is read once the settings script has been evaluated, because a `plugins { }`
+     * block is applied before the rest of the script runs: a `kreateSettings { }` block further down
+     * still takes effect.
      *
      * @param settings The settings to configure.
      * @since 3.2.0
      */
     override fun apply(settings: Settings) {
-        val extension = settings.extensions.create<KreateSettingsExtension>("kreateSettings")
+        val extension = settings.extensions.create<KreateSettingsExtension>(EXTENSION_NAME)
 
-        // Deferred to `settingsEvaluated` because a `plugins { }` block is applied before the rest
-        // of the settings script has run: reading the extension here would read its defaults and
-        // silently ignore a `kreateSettings { }` block written three lines further down.
         settings.gradle.settingsEvaluated {
             settings.installLocalResolution(extension)
         }
     }
 }
 
-/**
- * Installs the local resolution lifecycle actions, if local mode is on.
- *
- * @param extension The settings extension.
- * @since 3.2.0
- */
 private fun Settings.installLocalResolution(extension: KreateSettingsExtension) {
     if (!extension.enabled.get()) return
 
-    val mode = resolveLocalMode(
-        gatherLocalModeInputs(
-            providers,
-            gradle.gradleUserHomeDir,
-            extension.ciEnvironmentVariables.get()
-        )
-    )
+    val ciVariables = extension.ciEnvironmentVariables.get()
+    val inputs = gatherLocalModeInputs(providers, gradle.gradleUserHomeDir, ciVariables)
+    val mode = resolveLocalMode(inputs)
     if (mode !is LocalMode.Active) return
 
     val repository = mavenLocalOf(providers)
+    substituteLocalArtifacts(mode, extension, repository)
+    unlockAfterEachProject()
 
+    announceLocalMode(mode, repository)
+}
+
+private fun Settings.substituteLocalArtifacts(
+    mode: LocalMode.Active,
+    extension: KreateSettingsExtension,
+    repository: File
+) {
     gradle.lifecycle.beforeProject(
         LocalResolutionAction(
             substitutions = HashMap(mode.workspace.substitutions),
@@ -103,9 +109,8 @@ private fun Settings.installLocalResolution(extension: KreateSettingsExtension) 
             repositoryUri = repository.toURI().toString()
         )
     )
+}
 
-    // After, not before. See `DeactivateLockingAction` — the ordering is the entire point.
+private fun Settings.unlockAfterEachProject() {
     gradle.lifecycle.afterProject(DeactivateLockingAction())
-
-    announceLocalMode(mode, repository)
 }

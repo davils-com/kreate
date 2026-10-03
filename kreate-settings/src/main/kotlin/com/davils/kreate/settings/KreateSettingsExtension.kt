@@ -16,10 +16,13 @@
 
 package com.davils.kreate.settings
 
+import com.davils.kreate.settings.local.DEFAULT_CI_VARIABLES
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import javax.inject.Inject
+
+private const val DEFAULT_REPOSITORY_NAME: String = "KreateLocal"
 
 /**
  * Extension for the settings half of the local development workflow.
@@ -32,10 +35,6 @@ import javax.inject.Inject
  * @since 3.2.0
  */
 public abstract class KreateSettingsExtension @Inject constructor(
-    /**
-     * The object factory instance.
-     * @since 3.2.0
-     */
     factory: ObjectFactory
 ) {
     /**
@@ -58,7 +57,7 @@ public abstract class KreateSettingsExtension @Inject constructor(
      * @since 3.2.0
      */
     public val repositoryName: Property<String> =
-        factory.property(String::class.java).convention("KreateLocal")
+        factory.property(String::class.java).convention(DEFAULT_REPOSITORY_NAME)
 
     /**
      * The environment variables whose presence means the build is running in CI.
@@ -71,5 +70,5 @@ public abstract class KreateSettingsExtension @Inject constructor(
      */
     public val ciEnvironmentVariables: ListProperty<String> = factory
         .listProperty(String::class.java)
-        .convention(listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID"))
+        .convention(DEFAULT_CI_VARIABLES)
 }
