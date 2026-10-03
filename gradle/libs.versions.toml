@@ -4,7 +4,7 @@ poet = "2.4.0"
 dokka = "2.2.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
-kover = "0.9.9"
+kover = "0.9.11"
 jacoco = "0.8.14"
 
 # test & tooling
