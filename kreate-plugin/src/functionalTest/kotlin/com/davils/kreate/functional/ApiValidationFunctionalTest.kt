@@ -16,36 +16,20 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-/**
- * Tests for the binary compatibility validation feature.
- */
-@DisplayName("API validation")
-class ApiValidationFunctionalTest {
+class ApiValidationFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var projectDir: File
+    val workspace = tempdir()
 
-    private lateinit var fixture: KreateBuildFixture
-
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
-        fixture.writeSettings()
-        writeSource("class Sample {\n    fun greet(): String = \"hello\"\n}")
-    }
-
-    private fun writeSource(body: String) {
-        fixture.writeKotlin(
+    fun KreateBuildFixture.writeSource(body: String) {
+        writeKotlin(
             "com/example/Sample.kt",
             """
             package com.example
@@ -55,8 +39,8 @@ class ApiValidationFunctionalTest {
         )
     }
 
-    private fun writeBuild(apiBlock: String = "enabled = true") {
-        fixture.writeBuild(
+    fun KreateBuildFixture.writeApiValidationBuild(apiBlock: String = "enabled = true") {
+        writeBuild(
             """
             ${KreateBuildFixture.platformBlock}
 
@@ -72,114 +56,117 @@ class ApiValidationFunctionalTest {
         )
     }
 
-    private val dump: File get() = fixture.file("api/sample.api")
+    fun KreateBuildFixture.dump(): File = file("api/sample.api")
 
-    @Test
-    @DisplayName("records the public interface in the dump")
-    fun writesDump() {
-        writeBuild()
-
-        val result = fixture.build("kreateApiDump")
-
-        result.task(":kreateApiDump")?.outcome shouldBe TaskOutcome.SUCCESS
-        dump.readText() shouldContain "public final class com/example/Sample {"
-        dump.readText() shouldContain "public final fun greet ()Ljava/lang/String;"
+    fun newFixture(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
+        fixture.writeSettings()
+        fixture.writeSource("class Sample {\n    fun greet(): String = \"hello\"\n}")
+        return fixture
     }
 
-    @Test
-    @DisplayName("passes the check against a freshly written dump")
-    fun checkPassesAgainstFreshDump() {
-        writeBuild()
-        fixture.build("kreateApiDump")
+    context("API validation") {
+        test("records the public interface in the dump") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
 
-        val result = fixture.build("kreateApiCheck")
+            val result = fixture.build("kreateApiDump")
 
-        result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":kreateApiDump")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.dump().readText() shouldContain "public final class com/example/Sample {"
+            fixture.dump().readText() shouldContain "public final fun greet ()Ljava/lang/String;"
+        }
+
+        test("passes the check against a freshly written dump") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+
+            val result = fixture.build("kreateApiCheck")
+
+            result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("fails the check and names the dump task when the interface changed") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+
+            fixture.writeSource("class Sample {\n    fun greet(): String = \"hello\"\n    fun added(): Int = 1\n}")
+            val result = fixture.buildAndFail("kreateApiCheck")
+
+            result.output shouldContain "The public binary interface of project ':' changed."
+            result.output shouldContain "public final fun added ()I"
+            result.output shouldContain "./gradlew :kreateApiDump"
+        }
+
+        test("explains that no dump has been recorded yet") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+
+            val result = fixture.buildAndFail("kreateApiCheck")
+
+            result.output shouldContain "No binary interface dump has been recorded"
+            result.output shouldContain "./gradlew :kreateApiDump"
+        }
+
+        test("runs as part of the check lifecycle task") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+
+            val result = fixture.build("check")
+
+            result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("hides a declaration marked with a configured annotation") {
+            val fixture = newFixture()
+            fixture.writeKotlin(
+                "com/example/Marker.kt",
+                """
+                package com.example
+
+                @Retention(AnnotationRetention.BINARY)
+                annotation class Hidden
+                """.trimIndent()
+            )
+            fixture.writeSource(
+                "class Sample {\n    fun greet(): String = \"hello\"\n    @Hidden fun secret(): Int = 1\n}"
+            )
+            fixture.writeApiValidationBuild(
+                """
+                enabled = true
+                nonPublicMarkers = setOf("com.example.Hidden")
+                """.trimIndent()
+            )
+
+            fixture.build("kreateApiDump")
+
+            fixture.dump().readText() shouldContain "public final fun greet ()Ljava/lang/String;"
+            fixture.dump().readText() shouldNotContain "secret"
+        }
+
+        test("is up to date on a second run and reuses the configuration cache") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+            fixture.build("kreateApiCheck")
+
+            val result = fixture.build("kreateApiCheck")
+
+            result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.UP_TO_DATE
+            result.output shouldContain "Configuration cache entry reused"
+        }
+
+        test("registers no tasks while the feature is disabled") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild("enabled = false")
+
+            val result = fixture.build("tasks", "--all")
+
+            result.output shouldNotContain "kreateApiDump"
+            result.output shouldNotContain "kreateApiCheck"
+        }
     }
-
-    @Test
-    @DisplayName("fails the check and names the dump task when the interface changed")
-    fun checkFailsOnChange() {
-        writeBuild()
-        fixture.build("kreateApiDump")
-
-        writeSource("class Sample {\n    fun greet(): String = \"hello\"\n    fun added(): Int = 1\n}")
-        val result = fixture.buildAndFail("kreateApiCheck")
-
-        result.output shouldContain "The public binary interface of project ':' changed."
-        result.output shouldContain "public final fun added ()I"
-        result.output shouldContain "./gradlew :kreateApiDump"
-    }
-
-    @Test
-    @DisplayName("explains that no dump has been recorded yet")
-    fun checkFailsWithoutDump() {
-        writeBuild()
-
-        val result = fixture.buildAndFail("kreateApiCheck")
-
-        result.output shouldContain "No binary interface dump has been recorded"
-        result.output shouldContain "./gradlew :kreateApiDump"
-    }
-
-    @Test
-    @DisplayName("runs as part of the check lifecycle task")
-    fun runsAsPartOfCheck() {
-        writeBuild()
-        fixture.build("kreateApiDump")
-
-        val result = fixture.build("check")
-
-        result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.SUCCESS
-    }
-
-    @Test
-    @DisplayName("hides a declaration marked with a configured annotation")
-    fun honoursNonPublicMarkers() {
-        fixture.writeKotlin(
-            "com/example/Marker.kt",
-            """
-            package com.example
-
-            @Retention(AnnotationRetention.BINARY)
-            annotation class Hidden
-            """.trimIndent()
-        )
-        writeSource("class Sample {\n    fun greet(): String = \"hello\"\n    @Hidden fun secret(): Int = 1\n}")
-        writeBuild(
-            """
-            enabled = true
-            nonPublicMarkers = setOf("com.example.Hidden")
-            """.trimIndent()
-        )
-
-        fixture.build("kreateApiDump")
-
-        dump.readText() shouldContain "public final fun greet ()Ljava/lang/String;"
-        dump.readText() shouldNotContain "secret"
-    }
-
-    @Test
-    @DisplayName("is up to date on a second run and reuses the configuration cache")
-    fun isUpToDateAndCacheable() {
-        writeBuild()
-        fixture.build("kreateApiDump")
-        fixture.build("kreateApiCheck")
-
-        val result = fixture.build("kreateApiCheck")
-
-        result.task(":kreateApiCheck")?.outcome shouldBe TaskOutcome.UP_TO_DATE
-        result.output shouldContain "Configuration cache entry reused"
-    }
-
-    @Test
-    @DisplayName("registers no tasks while the feature is disabled")
-    fun registersNothingWhenDisabled() {
-        writeBuild("enabled = false")
-
-        val result = fixture.build("tasks", "--all")
-
-        result.output shouldNotContain "kreateApiDump"
-        result.output shouldNotContain "kreateApiCheck"
-    }
-}
+})

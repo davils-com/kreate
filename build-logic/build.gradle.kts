@@ -19,8 +19,6 @@ plugins {
 }
 
 kotlin {
-    // No explicitApi() here: precompiled script plugins are compiled into this source set
-    // and their top-level declarations cannot carry visibility modifiers.
     compilerOptions {
         allWarningsAsErrors = true
     }

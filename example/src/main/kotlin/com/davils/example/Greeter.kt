@@ -17,11 +17,8 @@
 package com.davils.example
 
 /**
- * A trivial piece of pure Kotlin that exists so the coverage example has something to measure.
- *
- * The [JNI] class cannot serve that purpose: instantiating it loads a native library, so a unit
- * test for it would depend on CMake having run first. The branch below is deliberate — it gives
- * the branch coverage bound something to distinguish from line coverage.
+ * Builds greetings. A piece of pure Kotlin with one branch, so that the coverage example has
+ * something to measure that does not depend on the native library.
  *
  * @since 2.2.0
  */
@@ -33,5 +30,12 @@ public class Greeter {
      * @return The greeting.
      * @since 2.2.0
      */
-    public fun greet(name: String): String = if (name.isBlank()) "Hello!" else "Hello, $name!"
+    public fun greet(name: String): String {
+        if (name.isBlank()) return ANONYMOUS_GREETING
+        return "Hello, $name!"
+    }
+
+    private companion object {
+        private const val ANONYMOUS_GREETING: String = "Hello!"
+    }
 }

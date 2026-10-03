@@ -140,7 +140,7 @@ build script is still being evaluated. Two consequences are worth knowing before
     </def>
     <def title="Enum values need an import">
         <code>LegacyTestPolicy</code> and <code>KotestModule</code> live in
-        <code>com.davils.kreate.module.project.tests</code> and
+        <code>com.davils.kreate.testing</code> and
         <code>...tests.suite</code>. A Kotlin build script needs an <code>import</code> at the top
         of the file, the same as for any other type a plugin exposes.
     </def>

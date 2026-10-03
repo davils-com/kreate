@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.davils.buildlogic.Project
 import dev.detekt.gradle.Detekt
 
 plugins {
@@ -30,16 +31,12 @@ detekt {
     allRules = true
     ignoreFailures = false
     parallel = true
-
-    val baselineFile = qualityConfigDir.resolve("baseline.xml")
-    if (baselineFile.exists()) {
-        baseline = baselineFile
-    }
 }
 
 dependencies {
     "detektPlugins"(libs.findLibrary("detekt-rules-ktlintWrapper").get())
     "detektPlugins"(libs.findLibrary("detekt-rules-libraries").get())
+    "detektPlugins"(Project.Quality.KREATE_RULES_MODULE)
 }
 
 tasks.withType<Detekt>().configureEach {
@@ -51,11 +48,6 @@ tasks.withType<Detekt>().configureEach {
     }
 }
 
-// Note: the KDoc rules from .junie/AGENTS.md are enforced by detekt's
-// UndocumentedPublicClass/Function/Property rules in config/detekt/detekt.yml. Dokka is a
-// feature Kreate offers its consumers, not something this project applies to itself, so
-// there is no Dokka task here to configure.
-
 apiValidation {
-    nonPublicMarkers += "com.davils.kreate.InternalKreateApi"
+    nonPublicMarkers += "com.davils.kreate.settings.InternalKreateApi"
 }

@@ -16,645 +16,537 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * Tests for the named test suites on Kotlin/JVM.
- *
- * Nothing here asserts only that a task succeeded. A test task that compiled nothing and ran
- * nothing succeeds too, and that is precisely the failure this feature can produce: a source
- * directory that looks like it holds tests and is never built. Every assertion is either about
- * a named test having actually executed, or about a specific task outcome that could not happen
- * by accident.
- */
-@DisplayName("test suites on Kotlin/JVM")
-class TestSuiteFunctionalTest {
+private const val JUNIT_VERSION: String = "6.1.3"
 
-    private companion object {
-        /**
-         * The JUnit version the generated builds declare.
-         *
-         * Pinned to the JUnit 6 line so that it matches the JUnit Platform launcher Kreate adds
-         * by default; a mismatch there is exactly the failure the default is meant to prevent.
-         */
-        const val JUNIT_VERSION: String = "6.1.3"
-    }
+private const val LEGACY_TEST_POLICY: String = "com.davils.kreate.testing.LegacyTestPolicy"
 
-    @TempDir
-    lateinit var projectDir: File
+private const val TASK_NOT_FOUND: Int = -1
 
-    private lateinit var fixture: KreateBuildFixture
+class TestSuiteFunctionalTest : FunSpec({
+    val workspace = tempdir()
 
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+    fun newBuild(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
+        return fixture
     }
 
-    /**
-     * Writes a build with testing enabled and the given extra configuration inside `tests { }`.
-     *
-     * @param testsBlock Additional body for the `tests { }` block.
-     * @param extra Additional build script content.
-     */
-    private fun writeBuild(testsBlock: String = "", extra: String = "") {
-        fixture.writeBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+    context("test suites on Kotlin/JVM") {
+        context("source sets and tasks") {
+            test("runs the tests in src/unitTest/kotlin") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "UnitSuiteRan")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest"))
 
-                project {
-                    name = "Sample"
+                val result = fixture.build("unitTest")
 
-                    tests {
-                        enabled = true
-                        maxParallelForks = 1
+                result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.executedTestReports("unitTest") shouldContain "UnitSuiteRan"
+            }
 
-                        report {
-                            enabled = true
-                            xml = true
+            test("runs the tests in src/integrationTest/kotlin") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("integrationTest", "IntegrationSuiteRan")
+                fixture.writeTestingBuild(testsBlock = junitFor("integrationTest"))
+
+                fixture.build("integrationTest")
+
+                fixture.executedTestReports("integrationTest") shouldContain "IntegrationSuiteRan"
+            }
+
+            test("a suite sees main's internal declarations") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "SeesInternals", body = "assert(secret() == \"internal\")")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest"))
+
+                fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+
+            test("a suite can carry dependencies the rest of the project does not") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.write(
+                    "src/integrationTest/kotlin/com/example/UsesOwnDependency.kt",
+                    """
+                    package com.example
+
+                    import org.apache.commons.lang3.StringUtils
+                    import org.junit.jupiter.api.Test
+
+                    class UsesOwnDependency {
+                        @Test
+                        fun usesOwnDependency() {
+                            assert(StringUtils.reverse("ab") == "ba")
                         }
-
-                        $testsBlock
                     }
-                }
-            """.trimIndent(),
-            extra = """
-                repositories { mavenCentral() }
+                    """.trimIndent()
+                )
+                fixture.writeTestingBuild(
+                    testsBlock = junitFor(
+                        "integrationTest",
+                        dependencies = """implementation("org.apache.commons:commons-lang3:3.17.0")"""
+                    )
+                )
 
-                $extra
-            """.trimIndent()
-        )
-    }
-
-    /**
-     * Writes a production class carrying an `internal` declaration.
-     */
-    private fun writeProductionCode() {
-        fixture.writeKotlin(
-            "com/example/Greeter.kt",
-            """
-            package com.example
-
-            class Greeter {
-                fun greet(name: String): String = "Hello, " + name
+                fixture.build("integrationTest").task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
             }
 
-            internal fun secret(): String = "internal"
-            """.trimIndent()
-        )
-    }
+            test("a suite can reuse another suite's fixtures") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.write(
+                    "src/unitTest/kotlin/com/example/Fixtures.kt",
+                    """
+                    package com.example
 
-    /**
-     * Writes a JUnit 5 test into an arbitrary source set.
-     *
-     * @param sourceSet The source set directory below `src`.
-     * @param className The test class name, also used as the test method name.
-     * @param body The assertion body.
-     */
-    private fun writeTest(sourceSet: String, className: String, body: String = "assert(true)") {
-        fixture.write(
-            "src/$sourceSet/kotlin/com/example/$className.kt",
-            """
-            package com.example
-
-            import org.junit.jupiter.api.Test
-
-            class $className {
-                @Test
-                fun $className() {
-                    $body
-                }
-            }
-            """.trimIndent()
-        )
-    }
-
-    /**
-     * A `suites { }` block that gives each named suite the JUnit 5 engine.
-     *
-     * Declared on the suite rather than in a top level `dependencies { }` block, because a
-     * suite's configurations do not exist while the build script is running.
-     *
-     * @param suites The suite names to configure.
-     * @param body Additional body for every named suite.
-     * @param dependencies Additional lines for every named suite's `dependencies { }` block.
-     * @return A `suites { }` block.
-     */
-    private fun junitFor(
-        vararg suites: String,
-        body: String = "",
-        dependencies: String = ""
-    ): String {
-        val entries = suites.joinToString("\n\n") { suite ->
-            """
-            named("$suite") {
-                dependencies {
-                    implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
-                    $dependencies
-                }
-                $body
-            }
-            """.trimIndent()
-        }
-        return """
-            suites {
-                $entries
-            }
-        """.trimIndent()
-    }
-
-    @Nested
-    @DisplayName("source sets and tasks")
-    inner class SourceSetsAndTasks {
-
-        @Test
-        @DisplayName("runs the tests in src/unitTest/kotlin")
-        fun runsUnitSuite() {
-            writeProductionCode()
-            writeTest("unitTest", "UnitSuiteRan")
-            writeBuild(testsBlock = junitFor("unitTest"))
-
-            val result = fixture.build("unitTest")
-
-            result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            // The report, not the task outcome: an empty suite succeeds just as loudly.
-            fixture.file("build/test-results/unitTest").walkTopDown()
-                .filter { it.extension == "xml" }
-                .joinToString("") { it.readText() } shouldContain "UnitSuiteRan"
-        }
-
-        @Test
-        @DisplayName("runs the tests in src/integrationTest/kotlin")
-        fun runsIntegrationSuite() {
-            writeProductionCode()
-            writeTest("integrationTest", "IntegrationSuiteRan")
-            writeBuild(testsBlock = junitFor("integrationTest"))
-
-            fixture.build("integrationTest")
-
-            fixture.file("build/test-results/integrationTest").walkTopDown()
-                .filter { it.extension == "xml" }
-                .joinToString("") { it.readText() } shouldContain "IntegrationSuiteRan"
-        }
-
-        @Test
-        @DisplayName("a suite sees main's internal declarations")
-        fun seesInternals() {
-            writeProductionCode()
-            writeTest("unitTest", "SeesInternals", body = "assert(secret() == \"internal\")")
-            writeBuild(testsBlock = junitFor("unitTest"))
-
-            fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-
-        @Test
-        @DisplayName("a suite can carry dependencies the rest of the project does not")
-        fun ownDependencies() {
-            writeProductionCode()
-            fixture.write(
-                "src/integrationTest/kotlin/com/example/UsesOwnDependency.kt",
-                """
-                package com.example
-
-                import org.apache.commons.lang3.StringUtils
-                import org.junit.jupiter.api.Test
-
-                class UsesOwnDependency {
-                    @Test
-                    fun usesOwnDependency() {
-                        assert(StringUtils.reverse("ab") == "ba")
+                    internal object Fixtures {
+                        val value: String = "shared"
                     }
-                }
-                """.trimIndent()
-            )
-            writeBuild(
-                testsBlock = junitFor(
-                    "integrationTest",
-                    dependencies = """implementation("org.apache.commons:commons-lang3:3.17.0")"""
+                    """.trimIndent()
                 )
-            )
-
-            fixture.build("integrationTest").task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-
-        @Test
-        @DisplayName("a suite can reuse another suite's fixtures")
-        fun sharedFixtures() {
-            writeProductionCode()
-            fixture.write(
-                "src/unitTest/kotlin/com/example/Fixtures.kt",
-                """
-                package com.example
-
-                internal object Fixtures {
-                    val value: String = "shared"
-                }
-                """.trimIndent()
-            )
-            writeTest("integrationTest", "UsesFixtures", body = "assert(Fixtures.value == \"shared\")")
-            writeBuild(
-                testsBlock = junitFor("unitTest") + "\n" + junitFor(
-                    "integrationTest",
-                    body = """dependsOnSuites = listOf("unitTest")"""
+                fixture.writeTest("integrationTest", "UsesFixtures", body = "assert(Fixtures.value == \"shared\")")
+                fixture.writeTestingBuild(
+                    testsBlock = junitFor("unitTest") +
+                        "\n" +
+                        junitFor(
+                            "integrationTest",
+                            body = """dependsOnSuites = listOf("unitTest")"""
+                        )
                 )
-            )
 
-            fixture.build("integrationTest").task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
+                fixture.build("integrationTest").task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
 
-        @Test
-        @DisplayName("a registered suite gets a source set and a task of its own")
-        fun registeredSuite() {
-            writeProductionCode()
-            writeTest("contractTest", "ContractSuiteRan")
-            writeBuild(
-                testsBlock = """
-                    suites {
-                        register("contractTest") {
-                            runOnCheck = false
-                            dependencies {
-                                implementation("org.junit.jupiter:junit-jupiter:5.11.4")
+            test("a registered suite gets a source set and a task of its own") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("contractTest", "ContractSuiteRan")
+                fixture.writeTestingBuild(
+                    testsBlock = """
+                        suites {
+                            register("contractTest") {
+                                runOnCheck = false
+                                dependencies {
+                                    implementation("org.junit.jupiter:junit-jupiter:5.11.4")
+                                }
                             }
                         }
-                    }
-                """.trimIndent()
-            )
+                    """.trimIndent()
+                )
 
-            fixture.build("contractTest").task(":contractTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.build("contractTest").task(":contractTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+        }
+
+        context("check wiring") {
+            test("check runs the unit suite and leaves the integration suite alone") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "OnCheck")
+                fixture.writeTest("integrationTest", "NotOnCheck")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest", "integrationTest"))
+
+                val result = fixture.build("check")
+
+                result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":integrationTest") shouldBe null
+            }
+
+            test("asking for the integration suite does not drag the unit suite in") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "NotRequested")
+                fixture.writeTest("integrationTest", "Requested")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest", "integrationTest"))
+
+                val result = fixture.build("integrationTest")
+
+                result.task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":unitTest") shouldBe null
+            }
+
+            test("the integration suite runs after the unit suite when both are asked for") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "First")
+                fixture.writeTest("integrationTest", "Second")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest", "integrationTest"))
+
+                val output = fixture.build("integrationTest", "unitTest").output
+
+                val unitTestLine = output.taskLineIndex("unitTest")
+                val integrationTestLine = output.taskLineIndex("integrationTest")
+                unitTestLine shouldBeGreaterThanOrEqual 0
+                integrationTestLine shouldBeGreaterThanOrEqual 0
+                unitTestLine shouldBeLessThan integrationTestLine
+            }
+
+            test("a suite taken off check is not run by check") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "Skipped")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest", body = "runOnCheck = false"))
+
+                fixture.build("check").task(":unitTest") shouldBe null
+            }
+        }
+
+        context("tag filtering") {
+            test("an excluded tag is not run, so the suite's own useJUnitPlatform call wins") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.write(
+                    "src/unitTest/kotlin/com/example/Tagged.kt",
+                    """
+                    package com.example
+
+                    import org.junit.jupiter.api.Tag
+                    import org.junit.jupiter.api.Test
+
+                    class Tagged {
+                        @Test
+                        fun fast() = assert(true)
+
+                        @Test
+                        @Tag("slow")
+                        fun slow(): Unit = error("the excluded tag ran")
+                    }
+                    """.trimIndent()
+                )
+                fixture.writeTestingBuild(
+                    testsBlock = junitFor("unitTest", body = """excludeTags = listOf("slow")""")
+                )
+
+                fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+        }
+
+        context("legacy test source set") {
+            test("the conventional test task is skipped by default") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "Replacement")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest"))
+
+                val result = fixture.build("check", "test")
+
+                result.task(":test")?.outcome shouldBe TaskOutcome.SKIPPED
+            }
+
+            test("the FAIL policy names the directory that still holds tests") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("test", "StillHere")
+                fixture.writeTestingBuild(
+                    testsBlock = legacyPolicy("FAIL"),
+                    extra = """
+                        dependencies {
+                            testImplementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                            testRuntimeOnly("org.junit.platform:junit-platform-launcher:$JUNIT_VERSION")
+                        }
+                    """.trimIndent()
+                )
+
+                val output = fixture.buildAndFail("check").output
+
+                val directoryWithForwardSlashesOnEveryPlatform = "src/test/kotlin"
+                output shouldContain directoryWithForwardSlashesOnEveryPlatform
+                output shouldContain "would stop running"
+            }
+
+            test("the FAIL policy passes once the tests have moved") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "Moved")
+                fixture.writeTestingBuild(
+                    testsBlock = legacyPolicy("FAIL") + "\n" + junitFor("unitTest")
+                )
+
+                fixture.build("check").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+
+            test("the ALIAS policy runs an unmoved src/test tree as the unit suite") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("test", "AdoptedFromLegacy")
+                fixture.writeTestingBuild(
+                    testsBlock = legacyPolicy("ALIAS") + "\n" + junitFor("unitTest")
+                )
+
+                val result = fixture.build("test")
+
+                result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.executedTestReports("unitTest") shouldContain "AdoptedFromLegacy"
+            }
+
+            test("the KEEP policy leaves the conventional test task running") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("test", "LegacyStillRuns")
+                fixture.writeTest("unitTest", "SuiteAlsoRuns")
+                fixture.writeTestingBuild(
+                    testsBlock = legacyPolicy("KEEP") + "\n" + junitFor("unitTest"),
+                    extra = """
+                        dependencies {
+                            testImplementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                            testRuntimeOnly("org.junit.platform:junit-platform-launcher:$JUNIT_VERSION")
+                        }
+                    """.trimIndent()
+                )
+
+                val result = fixture.build("check")
+
+                result.task(":test")?.outcome shouldBe TaskOutcome.SUCCESS
+                result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            }
+        }
+
+        context("Kotest bundle") {
+            test("a Kotest spec runs with nothing declared but the bundle") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.write(
+                    "src/unitTest/kotlin/com/example/GreeterSpec.kt",
+                    """
+                    package com.example
+
+                    import io.kotest.core.spec.style.StringSpec
+                    import io.kotest.matchers.shouldBe
+
+                    class GreeterSpec : StringSpec({
+                        "greets by name" {
+                            Greeter().greet("world") shouldBe "Hello, world"
+                        }
+                    })
+                    """.trimIndent()
+                )
+                fixture.writeTestingBuild(
+                    testsBlock = """
+                        kotest {
+                            enabled = true
+                        }
+                    """.trimIndent()
+                )
+
+                fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+                fixture.executedTestReports("unitTest") shouldContain "greets by name"
+            }
+        }
+
+        context("coverage") {
+            test("measures the code a suite exercises and leaves the suite itself out") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest(
+                    "unitTest",
+                    "CoversGreeter",
+                    body = "assert(Greeter().greet(\"x\") == \"Hello, x\")"
+                )
+                fixture.writeBuild(
+                    kreateBlock = """
+                        ${KreateBuildFixture.platformBlock}
+
+                        project {
+                            name = "Sample"
+
+                            tests {
+                                enabled = true
+                                maxParallelForks = 1
+
+                                ${junitFor("unitTest")}
+                            }
+
+                            coverage {
+                                enabled = true
+                            }
+                        }
+                    """.trimIndent(),
+                    extraPlugins = listOf("""id("org.jetbrains.kotlinx.kover")"""),
+                    extra = "repositories { mavenCentral() }"
+                )
+
+                fixture.build("koverXmlReport").task(":koverXmlReport")?.outcome shouldBe TaskOutcome.SUCCESS
+
+                val report = fixture.file("build/reports/kover/report.xml").readText()
+                report shouldContain "Greeter"
+                val somethingRecordedAsCovered = "covered="
+                report shouldContain somethingRecordedAsCovered
+                val suiteClassOutsideProductionCode = "CoversGreeter"
+                report shouldNotContain suiteClassOutsideProductionCode
+            }
+        }
+
+        context("validation") {
+            test("a suite cannot take over the production source set") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTestingBuild(
+                    testsBlock = """
+                        suites {
+                            named("unitTest") { sourceSetName = "main" }
+                        }
+                    """.trimIndent()
+                )
+
+                fixture.buildAndFail("check").output shouldContain "the production source set"
+            }
+
+            test("a suite cannot depend on one that is not registered") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTestingBuild(
+                    testsBlock = """
+                        suites {
+                            named("unitTest") { dependsOnSuites = listOf("nope") }
+                        }
+                    """.trimIndent()
+                )
+
+                fixture.buildAndFail("check").output shouldContain "which is not registered"
+            }
+        }
+
+        context("build contract") {
+            test("reuses the configuration cache entry") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeTest("unitTest", "Cached")
+                fixture.writeTestingBuild(testsBlock = junitFor("unitTest"))
+
+                fixture.build("check")
+
+                fixture.build("check").output shouldContain "Configuration cache entry reused"
+            }
+
+            test("registers no suite tasks while testing is disabled") {
+                val fixture = newBuild()
+                fixture.writeProductionCode()
+                fixture.writeBuild(
+                    kreateBlock = """
+                        ${KreateBuildFixture.platformBlock}
+
+                        project {
+                            name = "Sample"
+                        }
+                    """.trimIndent(),
+                    extra = "repositories { mavenCentral() }"
+                )
+
+                val output = fixture.build("tasks", "--all").output
+
+                output shouldNotContain "unitTest"
+                output shouldNotContain "integrationTest"
+            }
         }
     }
+})
 
-    @Nested
-    @DisplayName("check wiring")
-    inner class CheckWiring {
+private fun KreateBuildFixture.writeTestingBuild(testsBlock: String = "", extra: String = "") {
+    writeBuild(
+        kreateBlock = """
+            ${KreateBuildFixture.platformBlock}
 
-        @Test
-        @DisplayName("check runs the unit suite and leaves the integration suite alone")
-        fun checkScope() {
-            writeProductionCode()
-            writeTest("unitTest", "OnCheck")
-            writeTest("integrationTest", "NotOnCheck")
-            writeBuild(testsBlock = junitFor("unitTest", "integrationTest"))
+            project {
+                name = "Sample"
 
-            val result = fixture.build("check")
+                tests {
+                    enabled = true
+                    maxParallelForks = 1
 
-            result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            result.task(":integrationTest") shouldBe null
-        }
-
-        @Test
-        @DisplayName("asking for the integration suite does not drag the unit suite in")
-        fun integrationAlone() {
-            writeProductionCode()
-            writeTest("unitTest", "NotRequested")
-            writeTest("integrationTest", "Requested")
-            writeBuild(testsBlock = junitFor("unitTest", "integrationTest"))
-
-            val result = fixture.build("integrationTest")
-
-            result.task(":integrationTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            result.task(":unitTest") shouldBe null
-        }
-
-        @Test
-        @DisplayName("the integration suite runs after the unit suite when both are asked for")
-        fun ordering() {
-            writeProductionCode()
-            writeTest("unitTest", "First")
-            writeTest("integrationTest", "Second")
-            writeBuild(testsBlock = junitFor("unitTest", "integrationTest"))
-
-            val output = fixture.build("integrationTest", "unitTest").output
-
-            output.taskLineIndex("unitTest") shouldBeLessThan output.taskLineIndex("integrationTest")
-        }
-
-        @Test
-        @DisplayName("a suite taken off check is not run by check")
-        fun offCheck() {
-            writeProductionCode()
-            writeTest("unitTest", "Skipped")
-            writeBuild(testsBlock = junitFor("unitTest", body = "runOnCheck = false"))
-
-            fixture.build("check").task(":unitTest") shouldBe null
-        }
-    }
-
-    @Nested
-    @DisplayName("tag filtering")
-    inner class Tags {
-
-        @Test
-        @DisplayName("an excluded tag is not run, so the suite's own useJUnitPlatform call wins")
-        fun excludesTags() {
-            writeProductionCode()
-            fixture.write(
-                "src/unitTest/kotlin/com/example/Tagged.kt",
-                """
-                package com.example
-
-                import org.junit.jupiter.api.Tag
-                import org.junit.jupiter.api.Test
-
-                class Tagged {
-                    @Test
-                    fun fast() = assert(true)
-
-                    @Test
-                    @Tag("slow")
-                    fun slow(): Unit = error("the excluded tag ran")
-                }
-                """.trimIndent()
-            )
-            writeBuild(
-                testsBlock = junitFor("unitTest", body = """excludeTags = listOf("slow")""")
-            )
-
-            fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-    }
-
-    @Nested
-    @DisplayName("legacy test source set")
-    inner class Legacy {
-
-        @Test
-        @DisplayName("the conventional test task is skipped by default")
-        fun disabled() {
-            writeProductionCode()
-            writeTest("unitTest", "Replacement")
-            writeBuild(testsBlock = junitFor("unitTest"))
-
-            val result = fixture.build("check", "test")
-
-            result.task(":test")?.outcome shouldBe TaskOutcome.SKIPPED
-        }
-
-        @Test
-        @DisplayName("the FAIL policy names the directory that still holds tests")
-        fun failsOnLeftovers() {
-            writeProductionCode()
-            writeTest("test", "StillHere")
-            writeBuild(
-                testsBlock = "legacyTestSourceSet = com.davils.kreate.module.project.tests.LegacyTestPolicy.FAIL",
-                extra = """
-                    dependencies {
-                        testImplementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
-                        testRuntimeOnly("org.junit.platform:junit-platform-launcher:$JUNIT_VERSION")
-                    }
-                """.trimIndent()
-            )
-
-            val output = fixture.buildAndFail("check").output
-
-            // Forward slashes on every platform. This assertion can only fail on Windows, which
-            // is the point: the listing is built from `File`, and the rest of the same message
-            // spells directories with `/`.
-            output shouldContain "src/test/kotlin"
-            output shouldContain "would stop running"
-        }
-
-        @Test
-        @DisplayName("the FAIL policy passes once the tests have moved")
-        fun failPolicyPassesWhenMoved() {
-            writeProductionCode()
-            writeTest("unitTest", "Moved")
-            writeBuild(
-                testsBlock = "legacyTestSourceSet = com.davils.kreate.module.project.tests.LegacyTestPolicy.FAIL\n" + junitFor("unitTest")
-            )
-
-            fixture.build("check").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-
-        @Test
-        @DisplayName("the ALIAS policy runs an unmoved src/test tree as the unit suite")
-        fun aliasAdoptsSources() {
-            writeProductionCode()
-            writeTest("test", "AdoptedFromLegacy")
-            writeBuild(
-                testsBlock = "legacyTestSourceSet = com.davils.kreate.module.project.tests.LegacyTestPolicy.ALIAS\n" + junitFor("unitTest")
-            )
-
-            val result = fixture.build("test")
-
-            result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            fixture.file("build/test-results/unitTest").walkTopDown()
-                .filter { it.extension == "xml" }
-                .joinToString("") { it.readText() } shouldContain "AdoptedFromLegacy"
-        }
-
-        @Test
-        @DisplayName("the KEEP policy leaves the conventional test task running")
-        fun keepRunsLegacy() {
-            writeProductionCode()
-            writeTest("test", "LegacyStillRuns")
-            writeTest("unitTest", "SuiteAlsoRuns")
-            writeBuild(
-                testsBlock = "legacyTestSourceSet = com.davils.kreate.module.project.tests.LegacyTestPolicy.KEEP\n" + junitFor("unitTest"),
-                extra = """
-                    dependencies {
-                        testImplementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
-                        testRuntimeOnly("org.junit.platform:junit-platform-launcher:$JUNIT_VERSION")
-                    }
-                """.trimIndent()
-            )
-
-            val result = fixture.build("check")
-
-            result.task(":test")?.outcome shouldBe TaskOutcome.SUCCESS
-            result.task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-        }
-    }
-
-    @Nested
-    @DisplayName("Kotest bundle")
-    inner class Kotest {
-
-        @Test
-        @DisplayName("a Kotest spec runs with nothing declared but the bundle")
-        fun runsKotestSpec() {
-            writeProductionCode()
-            fixture.write(
-                "src/unitTest/kotlin/com/example/GreeterSpec.kt",
-                """
-                package com.example
-
-                import io.kotest.core.spec.style.StringSpec
-                import io.kotest.matchers.shouldBe
-
-                class GreeterSpec : StringSpec({
-                    "greets by name" {
-                        Greeter().greet("world") shouldBe "Hello, world"
-                    }
-                })
-                """.trimIndent()
-            )
-            writeBuild(
-                testsBlock = """
-                    kotest {
+                    report {
                         enabled = true
+                        xml = true
                     }
-                """.trimIndent()
-            )
 
-            fixture.build("unitTest").task(":unitTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            fixture.file("build/test-results/unitTest").walkTopDown()
-                .filter { it.extension == "xml" }
-                .joinToString("") { it.readText() } shouldContain "greets by name"
-        }
-    }
+                    $testsBlock
+                }
+            }
+        """.trimIndent(),
+        extra = """
+            repositories { mavenCentral() }
 
-    @Nested
-    @DisplayName("coverage")
-    inner class Coverage {
-
-        @Test
-        @DisplayName("measures the code a suite exercises and leaves the suite itself out")
-        fun measuresProductionCodeOnly() {
-            writeProductionCode()
-            writeTest(
-                "unitTest",
-                "CoversGreeter",
-                body = "assert(Greeter().greet(\"x\") == \"Hello, x\")"
-            )
-            fixture.writeBuild(
-                kreateBlock = """
-                    ${KreateBuildFixture.platformBlock}
-
-                    project {
-                        name = "Sample"
-
-                        tests {
-                            enabled = true
-                            maxParallelForks = 1
-
-                            ${junitFor("unitTest")}
-                        }
-
-                        coverage {
-                            enabled = true
-                        }
-                    }
-                """.trimIndent(),
-                extraPlugins = listOf("""id("org.jetbrains.kotlinx.kover")"""),
-                extra = "repositories { mavenCentral() }"
-            )
-
-            fixture.build("koverXmlReport").task(":koverXmlReport")?.outcome shouldBe TaskOutcome.SUCCESS
-
-            val report = fixture.file("build/reports/kover/report.xml").readText()
-            report shouldContain "Greeter"
-            // A zero-coverage report names the class too, so assert something was recorded.
-            report shouldContain "covered="
-            // The suite's own classes are not production code. Kover only recognises a source
-            // set called `test`, so without Kreate excluding them they would land in the
-            // denominator and the number would quietly describe the wrong thing.
-            report shouldNotContain "CoversGreeter"
-        }
-    }
-
-    @Nested
-    @DisplayName("validation")
-    inner class Validation {
-
-        @Test
-        @DisplayName("a suite cannot take over the production source set")
-        fun rejectsReservedName() {
-            writeProductionCode()
-            writeBuild(
-                testsBlock = """
-                    suites {
-                        named("unitTest") { sourceSetName = "main" }
-                    }
-                """.trimIndent()
-            )
-
-            fixture.buildAndFail("check").output shouldContain "the production source set"
-        }
-
-        @Test
-        @DisplayName("a suite cannot depend on one that is not registered")
-        fun rejectsUnknownSuite() {
-            writeProductionCode()
-            writeBuild(
-                testsBlock = """
-                    suites {
-                        named("unitTest") { dependsOnSuites = listOf("nope") }
-                    }
-                """.trimIndent()
-            )
-
-            fixture.buildAndFail("check").output shouldContain "which is not registered"
-        }
-    }
-
-    @Nested
-    @DisplayName("build contract")
-    inner class BuildContract {
-
-        @Test
-        @DisplayName("reuses the configuration cache entry")
-        fun configurationCache() {
-            writeProductionCode()
-            writeTest("unitTest", "Cached")
-            writeBuild(testsBlock = junitFor("unitTest"))
-
-            fixture.build("check")
-
-            fixture.build("check").output shouldContain "Configuration cache entry reused"
-        }
-
-        @Test
-        @DisplayName("registers no suite tasks while testing is disabled")
-        fun noTasksWhenDisabled() {
-            writeProductionCode()
-            fixture.writeBuild(
-                kreateBlock = """
-                    ${KreateBuildFixture.platformBlock}
-
-                    project {
-                        name = "Sample"
-                    }
-                """.trimIndent(),
-                extra = "repositories { mavenCentral() }"
-            )
-
-            val output = fixture.build("tasks", "--all").output
-
-            output shouldNotContain "unitTest"
-            output shouldNotContain "integrationTest"
-        }
-    }
+            $extra
+        """.trimIndent()
+    )
 }
 
-/**
- * Returns where a task's own execution line appears in the build output.
- *
- * Anchored to the whole line on purpose: a plain `indexOf(":unitTest")` also matches
- * `:unitTestClasses`, and the compilation tasks of the two suites are free to interleave -
- * only the test tasks themselves are ordered.
- *
- * @param taskName The task name without its path.
- * @return The index of the line, or `-1` when the task did not run.
- */
-private fun String.taskLineIndex(taskName: String): Int =
-    Regex("^> Task :$taskName\\b.*$", RegexOption.MULTILINE).find(this)?.range?.first ?: -1
+private fun KreateBuildFixture.writeProductionCode() {
+    writeKotlin(
+        "com/example/Greeter.kt",
+        """
+        package com.example
 
-/**
- * Asserts that this index is smaller than [other] and that both were actually found.
- *
- * @param other The index that must come later.
- */
-private infix fun Int.shouldBeLessThan(other: Int) {
-    check(this >= 0 && other >= 0) { "expected both markers in the output, got $this and $other" }
-    check(this < other) { "expected $this to come before $other" }
+        class Greeter {
+            fun greet(name: String): String = "Hello, " + name
+        }
+
+        internal fun secret(): String = "internal"
+        """.trimIndent()
+    )
+}
+
+private fun KreateBuildFixture.writeTest(sourceSet: String, className: String, body: String = "assert(true)") {
+    write(
+        "src/$sourceSet/kotlin/com/example/$className.kt",
+        """
+        package com.example
+
+        import org.junit.jupiter.api.Test
+
+        class $className {
+            @Test
+            fun $className() {
+                $body
+            }
+        }
+        """.trimIndent()
+    )
+}
+
+private fun KreateBuildFixture.executedTestReports(suite: String): String {
+    val resultsDirectory = file("build/test-results/$suite")
+    val reports = resultsDirectory.walkTopDown().filter { report -> report.extension == "xml" }
+    return reports.joinToString("") { report -> report.readText() }
+}
+
+private fun junitFor(
+    vararg suites: String,
+    body: String = "",
+    dependencies: String = ""
+): String {
+    val entries = suites.joinToString("\n\n") { suite ->
+        """
+        named("$suite") {
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter:$JUNIT_VERSION")
+                $dependencies
+            }
+            $body
+        }
+        """.trimIndent()
+    }
+    return """
+        suites {
+            $entries
+        }
+    """.trimIndent()
+}
+
+private fun legacyPolicy(policy: String): String = "legacyTestSourceSet = $LEGACY_TEST_POLICY.$policy"
+
+private fun String.taskLineIndex(taskName: String): Int {
+    val ownExecutionLine = Regex("^> Task :$taskName\\b.*$", RegexOption.MULTILINE)
+    return ownExecutionLine.find(this)?.range?.first ?: TASK_NOT_FOUND
 }

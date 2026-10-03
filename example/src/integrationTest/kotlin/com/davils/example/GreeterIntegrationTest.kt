@@ -1,24 +1,28 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.davils.example
 
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 
-/**
- * Integration tests for [Greeter].
- *
- * Lives in the integration suite to show what that suite is for: a test that depends on
- * something outside the process. Here it is one environment variable, set on the suite rather
- * than on every test task in the project.
- *
- * @since 1.0.0
- */
-class GreeterIntegrationTest {
-    /**
-     * Verifies that the suite's own environment reaches the test JVM.
-     *
-     * @since 1.0.0
-     */
-    @Test
-    fun readsItsOwnEnvironment() {
-        assert(System.getenv("EXAMPLE_INTEGRATION") == "true")
+class GreeterIntegrationTest : FunSpec({
+    test("reads the environment its suite declares") {
+        val integration = System.getenv("EXAMPLE_INTEGRATION")
+
+        integration shouldBe "true"
     }
-}
+})

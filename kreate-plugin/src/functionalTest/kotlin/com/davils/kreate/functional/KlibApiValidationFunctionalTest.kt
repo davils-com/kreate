@@ -16,43 +16,27 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-/**
- * Tests for validating every target of a multiplatform project through the Kotlin plugin.
- */
-@DisplayName("API validation of every multiplatform target")
-class KlibApiValidationFunctionalTest {
+class KlibApiValidationFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var projectDir: File
+    val workspace = tempdir()
 
-    private lateinit var fixture: KreateBuildFixture
-
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
-        fixture.writeSettings()
-        writeCommon("class Sample {\n    fun greet(): String = \"hello\"\n}")
+    fun KreateBuildFixture.writeCommon(body: String) {
+        writeKotlin("commonMain", "com/example/Sample.kt", "package com.example\n\n$body")
     }
 
-    private fun writeCommon(body: String) {
-        fixture.writeKotlin("commonMain", "com/example/Sample.kt", "package com.example\n\n$body")
+    fun KreateBuildFixture.writeWasmOnly(body: String) {
+        writeKotlin("wasmJsMain", "com/example/WasmOnly.kt", "package com.example\n\n$body")
     }
 
-    private fun writeWasmOnly(body: String) {
-        fixture.writeKotlin("wasmJsMain", "com/example/WasmOnly.kt", "package com.example\n\n$body")
-    }
-
-    private fun writeBuild(apiBlock: String = "enabled = true\nklib = true") {
-        fixture.writeMultiplatformBuild(
+    fun KreateBuildFixture.writeApiValidationBuild(apiBlock: String = "enabled = true\nklib = true") {
+        writeMultiplatformBuild(
             """
             ${KreateBuildFixture.platformBlock}
 
@@ -68,84 +52,100 @@ class KlibApiValidationFunctionalTest {
         )
     }
 
-    private val jvmDump: File get() = fixture.file("api/sample.api")
-    private val klibDump: File get() = fixture.file("api/sample.klib.api")
+    fun KreateBuildFixture.jvmDump(): File = file("api/sample.api")
 
-    @Test
-    @DisplayName("records the klib targets beside the JVM target")
-    fun writesKlibDump() {
-        writeBuild()
+    fun KreateBuildFixture.klibDump(): File = file("api/sample.klib.api")
 
-        fixture.build("kreateApiDump")
-
-        jvmDump.readText() shouldContain "public final class com/example/Sample {"
-        klibDump.readText() shouldContain "wasmJs"
-        klibDump.readText() shouldContain "final class com.example/Sample"
+    fun newFixture(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
+        fixture.writeSettings()
+        fixture.writeCommon("class Sample {\n    fun greet(): String = \"hello\"\n}")
+        return fixture
     }
 
-    @Test
-    @DisplayName("passes the check against freshly written dumps")
-    fun checkPassesAgainstFreshDumps() {
-        writeBuild()
-        fixture.build("kreateApiDump")
+    context("API validation of every multiplatform target") {
+        test("records the klib targets beside the JVM target") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
 
-        val result = fixture.build("kreateApiCheck")
+            fixture.build("kreateApiDump")
 
-        result.output shouldNotContain "ABI check failed"
+            fixture.jvmDump().readText() shouldContain "public final class com/example/Sample {"
+            fixture.klibDump().readText() shouldContain "wasmJs"
+            fixture.klibDump().readText() shouldContain "final class com.example/Sample"
+        }
+
+        test("passes the check against freshly written dumps") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+
+            val result = fixture.build("kreateApiCheck")
+
+            result.output shouldNotContain "ABI check failed"
+        }
+
+        test("fails the check when only a Wasm declaration changed") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild()
+            fixture.build("kreateApiDump")
+
+            fixture.writeWasmOnly("fun wasmOnly(): Int = 1")
+            val result = fixture.buildAndFail("kreateApiCheck")
+
+            result.output shouldContain "ABI check failed"
+            result.output shouldContain "wasmOnly"
+        }
+
+        test("leaves a declaration marked non-public out of the klib dump") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild(
+                "enabled = true\nklib = true\nnonPublicMarkers.add(\"com.example.Hidden\")"
+            )
+            fixture.writeCommon(
+                """
+                annotation class Hidden
+
+                class Sample {
+                    fun greet(): String = "hello"
+                }
+
+                @Hidden
+                class Secret
+                """.trimIndent()
+            )
+
+            fixture.build("kreateApiDump")
+
+            fixture.klibDump().readText() shouldNotContain "Secret"
+            fixture.jvmDump().readText() shouldNotContain "Secret"
+        }
+
+        test("leaves an ignored package and its subpackages out of the klib dump") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild(
+                "enabled = true\nklib = true\nignoredPackages.add(\"com.example.internal\")"
+            )
+            fixture.writeKotlin(
+                "commonMain",
+                "com/example/internal/deep/Plumbing.kt",
+                "package com.example.internal.deep\n\nclass Plumbing"
+            )
+
+            fixture.build("kreateApiDump")
+
+            fixture.klibDump().readText() shouldNotContain "Plumbing"
+            fixture.klibDump().readText() shouldContain "final class com.example/Sample"
+        }
+
+        test("keeps the class file dump alone when the wider check is not asked for") {
+            val fixture = newFixture()
+            fixture.writeApiValidationBuild("enabled = true")
+
+            fixture.build("kreateApiDump")
+
+            fixture.jvmDump().readText() shouldContain "public final class com/example/Sample {"
+            fixture.klibDump().exists() shouldBe false
+        }
     }
-
-    @Test
-    @DisplayName("fails the check when only a Wasm declaration changed")
-    fun checkFailsOnWasmOnlyChange() {
-        writeBuild()
-        fixture.build("kreateApiDump")
-
-        writeWasmOnly("fun wasmOnly(): Int = 1")
-        val result = fixture.buildAndFail("kreateApiCheck")
-
-        result.output shouldContain "ABI check failed"
-        result.output shouldContain "wasmOnly"
-    }
-
-    @Test
-    @DisplayName("leaves a declaration marked non-public out of the klib dump")
-    fun honoursNonPublicMarkers() {
-        writeBuild("enabled = true\nklib = true\nnonPublicMarkers.add(\"com.example.Hidden\")")
-        writeCommon(
-            "annotation class Hidden\n\nclass Sample {\n    fun greet(): String = \"hello\"\n}\n\n" +
-                "@Hidden\nclass Secret"
-        )
-
-        fixture.build("kreateApiDump")
-
-        klibDump.readText() shouldNotContain "Secret"
-        jvmDump.readText() shouldNotContain "Secret"
-    }
-
-    @Test
-    @DisplayName("leaves an ignored package and its subpackages out of the klib dump")
-    fun honoursIgnoredPackages() {
-        writeBuild("enabled = true\nklib = true\nignoredPackages.add(\"com.example.internal\")")
-        fixture.writeKotlin(
-            "commonMain",
-            "com/example/internal/deep/Plumbing.kt",
-            "package com.example.internal.deep\n\nclass Plumbing"
-        )
-
-        fixture.build("kreateApiDump")
-
-        klibDump.readText() shouldNotContain "Plumbing"
-        klibDump.readText() shouldContain "final class com.example/Sample"
-    }
-
-    @Test
-    @DisplayName("keeps the class file dump alone when the wider check is not asked for")
-    fun defaultStaysOnClassFiles() {
-        writeBuild("enabled = true")
-
-        fixture.build("kreateApiDump")
-
-        jvmDump.readText() shouldContain "public final class com/example/Sample {"
-        klibDump.exists() shouldBe false
-    }
-}
+})

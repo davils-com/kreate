@@ -1,33 +1,48 @@
-# Detekt configuration for the Kreate plugin.
+# Detekt configuration for the Kreate builds.
 #
-# Applied with `buildUponDefaultConfig = true` and `allRules = true`, so this file only
-# records deliberate deviations from the detekt defaults. Every disabled rule needs a
-# reason — "it was noisy" is not one.
+# Applied with `buildUponDefaultConfig = true` and `allRules = true`, next to the Kreate rule set,
+# so this file only records deliberate deviations from the detekt defaults. Every disabled rule
+# needs a reason - "it was noisy" is not one.
 
 config:
   validation: true
   warningsAsErrors: true
 
 comments:
-  # Mirrors the strict KDoc guidelines in .junie/AGENTS.md: everything that is part of
-  # the published DSL has to be documented.
+  # Everything that is part of the published DSL has to be documented. Non-public declarations
+  # carry no KDoc at all, which the Kreate rule KDocOnNonPublicDeclaration enforces.
+  # Detekt excludes test sources from the documentation and duplication rules by default. Kreate's
+  # TestKit suite lives in `src/functionalTest`, which those defaults do not know, so it is named here.
   UndocumentedPublicClass:
     active: true
+    excludes: &testSources
+      - '**/test/**'
+      - '**/functionalTest/**'
+      - '**/androidTest/**'
+      - '**/commonTest/**'
+      - '**/jvmTest/**'
+      - '**/androidUnitTest/**'
+      - '**/androidInstrumentedTest/**'
+      - '**/jsTest/**'
+      - '**/iosTest/**'
     searchInNestedClass: true
     searchInInnerClass: true
     searchInInnerObject: true
     searchInInnerInterface: true
   UndocumentedPublicFunction:
     active: true
+    excludes: *testSources
   UndocumentedPublicProperty:
     active: true
-  # Directly contradicts the project's own KDoc guidelines (.junie/AGENTS.md), which ask
-  # for detailed documentation wherever behaviour is non-trivial — including private
-  # helpers that shell out to external toolchains.
+    excludes: *testSources
+  # The Davils standard documents a constructor property above the property and never uses
+  # `@property`, so a constructor property may be named with `@param` on the class.
+  OutdatedDocumentation:
+    allowParamOnConstructorProperties: true
   DocumentationOverPrivateFunction:
-    active: false
+    active: true
   DocumentationOverPrivateProperty:
-    active: false
+    active: true
 
 complexity:
   LabeledExpression:
@@ -43,6 +58,8 @@ complexity:
   LongParameterList:
     # Gradle task types take their collaborators through @Inject constructors.
     ignoreAnnotated: [ 'Inject' ]
+  StringLiteralDuplication:
+    excludes: *testSources
   TooManyFunctions:
     # DSL extensions are intentionally wide: one accessor plus one Action overload per block.
     allowedFunctionsPerClass: 25
@@ -70,6 +87,10 @@ style:
     active: false
   OptionalUnit:
     active: false
+  # The raw strings of the TestKit suite are build scripts written into throwaway projects: test
+  # data, indented for the reader of the test rather than for the generated file.
+  MultilineRawStringIndentation:
+    excludes: [ '**/functionalTest/**' ]
   MaxLineLength:
     maxLineLength: 120
     excludeCommentStatements: false
@@ -119,6 +140,7 @@ ktlint:
     active: false
   Wrapping:
     active: false
+
 
 exceptions:
   TooGenericExceptionCaught:

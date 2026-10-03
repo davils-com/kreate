@@ -185,7 +185,7 @@ Gives `src/contractTest/kotlin`, the `contractTest*` configurations and a `contr
 Step one — nothing moves, everything keeps running:
 
 ```kotlin
-import com.davils.kreate.module.project.tests.LegacyTestPolicy
+import com.davils.kreate.testing.LegacyTestPolicy
 
 kreate {
     project {
@@ -343,9 +343,9 @@ tests {
 ## Everything at once
 
 ```kotlin
-import com.davils.kreate.module.project.tests.LegacySourceDirectories
-import com.davils.kreate.module.project.tests.LegacyTestPolicy
-import com.davils.kreate.module.project.tests.suite.KotestModule
+import com.davils.kreate.testing.LegacySourceDirectories
+import com.davils.kreate.testing.LegacyTestPolicy
+import com.davils.kreate.testing.KotestModule
 
 kreate {
     project {

@@ -15,13 +15,11 @@
  */
 
 import com.davils.buildlogic.Project
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    // `java` rather than `java-gradle-plugin`. `kreate-plugin` gets the latter from `kotlin-dsl`,
-    // and `kreate-detekt-rules` must not have it at all: it adds `gradleApi()` to the `api`
-    // configuration, which would put the Gradle API into the POM of a rule set JAR that is
-    // resolved onto Detekt's analysis classpath.
     java
 }
 
@@ -42,15 +40,11 @@ plugins.withId("org.jetbrains.kotlin.jvm") {
     }
 }
 
-// Task property validation is the plugin author's equivalent of a type checker: it is what
-// catches missing input annotations, outputs nested inside inputs, and other mistakes that
-// otherwise surface as stale build outputs on a user's machine.
 tasks.withType<ValidatePlugins>().configureEach {
     failOnWarning = true
     enableStricterValidation = true
 }
 
-// Reproducible archives: identical sources must produce byte-identical artifacts.
 tasks.withType<AbstractArchiveTask>().configureEach {
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
@@ -58,11 +52,6 @@ tasks.withType<AbstractArchiveTask>().configureEach {
     filePermissions { unix("rw-r--r--") }
 }
 
-// The plugin has to be able to name its own version at runtime — it records it alongside every
-// local publication, so that a record left behind by an older Kreate can be recognised as such.
-// The manifest is the only place that survives into the published artefact.
-//
-// Both values are derived from the build's own inputs, so reproducibility above is unaffected.
 val manifestVersion = provider { project.version.toString() }
 val manifestTitle = Project.Identity.NAME
 
@@ -72,5 +61,14 @@ tasks.withType<Jar>().configureEach {
             "Implementation-Title" to manifestTitle,
             "Implementation-Version" to manifestVersion
         )
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+
+    testLogging {
+        events(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
+        exceptionFormat = TestExceptionFormat.FULL
     }
 }

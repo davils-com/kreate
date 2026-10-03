@@ -16,45 +16,30 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
-/**
- * Tests for the kotlinx-benchmark integration and its regression gate.
- *
- * Most of these never run a benchmark. The measurement itself belongs to kotlinx-benchmark;
- * what Kreate adds is the wiring around it, and that is exercised far more precisely — and
- * in a second rather than a minute — by seeding a report and excluding the execution task.
- * The one test that does run a benchmark is tagged `slow`.
- */
-@DisplayName("Benchmarks")
-class BenchmarkFunctionalTest {
+private const val BENCHMARK_PLUGIN_FROM_TESTKIT_CLASSPATH: String = """id("org.jetbrains.kotlinx.benchmark")"""
 
-    @TempDir
-    lateinit var projectDir: File
+private const val MAIN_PROFILE_EXECUTION_TASK: String = "benchmarksBenchmark"
 
-    private lateinit var fixture: KreateBuildFixture
+private const val FILE_TIMESTAMP_RESOLUTION_MS: Long = 1100L
 
-    // No version: the plugin is on the injected TestKit classpath, the same way the Kotlin
-    // plugin is, so that both share a classloader.
-    private val benchmarkPlugin = """id("org.jetbrains.kotlinx.benchmark")"""
+private const val DEFAULT_REPORT_TIMESTAMP: String = "2026-08-19T10.00.00"
 
-    /** The execution task kotlinx-benchmark creates for the `benchmarks` target, `main` profile. */
-    private val executionTask = "benchmarksBenchmark"
+private const val DEFAULT_SCORE_ERROR: Double = 1.0
 
-    private val baseline: File get() = fixture.file("benchmarks/baseline.json")
+class BenchmarkFunctionalTest : FunSpec({
+    val workspace = tempdir()
 
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+    fun newBuild(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
         fixture.writeKotlin(
             "com/example/Sample.kt",
@@ -66,287 +51,264 @@ class BenchmarkFunctionalTest {
             }
             """.trimIndent()
         )
+        return fixture
     }
 
-    private fun writeBuild(
-        benchmarkBlock: String = "enabled = true",
-        withPlugin: Boolean = true
-    ) {
-        fixture.writeBuild(
-            kreateBlock = """
-                ${KreateBuildFixture.platformBlock}
+    context("Benchmarks") {
+        test("registers no tasks while the feature is disabled") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild("enabled = false")
 
-                project {
-                    name = "Sample"
-                    description = "Fixture"
+            val result = fixture.build("tasks", "--all")
 
-                    benchmark {
-                        $benchmarkBlock
+            result.output shouldNotContain "kreateBenchmarkCheck"
+            result.output shouldNotContain "kreateBenchmarkBaseline"
+        }
+
+        test("applies the kotlinx-benchmark plugin itself") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild(isPluginApplied = false)
+
+            val result = fixture.build("tasks", "--all")
+
+            result.output shouldContain "benchmarksBenchmarkGenerate"
+            result.output shouldContain "kreateBenchmarkCheck"
+        }
+
+        test("normalizes the newest run to a stable path") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 100.0, timestamp = "2026-08-19T09.00.00")
+            Thread.sleep(FILE_TIMESTAMP_RESOLUTION_MS)
+            fixture.seedReport(score = 200.0, timestamp = "2026-08-19T10.00.00")
+
+            val result = fixture.buildWithoutExecution("kreateBenchmarkReport")
+
+            result.task(":kreateBenchmarkReport")?.outcome shouldBe TaskOutcome.SUCCESS
+            val normalized = fixture.file("build/reports/kreate/benchmark/main/benchmarks.json")
+            normalized.readText() shouldContain "200.0"
+            normalized.readText() shouldNotContain "100.0"
+        }
+
+        test("records a baseline from the normalized report") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+
+            val result = fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+
+            result.task(":kreateBenchmarkBaseline")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.baseline().readText() shouldContain "com.example.SampleBenchmark.value"
+        }
+
+        test("passes the check against a freshly recorded baseline") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+            fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+
+            val result = fixture.buildWithoutExecution("kreateBenchmarkCheck")
+
+            result.task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.file("build/reports/kreate/benchmark/comparison.md").readText() shouldContain "unchanged"
+        }
+
+        test("fails the check and names the baseline task when a benchmark regressed") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+            fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+
+            fixture.seedReport(score = 500.0, timestamp = "2026-08-19T11.00.00")
+            val result = fixture.buildAndFailWithoutExecution("kreateBenchmarkCheck")
+
+            result.output shouldContain "Benchmark regression in project ':'"
+            result.output shouldContain "com.example.SampleBenchmark.value"
+            result.output shouldContain "./gradlew :kreateBenchmarkBaseline"
+        }
+
+        test("passes when a drop is smaller than the measurement error") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            val sharedRunnerVariance = 300.0
+            fixture.seedReport(score = 1000.0, error = sharedRunnerVariance)
+            fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+
+            fixture.seedReport(score = 800.0, timestamp = "2026-08-19T11.00.00", error = sharedRunnerVariance)
+            val result = fixture.buildWithoutExecution("kreateBenchmarkCheck")
+
+            result.task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("explains that no baseline has been recorded yet") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+
+            val result = fixture.buildAndFailWithoutExecution("kreateBenchmarkCheck")
+
+            result.output shouldContain "No benchmark baseline has been recorded"
+            result.output shouldContain "./gradlew :kreateBenchmarkBaseline"
+        }
+
+        test("fails when a benchmark disappeared from the run") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+            fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+
+            fixture.write("build/reports/benchmarks/main/2026-08-19T11.00.00/benchmarks.json", "[]")
+            val result = fixture.buildAndFailWithoutExecution("kreateBenchmarkCheck")
+
+            result.output shouldContain "in the baseline but not in this run"
+        }
+
+        test("refuses a gate profile that cannot produce a readable report") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild(
+                """
+                enabled = true
+                profiles {
+                    named("main") {
+                        reportFormat = "csv"
                     }
                 }
-            """.trimIndent(),
-            extraPlugins = if (withPlugin) listOf(benchmarkPlugin) else emptyList()
-        )
-    }
+                """.trimIndent()
+            )
 
-    /**
-     * Writes a report where kotlinx-benchmark would have left one, under a timestamped
-     * directory of the given name.
-     */
-    private fun seedReport(score: Double, timestamp: String = "2026-08-19T10.00.00", error: Double = 1.0) {
-        fixture.write(
-            "build/reports/benchmarks/main/$timestamp/benchmarks.json",
-            """
-            [
-              {
-                "benchmark" : "com.example.SampleBenchmark.value",
-                "mode" : "thrpt",
-                "params" : { },
-                "primaryMetric" : {
-                   "score": $score,
-                   "scoreError": $error,
-                   "scoreUnit" : "ops/s"
+            val result = fixture.buildAndFail("tasks")
+
+            result.output shouldContain "can only read 'json'"
+        }
+
+        test("warns when the threshold can never be reached") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild(
+                """
+                enabled = true
+                regression {
+                    maxRegressionPercent = 150.0
                 }
-              }
-            ]
-            """.trimIndent()
-        )
+                """.trimIndent()
+            )
+
+            val result = fixture.build("tasks")
+
+            result.output shouldContain "cannot drop by more than"
+        }
+
+        test("reuses the configuration cache for the gate") {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild()
+            fixture.seedReport(score = 1000.0)
+            fixture.buildWithoutExecution("kreateBenchmarkBaseline")
+            fixture.buildWithoutExecution("kreateBenchmarkCheck")
+
+            val result = fixture.buildWithoutExecution("kreateBenchmarkCheck")
+
+            result.output shouldContain "Configuration cache entry reused"
+        }
+
+        test("runs a real benchmark end to end and compares it").config(tags = setOf(Slow)) {
+            val fixture = newBuild()
+            fixture.writeBenchmarkBuild(
+                """
+                enabled = true
+                profiles {
+                    named("main") {
+                        warmups = 0
+                        iterations = 1
+                        iterationTime = 100
+                        iterationTimeUnit = "ms"
+                        advanced("jvmForks", "1")
+                    }
+                }
+                regression {
+                    // A single 100 ms iteration measures almost nothing, so the gate is opened
+                    // wide: this test is about the pipeline working, not about the number.
+                    maxRegressionPercent = 1000.0
+                }
+                """.trimIndent()
+            )
+            fixture.write(
+                "src/benchmarks/kotlin/com/example/SampleBenchmark.kt",
+                """
+                package com.example
+
+                import kotlinx.benchmark.Benchmark
+                import kotlinx.benchmark.Scope
+                import kotlinx.benchmark.State
+
+                @State(Scope.Benchmark)
+                class SampleBenchmark {
+                    private val sample = Sample()
+
+                    @Benchmark
+                    fun value(): Int = sample.value()
+                }
+                """.trimIndent()
+            )
+
+            val result = fixture.build("kreateBenchmarkBaseline")
+
+            result.task(":$MAIN_PROFILE_EXECUTION_TASK")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.baseline().readText() shouldContain "com.example.SampleBenchmark.value"
+
+            val check = fixture.build("kreateBenchmarkCheck")
+            check.task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
     }
+})
 
-    private fun build(vararg tasks: String) =
-        fixture.build(*tasks, "-x", executionTask)
+private fun KreateBuildFixture.writeBenchmarkBuild(
+    benchmarkBlock: String = "enabled = true",
+    isPluginApplied: Boolean = true
+) {
+    writeBuild(
+        kreateBlock = """
+            ${KreateBuildFixture.platformBlock}
 
-    private fun buildAndFail(vararg tasks: String) =
-        fixture.buildAndFail(*tasks, "-x", executionTask)
+            project {
+                name = "Sample"
+                description = "Fixture"
 
-    @Test
-    @DisplayName("registers no tasks while the feature is disabled")
-    fun registersNothingWhenDisabled() {
-        writeBuild("enabled = false")
-
-        val result = fixture.build("tasks", "--all")
-
-        result.output shouldNotContain "kreateBenchmarkCheck"
-        result.output shouldNotContain "kreateBenchmarkBaseline"
-    }
-
-    @Test
-    @DisplayName("applies the kotlinx-benchmark plugin itself")
-    fun appliesItsOwnPlugin() {
-        // Nothing in the generated build script mentions kotlinx-benchmark. Enabling the
-        // feature is the decision; applying its plugin is bookkeeping Kreate does.
-        writeBuild(withPlugin = false)
-
-        val result = fixture.build("tasks", "--all")
-
-        result.output shouldContain "benchmarksBenchmarkGenerate"
-        result.output shouldContain "kreateBenchmarkCheck"
-    }
-
-    @Test
-    @DisplayName("normalizes the newest run to a stable path")
-    fun normalizesNewestRun() {
-        writeBuild()
-        seedReport(score = 100.0, timestamp = "2026-08-19T09.00.00")
-        Thread.sleep(FILE_TIMESTAMP_RESOLUTION_MS)
-        seedReport(score = 200.0, timestamp = "2026-08-19T10.00.00")
-
-        val result = build("kreateBenchmarkReport")
-
-        result.task(":kreateBenchmarkReport")?.outcome shouldBe TaskOutcome.SUCCESS
-        val normalized = fixture.file("build/reports/kreate/benchmark/main/benchmarks.json")
-        normalized.readText() shouldContain "200.0"
-        normalized.readText() shouldNotContain "100.0"
-    }
-
-    @Test
-    @DisplayName("records a baseline from the normalized report")
-    fun recordsBaseline() {
-        writeBuild()
-        seedReport(score = 1000.0)
-
-        val result = build("kreateBenchmarkBaseline")
-
-        result.task(":kreateBenchmarkBaseline")?.outcome shouldBe TaskOutcome.SUCCESS
-        baseline.readText() shouldContain "com.example.SampleBenchmark.value"
-    }
-
-    @Test
-    @DisplayName("passes the check against a freshly recorded baseline")
-    fun checkPassesAgainstFreshBaseline() {
-        writeBuild()
-        seedReport(score = 1000.0)
-        build("kreateBenchmarkBaseline")
-
-        val result = build("kreateBenchmarkCheck")
-
-        result.task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
-        fixture.file("build/reports/kreate/benchmark/comparison.md")
-            .readText() shouldContain "unchanged"
-    }
-
-    @Test
-    @DisplayName("fails the check and names the baseline task when a benchmark regressed")
-    fun checkFailsOnRegression() {
-        writeBuild()
-        seedReport(score = 1000.0)
-        build("kreateBenchmarkBaseline")
-
-        seedReport(score = 500.0, timestamp = "2026-08-19T11.00.00")
-        val result = buildAndFail("kreateBenchmarkCheck")
-
-        result.output shouldContain "Benchmark regression in project ':'"
-        result.output shouldContain "com.example.SampleBenchmark.value"
-        result.output shouldContain "./gradlew :kreateBenchmarkBaseline"
-    }
-
-    @Test
-    @DisplayName("passes when a drop is smaller than the measurement error")
-    fun checkToleratesNoise() {
-        writeBuild()
-        seedReport(score = 1000.0, error = 300.0)
-        build("kreateBenchmarkBaseline")
-
-        // 200 apart with 600 of combined error: on a shared runner this is ordinary variance,
-        // and a gate that fires here gets switched off within a week.
-        seedReport(score = 800.0, timestamp = "2026-08-19T11.00.00", error = 300.0)
-        val result = build("kreateBenchmarkCheck")
-
-        result.task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
-    }
-
-    @Test
-    @DisplayName("explains that no baseline has been recorded yet")
-    fun checkExplainsMissingBaseline() {
-        writeBuild()
-        seedReport(score = 1000.0)
-
-        val result = buildAndFail("kreateBenchmarkCheck")
-
-        result.output shouldContain "No benchmark baseline has been recorded"
-        result.output shouldContain "./gradlew :kreateBenchmarkBaseline"
-    }
-
-    @Test
-    @DisplayName("fails when a benchmark disappeared from the run")
-    fun checkFailsOnMissingBenchmark() {
-        writeBuild()
-        seedReport(score = 1000.0)
-        build("kreateBenchmarkBaseline")
-
-        fixture.write("build/reports/benchmarks/main/2026-08-19T11.00.00/benchmarks.json", "[]")
-        val result = buildAndFail("kreateBenchmarkCheck")
-
-        result.output shouldContain "in the baseline but not in this run"
-    }
-
-    @Test
-    @DisplayName("refuses a gate profile that cannot produce a readable report")
-    fun rejectsNonJsonGateProfile() {
-        writeBuild(
-            """
-            enabled = true
-            profiles {
-                named("main") {
-                    reportFormat = "csv"
+                benchmark {
+                    $benchmarkBlock
                 }
             }
-            """.trimIndent()
-        )
-
-        val result = fixture.buildAndFail("tasks")
-
-        result.output shouldContain "can only read 'json'"
-    }
-
-    @Test
-    @DisplayName("warns when the threshold can never be reached")
-    fun warnsAboutUnreachableThreshold() {
-        writeBuild(
-            """
-            enabled = true
-            regression {
-                maxRegressionPercent = 150.0
-            }
-            """.trimIndent()
-        )
-
-        val result = fixture.build("tasks")
-
-        // In throughput mode a score cannot drop by more than 100%, so this configuration
-        // switches the gate off while still looking like a passing build.
-        result.output shouldContain "cannot drop by more than"
-    }
-
-    @Test
-    @DisplayName("reuses the configuration cache for the gate")
-    fun reusesConfigurationCache() {
-        writeBuild()
-        seedReport(score = 1000.0)
-        build("kreateBenchmarkBaseline")
-        build("kreateBenchmarkCheck")
-
-        val result = build("kreateBenchmarkCheck")
-
-        result.output shouldContain "Configuration cache entry reused"
-    }
-
-    @Test
-    @Tag("slow")
-    @DisplayName("runs a real benchmark end to end and compares it")
-    fun runsBenchmarkEndToEnd() {
-        writeBuild(
-            """
-            enabled = true
-            profiles {
-                named("main") {
-                    warmups = 0
-                    iterations = 1
-                    iterationTime = 100
-                    iterationTimeUnit = "ms"
-                    advanced("jvmForks", "1")
-                }
-            }
-            regression {
-                // A single 100 ms iteration measures almost nothing, so the gate is opened
-                // wide: this test is about the pipeline working, not about the number.
-                maxRegressionPercent = 1000.0
-            }
-            """.trimIndent()
-        )
-        fixture.write(
-            "src/benchmarks/kotlin/com/example/SampleBenchmark.kt",
-            """
-            package com.example
-
-            import kotlinx.benchmark.Benchmark
-            import kotlinx.benchmark.Scope
-            import kotlinx.benchmark.State
-
-            @State(Scope.Benchmark)
-            class SampleBenchmark {
-                private val sample = Sample()
-
-                @Benchmark
-                fun value(): Int = sample.value()
-            }
-            """.trimIndent()
-        )
-
-        // Proves what no seeded report can: the source set is associated with `main` (the
-        // benchmark calls into it), allopen opened the @State class for JMH, and the report
-        // lands where the normalization task looks for it.
-        val result = fixture.build("kreateBenchmarkBaseline")
-
-        result.task(":$executionTask")?.outcome shouldBe TaskOutcome.SUCCESS
-        baseline.readText() shouldContain "com.example.SampleBenchmark.value"
-
-        fixture.build("kreateBenchmarkCheck")
-            .task(":kreateBenchmarkCheck")?.outcome shouldBe TaskOutcome.SUCCESS
-    }
-
-    private companion object {
-        /** Enough for two runs to differ in modification time on any file system. */
-        const val FILE_TIMESTAMP_RESOLUTION_MS = 1100L
-    }
+        """.trimIndent(),
+        extraPlugins = listOfNotNull(BENCHMARK_PLUGIN_FROM_TESTKIT_CLASSPATH.takeIf { isPluginApplied })
+    )
 }
+
+private fun KreateBuildFixture.seedReport(
+    score: Double,
+    timestamp: String = DEFAULT_REPORT_TIMESTAMP,
+    error: Double = DEFAULT_SCORE_ERROR
+) {
+    write(
+        "build/reports/benchmarks/main/$timestamp/benchmarks.json",
+        """
+        [
+          {
+            "benchmark" : "com.example.SampleBenchmark.value",
+            "mode" : "thrpt",
+            "params" : { },
+            "primaryMetric" : {
+               "score": $score,
+               "scoreError": $error,
+               "scoreUnit" : "ops/s"
+            }
+          }
+        ]
+        """.trimIndent()
+    )
+}
+
+private fun KreateBuildFixture.baseline(): File = file("benchmarks/baseline.json")
+
+private fun KreateBuildFixture.buildWithoutExecution(vararg tasks: String): BuildResult =
+    build(*tasks, "-x", MAIN_PROFILE_EXECUTION_TASK)
+
+private fun KreateBuildFixture.buildAndFailWithoutExecution(vararg tasks: String): BuildResult =
+    buildAndFail(*tasks, "-x", MAIN_PROFILE_EXECUTION_TASK)

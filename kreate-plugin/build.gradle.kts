@@ -15,9 +15,8 @@
  */
 
 import com.davils.buildlogic.Project
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -32,9 +31,6 @@ dependencies {
     implementation(gradleApi())
     implementation(libs.bundles.kreate.plugin)
 
-    // The settings plugin and the local development core it shares with this plugin live in their
-    // own artefact, so that applying the settings plugin does not load this plugin's Gradle plugin
-    // dependencies into the settings class loader (ARC-66). Substituted by the included build.
     implementation("${Project.Identity.GROUP}:kreate-settings:$version")
 
     testImplementation(platform(libs.junit.bom))
@@ -43,18 +39,24 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-
-/**
- * TestKit based tests live in their own source set so that a slow, tool dependent
- * suite (CMake, Cargo, Trivy) never blocks the fast unit tests.
- */
 kotlin {
     compilerOptions {
-        optIn.add("com.davils.kreate.InternalKreateApi")
+        optIn.add("com.davils.kreate.settings.InternalKreateApi")
     }
 }
 
 val functionalTest: SourceSet = sourceSets.create("functionalTest")
+
+val coverageAgent: Configuration = configurations.create("coverageAgent") {
+    isCanBeConsumed = false
+    isTransitive = false
+}
+
+dependencies {
+    coverageAgent(variantOf(libs.jacoco.agent) { classifier("runtime") })
+}
+
+val functionalCoverageFile: Provider<RegularFile> = layout.buildDirectory.file("kover/functional/functionalTest.exec")
 
 configurations[functionalTest.implementationConfigurationName]
     .extendsFrom(configurations.testImplementation.get())
@@ -65,7 +67,6 @@ gradlePlugin {
     vcsUrl = Project.VersionControl.SCM_URL
     website = Project.Organization.WEBSITE_URL
 
-    // Injects the plugin under test onto the classpath of the functional tests.
     testSourceSets(functionalTest)
 
     plugins {
@@ -73,8 +74,7 @@ gradlePlugin {
             id = "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}"
             description = Project.Identity.DESCRIPTION
             displayName = Project.Identity.NAME
-            implementationClass =
-                "${Project.Identity.GROUP}.${Project.Identity.NAME.lowercase()}.${Project.Identity.NAME}"
+            implementationClass = "com.davils.kreate.KreatePlugin"
             tags = listOf(
                 "kotlin",
                 "multiplatform",
@@ -97,12 +97,9 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
     testClassesDirs = functionalTest.output.classesDirs
     classpath = functionalTest.runtimeClasspath
 
-    useJUnitPlatform {
-        // One functional test runs a real JMH benchmark end to end, which costs far more
-        // than the rest of the suite combined. It earns its place — nothing else proves
-        // that scaffolding, allopen and JMH generation fit together — but a developer
-        // iterating on something unrelated should be able to leave it out.
-        if (providers.gradleProperty("kreate.test.skipSlow").isPresent) excludeTags("slow")
+    val skipsSlowTests = providers.gradleProperty("kreate.test.skipSlow").isPresent
+    if (skipsSlowTests) {
+        systemProperty("kotest.tags", "!Slow")
     }
 
     systemProperty("kreate.test.gradleVersion", gradle.gradleVersion)
@@ -110,28 +107,52 @@ val functionalTestTask = tasks.register<Test>("functionalTest") {
 
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
 
-    // TestKit leaves a Gradle daemon holding handles on the project it just built, and on Windows
-    // a file that is open cannot be deleted. JUnit then fails a test that already passed, because
-    // it could not remove the `@TempDir` afterwards. Whether the directory goes away is not
-    // something this suite asserts; the runner's temp directory is cleaned up by the runner.
-    systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "NEVER")
+    val agentFiles: FileCollection = coverageAgent
+    val coverageFile = functionalCoverageFile
+    inputs.files(agentFiles).withPropertyName("coverageAgent")
+    outputs.file(coverageFile).withPropertyName("coverageFile")
+    jvmArgumentProviders.add(
+        CommandLineArgumentProvider {
+            listOf(
+                "-Dkreate.test.coverageAgent=${agentFiles.singleFile.absolutePath}",
+                "-Dkreate.test.coverageFile=${coverageFile.get().asFile.absolutePath}"
+            )
+        }
+    )
+    doFirst { coverageFile.get().asFile.delete() }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    systemProperty("junit.jupiter.tempdir.cleanup.mode.default", "NEVER")
-}
-
-// CI only keeps the console log, and without this a failing test there is just "There were failing tests".
-tasks.withType<Test>().configureEach {
-    testLogging {
-        events(TestLogEvent.FAILED, TestLogEvent.SKIPPED)
-        exceptionFormat = TestExceptionFormat.FULL
+kover {
+    currentProject {
+        instrumentation {
+            disabledForTestTasks.add(functionalTestTask.name)
+        }
     }
+
+    reports {
+        total {
+            additionalBinaryReports.add(functionalCoverageFile.map { file -> file.asFile })
+        }
+    }
+}
+
+val coverageReportSuffixes: List<String> = listOf("Report", "Log", "Verify")
+
+tasks.matching { task -> isCoverageReport(task.name, coverageReportSuffixes) }.configureEach {
+    dependsOn(functionalTestTask)
+}
+
+fun isCoverageReport(taskName: String, suffixes: List<String>): Boolean {
+    val isKoverTask = taskName.startsWith("kover")
+    return isKoverTask && suffixes.any { suffix -> taskName.endsWith(suffix) }
 }
 
 tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(functionalTestTask)
+}
+
+detekt {
+    source.from(functionalTest.allSource.srcDirs)
 }
 
 tasks.named<KotlinCompile>("compileFunctionalTestKotlin") {

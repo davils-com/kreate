@@ -1,8 +1,8 @@
 # Kreate rule set
 
-<link-summary>The comment and KDoc rules Kreate puts on Detekt's classpath.</link-summary>
+<link-summary>The code style rules Kreate puts on Detekt's classpath.</link-summary>
 
-<card-summary>Six rules that enforce the Kreate comment and KDoc standard. They report; they never rewrite.</card-summary>
+<card-summary>Ten rules that enforce the Kreate code style: comments, control flow, call chains, file structure and KDoc. They report; they never rewrite.</card-summary>
 
 <tldr>
 <p><b>Artifact</b>: <code>com.davils:kreate-detekt-rules</code>, published with Kreate and pinned to its version</p>
@@ -15,8 +15,8 @@ is added to the project's `detektPlugins` configuration and every rule in it is 
 your `detekt.yml` is required, because the artifact carries its own default configuration and Kreate
 runs with `buildUponDefaultConfig = true`.
 
-The rules encode the part of the Kreate Kotlin standard that is about what a file says rather than
-what it does: **no `//` comments, KDoc on the published surface only, and a `@since` tag on
+The rules encode the Kreate Kotlin standard: **no comments, no `else`, at most two calls per
+expression, one top-level type per file, KDoc on the published surface only, and a `@since` tag on
 everything that is documented.**
 
 <note>
@@ -43,7 +43,7 @@ send()
 val warmsConnectionPool = send()                                     // <- the fix
 ```
 
-Block comments and KDoc are untouched, so a copyright header written as `/* … */` is unaffected.
+Block comments are the business of `ForbiddenBlockComment`; KDoc is untouched.
 
 | Option           | Type     | Default | Meaning                                                                                |
 |------------------|----------|---------|----------------------------------------------------------------------------------------|
@@ -56,6 +56,92 @@ kreate:
   ForbiddenLineComment:
     allowedPattern: '^(region|endregion)\b'
 ```
+
+### ForbiddenBlockComment
+
+<p><i>Since 4.0.0.</i></p>
+
+Reports every `/* … */` comment, for the same reason `ForbiddenLineComment` reports `//`. KDoc
+(`/** … */`) attached to a declaration is not a block comment and is untouched.
+
+A KDoc block that documents no declaration is a block comment with an extra star, and is reported as
+one: a `/** … */` in a function body before a statement, at the end of a class body, or a second
+block stacked above a declaration that already has one.
+
+```kotlin
+fun run() {
+    /** Retry once. */ // <- reported: it documents no declaration
+    attempt()
+}
+```
+
+The one block comment that stays is the license header: a block comment that is the first content of
+the file and contains `licenseHeaderPattern`. Whitespace and a UTF-8 byte order mark before it do not
+count as content.
+
+| Option                 | Type     | Default       | Meaning                                                                                 |
+|------------------------|----------|---------------|-----------------------------------------------------------------------------------------|
+| `licenseHeaderPattern` | `String` | `'Copyright'` | Regular expression the header at the top of a file has to contain. Empty accepts none.  |
+
+### ForbiddenElse
+
+<p><i>Since 4.0.0.</i></p>
+
+Reports every `else`: the branch of an `if`, each step of an `else if` ladder, and `else ->` in a
+`when`.
+
+An `else` hides the case a guard clause would have named. Handle the exceptional case first, leave
+the function, and the main path stays at the left margin:
+
+```kotlin
+fun resolve(id: String): Theme {
+    if (!repository.exists(id)) return defaultTheme()
+    return repository.get(id) ?: defaultTheme()
+}
+```
+
+A `when` over an enum or a sealed type is exhaustive without `else ->` — and stays a compile error
+when the type grows, which `else ->` would turn into a silent wrong branch. A `when` over any other
+subject becomes a lookup, or a `when` statement whose branches return, followed by a final `return`.
+
+### ChainedCallLimit
+
+<p><i>Since 4.0.0.</i></p>
+
+Reports a qualified expression that chains more calls than `maxCalls`. A stack trace points at the
+whole line, a breakpoint has nowhere to sit, and every intermediate result goes unnamed:
+
+```kotlin
+val names = containers.filter { it.isRunning }.sortedBy { it.created }.map { it.name } // <- reported
+
+val running = containers.filter { it.isRunning }                                     // <- the fix
+val newestFirst = running.sortedBy { it.created }
+val names = newestFirst.map { it.name }
+```
+
+Only calls count. Property access (`project.layout.buildDirectory`) and a package-qualified
+constructor (`java.io.File(path)`) do not, and a lambda's body is an expression of its own.
+
+An index access (`[0]`), a non-null assertion (`!!`) or a pair of parentheses does not end a chain:
+the count runs through them, so `rows.first()[0].trim().lowercase()` and
+`(value.trim()).lowercase().uppercase()` both chain three calls and are reported once, as a whole.
+
+| Option     | Type  | Default | Meaning                                              |
+|------------|-------|---------|------------------------------------------------------|
+| `maxCalls` | `Int` | `2`     | The number of calls one qualified expression may chain. |
+
+### OneTopLevelTypePerFile
+
+<p><i>Since 4.0.0.</i></p>
+
+Reports a file that declares more than one top-level type (class, interface, object, enum or type
+alias), and a file whose single type does not give it its name. Top-level functions and constants
+next to the type are fine. A file that declares functions only is named in PascalCase after the
+role they share, such as `KeyExchange.kt`. Build scripts are not checked.
+
+The name compared is the part of the file name before its first dot, so the platform suffix of a
+Kotlin Multiplatform source is ignored: `actual class Foo` belongs in `Foo.jvm.kt` or `Foo.native.kt`,
+and platform functions in `Platform.android.kt`. `Bar.jvm.kt` holding `class Foo` is still reported.
 
 ### KDocOnNonPublicDeclaration
 
@@ -176,7 +262,7 @@ configuration, including this rule set's. The rules are then inactive until its
 ## Adopting the rules on an existing codebase
 
 Findings in the thousands are the normal first result on a codebase that was never held to this
-standard, and fixing them in one change is neither reviewable nor safe. Use Detekt's baseline:
+standard - Kreate's own sources started with about 1,500 - and fixing them in one change is neither reviewable nor safe. Use Detekt's baseline:
 
 ```kotlin
 plugins {

@@ -87,15 +87,10 @@ jobs:
       - name: Verify Trivy
         run: trivy --version
 
-      # `kreate-plugin`, `kreate-settings` and `kreate-detekt-rules` are included builds. The root `build` task
-      # only reaches them far enough to produce the JARs that `:example` consumes — it runs
-      # none of their own tests, Detekt, or apiCheck. Every target is therefore named
-      # explicitly, or CI would report green without a single plugin test having run.
-      - name: Build and check
-        run: >
-          ./gradlew
-          :kreate-plugin:build :kreate-settings:build :kreate-detekt-rules:build build
-          --configuration-cache --stacktrace
+      # `verify` aggregates `check` of every included build and of `:example`. The root `build`
+      # task alone would not reach the included builds' tests, Detekt or apiCheck.
+      - name: Verify
+        run: ./gradlew verify --configuration-cache --stacktrace
 
       - name: Verify the example consumer end to end
         # Exercises the published DSL the way a consumer does: scaffolds, generates headers,
@@ -110,6 +105,10 @@ jobs:
           path: |
             kreate-plugin/build/reports/tests/
             kreate-plugin/build/test-results/
+            kreate-settings/build/reports/tests/
+            kreate-settings/build/test-results/
+            kreate-detekt-rules/build/reports/tests/
+            kreate-detekt-rules/build/test-results/
           retention-days: 7
 
   coverage:

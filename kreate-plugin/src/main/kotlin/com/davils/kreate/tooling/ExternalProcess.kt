@@ -22,24 +22,8 @@ import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-/**
- * Runs an external build tool and surfaces its full output when it fails.
- *
- * The diagnostics that explain *why* a native build failed — a missing header, an unresolved
- * symbol, an unusable compiler — are written to the process's standard output and error streams.
- * They are captured here and attached to the thrown exception, because an exit code on its own
- * gives the user nothing to act on.
- *
- * @param exec The executive operations used to start the process.
- * @param logger The logger that receives the output of a successful invocation.
- * @param description A short label for the step, used in the failure message.
- * @param workingDirectory The directory the process is started in.
- * @param arguments The full command line, starting with the executable.
- * @param environment Extra environment variables exported to the process.
- * @return The captured output of the successful invocation.
- * @throws GradleException If the process terminates with a non-zero exit code.
- * @since 2.0.0
- */
+private const val SUCCESS_EXIT_CODE: Int = 0
+
 internal fun runExternalTool(
     exec: ExecOperations,
     logger: Logger,
@@ -59,8 +43,9 @@ internal fun runExternalTool(
     }
 
     val text = output.toString(Charsets.UTF_8)
+    val hasFailed = result.exitValue != SUCCESS_EXIT_CODE
 
-    if (result.exitValue != 0) {
+    if (hasFailed) {
         throw GradleException(
             buildString {
                 appendLine("$description failed with exit code ${result.exitValue}.")

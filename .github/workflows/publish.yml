@@ -60,7 +60,7 @@ jobs:
       # A tag build must not be the first time the suite runs. Verifying before publishing
       # is the difference between a bad release and a red build.
       - name: Verify
-        run: ./gradlew build --stacktrace
+        run: ./gradlew verify --configuration-cache --stacktrace
 
       # Both artefacts, in one invocation: the plugin pins the rule set to its own version, so
       # a release that shipped only the plugin would configure a `detektPlugins` dependency that

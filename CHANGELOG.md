@@ -5,10 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 4.0.0 - Unreleased
+
+Kreate 4.0.0 restructures the plugin into one package per feature, narrows the public API to the
+build script DSL and ships four more code style rules. Plugin ids, task names and every property of
+the `kreate { }` DSL are unchanged, so a build script keeps working once its imports are updated.
+
+### Breaking changes
+
+- **Every public type moved to a feature package.** The DSL types now live directly in
+  `com.davils.kreate.<feature>`. Update the imports of a build script that names them:
+
+  | Before | After |
+  |---|---|
+  | `com.davils.kreate.Kreate` | `com.davils.kreate.KreatePlugin` |
+  | `com.davils.kreate.module.platform.*`, `….platform.jvm.*`, `….platform.multiplatform.*` | `com.davils.kreate.platform.*` |
+  | `com.davils.kreate.module.platform.jvm.jni.*` | `com.davils.kreate.jni.*` |
+  | `com.davils.kreate.module.platform.multiplatform.cinterop.*` | `com.davils.kreate.cinterop.*` |
+  | `com.davils.kreate.module.project.ProjectExtension` | `com.davils.kreate.project.ProjectExtension` |
+  | `com.davils.kreate.module.project.ProjectExtensionVersion` | `com.davils.kreate.project.ProjectVersionExtension` |
+  | `com.davils.kreate.module.project.<feature>[.extension].*` | `com.davils.kreate.<feature>.*` for `api`, `benchmark`, `configuration`, `constants`, `coverage`, `detekt`, `docs`, `locking`, `publish` |
+  | `com.davils.kreate.module.project.publish.extension.pom.*`, `….repository.*` | `com.davils.kreate.publish.*` |
+  | `com.davils.kreate.module.project.publish.extension.repository.GitlabExtension` | `com.davils.kreate.publish.GitLabExtension` |
+  | `com.davils.kreate.repository.GitlabRegistrySpec` | `com.davils.kreate.publish.GitLabRegistrySpec` |
+  | `com.davils.kreate.repository.gitlabPackageRegistry` | `com.davils.kreate.publish.gitlabPackageRegistry` |
+  | `com.davils.kreate.module.project.tests[.logging\|.report\|.suite].*` | `com.davils.kreate.testing.*` |
+  | `com.davils.kreate.module.trivy[.extension].*` | `com.davils.kreate.trivy.*` |
+  | `com.davils.kreate.module.local.extension.*` | `com.davils.kreate.local.*` |
+
+- **`KreateTasks` is replaced by one task name object per feature**: `JniTaskNames`,
+  `CInteropTaskNames`, `TrivyTaskNames`, `ApiValidationTaskNames`, `ConfigurationSchemaTaskNames`,
+  `BenchmarkTaskNames`, `DependencyLockingTaskNames`, `LocalWorkflowTaskNames`, `DetektTaskNames`,
+  `BuildConstantsTaskNames` (`KreateTasks.BUILD_CONSTANTS` is `BuildConstantsTaskNames.GENERATE`) and
+  `TestSuiteNames` (formerly `KreateTasks.Tests`). The task group constants are gone; the groups
+  themselves are unchanged.
+- **Task classes are internal.** Kreate's tasks are reached by name, for example
+  `tasks.named(ApiValidationTaskNames.CHECK)`. `tasks.withType<ApiCheck>()` and similar no longer
+  compile. The same applies to `SuiteJvmTest`, `WorkspaceLibrary` and `DeclaredSchema`, which were
+  public only because task properties exposed them.
+- **The settings plugin class is `com.davils.kreate.settings.KreateSettingsPlugin`** (was
+  `KreateSettings`). The plugin id `com.davils.kreate.settings` is unchanged.
+- **The rule set moved to `com.davils.kreate.rules`.** `KreateRuleSetProvider` and
+  `KREATE_RULE_SET_ID` keep their names; the rule ids are unchanged.
+- **Four new rules are active by default**: `ForbiddenElse`, `ForbiddenBlockComment`,
+  `ChainedCallLimit` and `OneTopLevelTypePerFile`. A project switches one off with
+  `kreate: <Rule>: active: false` in its `detekt.yml`, or the whole set with
+  `detekt { kreateRules = false }`.
+- **`local { snapshotSuffix }` is removed.** It was never read: a local publication always carries
+  `-SNAPSHOT`, the suffix the consumer side's `snapshotsOnly()` repository is keyed to. Delete the
+  assignment from the build script.
 
 ### Added
 
+- **`ForbiddenElse`** reports every `else`: guard clauses and exhaustive `when` expressions replace
+  it.
+- **`ForbiddenBlockComment`** reports every `/* */` comment except a license header at the top of
+  the file (`licenseHeaderPattern`, default `Copyright`).
+- **`ChainedCallLimit`** reports a qualified expression that chains more than `maxCalls` calls
+  (default 2).
+- **`OneTopLevelTypePerFile`** reports a second top-level type in a file, and a file not named after
+  its type.
 - **`apiValidation { klib = true }` validates every target of a multiplatform project.** Kreate's
   dump is read from class files, so a multiplatform project's Wasm, JavaScript, Native and Android
   library targets were never validated: a declaration added in `wasmJsMain`, or a break at klib
@@ -18,6 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `kreateApiDump` and `kreateApiCheck` stay the entry points and the directory and filters carry
   over; the dumps take the Kotlin plugin's layout, including a `<project>.klib.api`. Off by
   default, so an existing dump keeps its layout until a project opts in. Requires Kotlin 2.4.
+
+### Changed
+
+- Kreate is built to its own standard: the Kreate rule set runs on Kreate's sources without a
+  baseline, the tests run on Kotest, and the line and branch coverage bounds include the TestKit
+  suite.
+- The Kore dependency is gone; the plugin carries one dependency less onto a consumer's build
+  classpath.
 
 ### Fixed
 
