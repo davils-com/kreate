@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import com.davils.buildlogic.Project
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     id("kreate.kotlin-conventions")
@@ -23,10 +25,6 @@ plugins {
 }
 
 dependencies {
-    // `compileOnly`, which is how every Detekt rule set is built: Detekt loads the rule set into a
-    // class loader that already holds `detekt-api` and the Kotlin compiler frontend. Shipping them
-    // again would put two copies of the PSI classes on that classpath, and a `KtFile` from one is
-    // not a `KtFile` from the other.
     compileOnly(libs.detekt.api)
 
     testImplementation(platform(libs.junit.bom))
@@ -36,6 +34,8 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
-    useJUnitPlatform()
+configurations.named("detektPlugins") {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module(Project.Quality.KREATE_RULES_MODULE)).using(project(":"))
+    }
 }
