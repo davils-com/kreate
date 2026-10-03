@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.TaskOutcome
@@ -26,7 +25,7 @@ import java.util.Properties
 
 class GitlabRegistryFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val endpoint = "https://gitlab.example.com/api/v4/groups/42/-/packages/maven"
 

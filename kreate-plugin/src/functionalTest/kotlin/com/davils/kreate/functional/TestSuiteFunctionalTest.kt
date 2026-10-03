@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
@@ -32,7 +31,7 @@ private const val LEGACY_TEST_POLICY: String = "com.davils.kreate.testing.Legacy
 private const val TASK_NOT_FOUND: Int = -1
 
 class TestSuiteFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun newBuild(): KreateBuildFixture {
         val fixture = KreateBuildFixture.createIn(workspace)

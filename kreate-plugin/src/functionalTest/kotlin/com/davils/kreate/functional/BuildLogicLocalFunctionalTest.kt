@@ -17,13 +17,12 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 
 class BuildLogicLocalFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun producer(): KreateBuildFixture {
         val fixture = KreateBuildFixture.createIn(workspace)

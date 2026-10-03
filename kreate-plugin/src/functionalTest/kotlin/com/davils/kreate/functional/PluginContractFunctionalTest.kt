@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -26,7 +25,7 @@ import org.gradle.testkit.runner.TaskOutcome
 private const val KOVER_PLUGIN: String = """id("org.jetbrains.kotlinx.kover")"""
 
 class PluginContractFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     val minimalKreateBlock = """
         ${KreateBuildFixture.platformBlock}

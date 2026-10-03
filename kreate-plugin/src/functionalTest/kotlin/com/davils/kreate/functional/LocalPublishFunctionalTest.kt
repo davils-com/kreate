@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -25,7 +24,7 @@ import org.gradle.testkit.runner.TaskOutcome
 
 class LocalPublishFunctionalTest : FunSpec({
 
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun producer(
         version: String = "1.4.0",

@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -28,7 +27,7 @@ private const val JUNIT_VERSION: String = "6.1.3"
 private val SAMPLE_SOURCE_SETS: List<String> = listOf("commonMain", "jvmMain", "wasmJsMain")
 
 class TestSuiteMultiplatformFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun newBuild(): KreateBuildFixture {
         val fixture = KreateBuildFixture.createIn(workspace)

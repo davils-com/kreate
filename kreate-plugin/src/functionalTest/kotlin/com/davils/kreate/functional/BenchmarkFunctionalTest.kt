@@ -17,7 +17,6 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -36,7 +35,7 @@ private const val DEFAULT_REPORT_TIMESTAMP: String = "2026-08-19T10.00.00"
 private const val DEFAULT_SCORE_ERROR: Double = 1.0
 
 class BenchmarkFunctionalTest : FunSpec({
-    val workspace = tempdir()
+    val workspace = kreateWorkspace()
 
     fun newBuild(): KreateBuildFixture {
         val fixture = KreateBuildFixture.createIn(workspace)
