@@ -16,53 +16,17 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * Tests that the settings plugin reaches a build that never applies the project plugin.
- *
- * ### Why this test exists
- *
- * A repository that keeps its conventions in a `build-logic` included build resolves the Kreate
- * plugin marker as an ordinary `implementation` dependency of that build, and `build-logic` never
- * applies `com.davils.kreate` itself. Anything installed by the project plugin is therefore
- * unreachable from exactly the place that decides which Kreate the repository compiles against —
- * which is why the feature needs a settings plugin at all. This suite is what makes that claim a
- * fact rather than an argument.
- *
- * The second case is the one that hurts in practice: `build-logic` calls
- * `dependencyLocking { lockAllConfigurations() }` and has a committed `gradle.lockfile` pinning
- * the released version. A local snapshot cannot be in that file. The build has to resolve the
- * snapshot anyway, and the file has to come out byte-identical.
- *
- * ### What this suite does *not* prove
- *
- * That `DeactivateLockingAction` is what produces that outcome. Gradle 9.6 was not observed to
- * enforce lock state against a selector that dependency substitution had already rewritten, so
- * the snapshot resolves here with the action registered through `afterProject`, through
- * `beforeProject`, with `force` removed, and with the action removed altogether.
- *
- * The deactivation stays regardless, because it is right on its own terms: a lock file records
- * released versions and cannot contain a machine-local snapshot, so enforcing it against one
- * would be enforcing a constraint that can never be satisfied. It is a precaution whose absence
- * this suite would not catch, and saying so here is cheaper than someone rediscovering it.
- */
-@DisplayName("com.davils.kreate.settings in an included build")
-class BuildLogicLocalFunctionalTest {
+class BuildLogicLocalFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var producerDirectory: File
+    val workspace = tempdir()
 
-    @TempDir
-    lateinit var consumerDirectory: File
-
-    private fun producer(): KreateBuildFixture {
-        val fixture = KreateBuildFixture(producerDirectory)
+    fun producer(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings("conventions")
         fixture.writeBuild(
             kreateBlock = """
@@ -82,45 +46,8 @@ class BuildLogicLocalFunctionalTest {
         return fixture
     }
 
-    /**
-     * Writes a consumer whose `build-logic` included build resolves the producer, locks all of its
-     * configurations, and never applies the Kreate project plugin.
-     *
-     * @param producer The fixture whose publication `build-logic` depends on.
-     * @return The consumer fixture.
-     */
-    private fun consumerWithBuildLogic(producer: KreateBuildFixture): KreateBuildFixture {
-        val fixture = KreateBuildFixture(consumerDirectory)
-        fixture.resolvingFrom(producer)
-
-        fixture.write(
-            "settings.gradle.kts",
-            """
-            rootProject.name = "consumer"
-
-            includeBuild("build-logic")
-            """.trimIndent()
-        )
-        fixture.write("build.gradle.kts", "")
-
-        fixture.write(
-            "build-logic/settings.gradle.kts",
-            """
-            plugins {
-                id("com.davils.kreate.settings")
-            }
-
-            dependencyResolutionManagement {
-                repositories {
-                    mavenCentral()
-                }
-            }
-
-            rootProject.name = "build-logic"
-            """.trimIndent()
-        )
-
-        fixture.write(
+    fun KreateBuildFixture.writeConventionsBuild() {
+        write(
             "build-logic/build.gradle.kts",
             """
             plugins {
@@ -158,48 +85,71 @@ class BuildLogicLocalFunctionalTest {
             }
             """.trimIndent()
         )
+    }
+
+    fun consumerWithBuildLogic(producer: KreateBuildFixture): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
+        fixture.resolvingFrom(producer)
+
+        fixture.write(
+            "settings.gradle.kts",
+            """
+            rootProject.name = "consumer"
+
+            includeBuild("build-logic")
+            """.trimIndent()
+        )
+        fixture.write("build.gradle.kts", "")
+
+        fixture.write(
+            "build-logic/settings.gradle.kts",
+            """
+            plugins {
+                id("com.davils.kreate.settings")
+            }
+
+            dependencyResolutionManagement {
+                repositories {
+                    mavenCentral()
+                }
+            }
+
+            rootProject.name = "build-logic"
+            """.trimIndent()
+        )
+
+        fixture.writeConventionsBuild()
         return fixture
     }
 
-    @Test
-    @DisplayName("substitutes into build-logic, which never applies the project plugin")
-    fun reachesBuildLogic() {
-        val conventions = producer()
-        conventions.build("kreateLocalPublish")
+    context("com.davils.kreate.settings in an included build") {
+        test("substitutes into build-logic, which never applies the project plugin") {
+            val conventions = producer()
+            conventions.build("kreateLocalPublish")
 
-        val app = consumerWithBuildLogic(conventions)
-        val result = app.build("-p", "build-logic", "printResolved")
+            val app = consumerWithBuildLogic(conventions)
+            val result = app.build("-p", "build-logic", "printResolved")
 
-        result.output shouldContain "RESOLVED com.example:conventions:1.0.0-SNAPSHOT"
+            result.output shouldContain "RESOLVED com.example:conventions:1.0.0-SNAPSHOT"
+        }
+
+        test("deactivates locking that the included build's own script switched on") {
+            val conventions = producer()
+
+            conventions.build("publishToMavenLocal", "-Pkreate.local=false")
+
+            val app = consumerWithBuildLogic(conventions)
+            app.build("-p", "build-logic", "printResolved", "--write-locks")
+
+            val committedLockFile = app.file("build-logic/gradle.lockfile")
+            committedLockFile.readText() shouldContain "com.example:conventions:1.0.0="
+            val pinned = committedLockFile.readText()
+
+            conventions.build("kreateLocalPublish")
+            val result = app.build("-p", "build-logic", "printResolved")
+
+            result.output shouldContain "RESOLVED com.example:conventions:1.0.0-SNAPSHOT"
+            committedLockFile.readText() shouldBe pinned
+        }
     }
-
-    @Test
-    @DisplayName("deactivates locking that the included build's own script switched on")
-    fun deactivationWinsOverTheScript() {
-        val conventions = producer()
-
-        // The real sequence: a release exists, a lock file pins it, and only then does someone
-        // publish locally. Without a committed lock file the test proves nothing, because
-        // locking a configuration that has no lock state does not constrain anything.
-        conventions.build("publishToMavenLocal", "-Pkreate.local=false")
-
-        val app = consumerWithBuildLogic(conventions)
-        app.build("-p", "build-logic", "printResolved", "--write-locks")
-
-        val lockFile = app.file("build-logic/gradle.lockfile")
-        lockFile.readText() shouldContain "com.example:conventions:1.0.0="
-        val pinned = lockFile.readText()
-
-        conventions.build("kreateLocalPublish")
-        val result = app.build("-p", "build-logic", "printResolved")
-
-        // A lock file pinning `1.0.0` is present and the script locks every configuration, yet
-        // the local snapshot resolves. This is the outcome the feature promises; it is not proof
-        // that the deactivation caused it — see the class comment.
-        result.output shouldContain "RESOLVED com.example:conventions:1.0.0-SNAPSHOT"
-
-        // And the committed lock file is left exactly as it was. This is the guarantee the
-        // feature makes: local mode never reads or writes lock state.
-        lockFile.readText() shouldBe pinned
-    }
-}
+})

@@ -16,27 +16,16 @@
 
 package com.davils.kreate.functional
 
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 
-/**
- * The marker the fixture's own rule matches, split so that no file in this repository contains it
- * whole and Kreate's own scan has nothing to report about this test.
- */
 private const val FIXTURE_PREFIX: String = "kreate-fixture-"
 private const val FIXTURE_SUFFIX: String = "marker-abcdefghijklmnop"
 
-/**
- * A secret configuration with one custom rule for the fixture's marker, so the test needs no
- * real-looking credential.
- */
 private val FIXTURE_RULES: String = """
     rules:
       - id: kreate-fixture-marker
@@ -48,23 +37,12 @@ private val FIXTURE_RULES: String = """
           - kreate-fixture-marker
 """.trimIndent()
 
-/**
- * Tests for how the Trivy secret scan is wired into a build.
- *
- * The wiring tests use `--dry-run`, which lists what `check` would run without running it, so they
- * need no Trivy binary. The one test that runs the scan is gated on Trivy being installed.
- */
-@DisplayName("Trivy secret scan")
-class TrivySecretScanFunctionalTest {
+class TrivySecretScanFunctionalTest : FunSpec({
 
-    @TempDir
-    lateinit var projectDir: File
+    val workspace = tempdir()
 
-    private lateinit var fixture: KreateBuildFixture
-
-    @BeforeEach
-    fun setUp() {
-        fixture = KreateBuildFixture(projectDir)
+    fun newFixture(): KreateBuildFixture {
+        val fixture = KreateBuildFixture.createIn(workspace)
         fixture.writeSettings()
         fixture.write("trivy-secret.yaml", FIXTURE_RULES)
         fixture.writeKotlin(
@@ -75,10 +53,11 @@ class TrivySecretScanFunctionalTest {
             class Sample
             """.trimIndent()
         )
+        return fixture
     }
 
-    private fun writeBuild(secretsBlock: String = "") {
-        fixture.writeBuild(
+    fun KreateBuildFixture.writeTrivyBuild(secretsBlock: String = "") {
+        writeBuild(
             """
             ${KreateBuildFixture.platformBlock}
 
@@ -93,58 +72,54 @@ class TrivySecretScanFunctionalTest {
         )
     }
 
-    @Test
-    @DisplayName("runs as part of check by default")
-    fun runsOnCheckByDefault() {
-        writeBuild()
+    context("Trivy secret scan") {
+        test("runs as part of check by default") {
+            val fixture = newFixture()
+            fixture.writeTrivyBuild()
 
-        val result = fixture.build("check", "--dry-run")
+            val result = fixture.build("check", "--dry-run")
 
-        result.output shouldContain ":kreateTrivySecretScan SKIPPED"
+            result.output shouldContain ":kreateTrivySecretScan SKIPPED"
+        }
+
+        test("stays out of check when runOnCheck is turned off") {
+            val fixture = newFixture()
+            fixture.writeTrivyBuild("runOnCheck = false")
+
+            val result = fixture.build("check", "--dry-run")
+
+            result.output shouldNotContain ":kreateTrivySecretScan"
+        }
+
+        test("never puts the license or vulnerability scan on check") {
+            val fixture = newFixture()
+            fixture.writeTrivyBuild()
+
+            val result = fixture.build("check", "--dry-run")
+
+            result.output shouldNotContain ":kreateTrivyLicenseScan"
+            result.output shouldNotContain ":kreateTrivyVulnerabilityScan"
+        }
+
+        test("stays out of check when the Trivy module is disabled") {
+            val fixture = newFixture()
+            fixture.writeBuild(KreateBuildFixture.platformBlock)
+
+            val result = fixture.build("check", "--dry-run")
+
+            result.output shouldNotContain ":kreateTrivySecretScan"
+        }
+
+        test("names every file with a finding when it fails").config(enabledOrReasonIf = requiresTrivy) {
+            val fixture = newFixture()
+            fixture.writeTrivyBuild()
+            fixture.write("src/main/resources/application.yaml", "fixture: $FIXTURE_PREFIX$FIXTURE_SUFFIX\n")
+
+            val result = fixture.buildAndFail("kreateTrivySecretScan")
+
+            result.task(":kreateTrivySecretScan")?.outcome shouldBe TaskOutcome.FAILED
+            result.output shouldContain "Trivy found secrets in 1 source file(s):"
+            result.output shouldContain "src/main/resources/application.yaml"
+        }
     }
-
-    @Test
-    @DisplayName("stays out of check when runOnCheck is turned off")
-    fun staysOutOfCheckWhenTurnedOff() {
-        writeBuild("runOnCheck = false")
-
-        val result = fixture.build("check", "--dry-run")
-
-        result.output shouldNotContain ":kreateTrivySecretScan"
-    }
-
-    @Test
-    @DisplayName("never puts the license or vulnerability scan on check")
-    fun keepsDatabaseScansOffCheck() {
-        writeBuild()
-
-        val result = fixture.build("check", "--dry-run")
-
-        result.output shouldNotContain ":kreateTrivyLicenseScan"
-        result.output shouldNotContain ":kreateTrivyVulnerabilityScan"
-    }
-
-    @Test
-    @DisplayName("stays out of check when the Trivy module is disabled")
-    fun staysOutOfCheckWhenTrivyDisabled() {
-        fixture.writeBuild(KreateBuildFixture.platformBlock)
-
-        val result = fixture.build("check", "--dry-run")
-
-        result.output shouldNotContain ":kreateTrivySecretScan"
-    }
-
-    @Test
-    @EnabledIfTrivyAvailable
-    @DisplayName("names every file with a finding when it fails")
-    fun namesFilesWithFindings() {
-        writeBuild()
-        fixture.write("src/main/resources/application.yaml", "fixture: $FIXTURE_PREFIX$FIXTURE_SUFFIX\n")
-
-        val result = fixture.buildAndFail("kreateTrivySecretScan")
-
-        result.task(":kreateTrivySecretScan")?.outcome shouldBe TaskOutcome.FAILED
-        result.output shouldContain "Trivy found secrets in 1 source file(s):"
-        result.output shouldContain "src/main/resources/application.yaml"
-    }
-}
+})

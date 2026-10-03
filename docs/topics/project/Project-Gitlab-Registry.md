@@ -19,7 +19,7 @@ combination wrong and you get a `401` that says nothing about why.
 
 ```kotlin
 // settings.gradle.kts
-import com.davils.kreate.repository.gitlabPackageRegistry
+import com.davils.kreate.publish.gitlabPackageRegistry
 
 dependencyResolutionManagement {
     repositories {
@@ -47,7 +47,7 @@ registry there needs it on the settings class path:
 
 ```kotlin
 // settings.gradle.kts
-import com.davils.kreate.repository.gitlabPackageRegistry
+import com.davils.kreate.publish.gitlabPackageRegistry
 
 buildscript {
     repositories { mavenCentral() }
