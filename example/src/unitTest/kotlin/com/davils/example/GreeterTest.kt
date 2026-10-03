@@ -16,36 +16,21 @@
 
 package com.davils.example
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 
-/**
- * Unit tests for [Greeter].
- *
- * @since 1.0.0
- */
-class GreeterTest {
+class GreeterTest : FunSpec({
+    context("greet") {
+        test("greets an ordinary name") {
+            val greeting = Greeter().greet("Kreate")
 
-    /**
-     * Verifies the greeting for an ordinary name.
-     *
-     * @since 1.0.0
-     */
-    @Test
-    fun greetsByName() {
-        assertEquals("Hello, Kreate!", Greeter().greet("Kreate"))
+            greeting shouldBe "Hello, Kreate!"
+        }
+
+        test("falls back to a generic greeting for a blank name") {
+            val greeting = Greeter().greet("  ")
+
+            greeting shouldBe "Hello!"
+        }
     }
-
-    /**
-     * Verifies the fallback for a blank name.
-     *
-     * This covers the other side of the condition. Without it the class still reaches full line
-     * coverage, which is the gap a branch coverage bound is there to catch.
-     *
-     * @since 1.0.0
-     */
-    @Test
-    fun fallsBackWhenNameIsBlank() {
-        assertEquals("Hello!", Greeter().greet("  "))
-    }
-}
+})
