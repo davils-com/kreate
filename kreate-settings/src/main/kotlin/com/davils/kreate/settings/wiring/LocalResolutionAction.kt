@@ -71,7 +71,6 @@ internal class LocalResolutionAction(
         val allSubstitutions = Action<DependencySubstitutions> { all(substitute) }
 
         val strategy = Action<ResolutionStrategy> {
-            dependencySubstitution(allSubstitutions)
             force(*forced.toTypedArray())
             cacheChangingModulesFor(LOCAL_SNAPSHOT_CACHE_SECONDS, TimeUnit.SECONDS)
         }
