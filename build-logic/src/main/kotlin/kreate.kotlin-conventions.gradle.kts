@@ -15,6 +15,7 @@
  */
 
 import com.davils.buildlogic.Project
+import org.gradle.api.artifacts.dsl.LockMode
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -38,6 +39,14 @@ plugins.withId("org.jetbrains.kotlin.jvm") {
             allWarningsAsErrors = true
         }
     }
+}
+
+dependencyLocking {
+    lockMode = LockMode.STRICT
+}
+
+configurations.matching { it.name == JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME }.configureEach {
+    resolutionStrategy.activateDependencyLocking()
 }
 
 tasks.withType<ValidatePlugins>().configureEach {

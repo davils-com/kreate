@@ -146,6 +146,24 @@ in the same change:
 
 ---
 
+## Changing a Dependency
+
+The build verifies every dependency against `gradle/verification-metadata.xml`, and the published
+modules lock their runtime classpath in `gradle.lockfile`, in strict mode. A dependency bump,
+including a Dependabot pull request, is red until both are updated:
+
+```bash
+./gradlew :kreate-plugin:dependencies :kreate-settings:dependencies :kreate-detekt-rules:dependencies --configuration runtimeClasspath --write-locks
+```
+
+```bash
+./gradlew --write-verification-metadata sha256 --no-configuration-cache verify
+```
+
+Read the diff of the metadata: a checksum that changes for a version that did not is a tampered
+artifact, not a chore. Kotlin, `kotlinx-serialization` and Ktor are held back on purpose, see
+`gradle/libs.versions.toml`.
+
 ## Commit Messages
 
 Conventional commits with the module as scope, in the imperative mood:

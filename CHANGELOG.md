@@ -105,6 +105,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **The default secret scan reads build scripts and key files.** `*.kts`, `*.toml`, `*.xml`, `*.pem`
   and `*.key` were missing, although the documentation claimed build scripts and version catalogs
   were covered.
+- **Kreate's own build verifies its dependencies.** `gradle/verification-metadata.xml` pins the
+  SHA-256 of every artifact, and the published modules lock their runtime classpath in strict mode,
+  so Trivy scans what actually ships.
 - **A CI job token only goes to its own GitLab instance.** `gitlabPackageRegistry` sent `CI_JOB_TOKEN`
   to any URL, so a build resolving from a second instance handed that operator a live credential. It
   is now sent only when the host matches `CI_SERVER_HOST`, or is listed in the new
