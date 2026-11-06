@@ -90,6 +90,18 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **A missing tool fails with an error instead of a bare command name.** When a tool was not found,
   Kreate handed its name to the operating system, which on Windows can run an executable from the
   working directory. The task now fails and names the directories it searched.
+- **A release has to pass through `main`.** Any tag on any commit used to publish a signed release.
+  The publish workflow now accepts version tags only, and refuses a tag that is not on `main` or
+  does not match `version` in `gradle.properties`.
+- **The signing key is no longer in reach of the build.** Verification runs in a job without secrets,
+  and the Maven Central and signing secrets exist on the single step that publishes. That job
+  restores no Gradle cache.
+- **Releases carry build provenance and an SBOM attestation.** Both are signed by GitHub Actions
+  and can be checked with `gh attestation verify`.
+- **Kreate's own secret scan covers every built-in Trivy rule.** `trivy-secret.yaml` had enabled
+  only the two AWS rules, which switched all the others off, and the CI gate failed only on
+  `CRITICAL`, which the custom rule never reaches. Any secret now fails the build. The repository
+  scans also ran on Trivy 0.70.0, the default of `trivy-action`; every workflow now pins Trivy.
 
 ### Changed
 

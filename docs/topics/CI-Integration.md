@@ -227,7 +227,7 @@ security:
     - apt-get update && apt-get install -y wget gnupg
     - wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor > /usr/share/keyrings/trivy.gpg
     - echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list
-    - apt-get update && apt-get install -y trivy
+    - apt-get update && apt-get install -y trivy=0.76.2
   script:
     - ./gradlew dependencies --write-locks
     - ./gradlew kreateTrivyScan
