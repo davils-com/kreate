@@ -178,6 +178,39 @@ have nothing to inspect, so they fail unless <code>failOnMissingLockFiles</code>
 <a href="Dependency-Locking.md">Dependency locking</a>.
 </warning>
 
+## Software assurance
+
+Registered when `assurance.enabled` is `true`. See [Software assurance](Assurance-Overview.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Consumes</td>
+    </tr>
+    <tr>
+        <td><code>kreateAssurance</code></td>
+        <td>Decides whether the build passes the gate. Runs on <code>check</code> unless
+            <code>runOnCheck</code> is <code>false</code>.</td>
+        <td>Finding documents, baseline, ignore rules</td>
+    </tr>
+    <tr>
+        <td><code>kreateAssuranceReport</code></td>
+        <td>Writes the reports. Runs after <code>kreateAssurance</code>, also when that fails.</td>
+        <td>Finding documents, baseline, ignore rules</td>
+    </tr>
+    <tr>
+        <td><code>kreateAssuranceBaselineCreate</code></td>
+        <td>Records the current findings. Refuses to while a source is incomplete.</td>
+        <td>Finding documents</td>
+    </tr>
+    <tr>
+        <td><code>kreateAssuranceBaselinePrune</code></td>
+        <td>Removes what no longer occurs. Never adds anything.</td>
+        <td>Finding documents, baseline</td>
+    </tr>
+</table>
+
 ## API validation
 
 Registered when `project.apiValidation.enabled` is `true`. See

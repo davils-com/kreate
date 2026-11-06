@@ -44,6 +44,7 @@ build *verifies*.
 kreate {
     platform { /* toolchains, compiler flags, native interop */ }
     project  { /* identity, versioning, docs, tests, publishing */ }
+    assurance { /* one gate over every finding */ }
     trivy    { /* vulnerability, licence and secret scanning */ }
 }
 ```

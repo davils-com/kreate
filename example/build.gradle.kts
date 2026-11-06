@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.davils.kreate.assurance.ReportFormat
 import com.davils.kreate.assurance.Severity
 import com.davils.kreate.cinterop.NativeLanguage
 import com.davils.kreate.coverage.Grouping
@@ -75,6 +76,13 @@ kreate {
                     generateLoader = true
                 }
             }
+        }
+    }
+
+    assurance {
+        enabled = true
+        reports {
+            formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
         }
     }
 

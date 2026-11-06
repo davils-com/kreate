@@ -152,6 +152,14 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 - **Platform-agnostic**: the `trivy { }` block works in any project, including ones using no other
   Kreate feature.
 
+### Software Assurance
+
+- **One gate over every finding**: `assurance { }` filters findings through ignore rules that expire
+  and a baseline, writes JSON, SARIF or text, and decides.
+- **Never clean by accident**: a check that could not finish fails the gate, and `reportOnly` cannot
+  hide that.
+- **Findings from other tools**: `externalFindings` reads their documents.
+
 ### Project & Release
 
 - **Build constants**: generate a type-safe Kotlin object from build values.
@@ -287,6 +295,7 @@ kreate {
 | `project.benchmark`               | `enabled`                  | kotlinx-benchmark integration              | `false`      |
 | `project.benchmark.regression`    | `maxRegressionPercent`     | Benchmark regression threshold             | `10.0`       |
 | `project.publish`                 | `enabled`                  | Maven Central / GitLab publishing          | `false`      |
+| `assurance`                       | `enabled`                  | Software assurance gate          |
 | `trivy`                           | `enabled`                  | Security and compliance scanning           | `false`      |
 
 ---

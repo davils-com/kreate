@@ -24,5 +24,6 @@ internal enum class FeaturePhase {
     CONFIGURATION,
     PLATFORM,
     SCANNING,
+    ASSURANCE,
     LOCAL_WORKFLOW
 }

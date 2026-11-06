@@ -79,6 +79,18 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Added
 
+- **The software assurance gate.** `assurance { enabled = true }` adds `kreateAssurance`, which
+  collects findings, filters them and decides, and `kreateAssuranceReport`, which writes JSON, SARIF
+  or text. A finding fails from `failOn`, by default `HIGH`, and `build/kreate/assurance/result.json`
+  holds the outcome for scripts, with exit code 1 for findings, 65 for invalid input and 69 for a
+  check that could not finish. `reportOnly` hides findings, never an incomplete check.
+- **Ignore rules that expire.** `ignore("GHSA-...") { reason = "..."; expires = "2027-01-31" }`
+  accepts a finding, and a rule without a reason is refused. `forbidIgnoreOf` keeps severities out of
+  reach of the rules and the baseline.
+- **A baseline for existing code.** `kreateAssuranceBaselineCreate` records today's findings in
+  `kreate-baseline.json`, and `kreateAssuranceBaselinePrune` removes what no longer occurs. Entries
+  carry no line numbers, and a further occurrence is reported as new.
+- **`assurance { externalFindings }`** reads finding documents written by other tools.
 - **`cinterop { cargoLocked = true }`** runs `cargo build --locked`, so a crate cannot float to a new
   version whose `build.rs` runs during the build. **`cinterop { cmakeExecutable }`** pins CMake for C
   and C++ projects, as the JNI block already could.

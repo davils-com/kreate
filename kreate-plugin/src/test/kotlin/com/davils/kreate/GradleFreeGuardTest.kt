@@ -42,7 +42,14 @@ private const val CONSTANT_NAME_AND_TYPE: Int = 12
 
 private const val CONSTANT_METHOD_TYPE: Int = 16
 
-private val GRADLE_FREE_PACKAGES: List<String> = listOf("net", "archive")
+private val GRADLE_FREE_PACKAGES: List<String> = listOf(
+    "net",
+    "archive",
+    "assurance/finding",
+    "assurance/policy",
+    "assurance/baseline",
+    "assurance/report"
+)
 
 private val GRADLE_FREE_TOOLING_TYPES: List<String> = listOf(
     "ToolRunner",

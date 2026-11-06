@@ -16,6 +16,7 @@
 
 package com.davils.kreate
 
+import com.davils.kreate.assurance.AssuranceExtension
 import com.davils.kreate.local.LocalExtension
 import com.davils.kreate.platform.PlatformExtension
 import com.davils.kreate.project.ProjectExtension
@@ -57,6 +58,14 @@ public abstract class KreateExtension @Inject constructor() {
     public abstract val trivy: TrivyExtension
 
     /**
+     * Configuration for the software assurance gate.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val assurance: AssuranceExtension
+
+    /**
      * Configuration for the local development workflow.
      *
      * @since 3.2.0
@@ -92,6 +101,16 @@ public abstract class KreateExtension @Inject constructor() {
      */
     public fun trivy(action: Action<TrivyExtension>) {
         action.execute(trivy)
+    }
+
+    /**
+     * Configures the [AssuranceExtension] using the provided action.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun assurance(action: Action<AssuranceExtension>) {
+        action.execute(assurance)
     }
 
     /**

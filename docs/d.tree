@@ -41,6 +41,10 @@
         </toc-element>
     </toc-element>
 
+    <toc-element toc-title="Software assurance">
+        <toc-element topic="Assurance-Overview.md"/>
+    </toc-element>
+
     <toc-element toc-title="Security &amp; compliance">
         <toc-element topic="Trivy-Overview.md"/>
         <toc-element topic="Trivy-Vulnerability-Scan.md"/>

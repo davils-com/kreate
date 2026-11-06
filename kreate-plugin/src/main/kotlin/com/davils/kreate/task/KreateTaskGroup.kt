@@ -27,5 +27,6 @@ internal enum class KreateTaskGroup(val label: String) {
     LOCKING("kreate locking"),
     LOCAL("kreate local"),
     DETEKT("kreate detekt"),
-    BUILD_CONSTANTS("kreate build-constants")
+    BUILD_CONSTANTS("kreate build-constants"),
+    ASSURANCE("kreate assurance")
 }

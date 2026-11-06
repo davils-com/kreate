@@ -1,5 +1,7 @@
 public abstract class com/davils/kreate/KreateExtension {
 	public fun <init> ()V
+	public final fun assurance (Lorg/gradle/api/Action;)V
+	public abstract fun getAssurance ()Lcom/davils/kreate/assurance/AssuranceExtension;
 	public abstract fun getLocal ()Lcom/davils/kreate/local/LocalExtension;
 	public abstract fun getPlatform ()Lcom/davils/kreate/platform/PlatformExtension;
 	public abstract fun getProject ()Lcom/davils/kreate/project/ProjectExtension;
@@ -31,6 +33,61 @@ public final class com/davils/kreate/api/ApiValidationTaskNames {
 	public static final field CHECK Ljava/lang/String;
 	public static final field DUMP Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/api/ApiValidationTaskNames;
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceBaselineExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/ProjectLayout;)V
+	public final fun getFailOnStale ()Lorg/gradle/api/provider/Property;
+	public final fun getFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getMaxSeverity ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun baseline (Lorg/gradle/api/Action;)V
+	public abstract fun getBaseline ()Lcom/davils/kreate/assurance/AssuranceBaselineExtension;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getExternalFindings ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun getFailOn ()Lorg/gradle/api/provider/Property;
+	public final fun getForbidIgnoreOf ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getMinSeverity ()Lorg/gradle/api/provider/Property;
+	public final fun getReportOnly ()Lorg/gradle/api/provider/Property;
+	public abstract fun getReports ()Lcom/davils/kreate/assurance/AssuranceReportsExtension;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun ignore (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun reports (Lorg/gradle/api/Action;)V
+}
+
+public final class com/davils/kreate/assurance/AssuranceIgnoreSpec {
+	public fun <init> ()V
+	public final fun getExpires ()Ljava/lang/String;
+	public final fun getModule ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public final fun setExpires (Ljava/lang/String;)V
+	public final fun setModule (Ljava/lang/String;)V
+	public final fun setReason (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceReportsExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getFormats ()Lorg/gradle/api/provider/SetProperty;
+}
+
+public final class com/davils/kreate/assurance/AssuranceTaskNames {
+	public static final field BASELINE_CREATE Ljava/lang/String;
+	public static final field BASELINE_PRUNE Ljava/lang/String;
+	public static final field CHECK Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/assurance/AssuranceTaskNames;
+	public static final field REPORT Ljava/lang/String;
+}
+
+public final class com/davils/kreate/assurance/ReportFormat : java/lang/Enum {
+	public static final field JSON Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field SARIF Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field TEXT Lcom/davils/kreate/assurance/ReportFormat;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/assurance/ReportFormat;
+	public static fun values ()[Lcom/davils/kreate/assurance/ReportFormat;
 }
 
 public final class com/davils/kreate/assurance/Severity : java/lang/Enum {

@@ -18,6 +18,7 @@ package com.davils.kreate.feature
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.api.wiring.ApiValidationFeature
+import com.davils.kreate.assurance.wiring.AssuranceFeature
 import com.davils.kreate.benchmark.wiring.BenchmarkFeature
 import com.davils.kreate.cinterop.wiring.CInteropFeature
 import com.davils.kreate.configuration.wiring.ConfigurationSchemaFeature
@@ -56,6 +57,7 @@ internal object KreateFeatures {
         CInteropFeature,
         JniFeature,
         TrivyFeature,
+        AssuranceFeature,
         LocalWorkflowFeature
     )
 
