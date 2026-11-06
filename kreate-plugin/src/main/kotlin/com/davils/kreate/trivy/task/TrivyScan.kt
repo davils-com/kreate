@@ -25,14 +25,15 @@ import com.davils.kreate.assurance.task.FindingCollectTask
 import com.davils.kreate.task.KreateTaskGroup
 import com.davils.kreate.tooling.ExecOperationsToolRunner
 import com.davils.kreate.tooling.ToolInvocation
-import com.davils.kreate.tooling.ToolNotFoundException
 import com.davils.kreate.tooling.ToolResult
 import com.davils.kreate.tooling.ToolStatus
+import com.davils.kreate.trivy.provision.TrivyUnavailableException
 import com.davils.kreate.trivy.report.TrivyReportParser
 import org.gradle.api.GradleException
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
@@ -57,6 +58,9 @@ internal abstract class TrivyScan(
 ) : FindingCollectTask(taskDescription, KreateTaskGroup.TRIVY) {
     private val runner = ExecOperationsToolRunner(exec)
 
+    @get:Nested
+    public abstract val tool: TrivyToolInput
+
     @get:Input
     public abstract val severity: ListProperty<String>
 
@@ -75,9 +79,14 @@ internal abstract class TrivyScan(
         report.delete()
 
         return try {
-            val invocation = ToolInvocation(trivyArguments(target.file, report), temporaryDir, timeout = SCAN_TIMEOUT)
+            val command = tool.provisioner(runner, temporaryDir, logger).provision()
+            val invocation = ToolInvocation(
+                trivyArguments(command, target.file, report),
+                temporaryDir,
+                timeout = SCAN_TIMEOUT
+            )
             outcomeOf(runner.run(invocation), target, report)
-        } catch (cause: ToolNotFoundException) {
+        } catch (cause: TrivyUnavailableException) {
             TrivyRun(emptyList(), cause.message.orEmpty())
         }
     }
@@ -95,8 +104,8 @@ internal abstract class TrivyScan(
         throw GradleException(findingsMessage(findings))
     }
 
-    private fun trivyArguments(target: File, report: File): List<String> {
-        val scanArguments = listOf(resolveTrivyCommand(), "fs", "--quiet", "--scanners", scanner)
+    private fun trivyArguments(command: String, target: File, report: File): List<String> {
+        val scanArguments = listOf(command, "fs", "--quiet", "--scanners", scanner)
         val reportArguments = listOf(
             "--severity", joinForTrivy(severity.get()),
             "--exit-code", SUCCESS_EXIT_CODE.toString(),

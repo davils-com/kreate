@@ -73,6 +73,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **Dependency locking is strict.** A locked configuration without lock state now fails the build.
   In Gradle's default mode a deleted lock file went unnoticed and versions floated.
   `dependencyLocking { strict = false }` restores it.
+- **Kreate brings its own Trivy.** It uses the pinned version, 0.76.2, and no longer whatever is on the
+  `PATH`, because results differ between versions. A missing Trivy is downloaded and verified against a
+  SHA-256 built into the plugin. `trivy { useInstalled = true }` restores the old behaviour, and an
+  air-gapped build sets `-Pkreate.trivy.downloadBaseUrl` or `trivy { executable }`.
 - **Kreate runs Trivy outside the project, so `.trivyignore` and `trivy.yaml` no longer apply.** A
   file committed there could hide a finding, even a private key, without a trace in the build. Use
   `assurance { ignore }`, which needs a reason and can expire.
@@ -100,6 +104,7 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   scan has a timeout of 30 minutes.
 - **`trivy { misconfig { } }` and `trivy { filesystem { } }`** add `kreateTrivyMisconfigScan` and
   `kreateTrivyFilesystemScan`, which read the whole project directory.
+- **`kreateTrivyProvision`** installs the pinned Trivy ahead of time, for example to warm a CI cache.
 - **`vulnerability { ignoreUnfixed = true }`** leaves out vulnerabilities without a released fix.
 - **`cinterop { cargoLocked = true }`** runs `cargo build --locked`, so a crate cannot float to a new
   version whose `build.rs` runs during the build. **`cinterop { cmakeExecutable }`** pins CMake for C

@@ -28,16 +28,22 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import io.ktor.http.content.ByteArrayContent
+import io.ktor.http.isSuccess
 import io.ktor.util.toMap
+import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.io.readByteArray
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Clock
 import java.time.Duration
 import io.ktor.http.HttpMethod as KtorHttpMethod
+
+private const val DOWNLOAD_CHUNK_BYTES: Long = 1024L * 1024L
 
 internal class KtorHttpTransport(
     private val client: HttpClient,
@@ -103,11 +109,30 @@ internal class KtorHttpTransport(
 
     private suspend fun readBounded(request: TransportRequest, response: HttpResponse): ByteArray {
         val channel = response.bodyAsChannel()
+        val target = request.downloadTo
+        if (target != null && response.status.isSuccess()) {
+            writeBounded(request, channel, target)
+            return ByteArray(0)
+        }
+
         val packet = channel.readRemaining(request.maxBytes + 1L)
         val bytes = packet.readByteArray()
 
         if (bytes.size > request.maxBytes) throw tooLarge(request)
         return bytes
+    }
+
+    private suspend fun writeBounded(request: TransportRequest, channel: ByteReadChannel, target: Path) {
+        Files.newOutputStream(target).use { output ->
+            var received = 0L
+            while (!channel.isClosedForRead) {
+                val packet = channel.readRemaining(DOWNLOAD_CHUNK_BYTES)
+                val chunk = packet.readByteArray()
+                received += chunk.size
+                if (received > request.maxBytes) throw tooLarge(request)
+                output.write(chunk)
+            }
+        }
     }
 
     private fun tooLarge(request: TransportRequest): NetworkException.TooLarge =

@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.davils.kreate.trivy.task
+package com.davils.kreate.trivy.provision
 
-import com.davils.kreate.tooling.ExecutableResolver
-import com.davils.kreate.tooling.ExternalTool
-
-internal fun resolveTrivyCommand(): String = ExecutableResolver.resolve(ExternalTool.TRIVY)
+internal class TrivyUnavailableException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)

@@ -76,6 +76,35 @@ fail on their own. They write their findings to `build/kreate/assurance/document
 `kreateAssurance` decides, so ignore rules and the baseline apply. A scan with `failOnFindings = false`
 stays in the report without blocking, and a crash of Trivy is `INCOMPLETE` rather than a pass.
 
+## Which Trivy runs
+
+Kreate pins a Trivy version and holds the SHA-256 of its releases, so a build does not depend on what
+a machine has installed, and a compromised release cannot slip in. The scans resolve Trivy in this
+order:
+
+1. `trivy { executable }` or `-Pkreate.trivy.executable`. Nothing else is considered;
+2. with `useInstalled = true`, any Trivy on the `PATH`;
+3. the pinned version in `caches/kreate/trivy` of the Gradle user home, whose digest is checked on
+   every use;
+4. an installed Trivy of exactly the pinned version;
+5. a download of the pinned version, verified before it is unpacked.
+
+| Property       | Type                        | Default                 | Description                                     |
+|:---------------|:----------------------------|:------------------------|:------------------------------------------------|
+| `version`      | `Property<String>`          | the version Kreate pins | The exact version                               |
+| `useInstalled` | `Property<Boolean>`         | `false`                 | Accepts any installed version                   |
+| `executable`   | `Property<String>`          | none                    | The executable to run                           |
+| `checksums`    | `MapProperty<String,String>`| empty                   | SHA-256 per platform, such as `Linux-64bit`     |
+
+A version other than the default needs `checksums` for the same protection. Without them Kreate reads
+Trivy's own `checksums.txt` and warns: that file comes from the same release, so it proves the download
+is intact, not that the release is genuine.
+
+For an air-gapped build, mirror the release assets and set
+`-Pkreate.trivy.downloadBaseUrl=https://mirror.example.com/trivy`, or point `executable` at an installed
+copy. `kreateTrivyProvision` installs Trivy ahead of time, for example to warm a CI cache. When Trivy
+is not available, a scan fails, and the gate reports `INCOMPLETE`.
+
 ## `.trivyignore` and `trivy.yaml`
 
 Kreate runs Trivy from the temporary directory of the task, so neither file is read. A committed

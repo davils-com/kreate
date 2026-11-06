@@ -879,11 +879,15 @@ public abstract class com/davils/kreate/trivy/TrivyDirectoryScanExtension {
 public abstract class com/davils/kreate/trivy/TrivyExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun filesystem (Lorg/gradle/api/Action;)V
+	public final fun getChecksums ()Lorg/gradle/api/provider/MapProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getExecutable ()Lorg/gradle/api/provider/Property;
 	public abstract fun getFilesystem ()Lcom/davils/kreate/trivy/TrivyDirectoryScanExtension;
 	public abstract fun getLicense ()Lcom/davils/kreate/trivy/TrivyLicenseExtension;
 	public abstract fun getMisconfig ()Lcom/davils/kreate/trivy/TrivyDirectoryScanExtension;
 	public abstract fun getSecrets ()Lcom/davils/kreate/trivy/TrivySecretExtension;
+	public final fun getUseInstalled ()Lorg/gradle/api/provider/Property;
+	public final fun getVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVulnerability ()Lcom/davils/kreate/trivy/TrivyVulnerabilityExtension;
 	public final fun license (Lorg/gradle/api/Action;)V
 	public final fun misconfig (Lorg/gradle/api/Action;)V
@@ -915,6 +919,7 @@ public final class com/davils/kreate/trivy/TrivyTaskNames {
 	public static final field INSTANCE Lcom/davils/kreate/trivy/TrivyTaskNames;
 	public static final field LICENSES Ljava/lang/String;
 	public static final field MISCONFIGURATION Ljava/lang/String;
+	public static final field PROVISION Ljava/lang/String;
 	public static final field SCAN Ljava/lang/String;
 	public static final field SECRETS Ljava/lang/String;
 	public static final field VULNERABILITIES Ljava/lang/String;

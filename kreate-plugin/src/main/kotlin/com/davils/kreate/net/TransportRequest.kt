@@ -17,6 +17,7 @@
 package com.davils.kreate.net
 
 import java.net.URI
+import java.nio.file.Path
 
 internal class TransportRequest(
     val method: HttpMethod,
@@ -24,14 +25,15 @@ internal class TransportRequest(
     val headers: Map<String, String> = emptyMap(),
     val body: ByteArray? = null,
     val maxBytes: Int = DEFAULT_MAX_BYTES,
-    val allowedHosts: Set<String> = emptySet()
+    val allowedHosts: Set<String> = emptySet(),
+    val downloadTo: Path? = null
 ) {
     init {
         require(maxBytes in 0 until Int.MAX_VALUE) { "The response limit must leave room to detect an overrun." }
     }
 
     fun redirectedTo(target: URI, keptHeaders: Map<String, String>): TransportRequest =
-        TransportRequest(method, target, keptHeaders, body, maxBytes, allowedHosts)
+        TransportRequest(method, target, keptHeaders, body, maxBytes, allowedHosts, downloadTo)
 
     companion object {
         const val DEFAULT_MAX_BYTES: Int = 64 * 1024 * 1024

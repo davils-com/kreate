@@ -38,6 +38,7 @@ class TrivyLicenseScanFunctionalTest : FunSpec({
             ${KreateBuildFixture.platformBlock}
 
             trivy {
+                useInstalled = true
                 enabled = true
 
                 secrets {

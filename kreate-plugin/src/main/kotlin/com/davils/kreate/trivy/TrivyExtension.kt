@@ -16,8 +16,10 @@
 
 package com.davils.kreate.trivy
 
+import com.davils.kreate.trivy.provision.TrivyPins
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
@@ -38,6 +40,43 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
      * @since 1.2.0
      */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * The exact Trivy version to use. Defaults to the version this Kreate release pins.
+     *
+     * Kreate holds the SHA-256 of the default version's releases, which is what protects a build from
+     * a compromised release. Another version needs [checksums] for the same protection.
+     *
+     * @since 4.0.0
+     */
+    public val version: Property<String> = factory.property(String::class.java).convention(TrivyPins.DEFAULT_VERSION)
+
+    /**
+     * Whether any Trivy on this machine may be used instead of the pinned one. Defaults to `false`.
+     *
+     * Results differ between versions, so a build stays on the pinned one unless this says otherwise.
+     *
+     * @since 4.0.0
+     */
+    public val useInstalled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * The Trivy executable to run, instead of finding or downloading one.
+     *
+     * The Gradle property `kreate.trivy.executable` overrides it.
+     *
+     * @since 4.0.0
+     */
+    public val executable: Property<String> = factory.property(String::class.java)
+
+    /**
+     * The SHA-256 of the release archive per platform, such as `Linux-64bit`, for a version other
+     * than the default.
+     *
+     * @since 4.0.0
+     */
+    public val checksums: MapProperty<String, String> =
+        factory.mapProperty(String::class.java, String::class.java).convention(emptyMap())
 
     /**
      * Configuration for scanning the project for insecure configuration.

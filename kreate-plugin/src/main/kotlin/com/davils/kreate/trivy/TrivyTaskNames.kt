@@ -63,4 +63,11 @@ public object TrivyTaskNames {
      * @since 4.0.0
      */
     public const val FILESYSTEM: String = "kreateTrivyFilesystemScan"
+
+    /**
+     * Makes the pinned Trivy available, for example to warm a CI cache.
+     *
+     * @since 4.0.0
+     */
+    public const val PROVISION: String = "kreateTrivyProvision"
 }

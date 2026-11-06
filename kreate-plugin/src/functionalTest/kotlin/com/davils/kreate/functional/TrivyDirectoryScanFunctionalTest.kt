@@ -71,6 +71,7 @@ class TrivyDirectoryScanFunctionalTest : FunSpec({
 
             trivy {
                 enabled = true
+                useInstalled = true
                 secrets { runOnCheck = false }
                 vulnerability { failOnMissingLockFiles = false }
                 license { failOnMissingLockFiles = false }
@@ -191,6 +192,7 @@ class TrivyDirectoryScanFunctionalTest : FunSpec({
 
                 trivy {
                     enabled = true
+                    useInstalled = true
                 }
                 """.trimIndent()
             )

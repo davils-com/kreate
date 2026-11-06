@@ -131,6 +131,38 @@ class KtorHttpTransportTest : FunSpec({
         response.statusCode shouldBe 418
     }
 
+    context("a download") {
+        test("streams the body into the file and returns an empty body") {
+            server.respond("/file", body = "content".toByteArray())
+            val target = kotlin.io.path.createTempFile()
+            val request = TransportRequest(HttpMethod.GET, server.uri("/file"), downloadTo = target)
+
+            val response = transport().send(request)
+
+            response.body shouldHaveSize 0
+            target.toFile().readText() shouldBe "content"
+        }
+
+        test("refuses a file above the limit") {
+            server.respond("/big", body = ByteArray(32))
+            val target = kotlin.io.path.createTempFile()
+            val request = TransportRequest(HttpMethod.GET, server.uri("/big"), maxBytes = 16, downloadTo = target)
+
+            shouldThrow<NetworkException.TooLarge> { transport().send(request) }
+        }
+
+        test("keeps the body of a redirect in memory, so that it cannot overwrite the file") {
+            server.redirect("/moved", "/elsewhere")
+            val target = kotlin.io.path.createTempFile()
+            target.toFile().writeText("untouched")
+            val request = TransportRequest(HttpMethod.GET, server.uri("/moved"), downloadTo = target)
+
+            transport().send(request).statusCode shouldBe 302
+
+            target.toFile().readText() shouldBe "untouched"
+        }
+    }
+
     context("the byte cap") {
         test("accepts a body of exactly the limit") {
             server.respond("/exact", body = ByteArray(16))

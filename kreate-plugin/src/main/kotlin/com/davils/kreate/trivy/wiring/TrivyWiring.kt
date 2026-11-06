@@ -26,13 +26,17 @@ import com.davils.kreate.trivy.task.TrivyDirectoryScan
 import com.davils.kreate.trivy.task.TrivyFilesystemScan
 import com.davils.kreate.trivy.task.TrivyLicenseScan
 import com.davils.kreate.trivy.task.TrivyMisconfigScan
+import com.davils.kreate.trivy.task.TrivyProvision
+import com.davils.kreate.trivy.task.TrivyScan
 import com.davils.kreate.trivy.task.TrivyScanAggregate
 import com.davils.kreate.trivy.task.TrivySecretScan
+import com.davils.kreate.trivy.task.TrivyToolInput
 import com.davils.kreate.trivy.task.TrivyVulnerabilityScan
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 private val SOURCE_SCAFFOLDING_TASKS: Set<String> = setOf(
@@ -42,11 +46,27 @@ private val SOURCE_SCAFFOLDING_TASKS: Set<String> = setOf(
 
 private const val DOCUMENT_DIRECTORY: String = "kreate/assurance/documents"
 
+private const val CACHE_DIRECTORY: String = "caches/kreate/trivy"
+
+private const val EXECUTABLE_PROPERTY: String = "kreate.trivy.executable"
+
+private const val DOWNLOAD_BASE_URL_PROPERTY: String = "kreate.trivy.downloadBaseUrl"
+
+private const val DEFAULT_DOWNLOAD_BASE_URL: String = "https://github.com/aquasecurity/trivy/releases/download"
+
+private const val HTTPS_PROXY_VARIABLE: String = "HTTPS_PROXY"
+
+private const val NO_PROXY_VARIABLE: String = "NO_PROXY"
+
 internal fun Project.initializeTrivy(extension: KreateExtension) {
     val trivyExtension = extension.trivy
     if (!trivyExtension.enabled.get()) return
 
     val isGated = extension.assurance.enabled.get()
+
+    tasks.withType<TrivyScan>().configureEach { project.configureTool(tool, trivyExtension) }
+    tasks.register<TrivyProvision>(TrivyTaskNames.PROVISION) { project.configureTool(tool, trivyExtension) }
+
     val trivySecretExtension = trivyExtension.secrets
     val secretScan = tasks.register<TrivySecretScan>(TrivyTaskNames.SECRETS) {
         failOnFindings.set(trivySecretExtension.failOnFindings)
@@ -95,6 +115,18 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     tasks.register<TrivyScanAggregate>(TrivyTaskNames.SCAN) {
         dependsOn(secretScan, licenseScan, vulnerabilityScan, directoryScans)
     }
+}
+
+private fun Project.configureTool(tool: TrivyToolInput, trivy: TrivyExtension) {
+    tool.version.set(trivy.version)
+    tool.useInstalled.set(trivy.useInstalled)
+    tool.executable.set(providers.gradleProperty(EXECUTABLE_PROPERTY).orElse(trivy.executable))
+    tool.checksums.set(trivy.checksums)
+    tool.downloadBaseUrl.set(providers.gradleProperty(DOWNLOAD_BASE_URL_PROPERTY).orElse(DEFAULT_DOWNLOAD_BASE_URL))
+    tool.cacheRoot.set(gradle.gradleUserHomeDir.resolve(CACHE_DIRECTORY))
+    tool.offline.set(gradle.startParameter.isOffline)
+    tool.httpsProxy.set(providers.environmentVariable(HTTPS_PROXY_VARIABLE))
+    tool.noProxy.set(providers.environmentVariable(NO_PROXY_VARIABLE))
 }
 
 private fun Project.directoryScans(

@@ -38,6 +38,11 @@ class TrivyLockFileScanTest : FunSpec({
         task.severity.set(emptyList())
         task.failOnFindings.set(true)
         task.gated.set(false)
+        task.tool.version.set("0.0.0")
+        task.tool.useInstalled.set(true)
+        task.tool.checksums.set(emptyMap())
+        task.tool.downloadBaseUrl.set("https://example.invalid")
+        task.tool.offline.set(true)
         task.documentFile.set(project.layout.buildDirectory.file("document.json"))
         return task
     }

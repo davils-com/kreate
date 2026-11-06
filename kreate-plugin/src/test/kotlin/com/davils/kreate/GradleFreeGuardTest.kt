@@ -48,7 +48,9 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "assurance/finding",
     "assurance/policy",
     "assurance/baseline",
-    "assurance/report"
+    "assurance/report",
+    "trivy/provision",
+    "trivy/report"
 )
 
 private val GRADLE_FREE_TOOLING_TYPES: List<String> = listOf(
