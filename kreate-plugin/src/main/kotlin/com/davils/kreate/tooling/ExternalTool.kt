@@ -16,34 +16,48 @@
 
 package com.davils.kreate.tooling
 
-private const val HOMEBREW_BIN = "/opt/homebrew/bin"
-private const val LOCAL_BIN = "/usr/local/bin"
-private const val SYSTEM_BIN = "/usr/bin"
+import com.davils.kreate.host.OperatingSystem
 
-private val UNIX_BIN_DIRECTORIES = listOf(HOMEBREW_BIN, LOCAL_BIN, SYSTEM_BIN)
+private const val HOMEBREW_BIN: String = "/opt/homebrew/bin"
+
+private const val LOCAL_BIN: String = "/usr/local/bin"
+
+private const val SYSTEM_BIN: String = "/usr/bin"
+
+private val LINUX_BIN_DIRECTORIES: List<String> = listOf(LOCAL_BIN, SYSTEM_BIN)
+
+private val MACOS_BIN_DIRECTORIES: List<String> = listOf(HOMEBREW_BIN, LOCAL_BIN, SYSTEM_BIN)
+
+private val UNIX_BIN_DIRECTORIES: Map<OperatingSystem, List<String>> = mapOf(
+    OperatingSystem.LINUX to LINUX_BIN_DIRECTORIES,
+    OperatingSystem.MACOS to MACOS_BIN_DIRECTORIES
+)
 
 internal enum class ExternalTool(
     val commandName: String,
-    val wellKnownDirectories: List<String>,
+    private val directoriesByOperatingSystem: Map<OperatingSystem, List<String>>,
     val homeRelativeDirectories: List<String> = emptyList()
 ) {
     CMAKE(
         commandName = "cmake",
-        wellKnownDirectories = UNIX_BIN_DIRECTORIES +
-            listOf(
-                "/Applications/CMake.app/Contents/bin",
-                "C:\\Program Files\\CMake\\bin"
-            )
+        directoriesByOperatingSystem = mapOf(
+            OperatingSystem.LINUX to LINUX_BIN_DIRECTORIES,
+            OperatingSystem.MACOS to MACOS_BIN_DIRECTORIES + "/Applications/CMake.app/Contents/bin",
+            OperatingSystem.WINDOWS to listOf("C:\\Program Files\\CMake\\bin")
+        )
     ),
 
     CARGO(
         commandName = "cargo",
-        wellKnownDirectories = UNIX_BIN_DIRECTORIES,
+        directoriesByOperatingSystem = UNIX_BIN_DIRECTORIES,
         homeRelativeDirectories = listOf(".cargo/bin")
     ),
 
     TRIVY(
         commandName = "trivy",
-        wellKnownDirectories = UNIX_BIN_DIRECTORIES
-    )
+        directoriesByOperatingSystem = UNIX_BIN_DIRECTORIES
+    );
+
+    fun wellKnownDirectories(operatingSystem: OperatingSystem): List<String> =
+        directoriesByOperatingSystem[operatingSystem].orEmpty()
 }

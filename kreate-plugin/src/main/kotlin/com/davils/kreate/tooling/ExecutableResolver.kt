@@ -18,6 +18,7 @@ package com.davils.kreate.tooling
 
 import com.davils.kreate.host.HostPlatform
 import com.davils.kreate.host.OperatingSystem
+import org.gradle.api.GradleException
 import java.io.File
 
 private const val PATH_VARIABLE: String = "PATH"
@@ -30,24 +31,33 @@ private val DEFAULT_WINDOWS_EXTENSIONS: List<String> = listOf(".EXE", ".CMD", ".
 
 internal class ExecutableResolver(
     private val host: HostPlatform,
-    private val userHome: String?
+    private val userHome: String?,
+    private val environment: (String) -> String? = { name -> System.getenv(name) }
 ) {
     fun resolve(tool: ExternalTool, override: String? = null): String =
         override?.takeIf { it.isNotBlank() }
             ?: findOnPath(tool)?.absolutePath
             ?: findInWellKnownDirectories(tool)?.absolutePath
-            ?: tool.commandName
+            ?: throw toolNotFound(tool)
 
     private fun findOnPath(tool: ExternalTool): File? {
-        val pathValue = System.getenv(PATH_VARIABLE) ?: return null
+        val pathValue = environment(PATH_VARIABLE) ?: return null
         val entries = pathValue.split(File.pathSeparatorChar)
         val directories = entries.filter { it.isNotBlank() }.map(::File)
         return findExecutable(directories, candidateNames(tool))
     }
 
-    private fun findInWellKnownDirectories(tool: ExternalTool): File? {
-        val directories = tool.wellKnownDirectories.map(::File) + homeRelativeDirectories(tool)
-        return findExecutable(directories, candidateNames(tool))
+    private fun findInWellKnownDirectories(tool: ExternalTool): File? =
+        findExecutable(wellKnownDirectories(tool), candidateNames(tool))
+
+    private fun wellKnownDirectories(tool: ExternalTool): List<File> {
+        val systemDirectories = systemDirectories(tool).map(::File)
+        return systemDirectories + homeRelativeDirectories(tool)
+    }
+
+    private fun systemDirectories(tool: ExternalTool): List<String> {
+        val operatingSystem = host.operatingSystemOrNull() ?: return emptyList()
+        return tool.wellKnownDirectories(operatingSystem)
     }
 
     private fun homeRelativeDirectories(tool: ExternalTool): List<File> {
@@ -56,7 +66,10 @@ internal class ExecutableResolver(
     }
 
     private fun findExecutable(directories: List<File>, candidateNames: List<String>): File? {
-        val candidates = directories.asSequence().flatMap { directory -> candidatesIn(directory, candidateNames) }
+        val absoluteDirectories = directories.filter { directory -> directory.isAbsolute }
+        val candidates = absoluteDirectories.asSequence().flatMap { directory ->
+            candidatesIn(directory, candidateNames)
+        }
         return candidates.firstOrNull { it.isFile && it.canExecute() }
     }
 
@@ -72,9 +85,15 @@ internal class ExecutableResolver(
     }
 
     private fun windowsExecutableExtensions(): List<String> {
-        val declaredExtensions = System.getenv(PATHEXT_VARIABLE) ?: return DEFAULT_WINDOWS_EXTENSIONS
+        val declaredExtensions = environment(PATHEXT_VARIABLE) ?: return DEFAULT_WINDOWS_EXTENSIONS
         val entries = declaredExtensions.split(File.pathSeparatorChar)
         return entries.filter { it.isNotBlank() }
+    }
+
+    private fun toolNotFound(tool: ExternalTool): GradleException {
+        val searched = wellKnownDirectories(tool).joinToString(", ") { directory -> directory.path }
+        val command = tool.commandName
+        return GradleException("Kreate could not find '$command' on the PATH or in: $searched. Install it to continue.")
     }
 
     companion object {

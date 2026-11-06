@@ -81,6 +81,15 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a
   consumer resolves unless the build applies a higher one.
+- **External tools are looked up only where they can be trusted.** The directories Kreate searches
+  for CMake, Cargo and Trivy were not separated by operating system: on Windows `/usr/local/bin`
+  meant `C:\usr\local\bin`, a folder any local user can usually create, and it was searched before
+  `C:\Program Files\CMake\bin`. On Unix that Windows path was relative to the working directory.
+  Each operating system now has its own list, and a relative directory is never searched, including
+  a relative entry on the `PATH`.
+- **A missing tool fails with an error instead of a bare command name.** When a tool was not found,
+  Kreate handed its name to the operating system, which on Windows can run an executable from the
+  working directory. The task now fails and names the directories it searched.
 
 ### Changed
 
