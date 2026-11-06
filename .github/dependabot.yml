@@ -10,6 +10,9 @@ version: 2
 # `org.jetbrains.kotlin*` would also swallow `org.jetbrains.kotlinx`, taking Kover,
 # kotlinx-benchmark and the binary compatibility validator out of the updates with it.
 #
+# kotlinx-serialization is held at the last release built on Kotlin 2.2, the stdlib of Gradle 9.0,
+# Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
+#
 # The list is repeated per ecosystem rather than shared through a YAML anchor: Dependabot
 # validates this file against a fixed schema and rejects an unknown top-level key.
 
@@ -28,6 +31,7 @@ updates:
       - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
       # the compiler plugins Kreate applies: serialization, allopen
       - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
 
   - package-ecosystem: "gradle"
     directory: "/kreate-plugin"
@@ -40,6 +44,7 @@ updates:
       - dependency-name: "org.jetbrains.kotlin.jvm:*"
       - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
       - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
 
   - package-ecosystem: "gradle"
     directory: "/build-logic"
@@ -52,6 +57,7 @@ updates:
       - dependency-name: "org.jetbrains.kotlin.jvm:*"
       - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
       - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
+      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
 
   - package-ecosystem: "github-actions"
     directory: "/"

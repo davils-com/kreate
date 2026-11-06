@@ -16,36 +16,27 @@
 
 package com.davils.kreate.benchmark.report
 
-import com.davils.kreate.json.JsonArray
-import com.davils.kreate.json.JsonNumber
-import com.davils.kreate.json.JsonObject
-import com.davils.kreate.json.JsonParseException
-import com.davils.kreate.json.JsonParser
-import com.davils.kreate.json.JsonParserOptions
-import com.davils.kreate.json.JsonString
-import com.davils.kreate.json.JsonValue
-import com.davils.kreate.json.JsonWriter
-import com.davils.kreate.json.asString
-import com.davils.kreate.json.double
-import com.davils.kreate.json.obj
-import com.davils.kreate.json.string
-import com.davils.kreate.json.typeName
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 internal object BenchmarkReport {
     private const val INVALID_JSON_MESSAGE = "The benchmark report is not valid JSON."
-    private val PARSER_OPTIONS = JsonParserOptions(maxSize = Int.MAX_VALUE, nonFiniteAsNull = true)
 
     fun parse(json: String): List<BenchmarkResult> {
         val parsed = parseJson(json)
 
         require(parsed is JsonArray) {
             "A benchmark report must be a JSON array of measurements, but the document is " +
-                "a ${parsed.typeName}."
+                "${describe(parsed)}."
         }
 
-        return parsed.elements.map { entry ->
+        return parsed.map { entry ->
             require(entry is JsonObject) { "Every entry of a benchmark report must be an object." }
-            readResult(entry)
+            readBenchmarkResult(entry)
         }
     }
 
@@ -57,65 +48,37 @@ internal object BenchmarkReport {
             transform = ::renderResult
         )
 
-    private fun parseJson(json: String): JsonValue {
+    private fun parseJson(json: String): JsonElement {
         require(json.isNotEmpty()) { INVALID_JSON_MESSAGE }
 
         return try {
-            JsonParser.parse(json, PARSER_OPTIONS)
-        } catch (cause: JsonParseException) {
+            Json.parseToJsonElement(json)
+        } catch (cause: SerializationException) {
             throw IllegalArgumentException(INVALID_JSON_MESSAGE, cause)
         }
     }
 
-    private fun readResult(entry: JsonObject): BenchmarkResult {
-        val benchmark = entry.string("benchmark")
-        requireNotNull(benchmark) { "A benchmark report entry has no 'benchmark' name." }
-
-        val metric = entry.obj("primaryMetric")
-        require(metric != null) { "Benchmark '$benchmark' has no 'primaryMetric'." }
-
-        val score = metric.double("score")
-        require(score != null) { "Benchmark '$benchmark' has no numeric 'score'." }
-
-        return BenchmarkResult(
-            benchmark = benchmark,
-            mode = entry.string("mode") ?: "",
-            params = readParams(entry.obj("params")),
-            score = score,
-            scoreError = readDouble(metric.members["scoreError"]),
-            scoreUnit = metric.string("scoreUnit") ?: ""
-        )
+    private fun describe(element: JsonElement): String = when (element) {
+        is JsonArray -> "an array"
+        is JsonObject -> "an object"
+        is JsonPrimitive -> "a value"
     }
 
-    private fun readDouble(value: JsonValue?): Double {
-        if (value is JsonNumber) return value.toDouble()
-        val text = value.asString() ?: return Double.NaN
-        return text.toDoubleOrNull() ?: Double.NaN
-    }
-
-    private fun readParams(params: JsonObject?): Map<String, String> {
-        if (params == null) return emptyMap()
-        return params.members.mapValues { (_, value) -> renderParam(value) }
-    }
-
-    private fun renderParam(value: JsonValue): String {
-        if (value is JsonString) return value.value
-        return JsonWriter.compact(value)
-    }
+    private fun quoted(text: String): String = JsonPrimitive(text).toString()
 
     private fun renderResult(result: BenchmarkResult): String {
         val sortedParams = result.params.entries.sortedBy { it.key }
-        val params = sortedParams.joinToString(", ") { "${JsonWriter.quote(it.key)} : ${JsonWriter.quote(it.value)}" }
+        val params = sortedParams.joinToString(", ") { "${quoted(it.key)} : ${quoted(it.value)}" }
 
         return listOf(
             "  {",
-            """    "benchmark" : ${JsonWriter.quote(result.benchmark)},""",
-            """    "mode" : ${JsonWriter.quote(result.mode)},""",
+            """    "benchmark" : ${quoted(result.benchmark)},""",
+            """    "mode" : ${quoted(result.mode)},""",
             """    "params" : { $params },""",
             """    "primaryMetric" : {""",
             """      "score" : ${result.score},""",
             """      "scoreError" : ${renderDouble(result.scoreError)},""",
-            """      "scoreUnit" : ${JsonWriter.quote(result.scoreUnit)}""",
+            """      "scoreUnit" : ${quoted(result.scoreUnit)}""",
             "    }",
             "  }"
         ).joinToString("\n")

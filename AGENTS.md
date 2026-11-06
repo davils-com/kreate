@@ -36,9 +36,10 @@ skipping tests.
   - `wiring`: the internal `<Feature>Feature` object and its Gradle wiring;
   - domain packages: internal logic without Gradle (`api.abi`, `benchmark.comparison`, ...).
 - Shared internals: `gradle` (plugin ids, source set names, task paths, project naming), `host`
-  (the machine Kreate runs on), `tooling` (external executables), `json` (bounded parser and
-  deterministic writer), `net` (the HTTP transport) and `archive` (bounded ZIP and TAR reading).
-  `json`, `net` and `archive` stay free of Gradle types; `GradleFreeGuardTest` enforces that.
+  (the machine Kreate runs on), `tooling` (external executables), `net` (the HTTP transport) and
+  `archive` (bounded ZIP and TAR reading). `net` and `archive` stay free of Gradle types;
+  `GradleFreeGuardTest` enforces that.
+- JSON goes through the tree API of `kotlinx-serialization-json`, without the compiler plugin.
 - Task names and DSL property names are the consumer contract and change only in a major version.
 
 ## Code rules
