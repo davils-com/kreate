@@ -88,6 +88,8 @@ public final class com/davils/kreate/benchmark/BenchmarkTaskNames {
 public abstract class com/davils/kreate/cinterop/CInteropExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun defFile (Lorg/gradle/api/Action;)V
+	public final fun getCargoLocked ()Lorg/gradle/api/provider/Property;
+	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
 	public abstract fun getDefFiles ()Lcom/davils/kreate/cinterop/DefFilesExtension;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getLanguage ()Lorg/gradle/api/provider/Property;
@@ -391,6 +393,7 @@ public abstract class com/davils/kreate/docs/DocsExtension {
 public abstract class com/davils/kreate/jni/JniExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getBuildType ()Lorg/gradle/api/provider/Property;
+	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHeaders ()Lcom/davils/kreate/jni/JniHeaderExtension;

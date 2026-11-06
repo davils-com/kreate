@@ -25,6 +25,7 @@ import com.davils.kreate.tooling.runExternalTool
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -55,6 +56,9 @@ internal abstract class CompileRust @Inject constructor(
     @get:Optional
     public abstract val rustTargets: ListProperty<String>
 
+    @get:Input
+    public abstract val locked: Property<Boolean>
+
     @get:OutputDirectory
     public val outputDir: File
         get() = workDir.get().asFile.resolve(CARGO_TARGET_DIR_NAME)
@@ -70,8 +74,14 @@ internal abstract class CompileRust @Inject constructor(
                 logger = logger,
                 description = "Cargo build for target '$target'",
                 workingDirectory = workDir.get().asFile,
-                arguments = listOf(cargoCmd, "build", "--target", target, "--release")
+                arguments = cargoBuildArguments(cargoCmd, target, locked.get())
             )
         }
     }
+}
+
+internal fun cargoBuildArguments(cargoCommand: String, target: String, locked: Boolean): List<String> {
+    val arguments = listOf(cargoCommand, "build", "--target", target, "--release")
+    if (!locked) return arguments
+    return arguments + "--locked"
 }

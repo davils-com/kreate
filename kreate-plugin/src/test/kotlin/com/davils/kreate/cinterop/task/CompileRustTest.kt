@@ -36,5 +36,15 @@ class CompileRustTest : FunSpec({
 
             task.outputDir shouldBe rustProject.resolve("target")
         }
+
+        test("lets Cargo update the lock file by default") {
+            cargoBuildArguments("cargo", "x86_64-unknown-linux-gnu", locked = false) shouldBe
+                listOf("cargo", "build", "--target", "x86_64-unknown-linux-gnu", "--release")
+        }
+
+        test("refuses a changed lock file when the build asks for it") {
+            cargoBuildArguments("cargo", "x86_64-unknown-linux-gnu", locked = true) shouldBe
+                listOf("cargo", "build", "--target", "x86_64-unknown-linux-gnu", "--release", "--locked")
+        }
     }
 })

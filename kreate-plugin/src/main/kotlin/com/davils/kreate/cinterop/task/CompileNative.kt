@@ -58,6 +58,10 @@ internal abstract class CompileNative @Inject constructor(
     @get:Optional
     public abstract val buildType: Property<String>
 
+    @get:Input
+    @get:Optional
+    public abstract val cmakeExecutable: Property<String>
+
     @get:OutputDirectory
     public val outputDir: File
         get() = workDir.get().asFile.resolve(BUILD_DIR_NAME)
@@ -71,7 +75,7 @@ internal abstract class CompileNative @Inject constructor(
         }
 
         val type = buildType.orNull ?: DEFAULT_BUILD_TYPE
-        val cmakeCmd = ExecutableResolver.resolve(ExternalTool.CMAKE)
+        val cmakeCmd = ExecutableResolver.resolve(ExternalTool.CMAKE, cmakeExecutable.orNull)
 
         runExternalTool(
             exec = exec,

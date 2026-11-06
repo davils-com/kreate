@@ -116,6 +116,7 @@ private fun Project.addRustCInteropTasks(
         if (cInteropConfig.rustTargets.isPresent) {
             rustTargets.set(cInteropConfig.rustTargets)
         }
+        locked.set(cInteropConfig.cargoLocked)
         dependsOn(generateRustBuildScript)
     }
 
@@ -147,6 +148,7 @@ private fun Project.addNativeCInteropTasks(
                 include(CMAKE_LISTS_FILE_NAME, "src/**", "include/**")
             }
         )
+        cmakeExecutable.set(cInteropConfig.cmakeExecutable)
         dependsOn(initializeNativeProject)
     }
 

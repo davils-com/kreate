@@ -93,6 +93,27 @@ public abstract class CInteropExtension @Inject constructor(
     public val rustTargets: ListProperty<String> = objects.listProperty(String::class.java)
 
     /**
+     * Whether `cargo build` runs with `--locked`, so that it fails instead of updating `Cargo.lock`.
+     *
+     * Defaults to `false`, because a freshly scaffolded project has no lock file yet. Turn it on
+     * once `Cargo.lock` is committed: a crate's `build.rs` runs during the build, so a dependency
+     * that floats to a new version runs new code with the build's privileges.
+     *
+     * @since 4.0.0
+     */
+    public val cargoLocked: Property<Boolean> = objects.property(Boolean::class.java).convention(false)
+
+    /**
+     * The CMake executable to run for a C or C++ project.
+     *
+     * When absent, CMake is looked up on the `PATH` and then in the conventional installation
+     * directories.
+     *
+     * @since 4.0.0
+     */
+    public val cmakeExecutable: Property<String> = objects.property(String::class.java)
+
+    /**
      * Configuration for definition files.
      * @since 1.0.0
      */

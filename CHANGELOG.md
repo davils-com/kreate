@@ -75,6 +75,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Added
 
+- **`cinterop { cargoLocked = true }`** runs `cargo build --locked`, so a crate cannot float to a new
+  version whose `build.rs` runs during the build. **`cinterop { cmakeExecutable }`** pins CMake for C
+  and C++ projects, as the JNI block already could.
 - **`ForbiddenElse`** reports every `else`: guard clauses and exhaustive `when` expressions replace
   it.
 - **`ForbiddenBlockComment`** reports every `/* */` comment except a license header at the top of
