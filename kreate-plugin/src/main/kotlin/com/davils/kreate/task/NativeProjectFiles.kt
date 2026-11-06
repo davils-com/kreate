@@ -16,4 +16,17 @@
 
 package com.davils.kreate.task
 
+import org.gradle.api.GradleException
+
 internal const val CMAKE_LISTS_FILE_NAME: String = "CMakeLists.txt"
+
+private val NATIVE_NAME_PATTERN: Regex = Regex("""[A-Za-z0-9_][A-Za-z0-9_.+-]*""")
+
+internal fun requireNativeName(name: String): String {
+    if (NATIVE_NAME_PATTERN.matches(name)) return name
+
+    throw GradleException(
+        "'$name' cannot name a native project: it ends up in generated build files, so it may hold " +
+            "only letters, digits, '_', '.', '+' and '-'."
+    )
+}

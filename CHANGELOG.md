@@ -143,6 +143,8 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Changed
 
+- **A native project's name is validated before it reaches a generated build file**, because it
+  ends up in CMake, C and Rust sources. Letters, digits, `_`, `.`, `+` and `-` are accepted.
 - **The Ktor client joins the plugin's classpath.** Kreate now talks to network services, and brings
   `ktor-client-core`, `ktor-client-java` and their dependencies onto a consumer's build classpath,
   which raises `kotlinx-coroutines-core` there to 1.10.2.

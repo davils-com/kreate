@@ -20,6 +20,7 @@ import com.davils.kreate.cinterop.NativeLanguage
 import com.davils.kreate.task.CMAKE_LISTS_FILE_NAME
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
+import com.davils.kreate.task.requireNativeName
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -54,7 +55,7 @@ internal abstract class InitializeNativeProject : KreateTask(
 
     @TaskAction
     public fun execute() {
-        val name = projectName.get()
+        val name = requireNativeName(projectName.get())
         val nativeLanguage = language.get()
         val projectRoot = workDir.get().asFile.resolve(name)
 

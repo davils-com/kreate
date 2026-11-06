@@ -19,6 +19,7 @@ package com.davils.kreate.jni.task
 import com.davils.kreate.task.CMAKE_LISTS_FILE_NAME
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
+import com.davils.kreate.task.requireNativeName
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -45,7 +46,7 @@ internal abstract class InitializeCppProject : KreateTask(
 
     @TaskAction
     public fun execute() {
-        val name = projectName.get()
+        val name = requireNativeName(projectName.get())
         val root = projectRoot.get().asFile
         val sourceDirectory = root.resolve(SRC_DIR_NAME)
 

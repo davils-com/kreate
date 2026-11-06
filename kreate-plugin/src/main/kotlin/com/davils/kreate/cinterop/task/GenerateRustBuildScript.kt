@@ -18,6 +18,7 @@ package com.davils.kreate.cinterop.task
 
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
+import com.davils.kreate.task.requireNativeName
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -68,6 +69,7 @@ internal abstract class GenerateRustBuildScript : KreateTask(
         val buildRsFile = workDir.get().asFile.resolve(BUILD_RUST_FILE_NAME)
         if (hasContent(buildRsFile)) return
 
+        requireNativeName(projectName.get())
         buildRsFile.writeText(script)
     }
 
