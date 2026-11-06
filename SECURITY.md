@@ -4,11 +4,10 @@
 
 Security fixes are released for the latest minor version of the current major release.
 
-| Version | Supported        |
-|---------|------------------|
-| 2.0.x   | Yes              |
-| 1.3.x   | Until 2026-12-31 |
-| < 1.3   | No               |
+| Version | Supported |
+|---------|-----------|
+| 4.0.x   | Yes       |
+| < 4.0   | No        |
 
 ## Reporting a Vulnerability
 
@@ -46,8 +45,24 @@ The following are **not** vulnerabilities in Kreate:
   being built; a build script is trusted code by definition,
 - findings that require an attacker to already have write access to the build.
 
+## Known Limitations
+
+- A GitLab token declared through `gitlabPackageRegistry` is held as a plain value by the repository
+  Gradle creates, so it reaches the configuration cache. Gradle encrypts that cache with a key kept in
+  the Gradle user home; someone who can read both can recover the token. Gradle's lazy credentials
+  read header values from Gradle properties only, which does not fit a token from the environment.
+- A local mode build turns dependency locking off for the whole project, not only for the
+  substituted modules, because a lock would otherwise pin the release the snapshot replaces.
+
 ## Verifying a Release
 
-Releases are published to Maven Central and signed. The plugin JAR is built reproducibly:
-building the same tag twice produces byte-identical archives, and CI verifies this on every
-run, so a published artifact can be checked against its source.
+Releases are published to Maven Central and signed. Each release also carries a signed build
+provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
+
+```bash
+gh attestation verify kreate-4.0.0.jar --repo davils-com/kreate
+```
+
+CI builds the plugin JAR twice on one runner and compares the checksums, which guards against
+accidental non-determinism in the build. It does not cover the other artefacts or a build on another
+machine, so treat the attestation, not a rebuild, as the proof of origin.
