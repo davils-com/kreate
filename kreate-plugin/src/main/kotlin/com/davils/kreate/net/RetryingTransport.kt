@@ -21,6 +21,10 @@ internal class RetryingTransport(
     private val policy: RetryPolicy,
     private val sleeper: Sleeper
 ) : HttpTransport {
+    override fun close() {
+        delegate.close()
+    }
+
     override fun send(request: TransportRequest): TransportResponse {
         var attempt = 1
         while (true) {

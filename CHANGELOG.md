@@ -130,6 +130,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Changed
 
+- **The Ktor client joins the plugin's classpath.** Kreate now talks to network services, and brings
+  `ktor-client-core`, `ktor-client-java` and their dependencies onto a consumer's build classpath,
+  which raises `kotlinx-coroutines-core` there to 1.10.2.
 - **The toolchain moved to its current releases.** Gradle 9.9.0, which embeds Kotlin 2.4.21, Dokka
   2.3.0, Kotest 6.2.6, JaCoCo 0.8.16, ASM 9.11.1, and Trivy 0.76.2 in CI. The default of
   `tests { kotest { version } }` is now 6.2.6. The minimum versions are unchanged: Gradle 9.0 and

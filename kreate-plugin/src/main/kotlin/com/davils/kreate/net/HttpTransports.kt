@@ -16,9 +16,11 @@
 
 package com.davils.kreate.net
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.java.Java
 import java.net.ProxySelector
-import java.net.http.HttpClient
 import java.time.Clock
+import java.net.http.HttpClient as JdkHttpClient
 
 internal object HttpTransports {
     fun create(
@@ -29,8 +31,7 @@ internal object HttpTransports {
     ): HttpTransport {
         if (settings.offline) return HttpTransport { request -> refuseOffline(request) }
 
-        val client = buildClient(settings)
-        val exchange = JavaHttpTransport(client, settings.userAgent, settings.timeout, clock)
+        val exchange = KtorHttpTransport(buildClient(settings), settings.userAgent, settings.timeout, clock)
         val redirecting = RedirectingTransport(exchange)
         return RetryingTransport(redirecting, policy, sleeper)
     }
@@ -40,12 +41,22 @@ internal object HttpTransports {
             "Network access is disabled (offline mode), so ${request.uri.host} cannot be contacted."
         )
 
-    private fun buildClient(settings: NetworkSettings): HttpClient {
-        val builder = HttpClient.newBuilder()
-        builder.followRedirects(HttpClient.Redirect.NEVER)
-        builder.connectTimeout(settings.timeout)
-        builder.proxy(EnvironmentProxySelector(settings.proxy, ProxySelector.getDefault()))
-        settings.caCertificates?.let { pemFile -> builder.sslContext(ExtraCertificateAuthority.sslContext(pemFile)) }
-        return builder.build()
+    fun buildClient(settings: NetworkSettings): HttpClient {
+        val proxySelector = EnvironmentProxySelector(settings.proxy, ProxySelector.getDefault())
+        val trustedAuthorities = settings.caCertificates?.let(ExtraCertificateAuthority::sslContext)
+
+        return HttpClient(Java) {
+            followRedirects = false
+            useDefaultTransformers = false
+
+            engine {
+                config {
+                    followRedirects(JdkHttpClient.Redirect.NEVER)
+                    connectTimeout(settings.timeout)
+                    proxy(proxySelector)
+                    trustedAuthorities?.let(::sslContext)
+                }
+            }
+        }
     }
 }

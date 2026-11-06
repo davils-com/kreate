@@ -16,6 +16,8 @@
 
 package com.davils.kreate.net
 
-internal fun interface HttpTransport {
+internal fun interface HttpTransport : AutoCloseable {
     fun send(request: TransportRequest): TransportResponse
+
+    override fun close(): Unit = Unit
 }

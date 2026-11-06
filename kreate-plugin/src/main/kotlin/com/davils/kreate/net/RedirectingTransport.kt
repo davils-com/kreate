@@ -29,6 +29,10 @@ private val REDIRECT_STATUS_CODES: Set<Int> = setOf(301, 302, 303, 307, 308)
 private val CROSS_ORIGIN_HEADERS: Set<String> = setOf("accept")
 
 internal class RedirectingTransport(private val delegate: HttpTransport) : HttpTransport {
+    override fun close() {
+        delegate.close()
+    }
+
     override fun send(request: TransportRequest): TransportResponse {
         val guard = UriGuard(request.allowedHosts)
         guard.check(request.uri)

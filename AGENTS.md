@@ -39,7 +39,8 @@ skipping tests.
   (the machine Kreate runs on), `tooling` (external executables), `net` (the HTTP transport) and
   `archive` (bounded ZIP and TAR reading). `net` and `archive` stay free of Gradle types;
   `GradleFreeGuardTest` enforces that.
-- JSON goes through the tree API of `kotlinx-serialization-json`, without the compiler plugin.
+- JSON goes through the tree API of `kotlinx-serialization-json`, without the compiler plugin. HTTP
+  goes through the Ktor client behind `net.HttpTransport`, and redirects and retries stay in `net`.
 - Task names and DSL property names are the consumer contract and change only in a major version.
 
 ## Code rules

@@ -4,6 +4,8 @@ poet = "2.4.0"
 # Held at the last release built on Kotlin 2.2, the stdlib of Gradle 9.0, Kreate's minimum. Later
 # releases need a newer stdlib than a plugin finds at runtime on that Gradle.
 serialization = "1.9.0"
+# Held at the last line built on Kotlin 2.2 or older, for the same reason.
+ktor = "3.2.4"
 dokka = "2.3.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
@@ -22,6 +24,9 @@ benchmark = "0.5.0"
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
 
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 
 asm-core = { module = "org.ow2.asm:asm", version.ref = "asm" }
 
@@ -75,6 +80,8 @@ build-logic = [
 kreate-plugin = [
     "poet-core",
     "serialization-json",
+    "ktor-client-core",
+    "ktor-client-java",
     "asm-core",
     "kotlin-metadata-jvm",
     "kotlin-gradle-plugin",

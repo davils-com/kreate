@@ -23,22 +23,32 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.longs.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import kotlinx.coroutines.isActive
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.URI
-import java.net.http.HttpClient
 import java.time.Duration
+import java.util.concurrent.CopyOnWriteArrayList
 
 private val TIMEOUT: Duration = Duration.ofSeconds(10)
 
-private fun transport(timeout: Duration = TIMEOUT): JavaHttpTransport {
-    val builder = HttpClient.newBuilder()
-    val client = builder.followRedirects(HttpClient.Redirect.NEVER).build()
-    return JavaHttpTransport(client, "kreate-test/1.0", timeout, FIXED_CLOCK)
+private fun transport(timeout: Duration = TIMEOUT): KtorHttpTransport {
+    val settings = NetworkSettings("kreate-test/1.0", timeout = timeout)
+    return KtorHttpTransport(HttpTransports.buildClient(settings), settings.userAgent, timeout, FIXED_CLOCK)
 }
 
-class JavaHttpTransportTest : FunSpec({
+class KtorHttpTransportTest : FunSpec({
     val server = autoClose(LoopbackServer.http())
+
+    test("closes the client it was given, which holds threads in a Gradle daemon") {
+        val settings = NetworkSettings("kreate-test/1.0")
+        val client = HttpTransports.buildClient(settings)
+        val exchange = KtorHttpTransport(client, settings.userAgent, TIMEOUT, FIXED_CLOCK)
+
+        exchange.close()
+
+        client.isActive shouldBe false
+    }
 
     test("returns status, headers, body and the time of arrival") {
         server.respond("/ok", 200, mapOf("X-Thing" to "1"), "hello".toByteArray())
@@ -80,6 +90,29 @@ class JavaHttpTransportTest : FunSpec({
         val request = server.requests.last { it.path == "/post" }
         request.method shouldBe "POST"
         request.body shouldBe body
+    }
+
+    test("hands the content type of a body to the engine, which refuses it as a plain header") {
+        server.respond("/typed", 201)
+        val headers = mapOf("content-type" to "application/json")
+        val request = TransportRequest(HttpMethod.POST, server.uri("/typed"), headers, "{}".toByteArray())
+
+        transport().send(request).statusCode shouldBe 201
+
+        server.requests.last { it.path == "/typed" }.header("Content-Type") shouldBe "application/json"
+    }
+
+    test("keeps an encoded slash and colon in the path and query, as deps.dev URLs need them") {
+        val rawTargets = CopyOnWriteArrayList<String>()
+        server.handle("/raw") { exchange ->
+            rawTargets.add(exchange.requestURI.rawPath + "?" + exchange.requestURI.rawQuery)
+            exchange.sendResponseHeaders(204, -1)
+        }
+        val uri = URI(server.uri("/raw/github.com%2Fsquare%3Aokhttp").toString() + "?q=a%2Fb")
+
+        transport().send(TransportRequest(HttpMethod.GET, uri)).statusCode shouldBe 204
+
+        rawTargets.single() shouldBe "/raw/github.com%2Fsquare%3Aokhttp?q=a%2Fb"
     }
 
     test("does not follow a redirect itself") {
@@ -186,7 +219,7 @@ class JavaHttpTransportTest : FunSpec({
                 transport(Duration.ofMillis(300)).send(TransportRequest(HttpMethod.GET, server.uri("/slow")))
             }
 
-            failure.message.orEmpty() shouldContain "cut off"
+            failure.message.orEmpty() shouldContain "timed out"
             Duration.ofNanos(System.nanoTime() - start).toSeconds() shouldBeLessThan 10L
         }
 
