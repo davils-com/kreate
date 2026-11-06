@@ -61,6 +61,8 @@ public const val STATE_EXTENSION: String = ".properties"
 @InternalKreateApi
 public const val STATE_DIRECTORY_PROPERTY: String = "kreate.local.state.dir"
 
+private val UNSAFE_VERSION_FRAGMENTS: List<String> = listOf("/", "\\", "..")
+
 private const val KEY_LIBRARY: String = "library"
 private const val KEY_GROUP: String = "group"
 private const val KEY_REPOSITORY: String = "repository"
@@ -141,7 +143,7 @@ private fun buildLocalLibrary(properties: Properties): LocalLibrary? {
     val modules = recordedModules(properties)
 
     val substitutesNothing = library.isEmpty() || group.isEmpty() || version.isEmpty() || modules.isEmpty()
-    if (substitutesNothing) return null
+    if (substitutesNothing || !isLocalVersion(version)) return null
 
     return LocalLibrary(
         library = library,
@@ -152,6 +154,11 @@ private fun buildLocalLibrary(properties: Properties): LocalLibrary? {
         kreateVersion = properties.valueOf(KEY_KREATE).orEmpty(),
         modules = modules
     )
+}
+
+private fun isLocalVersion(version: String): Boolean {
+    val namesOneDirectory = UNSAFE_VERSION_FRAGMENTS.none { fragment -> fragment in version }
+    return namesOneDirectory && version.endsWith(SNAPSHOT_SUFFIX)
 }
 
 private fun recordedModules(properties: Properties): List<LocalModule> {

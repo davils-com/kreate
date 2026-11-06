@@ -147,6 +147,17 @@ class LocalWorkspaceStateTest : FunSpec({
                 intactLibraries shouldBe listOf("library")
             }
 
+            test("skips a record whose version would lead out of the Maven repository") {
+                val stateDirectory = workspace.freshDirectory()
+                val versions = listOf("../../../../home/dev-SNAPSHOT", "1.0\\\\..\\\\x-SNAPSHOT", "1.0.0")
+                versions.forEachIndexed { index, version ->
+                    File(stateDirectory, "com.example.hostile$index$STATE_EXTENSION")
+                        .writeText("library=hostile\ngroup=com.example\nversion=$version\nmodules=com.example:a\n")
+                }
+
+                readLocalWorkspace(stateDirectory).isEmpty shouldBe true
+            }
+
             test("skips a record naming no modules, which would substitute nothing") {
                 val stateDirectory = workspace.freshDirectory()
                 File(stateDirectory, "com.example.empty$STATE_EXTENSION")

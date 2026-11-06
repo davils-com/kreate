@@ -30,6 +30,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
+import java.nio.file.Files
 
 @DisableCachingByDefault(because = "Deletes machine state outside the project directory.")
 internal abstract class LocalClean : KreateTask(
@@ -104,12 +105,23 @@ internal abstract class LocalClean : KreateTask(
     }
 
     private fun deleteExisting(directories: List<File>, repository: File): List<String> {
-        val existing = directories.filter { directory -> directory.isDirectory }
+        val root = repository.canonicalFile
+        val existing = directories.filter { directory -> directory.isDirectory && isInside(directory, root) }
         return existing.map { directory ->
-            directory.deleteRecursively()
+            deleteWithoutFollowingLinks(directory)
             pruneEmptyParents(directory.parentFile, repository)
             directory.absolutePath
         }
+    }
+
+    private fun isInside(directory: File, root: File): Boolean {
+        val resolved = directory.canonicalFile
+        return resolved != root && resolved.startsWith(root)
+    }
+
+    private fun deleteWithoutFollowingLinks(directory: File) {
+        val paths = Files.walk(directory.toPath()).use { walk -> walk.toList() }
+        paths.asReversed().forEach { path -> Files.delete(path) }
     }
 
     private fun pruneEmptyParents(start: File?, stop: File) {

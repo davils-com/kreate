@@ -106,6 +106,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   to any URL, so a build resolving from a second instance handed that operator a live credential. It
   is now sent only when the host matches `CI_SERVER_HOST`, or is listed in the new
   `additionalJobTokenHosts`. Any other registry gets the access token.
+- **`kreateLocalClean` stays inside the Maven repository.** A version from a local state file was not
+  validated, so `../..` could point the recursive delete elsewhere, and a directory link inside a
+  snapshot was followed. Such a record is now ignored, and neither a path that resolves outside the
+  repository nor a link is followed.
 - **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a

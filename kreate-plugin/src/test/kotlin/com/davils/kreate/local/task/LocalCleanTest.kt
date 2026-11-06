@@ -31,6 +31,7 @@ import io.kotest.matchers.file.shouldNotExist
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testfixtures.ProjectBuilder
 import java.io.File
+import java.nio.file.Files
 
 private const val VERSION = "1.0.0-SNAPSHOT"
 private const val GROUP = "com.acme"
@@ -90,6 +91,40 @@ class LocalCleanTest : FunSpec({
             state.shouldNotExist()
             log shouldContain "Removed 1 directory and 1 record(s)."
         }
+
+        test("does not follow a directory link out of the Maven repository")
+            .config(enabledIf = { File.separatorChar == '/' }) {
+                val state = workspace.freshDirectory("state")
+                val repository = workspace.freshDirectory("m2")
+                val outside = workspace.freshDirectory("outside")
+                val precious = outside.resolve("precious.txt")
+                precious.writeText("keep")
+                writeLocalLibrary(state, library("core"))
+                val published = installed(repository, "core", VERSION)
+                Files.createSymbolicLink(published.resolve("link").toPath(), outside.toPath())
+
+                cleanTask(state, repository, false, false).clean()
+
+                published.shouldNotExist()
+                precious.shouldExist()
+            }
+
+        test("leaves a publication alone that resolves outside the Maven repository")
+            .config(enabledIf = { File.separatorChar == '/' }) {
+                val state = workspace.freshDirectory("state")
+                val repository = workspace.freshDirectory("m2")
+                val outside = workspace.freshDirectory("outside")
+                val precious = outside.resolve("precious.txt")
+                precious.writeText("keep")
+                writeLocalLibrary(state, library("core"))
+                val published = moduleDirectory(repository, LocalModule(GROUP, "core"), VERSION)
+                published.parentFile.mkdirs()
+                Files.createSymbolicLink(published.toPath(), outside.toPath())
+
+                cleanTask(state, repository, false, false).clean()
+
+                precious.shouldExist()
+            }
 
         test("leaves other snapshots of the group alone unless asked to sweep") {
             val state = workspace.freshDirectory("state")
