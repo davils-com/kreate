@@ -29,7 +29,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
-import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -106,16 +105,12 @@ internal abstract class GenerateBuildConstants : KreateTask(
 
     private fun writeFileSpec(fileSpec: FileSpec) {
         val outputFile = file.get().asFile
-        try {
-            outputFile.parentFile.mkdirs()
-            val raw = fileSpec.toString()
-            val content = raw.replaceFirst(
-                oldValue = "package ${fileSpec.packageName}", newValue = "\npackage ${fileSpec.packageName}"
-            )
-            outputFile.writeText(content)
-            logger.lifecycle("Wrote build constants file to ${outputFile.absolutePath}.")
-        } catch (e: IOException) {
-            logger.error("Failed to write build constants file.", e)
-        }
+        outputFile.parentFile.mkdirs()
+        val raw = fileSpec.toString()
+        val content = raw.replaceFirst(
+            oldValue = "package ${fileSpec.packageName}", newValue = "\npackage ${fileSpec.packageName}"
+        )
+        outputFile.writeText(content)
+        logger.lifecycle("Wrote build constants file to ${outputFile.absolutePath}.")
     }
 }

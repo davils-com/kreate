@@ -33,6 +33,11 @@ kreate {
 >
 {style="note"}
 
+<warning>
+A constant is compiled into your artifact, and anyone holding the artifact can read it. Never put a
+token, a password or any other secret into one.
+</warning>
+
 ## How It Works
 
 When enabled, Kreate registers a `kreateBuildConstants` Gradle task that runs

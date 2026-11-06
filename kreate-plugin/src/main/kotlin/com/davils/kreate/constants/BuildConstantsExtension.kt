@@ -71,6 +71,9 @@ public abstract class BuildConstantsExtension @Inject constructor(
     /**
      * Adds a constant to the generated class.
      *
+     * The value is compiled into the artifact, where anyone holding it can read it, so a constant
+     * must never carry a secret.
+     *
      * @param key The name of the constant. Must not be blank.
      * @param value The value of the constant.
      * @throws IllegalArgumentException If the key is blank.

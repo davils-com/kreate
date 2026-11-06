@@ -166,6 +166,8 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Fixed
 
+- **A failure to write build constants fails the build.** It used to be logged, after which the
+  compilation went on with the previous constants or none.
 - **`@PublishedApi internal` declarations are part of the dump.** The class file reader dropped
   every declaration that is `internal` in Kotlin, including the ones marked `@PublishedApi`. Those
   are called from public inline functions compiled into the consumer, so renaming or removing one
