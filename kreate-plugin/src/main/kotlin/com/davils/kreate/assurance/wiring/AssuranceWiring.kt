@@ -81,6 +81,7 @@ private fun AssuranceEvaluationTask.configureEvaluation(assurance: AssuranceExte
     reportOnly.set(assurance.reportOnly)
     failOnStale.set(assurance.baseline.failOnStale)
     forbidIgnoreOf.set(assurance.forbidIgnoreOf)
+    maxAdvisoryAge.set(assurance.maxAdvisoryAge)
     maxBaselineSeverity.set(assurance.baseline.maxSeverity)
     ignoreRules.set(rules)
     today.set(project.providers.of(CurrentDateSource::class.java) { })

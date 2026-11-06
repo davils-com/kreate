@@ -160,3 +160,16 @@ jobs:
       # integration breaks, this job is what notices.
       - name: Run the plugin's Trivy tasks
         run: ./gradlew :example:kreateTrivyScan --stacktrace
+
+      # Kreate's own dependencies go through Kreate's own gate. It reads OSV.dev, which is why it runs
+      # here and not in `verify`, and it fails the job on anything `failOn` catches.
+      - name: Audit Kreate's own dependencies
+        run: ./gradlew :selfcheck:kreateAssurance --stacktrace
+
+      - name: Upload the assurance report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: assurance-report
+          path: selfcheck/build/kreate/assurance/
+          retention-days: 30

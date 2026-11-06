@@ -21,7 +21,12 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Nested
+import java.time.Duration
 import javax.inject.Inject
+
+private const val DEFAULT_ADVISORY_AGE_DAYS: Long = 3
+
+private const val DEFAULT_REUSE_HOURS: Long = 6
 
 /**
  * Configuration of the software assurance gate.
@@ -84,11 +89,43 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public val forbidIgnoreOf: SetProperty<Severity> = factory.setProperty(Severity::class.java)
 
     /**
+     * Groups of this organization. Their modules, and those of their subgroups, are never sent to a
+     * public service, because the name of an internal module is itself worth protecting.
+     *
+     * @since 4.0.0
+     */
+    public val internalGroups: SetProperty<String> = factory.setProperty(String::class.java)
+
+    /**
+     * How old the advisory data of a result may be. Defaults to 3 days. Older data is incomplete.
+     *
+     * @since 4.0.0
+     */
+    public val maxAdvisoryAge: Property<Duration> =
+        factory.property(Duration::class.java).convention(Duration.ofDays(DEFAULT_ADVISORY_AGE_DAYS))
+
+    /**
+     * How long an audit of unchanged dependencies stands before it runs again. Defaults to 6 hours.
+     *
+     * @since 4.0.0
+     */
+    public val reuseVerdictFor: Property<Duration> =
+        factory.property(Duration::class.java).convention(Duration.ofHours(DEFAULT_REUSE_HOURS))
+
+    /**
      * Finding documents written by other tools, which the gate treats like its own sources.
      *
      * @since 4.0.0
      */
     public val externalFindings: ConfigurableFileCollection = factory.fileCollection()
+
+    /**
+     * Configuration of the audit against OSV.dev.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val advisories: AssuranceAdvisoriesExtension
 
     /**
      * Configuration of the baseline.
@@ -116,6 +153,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public fun ignore(id: String, action: Action<AssuranceIgnoreSpec>) {
         val spec = ignoreRules.getOrPut(id) { AssuranceIgnoreSpec() }
         action.execute(spec)
+    }
+
+    /**
+     * Configures the audit against OSV.dev.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun advisories(action: Action<AssuranceAdvisoriesExtension>) {
+        action.execute(advisories)
     }
 
     /**

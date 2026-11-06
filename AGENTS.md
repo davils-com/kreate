@@ -12,6 +12,7 @@ build convention plugin, and it is built to the standard it enforces.
 | `kreate-detekt-rules` | `com.davils:kreate-detekt-rules` | The Kreate Detekt rule set |
 | `build-logic` | - | Conventions that build the three artifacts |
 | `:example` | - | A consumer project that exercises the published DSL end to end |
+| `:selfcheck` | - | Puts Kreate's own dependencies through its gate; reads OSV.dev, so it stays out of `verify` |
 
 The three artifacts are included builds. Root task names do not reach them.
 

@@ -205,6 +205,12 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
         <td>Finding documents, baseline, ignore rules</td>
     </tr>
     <tr>
+        <td><code>kreateAdvisoryAudit</code></td>
+        <td>Audits the resolved dependencies against OSV.dev. Only with
+            <code>advisories { enabled }</code>.</td>
+        <td>Resolved dependencies</td>
+    </tr>
+    <tr>
         <td><code>kreateAssuranceReport</code></td>
         <td>Writes the reports. Runs after <code>kreateAssurance</code>, also when that fails.</td>
         <td>Finding documents, baseline, ignore rules</td>

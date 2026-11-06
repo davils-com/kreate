@@ -37,3 +37,4 @@ includeBuild("kreate-plugin")
 includeBuild("kreate-detekt-rules")
 
 include(":example")
+include(":selfcheck")

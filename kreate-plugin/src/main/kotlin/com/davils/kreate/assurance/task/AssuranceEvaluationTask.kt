@@ -42,6 +42,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.work.DisableCachingByDefault
 import java.io.File
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
@@ -79,6 +80,9 @@ internal abstract class AssuranceEvaluationTask(taskDescription: String) :
     public abstract val maxBaselineSeverity: Property<Severity>
 
     @get:Input
+    public abstract val maxAdvisoryAge: Property<Duration>
+
+    @get:Input
     public abstract val today: Property<String>
 
     @get:Input
@@ -109,15 +113,16 @@ internal abstract class AssuranceEvaluationTask(taskDescription: String) :
             unignorable = forbidIgnoreOf.get()
         )
         val outcome = filter.apply(findingsOf(readDocuments), completeSourcesOf(readDocuments))
-        val rules = VerdictRules(failOn.get(), reportOnly.get(), failOnStale.get())
+        val rules = VerdictRules(failOn.get(), reportOnly.get(), failOnStale.get(), maxAdvisoryAge.get())
+        val now = Instant.now()
 
         return AssuranceEvaluation(
             project = projectPath.get(),
             toolVersion = KREATE_VERSION,
-            generatedAt = Instant.now(),
+            generatedAt = now,
             documents = readDocuments,
             outcome = outcome,
-            verdict = rules.decide(readDocuments, outcome)
+            verdict = rules.decide(readDocuments, outcome, now)
         )
     }
 

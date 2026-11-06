@@ -24,6 +24,7 @@ import com.davils.kreate.assurance.finding.finding
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import java.time.Duration
 import java.time.Instant
 
 private fun document(status: DocumentStatus): FindingDocument =
@@ -94,6 +95,30 @@ class VerdictRulesTest : FunSpec({
 
             VerdictRules(Severity.HIGH).decide(complete, stale).status shouldBe GateStatus.PASSED
             VerdictRules(Severity.HIGH, failOnStale = true).decide(complete, stale).status shouldBe GateStatus.FINDINGS
+        }
+    }
+
+    context("the age of the data") {
+        val readAt = Instant.parse("2026-11-01T00:00:00Z")
+        val document = FindingDocument(FindingSource.OSV, DocumentStatus.COMPLETE, readAt, dataAsOf = readAt)
+        val rules = VerdictRules(Severity.HIGH, maxDataAge = Duration.ofDays(3))
+
+        test("passes while it is fresh enough") {
+            val now = readAt.plus(Duration.ofDays(2))
+
+            rules.decide(listOf(document), outcome(), now).status shouldBe GateStatus.PASSED
+        }
+
+        test("is incomplete once it is too old, because a stale pass says nothing about today") {
+            val now = readAt.plus(Duration.ofDays(4))
+
+            rules.decide(listOf(document), outcome(), now).status shouldBe GateStatus.INCOMPLETE
+        }
+
+        test("does not concern a source without data of its own") {
+            val other = FindingDocument(FindingSource.QUALITY, DocumentStatus.COMPLETE, readAt)
+
+            rules.decide(listOf(other), outcome(), readAt.plus(Duration.ofDays(9))).status shouldBe GateStatus.PASSED
         }
     }
 

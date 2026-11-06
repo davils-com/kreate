@@ -96,6 +96,34 @@ With `trivy { enabled = true }` the scans feed the gate: they stop failing on th
 `kreateAssurance` runs them and decides. See
 [the configuration reference](Trivy-Configuration-Reference.md).
 
+## Advisories
+
+```kotlin
+assurance {
+    enabled = true
+    internalGroups = setOf("com.acme")
+
+    advisories {
+        enabled = true
+    }
+}
+```
+
+`kreateAdvisoryAudit` asks [OSV.dev](https://osv.dev) about the resolved dependencies, including the
+transitive ones. `configurations` defaults to the classpaths of the main code.
+
+- **Privacy.** Modules of `internalGroups` and their subgroups are never sent, because the name of an
+  internal module is itself worth protecting. They are not audited either.
+- **Freshness.** An advisory can appear without anything in the build changing. The audit stands for
+  `reuseVerdictFor`, 6 hours by default, and runs again after that. `maxAdvisoryAge`, 3 days by
+  default, makes older data `INCOMPLETE`.
+- **Severity.** Computed from the CVSS 3 vector. An advisory with only a CVSS 4 vector takes the rating
+  of its database, and one without any rating counts as `HIGH`.
+- **Offline.** `--offline` makes the audit `INCOMPLETE`, as does a dependency that does not resolve:
+  what nobody looked at is not clean.
+
+Point `-Pkreate.network.osvUrl` at an internal mirror.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

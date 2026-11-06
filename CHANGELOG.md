@@ -97,6 +97,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **A baseline for existing code.** `kreateAssuranceBaselineCreate` records today's findings in
   `kreate-baseline.json`, and `kreateAssuranceBaselinePrune` removes what no longer occurs. Entries
   carry no line numbers, and a further occurrence is reported as new.
+- **The advisory audit.** `assurance { advisories { enabled = true } }` adds `kreateAdvisoryAudit`,
+  which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
+  are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
+  `maxAdvisoryAge` makes older data incomplete.
 - **`assurance { externalFindings }`** reads finding documents written by other tools.
 - **Trivy joins the gate.** With `assurance` enabled, the scans write their findings to a document and
   `kreateAssurance` decides, so ignore rules and the baseline apply to them. Without it, they fail on

@@ -20,20 +20,31 @@ import com.davils.kreate.assurance.finding.DocumentStatus
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.FindingDocument
 import com.davils.kreate.assurance.finding.isAtLeast
+import java.time.Duration
+import java.time.Instant
 
 internal const val REPORT_ONLY_ATTRIBUTE: String = "reportOnly"
 
 internal class VerdictRules(
     private val failOn: Severity,
     private val reportOnly: Boolean = false,
-    private val failOnStale: Boolean = false
+    private val failOnStale: Boolean = false,
+    private val maxDataAge: Duration? = null
 ) {
-    fun decide(documents: List<FindingDocument>, outcome: FilterOutcome): Verdict {
+    fun decide(documents: List<FindingDocument>, outcome: FilterOutcome, now: Instant = Instant.EPOCH): Verdict {
         val blocking = outcome.kept.count { finding -> isBlocking(finding) }
-        val incomplete = documents.filter { document -> document.status == DocumentStatus.INCOMPLETE }
+        val incomplete = documents.filter { document -> isIncomplete(document, now) }
         val incompleteSources = incomplete.map { document -> document.source.id }
         val status = statusOf(incompleteSources, blocking, outcome.staleEntries)
         return Verdict(status, blocking, incompleteSources, outcome.staleEntries)
+    }
+
+    private fun isIncomplete(document: FindingDocument, now: Instant): Boolean {
+        if (document.status == DocumentStatus.INCOMPLETE) return true
+
+        val dataAsOf = document.dataAsOf ?: return false
+        val limit = maxDataAge ?: return false
+        return dataAsOf.plus(limit).isBefore(now)
     }
 
     private fun isBlocking(finding: Finding): Boolean {
