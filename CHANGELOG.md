@@ -100,6 +100,7 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   scan has a timeout of 30 minutes.
 - **`trivy { misconfig { } }` and `trivy { filesystem { } }`** add `kreateTrivyMisconfigScan` and
   `kreateTrivyFilesystemScan`, which read the whole project directory.
+- **`vulnerability { ignoreUnfixed = true }`** leaves out vulnerabilities without a released fix.
 - **`cinterop { cargoLocked = true }`** runs `cargo build --locked`, so a crate cannot float to a new
   version whose `build.rs` runs during the build. **`cinterop { cmakeExecutable }`** pins CMake for C
   and C++ projects, as the JNI block already could.

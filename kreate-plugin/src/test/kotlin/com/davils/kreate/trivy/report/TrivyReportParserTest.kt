@@ -72,7 +72,8 @@ class TrivyReportParserTest : FunSpec({
         test("reads a misconfiguration with its resolution") {
             val report = """
                 {"Results":[{"Target":"Dockerfile","Misconfigurations":[{
-                  "ID":"DS002","Severity":"HIGH","Title":"Root user","Resolution":"Add USER"
+                  "ID":"DS002","Severity":"HIGH","Title":"Root user","Resolution":"Add USER",
+                  "CauseMetadata":{"StartLine":3}
                 }]}]}
             """.trimIndent()
 
@@ -80,6 +81,7 @@ class TrivyReportParserTest : FunSpec({
 
             finding.ruleId shouldBe "DS002"
             finding.description shouldBe "Add USER"
+            finding.location shouldBe SourceLocation("Dockerfile", 3)
         }
 
         test("hands the target through the path mapping") {

@@ -16,7 +16,6 @@
 
 package com.davils.kreate.trivy.task
 
-import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -48,8 +47,7 @@ internal abstract class TrivyLockFileScan(
     @TaskAction
     public fun execute() {
         if (lockFiles.isEmpty) {
-            handleMissingLockFiles()
-            publish(emptyList()) { findingsMessage }
+            publish(listOf(runWithoutLockFiles())) { findingsMessage }
             return
         }
 
@@ -62,9 +60,10 @@ internal abstract class TrivyLockFileScan(
         return TrivyTarget(scanned) { lockFile.name }
     }
 
-    private fun handleMissingLockFiles() {
+    private fun runWithoutLockFiles(): TrivyRun {
         if (failOnMissingLockFiles.get()) {
-            throw GradleException(
+            return TrivyRun(
+                emptyList(),
                 "No lock files found, so the $scanName scan cannot check anything. Enable " +
                     "project { dependencyLocking { enabled = true } } and run " +
                     "'./gradlew kreateResolveAndLockAll --write-locks'."
@@ -72,5 +71,6 @@ internal abstract class TrivyLockFileScan(
         }
 
         logger.lifecycle("No lock files found. Skipping $scanName scan.")
+        return TrivyRun(emptyList())
     }
 }

@@ -39,6 +39,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 | `failOnFindings` | `Property<Boolean>`          | `true`                          | Fails the build if vulnerabilities are detected. |
 | `severity`       | `ListProperty<Severity>`     | `[CRITICAL, HIGH, MEDIUM, LOW]` | Vulnerability scores to include in the scan.     |
 | `failOnMissingLockFiles` | `Property<Boolean>` | `true` | Fails the build when there is no lock file to scan. |
+| `ignoreUnfixed` | `Property<Boolean>` | `false` | Leaves out vulnerabilities without a released fix. |
 | `lockFiles`      | `ConfigurableFileCollection` | `*.lockfile`                    | The collection of lockfiles to be scanned.       |
 
 ---

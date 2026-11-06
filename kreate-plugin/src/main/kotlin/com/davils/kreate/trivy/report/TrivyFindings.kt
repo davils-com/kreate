@@ -90,9 +90,14 @@ internal object TrivyFindings {
             severity = severityOf(entry),
             title = readable(entry.text(TITLE) ?: rule),
             description = readable(entry.text("Resolution") ?: entry.text(DESCRIPTION).orEmpty()),
-            location = SourceLocation(target),
+            location = SourceLocation(target, causeLine(entry)),
             url = entry.text(PRIMARY_URL)
         )
+    }
+
+    private fun causeLine(entry: JsonObject): Int? {
+        val cause = entry["CauseMetadata"] as? JsonObject ?: return null
+        return cause.number("StartLine")
     }
 
     private fun severityOf(entry: JsonObject): Severity =

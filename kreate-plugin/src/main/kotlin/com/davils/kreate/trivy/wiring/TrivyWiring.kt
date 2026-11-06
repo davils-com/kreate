@@ -85,6 +85,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         gated.set(isGated)
         documentFile.set(layout.buildDirectory.file("$DOCUMENT_DIRECTORY/trivy-vulnerabilities.json"))
         failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
+        ignoreUnfixed.set(trivyVulnerabilityExtension.ignoreUnfixed)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
         usesService(trivyDatabaseService())
     }
@@ -102,17 +103,22 @@ private fun Project.directoryScans(
 ): List<TaskProvider<out TrivyDirectoryScan>> {
     val misconfig = trivy.misconfig
     val filesystem = trivy.filesystem
-    val misconfigScan = tasks.register<TrivyMisconfigScan>(TrivyTaskNames.MISCONFIGURATION) {
-        configureDirectoryScan(misconfig, isGated, "trivy-misconfig.json")
-    }
-    val filesystemScan = tasks.register<TrivyFilesystemScan>(TrivyTaskNames.FILESYSTEM) {
-        configureDirectoryScan(filesystem, isGated, "trivy-filesystem.json")
-        usesService(trivyDatabaseService())
+    val scans = mutableListOf<TaskProvider<out TrivyDirectoryScan>>()
+
+    if (misconfig.enabled.get()) {
+        scans += tasks.register<TrivyMisconfigScan>(TrivyTaskNames.MISCONFIGURATION) {
+            configureDirectoryScan(misconfig, isGated, "trivy-misconfig.json")
+        }
     }
 
-    val scans = listOf(misconfig to misconfigScan, filesystem to filesystemScan)
-    val enabled = scans.filter { (scan, _) -> scan.enabled.get() }
-    return enabled.map { (_, task) -> task }
+    if (filesystem.enabled.get()) {
+        scans += tasks.register<TrivyFilesystemScan>(TrivyTaskNames.FILESYSTEM) {
+            configureDirectoryScan(filesystem, isGated, "trivy-filesystem.json")
+            usesService(trivyDatabaseService())
+        }
+    }
+
+    return scans
 }
 
 private fun TrivyDirectoryScan.configureDirectoryScan(
