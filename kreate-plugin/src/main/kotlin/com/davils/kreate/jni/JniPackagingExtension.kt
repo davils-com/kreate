@@ -82,21 +82,21 @@ public abstract class JniPackagingExtension @Inject constructor(
     /**
      * Whether a `KreateNativeLoader` object is generated into the project's sources.
      *
-     * The generated loader first tries `System.loadLibrary`, so a developer's local run with
-     * `java.library.path` set keeps working, and only falls back to extracting the packaged library
-     * from the classpath.
+     * The generated loader extracts the packaged library from the classpath. It consults
+     * `java.library.path` only when no packaged copy exists and the JVM runs with
+     * `-Dkreate.jni.useLibraryPath=true`, which Kreate sets on the test and run tasks of the project
+     * that builds the library. A loader that searched the library path first would load a file
+     * planted in the working directory on Windows in place of the shipped binary.
      *
      * Defaults to `false`. It is the dependency-free fallback, not the recommended loader, and the
      * weakest of the available loaders should not be the one a build gets by default. What it does
      * not do:
      *
      * - it checks no digest, so it cannot tell the binary you shipped from one somebody replaced;
-     * - it extracts into `Files.createTempDirectory`, which on a shared machine is world-readable
-     *   and writable by every other user;
      * - it marks the copy `deleteOnExit`, so every run extracts again;
      * - it reports the first thing that went wrong rather than every place it looked.
      *
-     * `com.davils:sira-native` does all four, and is what a Davils program should take. Turn this on
+     * `com.davils:sira-native` does all three, and is what a Davils program should take. Turn this on
      * where the artifact must load with nothing on the classpath but itself.
      *
      * @since 2.0.0

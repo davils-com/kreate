@@ -294,6 +294,41 @@ class NativePublishingFunctionalTest : FunSpec({
             loader shouldContain "Platforms published with this version: $hostPlatform"
         }
 
+        test("a quote in the version cannot break out of the generated loader") {
+            val fixture = newFixture()
+            fixture.writeBuild(
+                kreateBlock = """
+                    ${KreateBuildFixture.platformBlock}
+
+                    platform {
+                        jvm {
+                            jni {
+                                enabled = true
+
+                                packaging {
+                                    enabled = true
+                                    generateLoader = true
+
+                                    publishing {
+                                        enabled = true
+                                        platforms = listOf("$hostPlatform")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                """.trimIndent(),
+                extraPlugins = listOf("""id("maven-publish")"""),
+                extra = """version = "1.0\"+evil()+\"""""
+            )
+
+            fixture.build("compileKotlin")
+
+            val generatedSources = fixture.file("build/generated/jni/kotlin").walkTopDown()
+            val loaderSource = generatedSources.single { it.name == "KreateNativeLoader.kt" }
+            loaderSource.readText() shouldContain "1.0\\\"+evil()+\\\""
+        }
+
         test("the command line overrides the configured selection") {
             val fixture = newFixture()
             val repositoryDir = newRepositoryDirectory()

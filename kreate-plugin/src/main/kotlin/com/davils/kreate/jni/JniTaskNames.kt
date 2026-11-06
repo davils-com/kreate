@@ -93,4 +93,13 @@ public object JniTaskNames {
         val suffix = platformTaskSuffix(platformId)
         return NATIVE_JAR_PREFIX + suffix
     }
+
+    /**
+     * The task writing the digest manifest of one platform's native JAR.
+     *
+     * @param platformId The platform identifier, such as `linux-x86_64`.
+     * @return The task name.
+     * @since 4.0.0
+     */
+    public fun nativeDigestManifest(platformId: String): String = DIGEST_MANIFEST + platformTaskSuffix(platformId)
 }

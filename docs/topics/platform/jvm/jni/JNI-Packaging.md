@@ -110,7 +110,7 @@ Packaging writes `native/digests.properties`:
 
 ```properties
 # Written by Kreate. Do not edit - it is rewritten on every build.
-linux-x86_64=9f2c4d1e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d
+linux-x86_64/libmy_module.so=9f2c4d1e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d
 ```
 
 It is **the value a consumer pins**, so that nobody has to hash a release artifact by hand:
@@ -180,10 +180,12 @@ class Native {
 }
 ```
 
-The loader tries `System.loadLibrary` **first**. That ordering matters: during local development
-your library path is already configured, and loading the freshly built binary is exactly what you
-want. Only when that fails does it fall back to extracting the packaged copy into a temporary
-directory and loading it from there.
+The loader extracts the **packaged copy** into a temporary directory and loads it from there. It
+consults `java.library.path` only when no packaged copy exists and the JVM runs with
+`-Dkreate.jni.useLibraryPath=true`. That ordering matters: on Windows the library path normally
+includes the working directory and the `PATH`, so searching it first would load a planted DLL in
+place of the binary you shipped. Kreate sets the property on the test and run tasks of the project
+that builds the library, so local development keeps loading the freshly built binary.
 
 <deflist type="wide">
     <def title="Why generated source rather than a runtime library">
@@ -259,8 +261,8 @@ at runtime.
 
 <tip>
 On a read-only or <code>noexec</code> temporary filesystem — some hardened containers — extraction
-cannot work. In that environment, ship the library separately and set
-<code>java.library.path</code>, which the loader tries first anyway.
+cannot work. In that environment, ship the library separately, leave it out of the classpath, and
+set <code>java.library.path</code> together with <code>-Dkreate.jni.useLibraryPath=true</code>.
 </tip>
 
 ## One JAR holds one platform

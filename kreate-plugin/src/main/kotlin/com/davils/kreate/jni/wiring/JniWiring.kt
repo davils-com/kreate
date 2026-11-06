@@ -258,7 +258,7 @@ private fun Project.registerDigestManifest(
 
     return tasks.register<GenerateDigestManifest>(JniTaskNames.DIGEST_MANIFEST) {
         dependsOn(buildTaskName)
-        libraryDirectory.set(libraryDir)
+        libraryDirectories.from(libraryDir)
         this.platformId.set(platformId)
         manifest.set(layout.buildDirectory.file("jni/$platformId/$DIGEST_MANIFEST_FILE_NAME"))
     }

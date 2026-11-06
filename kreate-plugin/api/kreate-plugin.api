@@ -437,6 +437,7 @@ public final class com/davils/kreate/jni/JniTaskNames {
 	public static final field LOADER Ljava/lang/String;
 	public static final field NATIVE_JARS Ljava/lang/String;
 	public static final field VERIFY_PLATFORMS Ljava/lang/String;
+	public final fun nativeDigestManifest (Ljava/lang/String;)Ljava/lang/String;
 	public final fun nativeJar (Ljava/lang/String;)Ljava/lang/String;
 }
 

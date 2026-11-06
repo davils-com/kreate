@@ -20,6 +20,8 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.host.requireKnownPlatform
 import com.davils.kreate.jni.JniPublishingExtension
 import com.davils.kreate.jni.JniTaskNames
+import com.davils.kreate.jni.task.DIGEST_MANIFEST_FILE_NAME
+import com.davils.kreate.jni.task.GenerateDigestManifest
 import com.davils.kreate.jni.task.PLATFORM_CANDIDATE_SEPARATOR
 import com.davils.kreate.jni.task.VerifyNativePlatforms
 import com.davils.kreate.task.KreateTaskGroup
@@ -59,8 +61,10 @@ internal fun Project.configureNativePublishing(
     }
 
     val verify = registerVerifyTask(sources, buildTaskName, hostPlatformId)
+    val writesDigests = extension.platform.jvm.jni.packaging.digestManifest.get()
     val jars = sources.map { source ->
-        registerNativeJar(source, projectName, resourcePath, verify, buildTaskName, hostPlatformId)
+        val digests = registerPlatformDigestManifest(source, verify, writesDigests)
+        registerNativeJar(source, digests, projectName, resourcePath, verify, buildTaskName, hostPlatformId)
     }
 
     tasks.register(JniTaskNames.NATIVE_JARS) {
@@ -112,8 +116,25 @@ private fun NativeSource.candidatePathEntry(): String {
     return "$platformId$PLATFORM_CANDIDATE_SEPARATOR${paths.joinToString(File.pathSeparator)}"
 }
 
+private fun Project.registerPlatformDigestManifest(
+    source: NativeSource,
+    verify: TaskProvider<VerifyNativePlatforms>,
+    writesDigests: Boolean
+): TaskProvider<GenerateDigestManifest>? {
+    if (!writesDigests) return null
+
+    val platform = source.platformId
+    return tasks.register<GenerateDigestManifest>(JniTaskNames.nativeDigestManifest(platform)) {
+        dependsOn(verify)
+        libraryDirectories.from(source.directoriesByPrecedence())
+        platformId.set(platform)
+        manifest.set(layout.buildDirectory.file("jni/$platform/published/$DIGEST_MANIFEST_FILE_NAME"))
+    }
+}
+
 private fun Project.registerNativeJar(
     source: NativeSource,
+    digests: TaskProvider<GenerateDigestManifest>?,
     projectName: String,
     resourcePath: String,
     verify: TaskProvider<VerifyNativePlatforms>,
@@ -131,6 +152,9 @@ private fun Project.registerNativeJar(
 
         source.directoriesByPrecedence().forEach { directory ->
             from(directory) { into("$resourcePath/${source.platformId}") }
+        }
+        if (digests != null) {
+            from(digests) { into(resourcePath) }
         }
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 

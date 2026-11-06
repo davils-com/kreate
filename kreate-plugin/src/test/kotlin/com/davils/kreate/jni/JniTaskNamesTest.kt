@@ -28,5 +28,9 @@ class JniTaskNamesTest : FunSpec({
         test("the native JAR task name of a known platform keeps the architecture spelling") {
             JniTaskNames.nativeJar("linux-x86_64") shouldBe "kreateJniNativeJarLinuxX86_64"
         }
+
+        test("the digest manifest of a platform extends the shared task name") {
+            JniTaskNames.nativeDigestManifest("linux-x86_64") shouldBe "kreateJniDigestManifestLinuxX86_64"
+        }
     }
 })

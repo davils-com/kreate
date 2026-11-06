@@ -16,6 +16,7 @@
 
 package com.davils.kreate.jni.wiring
 
+import com.davils.kreate.jni.task.JNI_USE_LIBRARY_PATH_PROPERTY
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.process.CommandLineArgumentProvider
@@ -24,5 +25,8 @@ internal class JavaLibraryPathArgumentProvider(
     @get:Input
     val libraryPath: Provider<String>
 ) : CommandLineArgumentProvider {
-    override fun asArguments(): Iterable<String> = listOf("-Djava.library.path=${libraryPath.get()}")
+    override fun asArguments(): Iterable<String> = listOf(
+        "-Djava.library.path=${libraryPath.get()}",
+        "-D$JNI_USE_LIBRARY_PATH_PROPERTY=true"
+    )
 }

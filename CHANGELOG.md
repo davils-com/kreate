@@ -51,6 +51,17 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   `ChainedCallLimit` and `OneTopLevelTypePerFile`. A project switches one off with
   `kreate: <Rule>: active: false` in its `detekt.yml`, or the whole set with
   `detekt { kreateRules = false }`.
+- **The generated `KreateNativeLoader` loads the packaged copy first.** It used to try
+  `System.loadLibrary` first, so a file named like the library in a directory on
+  `java.library.path`, which on Windows normally includes the working directory, replaced the
+  shipped binary. The library path is now used only when no packaged copy exists and the JVM runs
+  with `-Dkreate.jni.useLibraryPath=true`. Kreate sets the property on the `Test` and `JavaExec`
+  tasks of the project that builds the library, so a local run is unaffected. A deployment that
+  pre-installs the library has to set it.
+- **Keys of `digests.properties` name the file.** `linux-x86_64=<sha256>` is now
+  `linux-x86_64/libsample.so=<sha256>`. A platform with several files, such as a Windows build
+  next to its import library, used to produce several lines with one key, of which a reader kept
+  only the last.
 - **`local { snapshotSuffix }` is removed.** It was never read: a local publication always carries
   `-SNAPSHOT`, the suffix the consumer side's `snapshotsOnly()` repository is keyed to. Delete the
   assignment from the build script.
@@ -77,6 +88,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Security
 
+- **Values reach the generated native loader as escaped literals.** The version, the coordinates
+  and the resource path were pasted into Kotlin source, and the documentation recommends taking the
+  version from `CI_COMMIT_TAG`. A Git tag can contain `"`, `$`, `(` and `)`, so a crafted tag could
+  add code to the published artifact. The package name is validated as well.
 - **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a

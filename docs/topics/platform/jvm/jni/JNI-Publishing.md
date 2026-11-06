@@ -161,8 +161,9 @@ plugin in the <i>consumer's</i> build that detects the OS and assembles the arti
 A consumer who forgets it gets a message that says exactly what to add:
 
 ```
-Native library 'mylib' is not on java.library.path and no packaged copy was found
+Native library 'mylib' has no packaged copy
 at /native/macos-aarch64/libmylib.dylib.
+Set -Dkreate.jni.useLibraryPath=true to take it from java.library.path.
 
 Add the platform artifact to your runtime classpath:
 
@@ -194,8 +195,9 @@ The GitLab Package Registry asks for none of this, and the empty JARs are not pr
     <def title="Extraction needs a writable, executable temp directory">
         The loader extracts the library and calls <code>System.load</code>. On a hardened
         container with <code>noexec</code> on <code>/tmp</code> that fails even though the file is
-        present. The loader tries <code>System.loadLibrary</code> first, so affected deployments
-        can pre-install the library and set <code>java.library.path</code>.
+        present. Affected deployments can pre-install the library, keep the platform artifact off
+        the classpath, and set <code>java.library.path</code> together with
+        <code>-Dkreate.jni.useLibraryPath=true</code>.
     </def>
 </deflist>
 

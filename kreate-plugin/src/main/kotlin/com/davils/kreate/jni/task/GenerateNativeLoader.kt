@@ -20,6 +20,8 @@ import com.davils.kreate.host.AARCH64_ID
 import com.davils.kreate.host.X86_64_ID
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
+import com.squareup.kotlinpoet.CodeBlock
+import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -28,7 +30,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
+internal const val JNI_USE_LIBRARY_PATH_PROPERTY: String = "kreate.jni.useLibraryPath"
+
 private const val LOADER_CLASS_NAME: String = "KreateNativeLoader"
+
+private const val STRING_LITERAL_FORMAT: String = "%S"
+
+private val PACKAGE_NAME_PATTERN: Regex = Regex("""[\p{L}_][\p{L}\p{N}_]*(\.[\p{L}_][\p{L}\p{N}_]*)*""")
 
 @CacheableTask
 internal abstract class GenerateNativeLoader : KreateTask(
@@ -52,11 +60,28 @@ internal abstract class GenerateNativeLoader : KreateTask(
 
     @TaskAction
     public fun execute() {
+        val validatedPackage = validatedPackageName()
         val target = outputDirectory.get().asFile
-            .resolve(packageName.get().replace('.', '/'))
+            .resolve(validatedPackage.replace('.', '/'))
         target.mkdirs()
 
         target.resolve("$LOADER_CLASS_NAME.kt").writeText(renderLoader())
+    }
+
+    private fun validatedPackageName(): String {
+        val name = packageName.get()
+        if (PACKAGE_NAME_PATTERN.matches(name)) return name
+
+        throw GradleException("'$name' is not a valid package name for the generated native loader.")
+    }
+
+    private fun kotlinLiteral(value: String): String {
+        val hasControlCharacter = value.any { character -> character.isISOControl() }
+        if (hasControlCharacter) {
+            throw GradleException("A value of the generated native loader contains a control character: $value")
+        }
+
+        return CodeBlock.of(STRING_LITERAL_FORMAT, value).toString()
     }
 
     private fun renderLoader(): String = buildString {
@@ -64,6 +89,7 @@ internal abstract class GenerateNativeLoader : KreateTask(
         appendLine()
         appendLine("package ${packageName.get()}")
         appendLine()
+        appendLine("import java.io.InputStream")
         appendLine("import java.nio.file.Files")
         appendLine("import java.nio.file.StandardCopyOption")
         appendLine()
@@ -76,6 +102,10 @@ internal abstract class GenerateNativeLoader : KreateTask(
         appendLine("    private val loaded = mutableSetOf<String>()")
         appendLine()
         append(renderLoadFunction())
+        appendLine()
+        append(renderPackagedLoading())
+        appendLine()
+        append(renderLibraryPathLoading())
         appendLine()
         append(renderHintFunction())
         appendLine()
@@ -97,64 +127,90 @@ internal abstract class GenerateNativeLoader : KreateTask(
         val (group, artifactAndVersion) = coordinate.split(':', limit = 2)
         val (artifact, version) = artifactAndVersion.split(':', limit = 2)
         val published = platforms.joinToString(", ")
+        val artifactPrefix = kotlinLiteral("$group:$artifact-")
+        val versionSuffix = kotlinLiteral(":$version")
+        val publishedPlatformsLine = kotlinLiteral("Platforms published with this version: $published")
 
         return """
             |    private fun hint(): String = "\n\n" +
             |        "Add the platform artifact to your runtime classpath:\n\n" +
-            |        "    runtimeOnly(\"$group:$artifact-" + platformId() + ":$version\")\n\n" +
-            |        "Platforms published with this version: $published"
+            |        "    runtimeOnly(\"" + $artifactPrefix + platformId() + $versionSuffix + "\")\n\n" +
+            |        $publishedPlatformsLine
             |
         """.trimMargin()
     }
 
-    private fun renderLoadFunction(): String = """
-        |    /**
-        |     * Loads the native library with the given base name.
-        |     *
-        |     * The library is first looked up the ordinary way, so a developer running with
-        |     * `-Djava.library.path` set keeps using their locally built binary. Only when
-        |     * that fails is the packaged copy extracted from the classpath and loaded from
-        |     * a temporary directory.
-        |     *
-        |     * @param name The library base name, without prefix or file extension.
-        |     * @return Unit
-        |     * @throws UnsatisfiedLinkError If the library is neither on the library path
-        |     *   nor packaged for the current platform.
-        |     * @since 2.0.0
-        |     */
-        |    @Synchronized
-        |    public fun load(name: String) {
-        |        if (!loaded.add(name)) return
-        |
-        |        try {
-        |            System.loadLibrary(name)
-        |            return
-        |        } catch (_: UnsatisfiedLinkError) {
-        |            // Fall through to the packaged copy.
-        |        }
-        |
-        |        val resource = "/${resourcePath.get()}/" + platformId() + "/" + fileName(name)
-        |        val stream = $LOADER_CLASS_NAME::class.java.getResourceAsStream(resource)
-        |            ?: run {
-        |                loaded.remove(name)
-        |                throw UnsatisfiedLinkError(
-        |                    "Native library '" + name + "' is not on java.library.path and no " +
-        |                        "packaged copy was found at " + resource + "." + hint()
-        |                )
-        |            }
-        |
+    private fun renderLoadFunction(): String {
+        val resourcePrefix = kotlinLiteral("/${resourcePath.get()}/")
+
+        return """
+            |    /**
+            |     * Loads the native library with the given base name.
+            |     *
+            |     * The copy packaged into this artifact always wins. A library on `java.library.path`
+            |     * is used only when no packaged copy exists and the JVM runs with
+            |     * `-D$JNI_USE_LIBRARY_PATH_PROPERTY=true`. Searching that path first would load whatever
+            |     * sits in the working directory on Windows in place of the shipped binary. Kreate sets
+            |     * the property on the test and run tasks of the project that builds the library.
+            |     *
+            |     * @param name The library base name, without prefix or file extension.
+            |     * @return Unit
+            |     * @throws UnsatisfiedLinkError If the library is not packaged for the current platform
+            |     *   and may not be taken from the library path.
+            |     * @since 2.0.0
+            |     */
+            |    @Synchronized
+            |    public fun load(name: String) {
+            |        if (name in loaded) return
+            |
+            |        val resource = $resourcePrefix + platformId() + "/" + fileName(name)
+            |        val stream = $LOADER_CLASS_NAME::class.java.getResourceAsStream(resource)
+            |        if (stream != null) {
+            |            loadPackaged(name, stream)
+            |        } else {
+            |            loadFromLibraryPath(name, resource)
+            |        }
+            |
+            |        loaded.add(name)
+            |    }
+            |
+        """.trimMargin()
+    }
+
+    private fun renderPackagedLoading(): String = """
+        |    private fun loadPackaged(name: String, stream: InputStream) {
         |        val directory = Files.createTempDirectory("kreate-jni")
         |        val target = directory.resolve(fileName(name))
+        |        directory.toFile().deleteOnExit()
+        |        target.toFile().deleteOnExit()
         |        stream.use { input ->
         |            Files.copy(input, target, StandardCopyOption.REPLACE_EXISTING)
         |        }
-        |        target.toFile().deleteOnExit()
-        |        directory.toFile().deleteOnExit()
         |
         |        System.load(target.toAbsolutePath().toString())
         |    }
         |
     """.trimMargin()
+
+    private fun renderLibraryPathLoading(): String {
+        val libraryPathProperty = kotlinLiteral(JNI_USE_LIBRARY_PATH_PROPERTY)
+
+        return """
+            |    private fun loadFromLibraryPath(name: String, resource: String) {
+            |        val property = $libraryPathProperty
+            |        if (java.lang.Boolean.getBoolean(property)) {
+            |            System.loadLibrary(name)
+            |            return
+            |        }
+            |
+            |        throw UnsatisfiedLinkError(
+            |            "Native library '" + name + "' has no packaged copy at " + resource + ". " +
+            |                "Set -D" + property + "=true to take it from java.library.path." + hint()
+            |        )
+            |    }
+            |
+        """.trimMargin()
+    }
 
     private fun renderPlatformHelpers(): String = """
         |    private fun platformId(): String {

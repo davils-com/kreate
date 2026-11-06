@@ -18,12 +18,12 @@ package com.davils.kreate.jni.task
 
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -45,9 +45,9 @@ internal abstract class GenerateDigestManifest : KreateTask(
     "Writes the SHA-256 of each packaged native library.",
     KreateTaskGroup.JNI
 ) {
-    @get:InputDirectory
+    @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public abstract val libraryDirectory: DirectoryProperty
+    public abstract val libraryDirectories: ConfigurableFileCollection
 
     @get:Input
     public abstract val platformId: Property<String>
@@ -57,12 +57,18 @@ internal abstract class GenerateDigestManifest : KreateTask(
 
     @TaskAction
     public fun execute() {
-        val directoryEntries = libraryDirectory.get().asFile.listFiles()
-        val libraries = directoryEntries.orEmpty().filter { file -> file.isFile }
+        val entries = libraryDirectories.files.flatMap { directory -> filesIn(directory) }
+        val libraries = entries.filter { file -> file.isFile }
+        val firstOfEachName = libraries.distinctBy { file -> file.name }
         val target = manifest.get().asFile
         target.parentFile.mkdirs()
 
-        target.writeText(renderManifest(libraries))
+        target.writeText(renderManifest(firstOfEachName))
+    }
+
+    private fun filesIn(directory: File): List<File> {
+        val entries = directory.listFiles() ?: return emptyList()
+        return entries.toList()
     }
 
     private fun renderManifest(libraries: List<File>): String = buildString {
@@ -73,7 +79,7 @@ internal abstract class GenerateDigestManifest : KreateTask(
         appendLine("# artifact as the binary it describes it proves nothing: whoever replaced one")
         appendLine("# replaced the other.")
         for (library in libraries.sortedBy { file -> file.name }) {
-            appendLine("${platformId.get()}=${digestOf(library)}")
+            appendLine("${platformId.get()}/${library.name}=${digestOf(library)}")
         }
     }
 
