@@ -57,4 +57,4 @@ public const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
  */
 @InternalKreateApi
 public val DEFAULT_CI_VARIABLES: List<String> =
-    listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
+    listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID", "JENKINS_URL", "TEAMCITY_VERSION", "TF_BUILD")

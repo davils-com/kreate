@@ -47,7 +47,15 @@ class KreateSettingsExtensionTest : FunSpec({
 
             test("recognises the common CI environment variables") {
                 extension().ciEnvironmentVariables.get() shouldContainExactly
-                    listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
+                    listOf(
+                        "CI",
+                        "GITLAB_CI",
+                        "GITHUB_ACTIONS",
+                        "CI_PIPELINE_ID",
+                        "JENKINS_URL",
+                        "TEAMCITY_VERSION",
+                        "TF_BUILD"
+                    )
             }
         }
 

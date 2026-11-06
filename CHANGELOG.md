@@ -110,6 +110,8 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   validated, so `../..` could point the recursive delete elsewhere, and a directory link inside a
   snapshot was followed. Such a record is now ignored, and neither a path that resolves outside the
   repository nor a link is followed.
+- **`kreateLocalClean` and local mode recognise more CI systems.** `JENKINS_URL`, `TEAMCITY_VERSION`
+  and `TF_BUILD` now mean CI.
 - **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a
