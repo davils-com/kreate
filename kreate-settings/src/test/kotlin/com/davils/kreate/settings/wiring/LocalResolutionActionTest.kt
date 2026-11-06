@@ -25,11 +25,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
-import org.gradle.api.artifacts.DependencySubstitution
-import org.gradle.api.artifacts.DependencySubstitutions
 import org.gradle.api.artifacts.ResolutionStrategy
-import org.gradle.api.artifacts.component.ComponentSelector
-import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor
@@ -100,29 +96,6 @@ class LocalResolutionActionTest : FunSpec({
         return strategy
     }
 
-    fun substitutionActionOf(action: LocalResolutionAction): Action<in DependencySubstitution> {
-        val strategy = mockk<ResolutionStrategy>(relaxed = true)
-        val substitutionsAction = slot<Action<in DependencySubstitutions>>()
-        every { strategy.dependencySubstitution(capture(substitutionsAction)) } returns strategy
-        strategyActionOf(action).execute(strategy)
-
-        val substitutions = mockk<DependencySubstitutions>()
-        val substitutionAction = slot<Action<in DependencySubstitution>>()
-        every { substitutions.all(capture(substitutionAction)) } returns substitutions
-        substitutionsAction.captured.execute(substitutions)
-        return substitutionAction.captured
-    }
-
-    fun requesting(group: String, module: String, version: String): DependencySubstitution {
-        val selector = mockk<ModuleComponentSelector>()
-        every { selector.group } returns group
-        every { selector.module } returns module
-        every { selector.version } returns version
-        val substitution = mockk<DependencySubstitution>(relaxed = true)
-        every { substitution.requested } returns selector
-        return substitution
-    }
-
     context("the injected repository") {
 
         test("carries the configured name and location") {
@@ -174,42 +147,6 @@ class LocalResolutionActionTest : FunSpec({
             val strategy = configuredStrategy(action("com.example:core" to "1.0.0-SNAPSHOT"))
 
             verify { strategy.cacheChangingModulesFor(0, TimeUnit.SECONDS) }
-        }
-    }
-
-    context("the dependency substitution") {
-
-        test("redirects a published module to its local version") {
-            val substitution = requesting(group = "com.example", module = "core", version = "1.0.0")
-
-            substitutionActionOf(action("com.example:core" to "1.1.0-SNAPSHOT")).execute(substitution)
-
-            verify { substitution.useTarget("com.example:core:1.1.0-SNAPSHOT", "Kreate local development mode") }
-        }
-
-        test("leaves a module alone that already asks for the local version") {
-            val substitution = requesting(group = "com.example", module = "core", version = "1.1.0-SNAPSHOT")
-
-            substitutionActionOf(action("com.example:core" to "1.1.0-SNAPSHOT")).execute(substitution)
-
-            verify(exactly = 0) { substitution.useTarget(any(), any()) }
-        }
-
-        test("leaves a module alone that was not published locally") {
-            val substitution = requesting(group = "com.example", module = "other", version = "1.0.0")
-
-            substitutionActionOf(action("com.example:core" to "1.1.0-SNAPSHOT")).execute(substitution)
-
-            verify(exactly = 0) { substitution.useTarget(any(), any()) }
-        }
-
-        test("leaves a project dependency alone") {
-            val substitution = mockk<DependencySubstitution>(relaxed = true)
-            every { substitution.requested } returns mockk<ComponentSelector>()
-
-            substitutionActionOf(action("com.example:core" to "1.1.0-SNAPSHOT")).execute(substitution)
-
-            verify(exactly = 0) { substitution.useTarget(any(), any()) }
         }
     }
 })

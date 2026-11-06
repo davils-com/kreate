@@ -20,16 +20,11 @@ import org.gradle.api.Action
 import org.gradle.api.IsolatedAction
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.DependencySubstitution
-import org.gradle.api.artifacts.DependencySubstitutions
 import org.gradle.api.artifacts.ResolutionStrategy
-import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenRepositoryContentDescriptor
 import org.gradle.api.artifacts.repositories.RepositoryContentDescriptor
 import java.util.concurrent.TimeUnit
-
-private const val SUBSTITUTION_REASON: String = "Kreate local development mode"
 
 private const val COORDINATE_SEPARATOR: Char = ':'
 
@@ -42,7 +37,7 @@ internal class LocalResolutionAction(
 ) : IsolatedAction<Project> {
     override fun execute(target: Project) {
         target.repositories.maven(repositoryAction())
-        target.configurations.configureEach(substitutionAction())
+        target.configurations.configureEach(resolutionAction())
     }
 
     private fun repositoryAction(): Action<MavenArtifactRepository> {
@@ -63,12 +58,8 @@ internal class LocalResolutionAction(
         }
     }
 
-    private fun substitutionAction(): Action<Configuration> {
+    private fun resolutionAction(): Action<Configuration> {
         val forced = substitutions.map { (coordinate, version) -> "$coordinate:$version" }
-        val versions = substitutions
-
-        val substitute = Action<DependencySubstitution> { substituteLocalVersion(versions) }
-        val allSubstitutions = Action<DependencySubstitutions> { all(substitute) }
 
         val strategy = Action<ResolutionStrategy> {
             force(*forced.toTypedArray())
@@ -77,13 +68,4 @@ internal class LocalResolutionAction(
 
         return Action { resolutionStrategy(strategy) }
     }
-}
-
-private fun DependencySubstitution.substituteLocalVersion(versions: Map<String, String>) {
-    val selector = requested as? ModuleComponentSelector ?: return
-    val coordinate = "${selector.group}$COORDINATE_SEPARATOR${selector.module}"
-    val version = versions[coordinate] ?: return
-    if (selector.version == version) return
-
-    useTarget("$coordinate$COORDINATE_SEPARATOR$version", SUBSTITUTION_REASON)
 }
