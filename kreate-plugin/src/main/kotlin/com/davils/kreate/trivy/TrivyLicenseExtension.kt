@@ -73,6 +73,17 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
     public val configurations: SetProperty<String> = factory.setProperty(String::class.java)
 
     /**
+     * Whether the task fails when it finds no lock file to scan.
+     *
+     * Defaults to `true`. Without a lock file this scan has nothing to read, so passing would report
+     * a dependency tree nobody looked at as clean. Set it to `false` only for a project that has no
+     * dependencies to lock.
+     *
+     * @since 4.0.0
+     */
+    public val failOnMissingLockFiles: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
+
+    /**
      * The collection of lock files to be scanned for license issues.
      *
      * @since 1.2.0

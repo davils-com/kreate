@@ -171,7 +171,8 @@ Registered when `trivy.enabled` is `true`.
 
 <warning>
 The vulnerability and licence scans read Gradle dependency lock files. Without them the scans
-have nothing to inspect. Enable Kreate's locking feature with
+have nothing to inspect, so they fail unless <code>failOnMissingLockFiles</code> is
+<code>false</code>. Enable Kreate's locking feature with
 <code>project { dependencyLocking { enabled = true } }</code> and write the lock files with
 <code>./gradlew kreateResolveAndLockAll --write-locks</code>. See
 <a href="Dependency-Locking.md">Dependency locking</a>.

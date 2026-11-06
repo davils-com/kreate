@@ -62,6 +62,13 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   `linux-x86_64/libsample.so=<sha256>`. A platform with several files, such as a Windows build
   next to its import library, used to produce several lines with one key, of which a reader kept
   only the last.
+- **Vulnerability and license scans fail when there is no lock file.** They used to log a line and
+  pass, so a project without locking, or a change that deleted `gradle.lockfile`, had a green scan
+  that had read nothing. `failOnMissingLockFiles = false` on `vulnerability { }` and `license { }`
+  restores the old behaviour for a project with nothing to lock.
+- **Dependency locking is strict.** A locked configuration without lock state now fails the build.
+  In Gradle's default mode a deleted lock file went unnoticed and versions floated.
+  `dependencyLocking { strict = false }` restores it.
 - **`local { snapshotSuffix }` is removed.** It was never read: a local publication always carries
   `-SNAPSHOT`, the suffix the consumer side's `snapshotsOnly()` repository is keyed to. Delete the
   assignment from the build script.
@@ -92,6 +99,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   and the resource path were pasted into Kotlin source, and the documentation recommends taking the
   version from `CI_COMMIT_TAG`. A Git tag can contain `"`, `$`, `(` and `)`, so a crafted tag could
   add code to the published artifact. The package name is validated as well.
+- **The default secret scan reads build scripts and key files.** `*.kts`, `*.toml`, `*.xml`, `*.pem`
+  and `*.key` were missing, although the documentation claimed build scripts and version catalogs
+  were covered.
 - **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a

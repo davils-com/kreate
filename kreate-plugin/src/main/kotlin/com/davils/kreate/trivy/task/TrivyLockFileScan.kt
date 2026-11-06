@@ -18,6 +18,8 @@ package com.davils.kreate.trivy.task
 
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -38,12 +40,15 @@ internal abstract class TrivyLockFileScan(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val lockFiles: ConfigurableFileCollection
 
+    @get:Input
+    public abstract val failOnMissingLockFiles: Property<Boolean>
+
     protected open fun scanTarget(lockFile: File): File = lockFile
 
     @TaskAction
     public fun execute() {
         if (lockFiles.isEmpty) {
-            logger.lifecycle("No lock files found. Skipping $scanName scan. Run 'gradle dependencies --write-locks'.")
+            handleMissingLockFiles()
             return
         }
 
@@ -51,5 +56,17 @@ internal abstract class TrivyLockFileScan(
         if (withFindings.isEmpty() || !failOnFindings.get()) return
 
         throw GradleException(findingsMessage)
+    }
+
+    private fun handleMissingLockFiles() {
+        if (failOnMissingLockFiles.get()) {
+            throw GradleException(
+                "No lock files found, so the $scanName scan cannot check anything. Enable " +
+                    "project { dependencyLocking { enabled = true } } and run " +
+                    "'./gradlew kreateResolveAndLockAll --write-locks'."
+            )
+        }
+
+        logger.lifecycle("No lock files found. Skipping $scanName scan.")
     }
 }

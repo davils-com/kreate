@@ -85,9 +85,9 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
     /**
      * The collection of source files to scan for secrets.
      *
-     * The default covers the sources and the configuration files a credential is actually pasted
-     * into: Kotlin and Java under `src`, and YAML, `.env`, properties and JSON anywhere in the
-     * project, which is what reaches a build script, a version catalog and a deployment descriptor.
+     * The default covers the sources and the files a credential is actually pasted into: Kotlin and
+     * Java under `src`, and build scripts, version catalogs, YAML, XML, `.env`, properties, JSON and
+     * key files anywhere in the project.
      *
      * **Generated output is excluded, and that is not only about noise.** A secret under `build` is a
      * copy of one in a file this scan already reads, so reporting it twice adds no finding and costs
@@ -112,11 +112,16 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
             include(
                 "src/**/*.kt",
                 "src/**/*.java",
+                "**/*.kts",
+                "**/*.toml",
+                "**/*.xml",
                 "**/*.yaml",
                 "**/*.yml",
                 "**/*.env",
                 "**/*.properties",
-                "**/*.json"
+                "**/*.json",
+                "**/*.pem",
+                "**/*.key"
             )
             exclude(
                 "**/build/**",

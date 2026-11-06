@@ -26,8 +26,7 @@ import javax.inject.Inject
  *
  * Locking pins every resolved dependency version in a `gradle.lockfile`, which is what
  * turns a build into a reproducible one and what gives the Trivy scans something concrete
- * to read. Without a lock file those scans have no version list to check and report
- * success without having checked anything.
+ * to read. Without a lock file those scans have no version list to check and fail.
  *
  * @param factory The object factory used to create the properties.
  * @since 2.1.0
@@ -57,6 +56,17 @@ public abstract class DependencyLockingExtension @Inject constructor(factory: Ob
      */
     public val lockedClasspaths: SetProperty<String> = factory.setProperty(String::class.java)
         .convention(setOf("compileClasspath", "runtimeClasspath"))
+
+    /**
+     * Whether a locked configuration without lock state fails the build.
+     *
+     * Defaults to `true`, Gradle's `LockMode.STRICT`. In Gradle's default mode a deleted lock file
+     * goes unnoticed: versions float again, and the build stays green. Write the state with
+     * `kreateResolveAndLockAll --write-locks`.
+     *
+     * @since 4.0.0
+     */
+    public val strict: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
     /**
      * Whether every configuration is locked instead of only [lockedClasspaths].

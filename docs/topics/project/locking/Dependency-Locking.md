@@ -38,6 +38,10 @@ kreate {
 
 Commit the resulting `gradle.lockfile`.
 
+Locking is **strict**: once enabled, a locked configuration without lock state fails the build, so a
+deleted lock file cannot let versions float unnoticed. `dependencyLocking { strict = false }` returns
+to Gradle's default mode.
+
 <note>
 The classpaths of every enabled <a href="Testing-Suites.md">test suite</a> are locked as well —
 <code>unitTestCompileClasspath</code>, <code>integrationTestRuntimeClasspath</code> and so on, or

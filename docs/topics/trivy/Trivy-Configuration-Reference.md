@@ -27,6 +27,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 | `severity`        | `ListProperty<LicenseSeverity>` | `[CRITICAL, HIGH, UNKNOWN]` | Severities to include in the scan.                                         |
 | `ignoredLicenses` | `ListProperty<String>`          | `[]`                        | List of licenses to ignore (e.g., "MIT", "Apache-2.0").                    |
 | `configurations`  | `SetProperty<String>`           | main compile and runtime classpaths | Lock file configurations whose dependencies are checked. Since 4.0.0.  |
+| `failOnMissingLockFiles` | `Property<Boolean>` | `true` | Fails the build when there is no lock file to scan. |
 | `lockFiles`       | `ConfigurableFileCollection`    | `*.lockfile`                | The collection of lockfiles to be scanned.                                 |
 
 ---
@@ -37,6 +38,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 |:-----------------|:-----------------------------|:--------------------------------|:-------------------------------------------------|
 | `failOnFindings` | `Property<Boolean>`          | `true`                          | Fails the build if vulnerabilities are detected. |
 | `score`          | `ListProperty<Score>`        | `[CRITICAL, HIGH, MEDIUM, LOW]` | Vulnerability scores to include in the scan.     |
+| `failOnMissingLockFiles` | `Property<Boolean>` | `true` | Fails the build when there is no lock file to scan. |
 | `lockFiles`      | `ConfigurableFileCollection` | `*.lockfile`                    | The collection of lockfiles to be scanned.       |
 
 ---
@@ -49,7 +51,7 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 | `runOnCheck`     | `Property<Boolean>`            | `true`                          | Makes `check` (and so `build`) run the secret scan. Since 3.4.0. |
 | `severity`       | `ListProperty<SecretSeverity>` | `[CRITICAL, HIGH, MEDIUM, LOW]` | Severities of secrets to include.            |
 | `secretConfig`   | `RegularFileProperty`          | `trivy-secret.yaml`             | Path to the Trivy secret configuration file. |
-| `sourceFiles`    | `ConfigurableFileCollection`   | sources and config files, excluding `build` | The files to be scanned for secrets. `from` adds to the default, `setFrom` replaces it. |
+| `sourceFiles`    | `ConfigurableFileCollection`   | sources, build scripts, config and key files, excluding `build` | The files to be scanned for secrets. `from` adds to the default, `setFrom` replaces it. |
 
 ---
 

@@ -81,6 +81,31 @@ class DependencyLockingFunctionalTest : FunSpec({
             lockFile.readText() shouldContain "runtimeClasspath"
         }
 
+        test("a deleted lock file fails the build instead of letting versions float") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild()
+            fixture.build("kreateResolveAndLockAll", "--write-locks")
+            fixture.lockFile().delete()
+
+            val result = fixture.buildAndFail("dependencies", "--configuration", "runtimeClasspath")
+
+            result.output shouldContain "Locking strict mode"
+        }
+
+        test("a build can opt out of strict locking") {
+            val fixture = newFixture()
+            fixture.writeLockedBuild(
+                """
+                enabled = true
+                strict = false
+                """.trimIndent()
+            )
+
+            val result = fixture.build("dependencies", "--configuration", "runtimeClasspath")
+
+            result.output shouldContain "commons-lang3"
+        }
+
         test("refuses to run without --write-locks and says what to type instead") {
             val fixture = newFixture()
             fixture.writeLockedBuild()

@@ -129,7 +129,7 @@ class PluginContractFunctionalTest : FunSpec({
             result.output shouldContain "kreateTrivyVulnerabilityScan"
         }
 
-        test("skips a Trivy scan with an actionable message when no lock files exist") {
+        test("fails a Trivy scan with an actionable message when no lock files exist") {
             val fixture = newBuild()
             fixture.writeBuild(
                 """
@@ -141,10 +141,31 @@ class PluginContractFunctionalTest : FunSpec({
                 """.trimIndent()
             )
 
-            val result = fixture.build("kreateTrivyVulnerabilityScan")
+            val result = fixture.buildAndFail("kreateTrivyVulnerabilityScan")
 
             val howToGenerateLockFiles = "--write-locks"
             result.output shouldContain howToGenerateLockFiles
+        }
+
+        test("skips a Trivy scan without lock files when the build opted out") {
+            val fixture = newBuild()
+            fixture.writeBuild(
+                """
+                $minimalKreateBlock
+
+                trivy {
+                    enabled = true
+
+                    vulnerability {
+                        failOnMissingLockFiles = false
+                    }
+                }
+                """.trimIndent()
+            )
+
+            val result = fixture.build("kreateTrivyVulnerabilityScan")
+
+            result.output shouldContain "Skipping vulnerability scan."
         }
 
         test("one plugins block is enough for every feature at once") {

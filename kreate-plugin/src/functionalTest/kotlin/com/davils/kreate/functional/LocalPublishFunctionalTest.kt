@@ -231,6 +231,7 @@ class LocalPublishFunctionalTest : FunSpec({
             test("refuses to write a lock file that would pin a local snapshot") {
                 val fixture = producer()
                 fixture.enableDependencyLocking()
+                fixture.build("kreateResolveAndLockAll", "--write-locks")
                 fixture.build("kreateLocalPublish")
 
                 val result = fixture.buildAndFail("kreateResolveAndLockAll", "--write-locks")
@@ -242,6 +243,7 @@ class LocalPublishFunctionalTest : FunSpec({
             test("turns dependency locking off rather than failing every build") {
                 val fixture = producer()
                 fixture.enableDependencyLocking()
+                fixture.build("kreateResolveAndLockAll", "--write-locks")
                 fixture.build("kreateLocalPublish")
 
                 val result = fixture.build("kreateLocalStatus")

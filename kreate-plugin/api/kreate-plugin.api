@@ -480,6 +480,7 @@ public abstract class com/davils/kreate/locking/DependencyLockingExtension {
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getLockAllConfigurations ()Lorg/gradle/api/provider/Property;
 	public final fun getLockedClasspaths ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getStrict ()Lorg/gradle/api/provider/Property;
 }
 
 public final class com/davils/kreate/locking/DependencyLockingTaskNames {
@@ -839,6 +840,7 @@ public abstract class com/davils/kreate/trivy/TrivyLicenseExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnMissingLockFiles ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
@@ -864,6 +866,7 @@ public final class com/davils/kreate/trivy/TrivyTaskNames {
 public abstract class com/davils/kreate/trivy/TrivyVulnerabilityExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnMissingLockFiles ()Lorg/gradle/api/provider/Property;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getScore ()Lorg/gradle/api/provider/ListProperty;
 }

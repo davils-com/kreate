@@ -60,6 +60,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         severity.set(trivyLicenseExtension.severity.names())
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
         configurations.set(trivyLicenseExtension.configurations)
+        failOnMissingLockFiles.set(trivyLicenseExtension.failOnMissingLockFiles)
         lockFiles.setFrom(trivyLicenseExtension.lockFiles)
     }
 
@@ -67,6 +68,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     val vulnerabilityScan = tasks.register<TrivyVulnerabilityScan>(TrivyTaskNames.VULNERABILITIES) {
         severity.set(trivyVulnerabilityExtension.score.names())
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
+        failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
         usesService(trivyDatabaseService())
     }

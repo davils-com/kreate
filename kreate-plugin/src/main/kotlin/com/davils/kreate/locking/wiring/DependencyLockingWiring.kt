@@ -29,6 +29,7 @@ import com.davils.kreate.testing.suite.enabledSuites
 import com.davils.kreate.testing.suite.lowerCamelCaseName
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.LockMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 private const val COMPILE_CLASSPATH_SUFFIX = "CompileClasspath"
@@ -42,6 +43,10 @@ internal fun Project.initializeDependencyLocking(extension: KreateExtension) {
     if (localModeOf(extension).isActive) {
         deactivateLockingForLocalMode()
         return
+    }
+
+    if (lockingExtension.strict.get()) {
+        dependencyLocking.lockMode.set(LockMode.STRICT)
     }
 
     val lockedClasspaths = lockingExtension.lockedClasspaths.get() +

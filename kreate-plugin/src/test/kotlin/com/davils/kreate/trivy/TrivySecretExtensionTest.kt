@@ -91,7 +91,25 @@ class TrivySecretExtensionTest : FunSpec({
                     "Main.kt",
                     "application.yaml",
                     "config.json",
-                    "gradle.properties"
+                    "gradle.properties",
+                    "libs.versions.toml"
+                )
+            }
+
+            test("covers build scripts, XML and key files, where a credential ends up by accident") {
+                val projectDirectory = workspace.freshDirectory("project")
+                write(projectDirectory, "build.gradle.kts")
+                write(projectDirectory, "nested/module/settings.xml")
+                write(projectDirectory, "certificates/service.pem")
+                write(projectDirectory, "signing.key")
+
+                val scanned = scannedNames(project(projectDirectory))
+
+                scanned shouldContainExactly listOf(
+                    "build.gradle.kts",
+                    "service.pem",
+                    "settings.xml",
+                    "signing.key"
                 )
             }
 
