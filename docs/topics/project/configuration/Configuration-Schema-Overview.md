@@ -83,6 +83,12 @@ and defaults. A constraint is exported as prose and is not compared, which is st
 papered over - a check that quietly missed a category of change would be worse than one that says
 which category it covers.
 
+<note>
+The schema tasks load the classes of the project and call the declaration you named inside the
+Gradle JVM. That is your own code, so it is the same trust a build script has, but a project-level
+side effect in that call runs during <code>check</code>.
+</note>
+
 ## The dry run over your own files
 
 A repository usually carries the configuration it ships with, and nothing checks that those files

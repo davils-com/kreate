@@ -19,10 +19,11 @@ package com.davils.kreate.tooling
 import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import org.gradle.process.ExecOperations
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 private const val SUCCESS_EXIT_CODE: Int = 0
+
+private const val MAX_RETAINED_OUTPUT_BYTES: Int = 16 * 1024 * 1024
 
 internal fun runExternalTool(
     exec: ExecOperations,
@@ -32,7 +33,7 @@ internal fun runExternalTool(
     arguments: List<String>,
     environment: Map<String, String> = emptyMap()
 ): String {
-    val output = ByteArrayOutputStream()
+    val output = BoundedOutputStream(MAX_RETAINED_OUTPUT_BYTES)
     val result = exec.exec {
         workingDir = workingDirectory
         commandLine(arguments)
@@ -42,7 +43,7 @@ internal fun runExternalTool(
         isIgnoreExitValue = true
     }
 
-    val text = output.toString(Charsets.UTF_8)
+    val text = output.snapshot().text
     val hasFailed = result.exitValue != SUCCESS_EXIT_CODE
 
     if (hasFailed) {
