@@ -21,7 +21,7 @@ kreate {
             failOnFindings = true
 
             // Define which severities should be reported
-            severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH)
+            severity = listOf(Severity.CRITICAL, Severity.HIGH)
 
             // Define which files to scan. setFrom replaces the default scope; from would add to it
             sourceFiles.setFrom(fileTree(projectDir) {

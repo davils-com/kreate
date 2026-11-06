@@ -81,7 +81,7 @@ public abstract class DetektExtension @Inject constructor(factory: ObjectFactory
      * @since 1.2.0
      */
     public val config: RegularFileProperty = factory.fileProperty().convention(
-        project.rootProject.layout.projectDirectory.file("detekt.yaml")
+        project.isolated.rootProject.projectDirectory.file("detekt.yaml")
     )
 
     /**

@@ -16,6 +16,7 @@
 
 package com.davils.kreate.trivy
 
+import com.davils.kreate.assurance.Severity
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
@@ -37,16 +38,16 @@ public abstract class TrivyLicenseExtension @Inject constructor(factory: ObjectF
      *
      * @since 1.2.0
      */
-    public val severity: ListProperty<LicenseSeverity> = factory.listProperty(
-        LicenseSeverity::class.java
-    ).convention(listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN))
+    public val severity: ListProperty<Severity> = factory.listProperty(
+        Severity::class.java
+    ).convention(listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN))
 
     /**
      * Whether the task should fail if forbidden or restricted licenses are found.
      *
-     * @since 1.2.0
+     * @since 4.0.0
      */
-    public val failOnForbidden: Property<Boolean> = factory.property(
+    public val failOnFindings: Property<Boolean> = factory.property(
         Boolean::class.java
     ).convention(true)
 

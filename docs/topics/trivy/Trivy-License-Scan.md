@@ -38,13 +38,13 @@ kreate {
         enabled = true
         license {
             // Fail the build if a forbidden license is found
-            failOnForbidden = true
+            failOnFindings = true
 
             // Define which severities should be reported
             severity = listOf(
-                LicenseSeverity.CRITICAL,
-                LicenseSeverity.HIGH,
-                LicenseSeverity.UNKNOWN
+                Severity.CRITICAL,
+                Severity.HIGH,
+                Severity.UNKNOWN
             )
 
             // Licenses that are explicitly allowed, even if Trivy flags them
@@ -78,7 +78,7 @@ Trivy's license classification is a technical aid and does not replace legal adv
     `./gradlew dependencies --write-locks` — it records only the configurations that one
     invocation happens to resolve, producing a lock file that looks complete and is not.
 *   **Handling "Unknown"**: Licenses are often marked as `UNKNOWN` if metadata in Maven Central is incomplete. Verify these manually and add them to `ignoredLicenses` if they are acceptable.
-*   **Gradual Adoption**: For existing projects, start with `failOnForbidden = false` to identify issues without breaking the build, then fix or ignore them before enforcing compliance.
+*   **Gradual Adoption**: For existing projects, start with `failOnFindings = false` to identify issues without breaking the build, then fix or ignore them before enforcing compliance.
 
 ## How to Run
 

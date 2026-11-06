@@ -16,6 +16,7 @@
 
 package com.davils.kreate.trivy
 
+import com.davils.kreate.assurance.Severity
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -39,10 +40,10 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
      *
      * @since 1.2.0
      */
-    public val severity: ListProperty<SecretSeverity> = factory.listProperty(
-        SecretSeverity::class.java
+    public val severity: ListProperty<Severity> = factory.listProperty(
+        Severity::class.java
     ).convention(listOf(
-        SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW
+        Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW
     ))
 
     /**
@@ -79,7 +80,7 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
      * @since 1.2.0
      */
     public val secretConfig: RegularFileProperty = factory.fileProperty().convention(
-        project.rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+        project.isolated.rootProject.projectDirectory.file("trivy-secret.yaml")
     )
 
     /**

@@ -25,7 +25,7 @@ internal object LocalWorkflowFeature : KreateFeature {
     override val phase: FeaturePhase = FeaturePhase.LOCAL_WORKFLOW
 
     override fun apply(project: Project, extension: KreateExtension) {
-        val isRootProject = project == project.rootProject
+        val isRootProject = project.parent == null
         if (!isRootProject) return
 
         project.initializeLocalWorkflow(extension)

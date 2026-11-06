@@ -31,6 +31,7 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   | `com.davils.kreate.repository.gitlabPackageRegistry` | `com.davils.kreate.publish.gitlabPackageRegistry` |
   | `com.davils.kreate.module.project.tests[.logging\|.report\|.suite].*` | `com.davils.kreate.testing.*` |
   | `com.davils.kreate.module.trivy[.extension].*` | `com.davils.kreate.trivy.*` |
+  | `com.davils.kreate.trivy.Score`, `….SecretSeverity`, `….LicenseSeverity` | `com.davils.kreate.assurance.Severity` |
   | `com.davils.kreate.module.local.extension.*` | `com.davils.kreate.local.*` |
 
 - **`KreateTasks` is replaced by one task name object per feature**: `JniTaskNames`,
@@ -51,6 +52,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   `ChainedCallLimit` and `OneTopLevelTypePerFile`. A project switches one off with
   `kreate: <Rule>: active: false` in its `detekt.yml`, or the whole set with
   `detekt { kreateRules = false }`.
+- **The Trivy DSL has one severity type.** `Score`, `SecretSeverity` and `LicenseSeverity` are
+  replaced by `com.davils.kreate.assurance.Severity`. `vulnerability { score }` is now
+  `vulnerability { severity }`, and `license { failOnForbidden }` is `license { failOnFindings }`.
 - **The generated `KreateNativeLoader` loads the packaged copy first.** It used to try
   `System.loadLibrary` first, so a file named like the library in a directory on
   `java.library.path`, which on Windows normally includes the working directory, replaced the

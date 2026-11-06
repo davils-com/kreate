@@ -13,36 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.davils.kreate.trivy
+package com.davils.kreate.assurance
 
 /**
- * Represents the severity levels for secret scanning.
+ * How serious a finding is, from [CRITICAL] down to [UNKNOWN].
  *
- * @since 1.2.0
+ * [UNKNOWN] means that the source gave no usable rating, not that the finding is harmless.
+ *
+ * @since 4.0.0
  */
-public enum class SecretSeverity {
+public enum class Severity {
     /**
-     * Critical secret found. Requires immediate revocation.
-     * @since 1.2.0
+     * Exploitable or already compromised. Requires immediate attention.
+     *
+     * @since 4.0.0
      */
     CRITICAL,
 
     /**
-     * High severity secret found. Should be revoked and rotated.
-     * @since 1.2.0
+     * A serious problem that should be addressed as soon as possible.
+     *
+     * @since 4.0.0
      */
     HIGH,
 
     /**
-     * Medium severity secret found. Potential security risk.
-     * @since 1.2.0
+     * A real problem that is important to address, but not urgent.
+     *
+     * @since 4.0.0
      */
     MEDIUM,
 
     /**
-     * Low severity secret found. Minimal security impact.
-     * @since 1.2.0
+     * A problem with minimal impact.
+     *
+     * @since 4.0.0
      */
-    LOW
+    LOW,
+
+    /**
+     * The source gave no usable rating.
+     *
+     * @since 4.0.0
+     */
+    UNKNOWN
 }

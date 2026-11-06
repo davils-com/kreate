@@ -56,7 +56,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     val productionConfigurations = provider { productionConfigurations() }
     trivyLicenseExtension.configurations.convention(productionConfigurations)
     val licenseScan = tasks.register<TrivyLicenseScan>(TrivyTaskNames.LICENSES) {
-        failOnFindings.set(trivyLicenseExtension.failOnForbidden)
+        failOnFindings.set(trivyLicenseExtension.failOnFindings)
         severity.set(trivyLicenseExtension.severity.names())
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
         configurations.set(trivyLicenseExtension.configurations)
@@ -66,7 +66,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
 
     val trivyVulnerabilityExtension = trivyExtension.vulnerability
     val vulnerabilityScan = tasks.register<TrivyVulnerabilityScan>(TrivyTaskNames.VULNERABILITIES) {
-        severity.set(trivyVulnerabilityExtension.score.names())
+        severity.set(trivyVulnerabilityExtension.severity.names())
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
         failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)

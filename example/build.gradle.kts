@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
+import com.davils.kreate.assurance.Severity
 import com.davils.kreate.cinterop.NativeLanguage
 import com.davils.kreate.coverage.Grouping
 import com.davils.kreate.testing.KotestModule
 import com.davils.kreate.testing.LegacyTestPolicy
-import com.davils.kreate.trivy.LicenseSeverity
-import com.davils.kreate.trivy.Score
-import com.davils.kreate.trivy.SecretSeverity
 import java.time.Year
 
 plugins {
@@ -84,7 +82,7 @@ kreate {
         enabled = true
 
         vulnerability {
-            score = listOf(Score.CRITICAL, Score.HIGH, Score.MEDIUM, Score.LOW)
+            severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW)
             failOnFindings = true
             lockFiles.from(
                 fileTree(projectDir) {
@@ -94,8 +92,8 @@ kreate {
         }
 
         license {
-            severity = listOf(LicenseSeverity.CRITICAL, LicenseSeverity.HIGH, LicenseSeverity.UNKNOWN)
-            failOnForbidden = true
+            severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.UNKNOWN)
+            failOnFindings = true
             ignoredLicenses = listOf("MIT")
             lockFiles.from(
                 fileTree(projectDir) {
@@ -105,7 +103,7 @@ kreate {
         }
 
         secrets {
-            severity = listOf(SecretSeverity.CRITICAL, SecretSeverity.HIGH, SecretSeverity.MEDIUM, SecretSeverity.LOW)
+            severity = listOf(Severity.CRITICAL, Severity.HIGH, Severity.MEDIUM, Severity.LOW)
             failOnFindings = true
             secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
             sourceFiles.setFrom(

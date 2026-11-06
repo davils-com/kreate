@@ -33,6 +33,17 @@ public final class com/davils/kreate/api/ApiValidationTaskNames {
 	public static final field INSTANCE Lcom/davils/kreate/api/ApiValidationTaskNames;
 }
 
+public final class com/davils/kreate/assurance/Severity : java/lang/Enum {
+	public static final field CRITICAL Lcom/davils/kreate/assurance/Severity;
+	public static final field HIGH Lcom/davils/kreate/assurance/Severity;
+	public static final field LOW Lcom/davils/kreate/assurance/Severity;
+	public static final field MEDIUM Lcom/davils/kreate/assurance/Severity;
+	public static final field UNKNOWN Lcom/davils/kreate/assurance/Severity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/assurance/Severity;
+	public static fun values ()[Lcom/davils/kreate/assurance/Severity;
+}
+
 public abstract class com/davils/kreate/benchmark/BenchmarkExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getApplyAllOpen ()Lorg/gradle/api/provider/Property;
@@ -800,37 +811,6 @@ public abstract class com/davils/kreate/testing/TestsReportExtension {
 	public final fun getXml ()Lorg/gradle/api/provider/Property;
 }
 
-public final class com/davils/kreate/trivy/LicenseSeverity : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static final field HIGH Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static final field LOW Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static final field MEDIUM Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static final field UNKNOWN Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/LicenseSeverity;
-	public static fun values ()[Lcom/davils/kreate/trivy/LicenseSeverity;
-}
-
-public final class com/davils/kreate/trivy/Score : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/trivy/Score;
-	public static final field HIGH Lcom/davils/kreate/trivy/Score;
-	public static final field LOW Lcom/davils/kreate/trivy/Score;
-	public static final field MEDIUM Lcom/davils/kreate/trivy/Score;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/Score;
-	public static fun values ()[Lcom/davils/kreate/trivy/Score;
-}
-
-public final class com/davils/kreate/trivy/SecretSeverity : java/lang/Enum {
-	public static final field CRITICAL Lcom/davils/kreate/trivy/SecretSeverity;
-	public static final field HIGH Lcom/davils/kreate/trivy/SecretSeverity;
-	public static final field LOW Lcom/davils/kreate/trivy/SecretSeverity;
-	public static final field MEDIUM Lcom/davils/kreate/trivy/SecretSeverity;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/trivy/SecretSeverity;
-	public static fun values ()[Lcom/davils/kreate/trivy/SecretSeverity;
-}
-
 public abstract class com/davils/kreate/trivy/TrivyExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
@@ -845,7 +825,7 @@ public abstract class com/davils/kreate/trivy/TrivyExtension {
 public abstract class com/davils/kreate/trivy/TrivyLicenseExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
-	public final fun getFailOnForbidden ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
 	public final fun getFailOnMissingLockFiles ()Lorg/gradle/api/provider/Property;
 	public final fun getIgnoredLicenses ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
@@ -874,6 +854,6 @@ public abstract class com/davils/kreate/trivy/TrivyVulnerabilityExtension {
 	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
 	public final fun getFailOnMissingLockFiles ()Lorg/gradle/api/provider/Property;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
-	public final fun getScore ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
 }
 
