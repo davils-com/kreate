@@ -75,8 +75,19 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   over; the dumps take the Kotlin plugin's layout, including a `<project>.klib.api`. Off by
   default, so an existing dump keeps its layout until a project opts in. Requires Kotlin 2.4.
 
+### Security
+
+- **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
+  deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
+  plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a
+  consumer resolves unless the build applies a higher one.
+
 ### Changed
 
+- **The toolchain moved to its current releases.** Gradle 9.9.0, which embeds Kotlin 2.4.21, Dokka
+  2.3.0, Kotest 6.2.6, JaCoCo 0.8.16, ASM 9.11.1, and Trivy 0.76.2 in CI. The default of
+  `tests { kotest { version } }` is now 6.2.6. The minimum versions are unchanged: Gradle 9.0 and
+  JDK 17.
 - **The license scan checks only what is shipped.** It used to read every configuration of a lock
   file, so a dependency that only a test suite resolves failed the scan. Kotest pulls in JNA
   (`LGPL-2.1-or-later`) through `kotlinx-coroutines-debug`, which failed the scan of every project

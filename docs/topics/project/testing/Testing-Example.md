@@ -44,7 +44,7 @@ tests {
     suites {
         named("unitTest") {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.0")
+                implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.21")
             }
         }
     }
@@ -197,7 +197,7 @@ kreate {
                 named("unitTest") {
                     dependencies {
                         // Moved off `testImplementation`, where they no longer apply.
-                        implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.0")
+                        implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.21")
                     }
                 }
             }
@@ -363,7 +363,7 @@ kreate {
 
             kotest {
                 enabled = true
-                version = "6.2.4"
+                version = "6.2.6"
                 modules = listOf(KotestModule.ASSERTIONS, KotestModule.PROPERTY)
                 addJUnitPlatformLauncher = true
                 junitPlatformVersion = "6.1.3"

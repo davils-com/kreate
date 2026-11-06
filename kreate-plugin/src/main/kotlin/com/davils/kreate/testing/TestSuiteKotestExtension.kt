@@ -103,7 +103,7 @@ public abstract class TestSuiteKotestExtension @Inject constructor(
         factory.property(String::class.java).convention(DEFAULT_JUNIT_PLATFORM_VERSION)
 
     private companion object {
-        const val DEFAULT_KOTEST_VERSION = "6.2.4"
+        const val DEFAULT_KOTEST_VERSION = "6.2.6"
 
         const val DEFAULT_JUNIT_PLATFORM_VERSION = "6.1.3"
     }

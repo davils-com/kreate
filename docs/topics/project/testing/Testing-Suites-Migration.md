@@ -161,7 +161,7 @@ tests {
     suites {
         named("unitTest") {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.0")
+                implementation("org.jetbrains.kotlin:kotlin-test-junit5:2.4.21")
                 implementation("org.junit.jupiter:junit-jupiter:6.1.3")
             }
         }

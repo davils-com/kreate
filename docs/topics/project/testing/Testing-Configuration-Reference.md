@@ -338,7 +338,7 @@ On a multiplatform project these land on the suite's shared source set.
 | Property                   | Type                          | Default               | Description                                    |
 |----------------------------|-------------------------------|-----------------------|------------------------------------------------|
 | `enabled`                  | `Property<Boolean>`           | `false`               | Whether Kreate adds the Kotest artifacts       |
-| `version`                  | `Property<String>`            | `6.2.4`               | One version for the whole bundle               |
+| `version`                  | `Property<String>`            | `6.2.6`               | One version for the whole bundle               |
 | `modules`                  | `ListProperty<KotestModule>`  | `[ASSERTIONS]`        | Optional libraries added beside the runner     |
 | `addJUnitPlatformLauncher` | `Property<Boolean>`           | `true`                | Adds the launcher a suite cannot start without |
 | `junitPlatformVersion`     | `Property<String>`            | `6.1.3`               | Version of that launcher                       |

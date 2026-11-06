@@ -14,7 +14,7 @@ A %product% build script needs two entries:
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.4.0"
+    kotlin("jvm") version "2.4.21"
     id("com.davils.kreate") version "%version%"
 }
 ```
@@ -88,7 +88,7 @@ Declare the plugin yourself:
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.4.0"
+    kotlin("jvm") version "2.4.21"
     id("dev.detekt") version "2.0.0-alpha.6"
     id("com.davils.kreate") version "%version%"
 }

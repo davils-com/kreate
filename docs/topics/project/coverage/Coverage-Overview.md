@@ -108,7 +108,7 @@ tooling expecting it:
 coverage {
     enabled = true
     useJacoco = true
-    jacocoVersion = "0.8.14"
+    jacocoVersion = "0.8.16"
 }
 ```
 
