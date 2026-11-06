@@ -154,6 +154,44 @@ class BenchmarkReportTest : FunSpec({
             BenchmarkReport.parse(baselineWithoutMachineDetails) shouldBe results
         }
 
+        test("renders text that needs escaping as valid JSON") {
+            val result = BenchmarkResult(
+                benchmark = "com.example.Bench.\"quoted\"",
+                mode = "thrpt",
+                params = mapOf("path" to "C:\\temp\n"),
+                score = 1.0,
+                scoreError = 0.5,
+                scoreUnit = "ops/s"
+            )
+
+            val rendered = BenchmarkReport.render(listOf(result))
+
+            BenchmarkReport.parse(rendered).single() shouldBe result
+        }
+
+        test("leaves a NaN inside a string alone") {
+            val report = kotlinxReport.replace("\"thrpt\"", "\"mode: NaN\"")
+
+            BenchmarkReport.parse(report).single().mode shouldBe "mode: NaN"
+        }
+
+        test("reads a NaN inside the raw data of a report") {
+            val report = kotlinxReport.replace("1239.0", "NaN")
+
+            BenchmarkReport.parse(report).single().score shouldBe 1234.5
+        }
+
+        test("keeps parameters that are not strings") {
+            val report = kotlinxReport.replace(
+                """"primaryMetric"""",
+                """"params": {"size": 3, "on": true, "none": null}, "primaryMetric""""
+            )
+
+            val params = BenchmarkReport.parse(report).single().params
+
+            params shouldBe mapOf("size" to "3", "on" to "true", "none" to "null")
+        }
+
         test("renders a non-finite score error as valid JSON") {
             val result = BenchmarkResult(
                 benchmark = "com.example.Bench.run",

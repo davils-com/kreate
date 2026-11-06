@@ -173,6 +173,11 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   having been scanned. Findings now use exit code 10. Every exit code other than 0 and 10 fails the
   task and names the file Trivy did not finish.
 
+- **Benchmark baselines survive text that needs escaping.** A benchmark name or parameter value
+  with a quote or backslash produced a baseline that was not valid JSON, and a `NaN` written after a
+  colon inside a string was rewritten while reading a report. Reports are now read and written by
+  Kreate's own JSON code, which also accepts `NaN` and `Infinity` inside arrays such as `rawData`.
+
 ## 3.4.0
 
 ### Fixed

@@ -16,24 +16,35 @@
 
 package com.davils.kreate.benchmark.report
 
-import groovy.json.JsonException
-import groovy.json.JsonSlurper
+import com.davils.kreate.json.JsonArray
+import com.davils.kreate.json.JsonNumber
+import com.davils.kreate.json.JsonObject
+import com.davils.kreate.json.JsonParseException
+import com.davils.kreate.json.JsonParser
+import com.davils.kreate.json.JsonParserOptions
+import com.davils.kreate.json.JsonString
+import com.davils.kreate.json.JsonValue
+import com.davils.kreate.json.JsonWriter
+import com.davils.kreate.json.asString
+import com.davils.kreate.json.double
+import com.davils.kreate.json.obj
+import com.davils.kreate.json.string
+import com.davils.kreate.json.typeName
 
 internal object BenchmarkReport {
     private const val INVALID_JSON_MESSAGE = "The benchmark report is not valid JSON."
-    private val NON_FINITE_LITERAL = Regex(""":\s*(NaN|-?Infinity)\b""")
+    private val PARSER_OPTIONS = JsonParserOptions(maxSize = Int.MAX_VALUE, nonFiniteAsNull = true)
 
     fun parse(json: String): List<BenchmarkResult> {
-        val sanitized = NON_FINITE_LITERAL.replace(json) { ": null" }
-        val parsed = parseJson(sanitized)
+        val parsed = parseJson(json)
 
-        require(parsed is List<*>) {
+        require(parsed is JsonArray) {
             "A benchmark report must be a JSON array of measurements, but the document is " +
-                "a ${parsed?.javaClass?.simpleName ?: "null"}."
+                "a ${parsed.typeName}."
         }
 
-        return parsed.map { entry ->
-            require(entry is Map<*, *>) { "Every entry of a benchmark report must be an object." }
+        return parsed.elements.map { entry ->
+            require(entry is JsonObject) { "Every entry of a benchmark report must be an object." }
             readResult(entry)
         }
     }
@@ -46,65 +57,65 @@ internal object BenchmarkReport {
             transform = ::renderResult
         )
 
-    private fun parseJson(json: String): Any? {
+    private fun parseJson(json: String): JsonValue {
         require(json.isNotEmpty()) { INVALID_JSON_MESSAGE }
 
         return try {
-            JsonSlurper().parseText(json)
-        } catch (cause: JsonException) {
+            JsonParser.parse(json, PARSER_OPTIONS)
+        } catch (cause: JsonParseException) {
             throw IllegalArgumentException(INVALID_JSON_MESSAGE, cause)
         }
     }
 
-    private fun readResult(entry: Map<*, *>): BenchmarkResult {
-        val benchmark = entry["benchmark"] as? String
+    private fun readResult(entry: JsonObject): BenchmarkResult {
+        val benchmark = entry.string("benchmark")
         requireNotNull(benchmark) { "A benchmark report entry has no 'benchmark' name." }
 
-        val metric = entry["primaryMetric"] as? Map<*, *>
+        val metric = entry.obj("primaryMetric")
         require(metric != null) { "Benchmark '$benchmark' has no 'primaryMetric'." }
 
-        val score = (metric["score"] as? Number)?.toDouble()
+        val score = metric.double("score")
         require(score != null) { "Benchmark '$benchmark' has no numeric 'score'." }
 
         return BenchmarkResult(
             benchmark = benchmark,
-            mode = entry["mode"] as? String ?: "",
-            params = readParams(entry["params"]),
+            mode = entry.string("mode") ?: "",
+            params = readParams(entry.obj("params")),
             score = score,
-            scoreError = readDouble(metric["scoreError"]),
-            scoreUnit = metric["scoreUnit"] as? String ?: ""
+            scoreError = readDouble(metric.members["scoreError"]),
+            scoreUnit = metric.string("scoreUnit") ?: ""
         )
     }
 
-    private fun readDouble(value: Any?): Double {
-        when (value) {
-            is Number -> return value.toDouble()
-            is String -> return value.toDoubleOrNull() ?: Double.NaN
-        }
-        return Double.NaN
+    private fun readDouble(value: JsonValue?): Double {
+        if (value is JsonNumber) return value.toDouble()
+        val text = value.asString() ?: return Double.NaN
+        return text.toDoubleOrNull() ?: Double.NaN
     }
 
-    private fun readParams(params: Any?): Map<String, String> {
-        if (params !is Map<*, *>) return emptyMap()
+    private fun readParams(params: JsonObject?): Map<String, String> {
+        if (params == null) return emptyMap()
+        return params.members.mapValues { (_, value) -> renderParam(value) }
+    }
 
-        return params.entries
-            .filter { it.key is String }
-            .associate { (key, value) -> key as String to value.toString() }
+    private fun renderParam(value: JsonValue): String {
+        if (value is JsonString) return value.value
+        return JsonWriter.compact(value)
     }
 
     private fun renderResult(result: BenchmarkResult): String {
         val sortedParams = result.params.entries.sortedBy { it.key }
-        val params = sortedParams.joinToString(", ") { """"${it.key}" : "${it.value}"""" }
+        val params = sortedParams.joinToString(", ") { "${JsonWriter.quote(it.key)} : ${JsonWriter.quote(it.value)}" }
 
         return listOf(
             "  {",
-            """    "benchmark" : "${result.benchmark}",""",
-            """    "mode" : "${result.mode}",""",
+            """    "benchmark" : ${JsonWriter.quote(result.benchmark)},""",
+            """    "mode" : ${JsonWriter.quote(result.mode)},""",
             """    "params" : { $params },""",
             """    "primaryMetric" : {""",
             """      "score" : ${result.score},""",
             """      "scoreError" : ${renderDouble(result.scoreError)},""",
-            """      "scoreUnit" : "${result.scoreUnit}"""",
+            """      "scoreUnit" : ${JsonWriter.quote(result.scoreUnit)}""",
             "    }",
             "  }"
         ).joinToString("\n")
