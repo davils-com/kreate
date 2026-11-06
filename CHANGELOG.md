@@ -102,6 +102,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **The default secret scan reads build scripts and key files.** `*.kts`, `*.toml`, `*.xml`, `*.pem`
   and `*.key` were missing, although the documentation claimed build scripts and version catalogs
   were covered.
+- **A CI job token only goes to its own GitLab instance.** `gitlabPackageRegistry` sent `CI_JOB_TOKEN`
+  to any URL, so a build resolving from a second instance handed that operator a live credential. It
+  is now sent only when the host matches `CI_SERVER_HOST`, or is listed in the new
+  `additionalJobTokenHosts`. Any other registry gets the access token.
 - **Kotlin 2.4.21 fixes CVE-2026-53914.** Kotlin before 2.4.20 could run code through unsafe
   deserialization of build cache metadata (GHSA-r937-wjx7-w2jp). Kreate carries the Kotlin Gradle
   plugin onto a consumer's build classpath, so the raised version also raises the Kotlin plugin a

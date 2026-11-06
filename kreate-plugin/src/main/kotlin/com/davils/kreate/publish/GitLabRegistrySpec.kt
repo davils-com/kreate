@@ -67,6 +67,27 @@ public class GitLabRegistrySpec {
     public var jobTokenVariable: String = "CI_JOB_TOKEN"
 
     /**
+     * The environment variable naming the GitLab host the pipeline runs on.
+     *
+     * Defaults to `CI_SERVER_HOST`, which GitLab injects into every pipeline job. A job token is a
+     * live credential of that instance, so it is only sent to a [url] on this host. A registry on
+     * any other host gets the access token, as outside a pipeline.
+     *
+     * @since 4.0.0
+     */
+    public var serverHostVariable: String = "CI_SERVER_HOST"
+
+    /**
+     * Further hosts the job token may be sent to, besides the one in [serverHostVariable].
+     *
+     * Defaults to empty. Name a host here only when it is the same GitLab instance under another
+     * name, such as an internal address of the pipeline's own server.
+     *
+     * @since 4.0.0
+     */
+    public var additionalJobTokenHosts: Set<String> = emptySet()
+
+    /**
      * The Gradle property holding a personal or group access token.
      *
      * Defaults to `gitlabToken`. This is the credential a developer keeps in

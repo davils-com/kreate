@@ -391,7 +391,6 @@ public abstract class com/davils/kreate/docs/DocsExtension {
 public abstract class com/davils/kreate/jni/JniExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getBuildType ()Lorg/gradle/api/provider/Property;
-	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHeaders ()Lcom/davils/kreate/jni/JniHeaderExtension;
@@ -569,14 +568,18 @@ public final class com/davils/kreate/publish/GitLabPackageRegistryKt {
 public final class com/davils/kreate/publish/GitLabRegistrySpec {
 	public fun <init> ()V
 	public final fun content (Lorg/gradle/api/Action;)V
+	public final fun getAdditionalJobTokenHosts ()Ljava/util/Set;
 	public final fun getJobTokenVariable ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getServerHostVariable ()Ljava/lang/String;
 	public final fun getTokenHeader ()Ljava/lang/String;
 	public final fun getTokenProperty ()Ljava/lang/String;
 	public final fun getTokenVariable ()Ljava/lang/String;
 	public final fun getUrl ()Ljava/lang/String;
+	public final fun setAdditionalJobTokenHosts (Ljava/util/Set;)V
 	public final fun setJobTokenVariable (Ljava/lang/String;)V
 	public final fun setName (Ljava/lang/String;)V
+	public final fun setServerHostVariable (Ljava/lang/String;)V
 	public final fun setTokenHeader (Ljava/lang/String;)V
 	public final fun setTokenProperty (Ljava/lang/String;)V
 	public final fun setTokenVariable (Ljava/lang/String;)V

@@ -92,13 +92,53 @@ class GitlabRegistryFunctionalTest : FunSpec({
             fixture.writeProjectBuild("""gitlabPackageRegistry(providers) { url = "$endpoint" }""")
 
             val result = fixture.buildWithEnvironment(
-                mapOf("CI_JOB_TOKEN" to "pipeline-token", "GITLAB_TOKEN" to "personal-token"),
+                mapOf(
+                    "CI_JOB_TOKEN" to "pipeline-token",
+                    "CI_SERVER_HOST" to "gitlab.example.com",
+                    "GITLAB_TOKEN" to "personal-token"
+                ),
                 "reportRepository"
             )
 
             result.output shouldContain "header=Job-Token"
             result.output shouldContain "token=pipeline-token"
             result.output shouldContain "auth=header"
+        }
+
+        test("keeps the job token from a registry on another GitLab instance") {
+            val fixture = newFixture()
+            fixture.writeProjectBuild("""gitlabPackageRegistry(providers) { url = "$endpoint" }""")
+
+            val result = fixture.buildWithEnvironment(
+                mapOf(
+                    "CI_JOB_TOKEN" to "pipeline-token",
+                    "CI_SERVER_HOST" to "gitlab.internal.example",
+                    "GITLAB_TOKEN" to "personal-token"
+                ),
+                "reportRepository"
+            )
+
+            result.output shouldContain "header=Private-Token"
+            result.output shouldContain "token=personal-token"
+        }
+
+        test("sends the job token to a host the build vouches for") {
+            val fixture = newFixture()
+            fixture.writeProjectBuild(
+                """
+                gitlabPackageRegistry(providers) {
+                    url = "$endpoint"
+                    additionalJobTokenHosts = setOf("gitlab.example.com")
+                }
+                """.trimIndent()
+            )
+
+            val result = fixture.buildWithEnvironment(
+                mapOf("CI_JOB_TOKEN" to "pipeline-token", "CI_SERVER_HOST" to "gitlab.internal.example"),
+                "reportRepository"
+            )
+
+            result.output shouldContain "token=pipeline-token"
         }
 
         test("falls back to a personal token as Private-Token outside one") {

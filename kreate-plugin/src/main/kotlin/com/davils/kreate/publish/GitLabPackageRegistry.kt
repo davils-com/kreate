@@ -75,7 +75,7 @@ public fun RepositoryHandler.gitlabPackageRegistry(
     action.execute(spec)
 
     val endpoint = spec.url ?: throw missingUrlFailure()
-    val jobToken = providers.environmentVariable(spec.jobTokenVariable).filter { it.isNotBlank() }
+    val jobToken = jobTokenFor(endpoint, providers, spec)
     val headerName = headerNameFor(jobToken.isPresent, spec)
     val token = jobToken.orElse(accessTokenOf(providers, spec)).orNull
 
@@ -96,6 +96,16 @@ public fun RepositoryHandler.gitlabPackageRegistry(
     }
 
     return maven(repositoryAction)
+}
+
+private fun jobTokenFor(endpoint: String, providers: ProviderFactory, spec: GitLabRegistrySpec): Provider<String> {
+    val serverHost = providers.environmentVariable(spec.serverHostVariable).orNull
+    val trustedHosts = spec.additionalJobTokenHosts + listOfNotNull(serverHost)
+    val endpointHost = URI(endpoint).host
+    val isTrusted = trustedHosts.any { host -> host.equals(endpointHost, ignoreCase = true) }
+
+    val jobToken = providers.environmentVariable(spec.jobTokenVariable)
+    return jobToken.filter { token -> isTrusted && token.isNotBlank() }
 }
 
 private fun accessTokenOf(providers: ProviderFactory, spec: GitLabRegistrySpec): Provider<String> {
