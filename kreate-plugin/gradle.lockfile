@@ -3,11 +3,11 @@
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :kreate-plugin:dependencies --write-locks
 com.fasterxml.jackson.core:jackson-annotations:2.22=runtimeClasspath
-com.fasterxml.jackson.core:jackson-core:2.22.2=runtimeClasspath
-com.fasterxml.jackson.core:jackson-databind:2.22.2=runtimeClasspath
-com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.2=runtimeClasspath
-com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2=runtimeClasspath
-com.fasterxml.jackson:jackson-bom:2.22.2=runtimeClasspath
+com.fasterxml.jackson.core:jackson-core:2.22.3=runtimeClasspath
+com.fasterxml.jackson.core:jackson-databind:2.22.3=runtimeClasspath
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.3=runtimeClasspath
+com.fasterxml.jackson.module:jackson-module-kotlin:2.22.3=runtimeClasspath
+com.fasterxml.jackson:jackson-bom:2.22.3=runtimeClasspath
 com.fasterxml.woodstox:woodstox-core:7.2.0=runtimeClasspath
 com.google.code.gson:gson:2.11.0=runtimeClasspath
 com.google.errorprone:error_prone_annotations:2.27.0=runtimeClasspath
@@ -53,7 +53,7 @@ io.ktor:ktor-websocket-serialization:3.2.4=runtimeClasspath
 io.ktor:ktor-websockets-jvm:3.2.4=runtimeClasspath
 io.ktor:ktor-websockets:3.2.4=runtimeClasspath
 org.codehaus.woodstox:stax2-api:4.3.0=runtimeClasspath
-org.freemarker:freemarker:2.3.32=runtimeClasspath
+org.freemarker:freemarker:2.3.35=runtimeClasspath
 org.jetbrains.dokka:dokka-core:2.3.0=runtimeClasspath
 org.jetbrains.dokka:dokka-gradle-plugin:2.3.0=runtimeClasspath
 org.jetbrains.intellij.deps:coverage-report:1.0.25=runtimeClasspath

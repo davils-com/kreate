@@ -33,6 +33,18 @@ dependencies {
 
     implementation("${Project.Identity.GROUP}:kreate-settings:$version")
 
+    constraints {
+        implementation(libs.freemarker) {
+            because("CVE-2026-84939: path traversal through a malformed locale identifier")
+        }
+        implementation(libs.jackson.core) {
+            because("CVE-2026-89407 and CVE-2026-89425")
+        }
+        implementation(libs.jackson.databind) {
+            because("CVE-2026-91776 and CVE-2026-91777")
+        }
+    }
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.kreate.test)

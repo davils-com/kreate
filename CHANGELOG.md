@@ -105,6 +105,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **The default secret scan reads build scripts and key files.** `*.kts`, `*.toml`, `*.xml`, `*.pem`
   and `*.key` were missing, although the documentation claimed build scripts and version catalogs
   were covered.
+- **FreeMarker 2.3.35 and Jackson 2.22.3 fix known vulnerabilities on the plugin's classpath.** Both
+  are transitive, FreeMarker through Kover, and scanning the new lock files found them:
+  CVE-2026-84939, CVE-2026-89407, CVE-2026-89425, CVE-2026-91776 and CVE-2026-91777. Kreate now
+  constrains them.
 - **Kreate's own build verifies its dependencies.** `gradle/verification-metadata.xml` pins the
   SHA-256 of every artifact, and the published modules lock their runtime classpath in strict mode,
   so Trivy scans what actually ships.
