@@ -24,9 +24,11 @@ import com.davils.kreate.assurance.task.AssuranceEvaluationTask
 import com.davils.kreate.assurance.task.AssuranceReportTask
 import com.davils.kreate.assurance.task.AssuranceVerdictTask
 import com.davils.kreate.assurance.task.CurrentDateSource
+import com.davils.kreate.assurance.task.FindingCollectTask
 import com.davils.kreate.assurance.task.IgnoreRuleInput
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.kotlin.dsl.register
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import java.time.LocalDate
@@ -72,6 +74,7 @@ internal fun Project.initializeAssurance(assurance: AssuranceExtension) {
 
 private fun AssuranceEvaluationTask.configureEvaluation(assurance: AssuranceExtension, rules: List<IgnoreRuleInput>) {
     documents.from(assurance.externalFindings)
+    documents.from(project.provider { project.collectedDocuments() })
     baselineFile.from(assurance.baseline.file)
     failOn.set(assurance.failOn)
     minSeverity.set(assurance.minSeverity)
@@ -82,6 +85,11 @@ private fun AssuranceEvaluationTask.configureEvaluation(assurance: AssuranceExte
     ignoreRules.set(rules)
     today.set(project.providers.of(CurrentDateSource::class.java) { })
     projectPath.set(project.path)
+}
+
+private fun Project.collectedDocuments(): List<RegularFileProperty> {
+    val collectors = tasks.withType(FindingCollectTask::class.java)
+    return collectors.map { collector -> collector.documentFile }
 }
 
 private fun ignoreRuleInputOf(id: String, spec: AssuranceIgnoreSpec): IgnoreRuleInput {

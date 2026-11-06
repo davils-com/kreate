@@ -18,7 +18,6 @@ package com.davils.kreate.tooling
 
 import com.davils.kreate.host.HostPlatform
 import com.davils.kreate.host.OperatingSystem
-import org.gradle.api.GradleException
 import java.io.File
 
 private const val PATH_VARIABLE: String = "PATH"
@@ -90,10 +89,12 @@ internal class ExecutableResolver(
         return entries.filter { it.isNotBlank() }
     }
 
-    private fun toolNotFound(tool: ExternalTool): GradleException {
+    private fun toolNotFound(tool: ExternalTool): ToolNotFoundException {
         val searched = wellKnownDirectories(tool).joinToString(", ") { directory -> directory.path }
         val command = tool.commandName
-        return GradleException("Kreate could not find '$command' on the PATH or in: $searched. Install it to continue.")
+        return ToolNotFoundException(
+            "Kreate could not find '$command' on the PATH or in: $searched. Install it to continue."
+        )
     }
 
     companion object {

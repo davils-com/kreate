@@ -55,6 +55,32 @@ The `trivy` block is located at `kreate { trivy { ... } }`.
 
 ---
 
+## `misconfig` and `filesystem`
+
+Both are off by default and read the whole project directory: `kreateTrivyMisconfigScan` for insecure
+configuration, and `kreateTrivyFilesystemScan` for vulnerabilities, secrets and misconfiguration in one
+run.
+
+| Property          | Type                     | Default                             | Description                         |
+|:------------------|:-------------------------|:------------------------------------|:------------------------------------|
+| `enabled`         | `Property<Boolean>`      | `false`                             | Whether the scan runs               |
+| `severity`        | `ListProperty<Severity>` | `[CRITICAL, HIGH, MEDIUM, LOW]`     | The severities to report            |
+| `failOnFindings`  | `Property<Boolean>`      | `true`                              | Fails the build if anything is found |
+| `skipDirectories` | `ListProperty<String>`   | `[build, .gradle, .kotlin, .git]`   | Directories the scan skips          |
+
+## Together with the assurance gate
+
+With <a href="Assurance-Overview.md"><code>assurance { enabled = true }</code></a>, the scans no longer
+fail on their own. They write their findings to `build/kreate/assurance/documents/`, and
+`kreateAssurance` decides, so ignore rules and the baseline apply. A scan with `failOnFindings = false`
+stays in the report without blocking, and a crash of Trivy is `INCOMPLETE` rather than a pass.
+
+## `.trivyignore` and `trivy.yaml`
+
+Kreate runs Trivy from the temporary directory of the task, so neither file is read. A committed
+`.trivyignore` would otherwise hide a finding without a trace in the build. Accept a finding with an
+`ignore` rule of the gate, which needs a reason and can expire, or with `ignoredLicenses`.
+
 ## Enums Reference
 
 ### Severity

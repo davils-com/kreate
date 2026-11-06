@@ -49,4 +49,18 @@ public object TrivyTaskNames {
      * @since 4.0.0
      */
     public const val VULNERABILITIES: String = "kreateTrivyVulnerabilityScan"
+
+    /**
+     * Scans the project for insecure configuration.
+     *
+     * @since 4.0.0
+     */
+    public const val MISCONFIGURATION: String = "kreateTrivyMisconfigScan"
+
+    /**
+     * Scans the whole project directory.
+     *
+     * @since 4.0.0
+     */
+    public const val FILESYSTEM: String = "kreateTrivyFilesystemScan"
 }

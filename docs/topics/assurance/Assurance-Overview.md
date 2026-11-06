@@ -90,6 +90,12 @@ when that fails. `reports { formats }` selects `JSON`, `SARIF` and `TEXT`. Uploa
 GitHub code scanning; it carries the `kreate/v1` fingerprint, so a finding keeps its identity across
 runs.
 
+## Trivy
+
+With `trivy { enabled = true }` the scans feed the gate: they stop failing on their own, and
+`kreateAssurance` runs them and decides. See
+[the configuration reference](Trivy-Configuration-Reference.md).
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

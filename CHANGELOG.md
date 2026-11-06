@@ -73,6 +73,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 - **Dependency locking is strict.** A locked configuration without lock state now fails the build.
   In Gradle's default mode a deleted lock file went unnoticed and versions floated.
   `dependencyLocking { strict = false }` restores it.
+- **Kreate runs Trivy outside the project, so `.trivyignore` and `trivy.yaml` no longer apply.** A
+  file committed there could hide a finding, even a private key, without a trace in the build. Use
+  `assurance { ignore }`, which needs a reason and can expire.
 - **`local { snapshotSuffix }` is removed.** It was never read: a local publication always carries
   `-SNAPSHOT`, the suffix the consumer side's `snapshotsOnly()` repository is keyed to. Delete the
   assignment from the build script.
@@ -91,6 +94,12 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   `kreate-baseline.json`, and `kreateAssuranceBaselinePrune` removes what no longer occurs. Entries
   carry no line numbers, and a further occurrence is reported as new.
 - **`assurance { externalFindings }`** reads finding documents written by other tools.
+- **Trivy joins the gate.** With `assurance` enabled, the scans write their findings to a document and
+  `kreateAssurance` decides, so ignore rules and the baseline apply to them. Without it, they fail on
+  their own as before. A scan's findings are now printed by Kreate, from Trivy's JSON report, and a
+  scan has a timeout of 30 minutes.
+- **`trivy { misconfig { } }` and `trivy { filesystem { } }`** add `kreateTrivyMisconfigScan` and
+  `kreateTrivyFilesystemScan`, which read the whole project directory.
 - **`cinterop { cargoLocked = true }`** runs `cargo build --locked`, so a crate cannot float to a new
   version whose `build.rs` runs during the build. **`cinterop { cmakeExecutable }`** pins CMake for C
   and C++ projects, as the JNI block already could.
@@ -189,6 +198,9 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Fixed
 
+- **`trivy { enabled = true }` works without `trivy-secret.yaml`.** The missing file failed Gradle's
+  input validation, and `check` with it. Trivy now applies its built-in rules.
+- **The secret scan runs Trivy once.** It started one process per source file.
 - **A failure to write build constants fails the build.** It used to be logged, after which the
   compilation went on with the previous constants or none.
 - **`@PublishedApi internal` declarations are part of the dump.** The class file reader dropped

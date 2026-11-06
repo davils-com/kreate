@@ -77,6 +77,9 @@ public abstract class TrivySecretExtension @Inject constructor(factory: ObjectFa
     /**
      * The configuration file for Trivy secret scanning.
      *
+     * Without this file, Trivy applies its built-in rules. Listing `enable-builtin-rules` in it turns
+     * every rule off that is not listed, so a list of two rules is a scan for two kinds of secret.
+     *
      * @since 1.2.0
      */
     public val secretConfig: RegularFileProperty = factory.fileProperty().convention(

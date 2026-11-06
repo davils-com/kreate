@@ -19,13 +19,19 @@ package com.davils.kreate.trivy.wiring
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.cinterop.CInteropTaskNames
 import com.davils.kreate.jni.JniTaskNames
+import com.davils.kreate.trivy.TrivyDirectoryScanExtension
+import com.davils.kreate.trivy.TrivyExtension
 import com.davils.kreate.trivy.TrivyTaskNames
+import com.davils.kreate.trivy.task.TrivyDirectoryScan
+import com.davils.kreate.trivy.task.TrivyFilesystemScan
 import com.davils.kreate.trivy.task.TrivyLicenseScan
+import com.davils.kreate.trivy.task.TrivyMisconfigScan
 import com.davils.kreate.trivy.task.TrivyScanAggregate
 import com.davils.kreate.trivy.task.TrivySecretScan
 import com.davils.kreate.trivy.task.TrivyVulnerabilityScan
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.register
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
@@ -34,14 +40,20 @@ private val SOURCE_SCAFFOLDING_TASKS: Set<String> = setOf(
     CInteropTaskNames.INITIALIZE
 )
 
+private const val DOCUMENT_DIRECTORY: String = "kreate/assurance/documents"
+
 internal fun Project.initializeTrivy(extension: KreateExtension) {
     val trivyExtension = extension.trivy
     if (!trivyExtension.enabled.get()) return
 
+    val isGated = extension.assurance.enabled.get()
     val trivySecretExtension = trivyExtension.secrets
     val secretScan = tasks.register<TrivySecretScan>(TrivyTaskNames.SECRETS) {
         failOnFindings.set(trivySecretExtension.failOnFindings)
-        secretConfig.set(trivySecretExtension.secretConfig)
+        gated.set(isGated)
+        documentFile.set(layout.buildDirectory.file("$DOCUMENT_DIRECTORY/trivy-secrets.json"))
+        projectDirectory.set(layout.projectDirectory)
+        secretConfig.from(trivySecretExtension.secretConfig)
         severity.set(trivySecretExtension.severity.names())
         sourceFiles.setFrom(trivySecretExtension.sourceFiles)
         mustRunAfter(tasks.matching { it.name in SOURCE_SCAFFOLDING_TASKS })
@@ -57,6 +69,8 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     trivyLicenseExtension.configurations.convention(productionConfigurations)
     val licenseScan = tasks.register<TrivyLicenseScan>(TrivyTaskNames.LICENSES) {
         failOnFindings.set(trivyLicenseExtension.failOnFindings)
+        gated.set(isGated)
+        documentFile.set(layout.buildDirectory.file("$DOCUMENT_DIRECTORY/trivy-licenses.json"))
         severity.set(trivyLicenseExtension.severity.names())
         ignoredLicenses.set(trivyLicenseExtension.ignoredLicenses)
         configurations.set(trivyLicenseExtension.configurations)
@@ -68,14 +82,50 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
     val vulnerabilityScan = tasks.register<TrivyVulnerabilityScan>(TrivyTaskNames.VULNERABILITIES) {
         severity.set(trivyVulnerabilityExtension.severity.names())
         failOnFindings.set(trivyVulnerabilityExtension.failOnFindings)
+        gated.set(isGated)
+        documentFile.set(layout.buildDirectory.file("$DOCUMENT_DIRECTORY/trivy-vulnerabilities.json"))
         failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
         usesService(trivyDatabaseService())
     }
 
+    val directoryScans = directoryScans(trivyExtension, isGated)
+
     tasks.register<TrivyScanAggregate>(TrivyTaskNames.SCAN) {
-        dependsOn(secretScan, licenseScan, vulnerabilityScan)
+        dependsOn(secretScan, licenseScan, vulnerabilityScan, directoryScans)
     }
+}
+
+private fun Project.directoryScans(
+    trivy: TrivyExtension,
+    isGated: Boolean
+): List<TaskProvider<out TrivyDirectoryScan>> {
+    val misconfig = trivy.misconfig
+    val filesystem = trivy.filesystem
+    val misconfigScan = tasks.register<TrivyMisconfigScan>(TrivyTaskNames.MISCONFIGURATION) {
+        configureDirectoryScan(misconfig, isGated, "trivy-misconfig.json")
+    }
+    val filesystemScan = tasks.register<TrivyFilesystemScan>(TrivyTaskNames.FILESYSTEM) {
+        configureDirectoryScan(filesystem, isGated, "trivy-filesystem.json")
+        usesService(trivyDatabaseService())
+    }
+
+    val scans = listOf(misconfig to misconfigScan, filesystem to filesystemScan)
+    val enabled = scans.filter { (scan, _) -> scan.enabled.get() }
+    return enabled.map { (_, task) -> task }
+}
+
+private fun TrivyDirectoryScan.configureDirectoryScan(
+    scan: TrivyDirectoryScanExtension,
+    isGated: Boolean,
+    documentName: String
+) {
+    severity.set(scan.severity.names())
+    failOnFindings.set(scan.failOnFindings)
+    gated.set(isGated)
+    skipDirectories.set(scan.skipDirectories)
+    projectDirectory.set(project.layout.projectDirectory)
+    documentFile.set(project.layout.buildDirectory.file("$DOCUMENT_DIRECTORY/$documentName"))
 }
 
 private fun <T : Enum<T>> Provider<List<T>>.names(): Provider<List<String>> =

@@ -868,13 +868,25 @@ public abstract class com/davils/kreate/testing/TestsReportExtension {
 	public final fun getXml ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract class com/davils/kreate/trivy/TrivyExtension {
+public abstract class com/davils/kreate/trivy/TrivyDirectoryScanExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnFindings ()Lorg/gradle/api/provider/Property;
+	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getSkipDirectories ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public abstract class com/davils/kreate/trivy/TrivyExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun filesystem (Lorg/gradle/api/Action;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getFilesystem ()Lcom/davils/kreate/trivy/TrivyDirectoryScanExtension;
 	public abstract fun getLicense ()Lcom/davils/kreate/trivy/TrivyLicenseExtension;
+	public abstract fun getMisconfig ()Lcom/davils/kreate/trivy/TrivyDirectoryScanExtension;
 	public abstract fun getSecrets ()Lcom/davils/kreate/trivy/TrivySecretExtension;
 	public abstract fun getVulnerability ()Lcom/davils/kreate/trivy/TrivyVulnerabilityExtension;
 	public final fun license (Lorg/gradle/api/Action;)V
+	public final fun misconfig (Lorg/gradle/api/Action;)V
 	public final fun secrets (Lorg/gradle/api/Action;)V
 	public final fun vulnerability (Lorg/gradle/api/Action;)V
 }
@@ -899,8 +911,10 @@ public abstract class com/davils/kreate/trivy/TrivySecretExtension {
 }
 
 public final class com/davils/kreate/trivy/TrivyTaskNames {
+	public static final field FILESYSTEM Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/trivy/TrivyTaskNames;
 	public static final field LICENSES Ljava/lang/String;
+	public static final field MISCONFIGURATION Ljava/lang/String;
 	public static final field SCAN Ljava/lang/String;
 	public static final field SECRETS Ljava/lang/String;
 	public static final field VULNERABILITIES Ljava/lang/String;

@@ -35,6 +35,10 @@ class TrivyLockFileScanTest : FunSpec({
         val project = builder.build()
         val task = project.tasks.register("scan", type).get()
         task.failOnMissingLockFiles.set(failOnMissingLockFiles)
+        task.severity.set(emptyList())
+        task.failOnFindings.set(true)
+        task.gated.set(false)
+        task.documentFile.set(project.layout.buildDirectory.file("document.json"))
         return task
     }
 

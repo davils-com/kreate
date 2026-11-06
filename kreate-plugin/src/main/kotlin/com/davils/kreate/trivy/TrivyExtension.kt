@@ -40,6 +40,22 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
+     * Configuration for scanning the project for insecure configuration.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val misconfig: TrivyDirectoryScanExtension
+
+    /**
+     * Configuration for one scan of the whole project directory.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val filesystem: TrivyDirectoryScanExtension
+
+    /**
      * Configuration for vulnerability scanning (CVEs).
      *
      * @since 1.2.0
@@ -91,5 +107,25 @@ public abstract class TrivyExtension @Inject constructor(factory: ObjectFactory)
      */
     public fun secrets(action: Action<TrivySecretExtension>) {
         action.execute(secrets)
+    }
+
+    /**
+     * Configures the scan for insecure configuration.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun misconfig(action: Action<TrivyDirectoryScanExtension>) {
+        action.execute(misconfig)
+    }
+
+    /**
+     * Configures the scan of the whole project directory.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun filesystem(action: Action<TrivyDirectoryScanExtension>) {
+        action.execute(filesystem)
     }
 }

@@ -163,6 +163,16 @@ Registered when `trivy.enabled` is `true`.
         <td>Dependency lock files</td>
     </tr>
     <tr>
+        <td><code>kreateTrivyMisconfigScan</code></td>
+        <td>Scans the project for insecure configuration. Only with <code>misconfig { enabled }</code>.</td>
+        <td>Project directory</td>
+    </tr>
+    <tr>
+        <td><code>kreateTrivyFilesystemScan</code></td>
+        <td>Scans the whole project directory. Only with <code>filesystem { enabled }</code>.</td>
+        <td>Project directory</td>
+    </tr>
+    <tr>
         <td><code>kreateTrivySecretScan</code></td>
         <td>Finds hard-coded credentials.</td>
         <td>Source files, <code>trivy-secret.yaml</code></td>

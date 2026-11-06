@@ -109,6 +109,25 @@ class TrivySecretScanFunctionalTest : FunSpec({
             result.output shouldNotContain ":kreateTrivySecretScan"
         }
 
+        test("applies Trivy's own rules without a configuration file").config(enabledOrReasonIf = requiresTrivy) {
+            val fixture = KreateBuildFixture.createIn(workspace)
+            fixture.writeSettings()
+            fixture.writeBuild(
+                """
+                ${KreateBuildFixture.platformBlock}
+
+                trivy {
+                    enabled = true
+                }
+                """.trimIndent()
+            )
+            fixture.write("src/main/resources/application.yaml", "port: 8080\n")
+
+            val result = fixture.build("kreateTrivySecretScan")
+
+            result.task(":kreateTrivySecretScan")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
         test("names every file with a finding when it fails").config(enabledOrReasonIf = requiresTrivy) {
             val fixture = newFixture()
             fixture.writeTrivyBuild()

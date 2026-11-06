@@ -16,17 +16,20 @@
 
 package com.davils.kreate.trivy.task
 
-import org.gradle.api.GradleException
+import com.davils.kreate.assurance.finding.Finding
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 import javax.inject.Inject
+
+private const val STAGE_DIRECTORY: String = "sources"
 
 @DisableCachingByDefault(because = "Trivy scans depend on external vulnerability databases and tools")
 internal abstract class TrivySecretScan @Inject constructor(
@@ -40,25 +43,40 @@ internal abstract class TrivySecretScan @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val sourceFiles: ConfigurableFileCollection
 
-    @get:InputFile
+    @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    public abstract val secretConfig: RegularFileProperty
+    public abstract val secretConfig: ConfigurableFileCollection
+
+    @get:Internal
+    public abstract val projectDirectory: DirectoryProperty
 
     @TaskAction
     public fun execute() {
-        val withSecrets = sourceFiles.files.filter { file -> scanReportsFindings(file) }
-        if (withSecrets.isEmpty() || !failOnFindings.get()) return
+        val staged = temporaryDir.resolve(STAGE_DIRECTORY)
+        staged.deleteRecursively()
+        sourceFiles.files.forEach { file -> stage(file, staged) }
 
-        val named = withSecrets.map { file -> file.invariantSeparatorsPath }.sorted()
-        throw GradleException(
-            "Trivy found secrets in ${named.size} source file(s):\n" +
-                named.joinToString("\n") { "  $it" } +
-                "\nEach file's findings are printed with its summary table above."
-        )
+        val run = runTrivy(TrivyTarget(staged) { path -> path.removePrefix(staged.invariantSeparatorsPath + "/") })
+        publish(listOf(run), ::findingsMessage)
+    }
+
+    private fun stage(file: File, staged: File) {
+        val root = projectDirectory.get().asFile
+        val copy = staged.resolve(file.relativeTo(root).path)
+        copy.parentFile.mkdirs()
+        file.copyTo(copy, overwrite = true)
+    }
+
+    private fun findingsMessage(findings: List<Finding>): String {
+        val paths = findings.mapNotNull { finding -> finding.location?.path }
+        val named = paths.distinct().sorted()
+        return "Trivy found secrets in ${named.size} source file(s):\n" +
+            named.joinToString("\n") { "  $it" } +
+            "\nThe findings are listed above."
     }
 
     override fun scannerArguments(): List<String> {
-        val secretConfigPath = secretConfig.get().asFile.absolutePath
-        return listOf("--secret-config", secretConfigPath)
+        val configuration = secretConfig.files.firstOrNull { file -> file.isFile } ?: return emptyList()
+        return listOf("--secret-config", configuration.absolutePath)
     }
 }

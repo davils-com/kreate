@@ -49,13 +49,17 @@ internal abstract class TrivyLockFileScan(
     public fun execute() {
         if (lockFiles.isEmpty) {
             handleMissingLockFiles()
+            publish(emptyList()) { findingsMessage }
             return
         }
 
-        val withFindings = lockFiles.files.filter { lockFile -> scanReportsFindings(scanTarget(lockFile)) }
-        if (withFindings.isEmpty() || !failOnFindings.get()) return
+        val runs = lockFiles.files.map { lockFile -> runTrivy(targetOf(lockFile)) }
+        publish(runs) { findingsMessage }
+    }
 
-        throw GradleException(findingsMessage)
+    private fun targetOf(lockFile: File): TrivyTarget {
+        val scanned = scanTarget(lockFile)
+        return TrivyTarget(scanned) { lockFile.name }
     }
 
     private fun handleMissingLockFiles() {

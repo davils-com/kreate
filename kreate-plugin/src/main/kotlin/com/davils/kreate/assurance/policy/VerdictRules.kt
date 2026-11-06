@@ -17,8 +17,11 @@ package com.davils.kreate.assurance.policy
 
 import com.davils.kreate.assurance.Severity
 import com.davils.kreate.assurance.finding.DocumentStatus
+import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.FindingDocument
 import com.davils.kreate.assurance.finding.isAtLeast
+
+internal const val REPORT_ONLY_ATTRIBUTE: String = "reportOnly"
 
 internal class VerdictRules(
     private val failOn: Severity,
@@ -26,11 +29,16 @@ internal class VerdictRules(
     private val failOnStale: Boolean = false
 ) {
     fun decide(documents: List<FindingDocument>, outcome: FilterOutcome): Verdict {
-        val blocking = outcome.kept.count { finding -> finding.gatingSeverity.isAtLeast(failOn) }
+        val blocking = outcome.kept.count { finding -> isBlocking(finding) }
         val incomplete = documents.filter { document -> document.status == DocumentStatus.INCOMPLETE }
         val incompleteSources = incomplete.map { document -> document.source.id }
         val status = statusOf(incompleteSources, blocking, outcome.staleEntries)
         return Verdict(status, blocking, incompleteSources, outcome.staleEntries)
+    }
+
+    private fun isBlocking(finding: Finding): Boolean {
+        val isOnlyReported = REPORT_ONLY_ATTRIBUTE in finding.attributes
+        return !isOnlyReported && finding.gatingSeverity.isAtLeast(failOn)
     }
 
     private fun statusOf(incompleteSources: List<String>, blocking: Int, staleEntries: Int): GateStatus {
