@@ -40,5 +40,47 @@ public enum class ReportFormat {
      *
      * @since 4.0.0
      */
-    TEXT
+    TEXT,
+
+    /**
+     * A self-contained HTML dashboard with a strict content security policy.
+     *
+     * @since 4.0.0
+     */
+    HTML,
+
+    /**
+     * Markdown, for a pull request comment or a job summary.
+     *
+     * @since 4.0.0
+     */
+    MARKDOWN,
+
+    /**
+     * JUnit XML, one test suite per source of findings.
+     *
+     * @since 4.0.0
+     */
+    JUNIT,
+
+    /**
+     * Checkstyle XML.
+     *
+     * @since 4.0.0
+     */
+    CHECKSTYLE,
+
+    /**
+     * The code quality report of GitLab.
+     *
+     * @since 4.0.0
+     */
+    GITLAB,
+
+    /**
+     * The generic issue import format of SonarQube.
+     *
+     * @since 4.0.0
+     */
+    SONARQUBE
 }

@@ -76,6 +76,8 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "doctor/check",
     "policy/model",
     "policy/check",
+    "assurance/ingest",
+    "assurance/aggregate",
     "advisory/severity",
     "advisory/version",
     "trivy/provision",

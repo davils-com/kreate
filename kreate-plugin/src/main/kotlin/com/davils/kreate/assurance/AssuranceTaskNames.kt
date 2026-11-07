@@ -69,4 +69,12 @@ public object AssuranceTaskNames {
      * @since 4.0.0
      */
     public const val EXPLAIN: String = "kreateExplain"
+
+    /**
+     * Puts the gates of all projects of the build into one report. Only in the root project, with
+     * `aggregate { enabled }`.
+     *
+     * @since 4.0.0
+     */
+    public const val AGGREGATE: String = "kreateAssuranceAggregate"
 }

@@ -16,6 +16,7 @@
 package com.davils.kreate.workspace.wiring
 
 import com.davils.kreate.assurance.AssuranceWorkspaceExtension
+import com.davils.kreate.assurance.wiring.buildMembers
 import com.davils.kreate.dependency.graph.DependencyGraphModel
 import com.davils.kreate.dependency.wiring.dependencyGraphOf
 import com.davils.kreate.trivy.wiring.productionConfigurations
@@ -30,7 +31,6 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.attributes.Usage
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.register
 
 private const val DESCRIPTOR_TASK: String = "kreateWorkspaceDescriptor"
@@ -40,8 +40,6 @@ private const val ELEMENTS: String = "kreateWorkspaceElements"
 private const val COLLECTED: String = "kreateWorkspace"
 
 private const val USAGE: String = "kreate-workspace"
-
-private const val MEMBERS_PROPERTY: String = "kreate.workspace.members"
 
 private const val DESCRIPTOR_FILE: String = "kreate/workspace/descriptor.json"
 
@@ -75,7 +73,7 @@ internal fun Project.registerWorkspaceMember(workspace: AssuranceWorkspaceExtens
 }
 
 internal fun Project.registerWorkspaceRoot(workspace: AssuranceWorkspaceExtension) {
-    workspace.members.convention(membersFromSettings())
+    workspace.members.convention(buildMembers())
     val owner = this
     val collected = configurations.resolvable(COLLECTED) {
         attributes.attribute(Usage.USAGE_ATTRIBUTE, owner.objects.named(Usage::class.java, USAGE))
@@ -116,19 +114,6 @@ private fun Project.projectDependency(path: String): Dependency = dependencies.p
 private fun Configuration.lenientFiles(): FileCollection {
     val view = incoming.artifactView { lenient(true) }
     return view.files
-}
-
-private fun Project.membersFromSettings(): Provider<Set<String>> {
-    val extras = extensions.extraProperties
-    val own = path
-    return provider {
-        val shared = extras.takeIf { values -> values.has(MEMBERS_PROPERTY) }
-        val value = shared?.get(MEMBERS_PROPERTY)
-        val text = value?.toString().orEmpty()
-        val paths = text.split(',').map { member -> member.trim() }
-        val members = paths.filter { member -> member.isNotEmpty() }.toSet()
-        members.ifEmpty { setOf(own) }
-    }
 }
 
 private fun Project.graphsOf(names: Set<String>): ListProperty<DependencyGraphModel> {

@@ -18,8 +18,14 @@ package com.davils.kreate.assurance.task
 import com.davils.kreate.assurance.ReportFormat
 import com.davils.kreate.assurance.finding.AssuranceInputException
 import com.davils.kreate.assurance.report.AssuranceEvaluation
+import com.davils.kreate.assurance.report.CheckstyleReportWriter
+import com.davils.kreate.assurance.report.GitLabReportWriter
+import com.davils.kreate.assurance.report.HtmlReportWriter
 import com.davils.kreate.assurance.report.JsonReportWriter
+import com.davils.kreate.assurance.report.JunitReportWriter
+import com.davils.kreate.assurance.report.MarkdownReportWriter
 import com.davils.kreate.assurance.report.SarifReportWriter
+import com.davils.kreate.assurance.report.SonarQubeReportWriter
 import com.davils.kreate.assurance.report.TextReportWriter
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.SetProperty
@@ -57,11 +63,23 @@ internal abstract class AssuranceReportTask : AssuranceEvaluationTask("Writes th
         ReportFormat.JSON -> "json"
         ReportFormat.SARIF -> "sarif"
         ReportFormat.TEXT -> "txt"
+        ReportFormat.HTML -> "html"
+        ReportFormat.MARKDOWN -> "md"
+        ReportFormat.JUNIT -> "junit.xml"
+        ReportFormat.CHECKSTYLE -> "checkstyle.xml"
+        ReportFormat.GITLAB -> "gitlab.json"
+        ReportFormat.SONARQUBE -> "sonarqube.json"
     }
 
     private fun render(format: ReportFormat, evaluation: AssuranceEvaluation): String = when (format) {
         ReportFormat.JSON -> JsonReportWriter.render(evaluation)
         ReportFormat.SARIF -> SarifReportWriter.render(evaluation)
         ReportFormat.TEXT -> TextReportWriter.render(evaluation)
+        ReportFormat.HTML -> HtmlReportWriter.render(evaluation)
+        ReportFormat.MARKDOWN -> MarkdownReportWriter.render(evaluation)
+        ReportFormat.JUNIT -> JunitReportWriter.render(evaluation)
+        ReportFormat.CHECKSTYLE -> CheckstyleReportWriter.render(evaluation)
+        ReportFormat.GITLAB -> GitLabReportWriter.render(evaluation)
+        ReportFormat.SONARQUBE -> SonarQubeReportWriter.render(evaluation)
     }
 }

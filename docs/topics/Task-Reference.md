@@ -345,6 +345,17 @@ See [Developer tools](Developer-Tools.md) and the workspace section of the assur
         <td><code>build/kreate/workspace</code></td>
     </tr>
     <tr>
+        <td><code>kreateAssuranceIngest</code></td>
+        <td>Reads the reports of Detekt, Kover and the API check into the gate. With
+            <code>reports { ingestQuality }</code>.</td>
+        <td><code>build/kreate/assurance/documents/quality.json</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateAssuranceAggregate</code></td>
+        <td>Puts the gates of all projects into one report. Root project, with <code>aggregate { enabled }</code>.</td>
+        <td><code>build/kreate/assurance/aggregate</code></td>
+    </tr>
+    <tr>
         <td><code>kreateAssurancePolicyCheck</code>, <code>kreateAssurancePolicyTemplate</code></td>
         <td>Check the build against the policy named by <code>-Pkreate.assurance.policy</code>; write a
             policy from the current settings.</td>

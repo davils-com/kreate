@@ -53,13 +53,17 @@ kreate {
             enabled = true
         }
 
+        aggregate {
+            enabled = true
+        }
+
         dependencyPolicy {
             enabled = true
             checkOutdated = true
         }
 
         reports {
-            formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
+            formats = ReportFormat.entries.toSet()
         }
     }
 }

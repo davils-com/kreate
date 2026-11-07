@@ -101,6 +101,13 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **Six more report formats.** `reports { formats }` adds `HTML`, a self-contained dashboard with a
+  hash-based content security policy, `MARKDOWN`, `JUNIT`, `CHECKSTYLE`, `GITLAB` and `SONARQUBE`.
+- **The quality ingest.** `kreateAssuranceIngest` reads the SARIF reports of Detekt, the coverage of
+  Kover and outdated API dumps into the gate as findings that only inform.
+- **The aggregation.** `assurance { aggregate { enabled = true } }` lets `kreateAssuranceAggregate` in
+  the root project put the gates of all projects into one report, Isolated Projects safe, and fail with
+  the worst status.
 - **Organisation policies.** CI names a versioned policy artifact with
   `-Pkreate.assurance.policy=group:name:version`. `kreateAssurancePolicyCheck` reports options that
   differ from what the policy requires or are weaker than its minimum, ignore rules without expiry or

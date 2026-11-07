@@ -1,0 +1,26 @@
+{
+  "source": "quality",
+  "rules": [
+    {
+      "id": "DETEKT_ISSUE",
+      "severity": "LOW",
+      "category": "detekt",
+      "summary": "Detekt reports an issue",
+      "explanation": "Detekt found this issue and decides itself whether it fails the build. The gate shows it so that one report holds everything."
+    },
+    {
+      "id": "COVERAGE_BELOW_MINIMUM",
+      "severity": "MEDIUM",
+      "category": "coverage",
+      "summary": "Line coverage is below the minimum",
+      "explanation": "The tests cover fewer lines than coverage { verify { minLineCoverage } } asks for. Kover's verification decides whether that fails the build."
+    },
+    {
+      "id": "API_DUMP_OUTDATED",
+      "severity": "MEDIUM",
+      "category": "api",
+      "summary": "The API dump no longer matches the code",
+      "explanation": "The public binary interface changed without a new dump. kreateApiCheck fails on it; run kreateApiDump if the change is intended."
+    }
+  ]
+}

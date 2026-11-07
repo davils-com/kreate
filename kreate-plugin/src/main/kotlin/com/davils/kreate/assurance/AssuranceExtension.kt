@@ -176,6 +176,14 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val workspace: AssuranceWorkspaceExtension
 
     /**
+     * Configuration of the aggregation over the projects of a build.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val aggregate: AssuranceAggregateExtension
+
+    /**
      * Configuration of the reports.
      *
      * @since 4.0.0
@@ -223,6 +231,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun confusion(action: Action<AssuranceConfusionExtension>) {
         action.execute(confusion)
+    }
+
+    /**
+     * Configures the aggregation over the projects of a build.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun aggregate(action: Action<AssuranceAggregateExtension>) {
+        action.execute(aggregate)
     }
 
     /**

@@ -50,6 +50,8 @@ internal fun Project.initializeAssurance(extension: KreateExtension) {
     val rules = assurance.declaredIgnoreRules().map { (id, spec) -> ignoreRuleInputOf(id, spec) }
     registerAssuranceTools(extension, rules)
     registerPolicyTasks(extension, rules)
+    registerQualityIngest(extension)
+    registerAggregation(assurance) { configureEvaluation(assurance, rules) }
 
     val report = tasks.register<AssuranceReportTask>(AssuranceTaskNames.REPORT) {
         configureEvaluation(assurance, rules)

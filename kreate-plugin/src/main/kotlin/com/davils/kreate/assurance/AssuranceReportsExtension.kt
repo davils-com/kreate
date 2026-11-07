@@ -16,6 +16,7 @@
 package com.davils.kreate.assurance
 
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import javax.inject.Inject
 
@@ -33,4 +34,12 @@ public abstract class AssuranceReportsExtension @Inject constructor(factory: Obj
      */
     public val formats: SetProperty<ReportFormat> = factory.setProperty(ReportFormat::class.java)
         .convention(setOf(ReportFormat.JSON, ReportFormat.SARIF))
+
+    /**
+     * Whether the reports of Detekt, the coverage and the API check are read into the gate as findings
+     * of the source `quality`, which only inform. Defaults to `true`.
+     *
+     * @since 4.0.0
+     */
+    public val ingestQuality: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 }

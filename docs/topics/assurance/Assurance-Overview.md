@@ -86,9 +86,42 @@ reach of both the ignore rules and the baseline.
 ## Reports
 
 `kreateAssuranceReport` writes `build/kreate/assurance/reports/` and runs after `kreateAssurance`, even
-when that fails. `reports { formats }` selects `JSON`, `SARIF` and `TEXT`. Upload the SARIF file to
-GitHub code scanning; it carries the `kreate/v1` fingerprint, so a finding keeps its identity across
-runs.
+when that fails. `reports { formats }` selects any of:
+
+| Format | File | For |
+|---|---|---|
+| `JSON` | `report.json` | Scripts; a stable schema |
+| `SARIF` | `report.sarif` | GitHub code scanning; carries the `kreate/v1` fingerprint |
+| `TEXT` | `report.txt` | Reading |
+| `HTML` | `report.html` | A self-contained dashboard with filters |
+| `MARKDOWN` | `report.md` | A pull request comment or a job summary |
+| `JUNIT` | `report.junit.xml` | Test result views of CI servers |
+| `CHECKSTYLE` | `report.checkstyle.xml` | Tools that read Checkstyle |
+| `GITLAB` | `report.gitlab.json` | The code quality widget of GitLab |
+| `SONARQUBE` | `report.sonarqube.json` | The generic issue import of SonarQube |
+
+The dashboard allows only its own style and script, by their SHA-256 hashes in a content security
+policy, loads nothing from elsewhere and escapes everything that comes from a finding.
+
+With `reports { ingestQuality = true }`, the default, `kreateAssuranceIngest` reads the SARIF reports of
+Detekt, the coverage XML of Kover and the API dumps into the gate, as findings of the source `quality`
+that only inform: `DETEKT_ISSUE` by the rule of Detekt, `COVERAGE_BELOW_MINIMUM` against
+`coverage { verify { minLineCoverage } }` and `API_DUMP_OUTDATED`. Those tools keep deciding whether the
+build fails; the report shows everything in one place.
+
+### Aggregation
+
+```kotlin
+assurance {
+    aggregate { enabled = true }
+}
+```
+
+Every project with `aggregate` shares the outcome of its gate; `kreateAssuranceAggregate` in the root
+project collects them through a consumable variant, safe under Isolated Projects, and writes
+`build/kreate/assurance/aggregate/` as JSON, text, Markdown and HTML, as far as `formats` selects them.
+It fails with the worst status of any project. A project of the build that does not share its outcome
+is listed as not checked. The members are found as for the workspace check.
 
 ## Trivy
 

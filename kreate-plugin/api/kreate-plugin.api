@@ -58,6 +58,12 @@ public abstract class com/davils/kreate/assurance/AssuranceAdvisoriesExtension {
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 }
 
+public abstract class com/davils/kreate/assurance/AssuranceAggregateExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getMembers ()Lorg/gradle/api/provider/SetProperty;
+}
+
 public abstract class com/davils/kreate/assurance/AssuranceBaselineExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/ProjectLayout;)V
 	public final fun getFailOnStale ()Lorg/gradle/api/provider/Property;
@@ -97,10 +103,12 @@ public abstract class com/davils/kreate/assurance/AssuranceDependencyPolicyExten
 public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun advisories (Lorg/gradle/api/Action;)V
+	public final fun aggregate (Lorg/gradle/api/Action;)V
 	public final fun baseline (Lorg/gradle/api/Action;)V
 	public final fun confusion (Lorg/gradle/api/Action;)V
 	public final fun dependencyPolicy (Lorg/gradle/api/Action;)V
 	public abstract fun getAdvisories ()Lcom/davils/kreate/assurance/AssuranceAdvisoriesExtension;
+	public abstract fun getAggregate ()Lcom/davils/kreate/assurance/AssuranceAggregateExtension;
 	public abstract fun getBaseline ()Lcom/davils/kreate/assurance/AssuranceBaselineExtension;
 	public abstract fun getConfusion ()Lcom/davils/kreate/assurance/AssuranceConfusionExtension;
 	public abstract fun getDependencyPolicy ()Lcom/davils/kreate/assurance/AssuranceDependencyPolicyExtension;
@@ -147,9 +155,11 @@ public abstract class com/davils/kreate/assurance/AssuranceInspectionExtension {
 public abstract class com/davils/kreate/assurance/AssuranceReportsExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getFormats ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getIngestQuality ()Lorg/gradle/api/provider/Property;
 }
 
 public final class com/davils/kreate/assurance/AssuranceTaskNames {
+	public static final field AGGREGATE Ljava/lang/String;
 	public static final field BASELINE_CREATE Ljava/lang/String;
 	public static final field BASELINE_PRUNE Ljava/lang/String;
 	public static final field CHECK Ljava/lang/String;
@@ -183,8 +193,14 @@ public abstract class com/davils/kreate/assurance/AssuranceWorkspaceExtension {
 }
 
 public final class com/davils/kreate/assurance/ReportFormat : java/lang/Enum {
+	public static final field CHECKSTYLE Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field GITLAB Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field HTML Lcom/davils/kreate/assurance/ReportFormat;
 	public static final field JSON Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field JUNIT Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field MARKDOWN Lcom/davils/kreate/assurance/ReportFormat;
 	public static final field SARIF Lcom/davils/kreate/assurance/ReportFormat;
+	public static final field SONARQUBE Lcom/davils/kreate/assurance/ReportFormat;
 	public static final field TEXT Lcom/davils/kreate/assurance/ReportFormat;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/assurance/ReportFormat;
