@@ -20,6 +20,7 @@ import com.davils.kreate.advisory.wiring.AdvisoryFeature
 import com.davils.kreate.api.wiring.ApiValidationFeature
 import com.davils.kreate.assurance.wiring.AssuranceFeature
 import com.davils.kreate.benchmark.wiring.BenchmarkFeature
+import com.davils.kreate.changelog.wiring.ChangelogFeature
 import com.davils.kreate.cinterop.wiring.CInteropFeature
 import com.davils.kreate.configuration.wiring.ConfigurationSchemaFeature
 import com.davils.kreate.constants.wiring.BuildConstantsFeature
@@ -68,6 +69,7 @@ class KreateFeaturesTest : FunSpec({
                 ApiValidationFeature,
                 ConfigurationSchemaFeature,
                 BenchmarkFeature,
+                ChangelogFeature,
                 CoverageFeature
             )
         }
@@ -86,6 +88,7 @@ class KreateFeaturesTest : FunSpec({
                 ApiValidationFeature,
                 ConfigurationSchemaFeature,
                 BenchmarkFeature,
+                ChangelogFeature,
                 CoverageFeature,
                 PlatformFeature,
                 CInteropFeature,

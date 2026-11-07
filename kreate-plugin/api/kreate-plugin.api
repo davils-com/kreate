@@ -23,6 +23,15 @@ public final class com/davils/kreate/advisory/AdvisoryTaskNames {
 	public static final field INSTANCE Lcom/davils/kreate/advisory/AdvisoryTaskNames;
 }
 
+public abstract class com/davils/kreate/api/ApiSemverExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getBaseline ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getRequireBreakingCommit ()Lorg/gradle/api/provider/Property;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun getTagPrefix ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract class com/davils/kreate/api/ApiValidationExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
 	public final fun getApiDirectory ()Lorg/gradle/api/file/DirectoryProperty;
@@ -32,12 +41,15 @@ public abstract class com/davils/kreate/api/ApiValidationExtension {
 	public final fun getIgnoredPackages ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getKlib ()Lorg/gradle/api/provider/Property;
 	public final fun getNonPublicMarkers ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getSemver ()Lcom/davils/kreate/api/ApiSemverExtension;
+	public final fun semver (Lorg/gradle/api/Action;)V
 }
 
 public final class com/davils/kreate/api/ApiValidationTaskNames {
 	public static final field CHECK Ljava/lang/String;
 	public static final field DUMP Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/api/ApiValidationTaskNames;
+	public static final field SEMVER_CHECK Ljava/lang/String;
 }
 
 public abstract class com/davils/kreate/assurance/AssuranceAdvisoriesExtension {
@@ -224,6 +236,22 @@ public final class com/davils/kreate/benchmark/BenchmarkTaskNames {
 	public static final field CHECK Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/benchmark/BenchmarkTaskNames;
 	public static final field REPORT Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/changelog/ChangelogExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/Project;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun getIncludeDates ()Lorg/gradle/api/provider/Property;
+	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public final fun getTagPrefix ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/changelog/ChangelogTaskNames {
+	public static final field CHECK Ljava/lang/String;
+	public static final field GENERATE Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/changelog/ChangelogTaskNames;
+	public static final field NOTES Ljava/lang/String;
 }
 
 public abstract class com/davils/kreate/cinterop/CInteropExtension {
@@ -678,6 +706,7 @@ public abstract class com/davils/kreate/project/ProjectExtension {
 	public final fun apiValidation (Lorg/gradle/api/Action;)V
 	public final fun benchmark (Lorg/gradle/api/Action;)V
 	public final fun buildConstant (Lorg/gradle/api/Action;)V
+	public final fun changelog (Lorg/gradle/api/Action;)V
 	public final fun configurationSchema (Lorg/gradle/api/Action;)V
 	public final fun coverage (Lorg/gradle/api/Action;)V
 	public final fun dependencyLocking (Lorg/gradle/api/Action;)V
@@ -688,6 +717,7 @@ public abstract class com/davils/kreate/project/ProjectExtension {
 	public final fun getApplySerializationPlugin ()Lorg/gradle/api/provider/Property;
 	public abstract fun getBenchmark ()Lcom/davils/kreate/benchmark/BenchmarkExtension;
 	public abstract fun getBuildConstants ()Lcom/davils/kreate/constants/BuildConstantsExtension;
+	public abstract fun getChangelog ()Lcom/davils/kreate/changelog/ChangelogExtension;
 	public abstract fun getConfigurationSchema ()Lcom/davils/kreate/configuration/ConfigurationSchemaExtension;
 	public abstract fun getCoverage ()Lcom/davils/kreate/coverage/CoverageExtension;
 	public abstract fun getDependencyLocking ()Lcom/davils/kreate/locking/DependencyLockingExtension;

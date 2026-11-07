@@ -101,6 +101,12 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **`kreateApiSemverCheck`.** `apiValidation { semver { enabled = true } }` compares the API dump with
+  the one committed at the last release tag and fails when the version is too low for the difference,
+  or when a breaking change has no commit marked as breaking.
+- **The changelog tasks.** `project { changelog { enabled = true } }` adds `kreateChangelogCheck`,
+  which runs on `check`, `kreateChangelogGenerate`, which writes the next section from conventional
+  commits and suggests its version, and `kreateChangelogNotes`, which extracts the notes of a release.
 - **The dependency policy.** `assurance { dependencyPolicy { enabled = true } }` adds
   `kreateDependencyPolicy`, which reports denied and unapproved modules, repositories outside the
   allowed hosts or without TLS, `mavenLocal()`, dynamic and snapshot versions, test libraries on

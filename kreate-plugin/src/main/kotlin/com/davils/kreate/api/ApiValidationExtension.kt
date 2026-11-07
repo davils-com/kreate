@@ -16,11 +16,13 @@
 
 package com.davils.kreate.api
 
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
 /**
@@ -124,4 +126,22 @@ public abstract class ApiValidationExtension @Inject constructor(factory: Object
      * @since 2.1.0
      */
     public val ignoredClasses: SetProperty<String> = factory.setProperty(String::class.java)
+
+    /**
+     * Configuration of the semantic versioning check.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val semver: ApiSemverExtension
+
+    /**
+     * Configures the semantic versioning check.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun semver(action: Action<ApiSemverExtension>) {
+        action.execute(semver)
+    }
 }

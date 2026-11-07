@@ -56,6 +56,14 @@ internal enum class ExternalTool(
     TRIVY(
         commandName = "trivy",
         directoriesByOperatingSystem = UNIX_BIN_DIRECTORIES
+    ),
+    GIT(
+        commandName = "git",
+        directoriesByOperatingSystem = mapOf(
+            OperatingSystem.LINUX to LINUX_BIN_DIRECTORIES,
+            OperatingSystem.MACOS to MACOS_BIN_DIRECTORIES,
+            OperatingSystem.WINDOWS to listOf("C:\\Program Files\\Git\\cmd")
+        )
     );
 
     fun wellKnownDirectories(operatingSystem: OperatingSystem): List<String> =

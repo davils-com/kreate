@@ -291,6 +291,41 @@ Registered when `project.apiValidation.enabled` is `true`. See
         <td>Fails when the interface no longer matches the dump. Runs as part of <code>check</code>.</td>
         <td><code>build/kreate/api/&lt;project&gt;.api</code></td>
     </tr>
+    <tr>
+        <td><code>kreateApiSemverCheck</code></td>
+        <td>Fails when the version is too low for how the API changed since the last release. Only with
+            <code>semver { enabled }</code>.</td>
+        <td><code>build/kreate/api/semver.txt</code></td>
+    </tr>
+</table>
+
+## Changelog
+
+Registered when `project.changelog.enabled` is `true`. See [Changelog](Changelog.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateChangelogCheck</code></td>
+        <td>Checks the structure and that the project version has a section. Runs as part of
+            <code>check</code>.</td>
+        <td><code>build/kreate/changelog/check.txt</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateChangelogGenerate</code></td>
+        <td>Writes the next section from conventional commits; <code>--release</code>, <code>--from</code>,
+            <code>--write</code>.</td>
+        <td><code>build/kreate/changelog/next.md</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateChangelogNotes</code></td>
+        <td>Writes the section of a release as notes; <code>--release</code>.</td>
+        <td><code>build/kreate/changelog/notes.md</code></td>
+    </tr>
 </table>
 
 ## Configuration schema

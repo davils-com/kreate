@@ -40,6 +40,7 @@ private const val ACTUAL_DUMP_DIRECTORY = "kreate/api"
 internal fun Project.initializeApiValidation(extension: KreateExtension) {
     val apiExtension = extension.project.apiValidation
     if (!apiExtension.enabled.get()) return
+    registerApiSemverCheck(apiExtension)
     if (validatesThroughKotlinPlugin(apiExtension)) {
         initializeKotlinAbiValidation(apiExtension)
         return

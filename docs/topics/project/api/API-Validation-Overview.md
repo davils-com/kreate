@@ -87,3 +87,32 @@ compilation is validated; Kotlin/Native, JavaScript and Wasm targets produce no 
 are not covered by default. `klib = true` covers every target, klibs and an Android library target
 included, through the Kotlin plugin's own ABI validation - see
 [API validation configuration](API-Validation-Configuration.md).
+
+## Semantic versioning
+
+```kotlin
+kreate {
+    project {
+        apiValidation {
+            enabled = true
+            semver { enabled = true }
+        }
+    }
+}
+```
+
+`kreateApiSemverCheck` reads the dump committed at the last release, the highest tag reachable from
+`HEAD` (with `tagPrefix`, such as `v`), and compares it with the current dump class by class and member
+by member. A removed class or member, a member that changed between static and instance or lost
+`public`, a class that became final or abstract, a lost supertype and a new abstract member of an
+extensible type break the API; everything that was added extends it.
+
+The project version must then be high enough: a major release for a breaking change, a minor release
+for an addition; before 1.0.0 one place further right. A breaking change also needs a commit since the
+release that is marked as breaking with `!` or `BREAKING CHANGE`, unless `requireBreakingCommit = false`.
+`baseline` names another revision to compare with. Before the first release, or when the release has no
+dump, the check is skipped and says why. It runs as part of `check` unless `runOnCheck = false`.
+
+The classification is structural and errs towards breaking: an abstract member added to an abstract
+DSL class counts as breaking, although Gradle implements such classes itself.
+

@@ -35,4 +35,11 @@ public object ApiValidationTaskNames {
      * @since 4.0.0
      */
     public const val CHECK: String = "kreateApiCheck"
+
+    /**
+     * Checks that the project version is high enough for how the API changed since the last release.
+     *
+     * @since 4.0.0
+     */
+    public const val SEMVER_CHECK: String = "kreateApiSemverCheck"
 }

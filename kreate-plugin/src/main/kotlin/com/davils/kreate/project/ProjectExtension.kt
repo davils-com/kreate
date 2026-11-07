@@ -18,6 +18,7 @@ package com.davils.kreate.project
 
 import com.davils.kreate.api.ApiValidationExtension
 import com.davils.kreate.benchmark.BenchmarkExtension
+import com.davils.kreate.changelog.ChangelogExtension
 import com.davils.kreate.configuration.ConfigurationSchemaExtension
 import com.davils.kreate.constants.BuildConstantsExtension
 import com.davils.kreate.coverage.CoverageExtension
@@ -175,6 +176,14 @@ public abstract class ProjectExtension @Inject constructor(
     public abstract val benchmark: BenchmarkExtension
 
     /**
+     * Configuration of the changelog.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val changelog: ChangelogExtension
+
+    /**
      * Configures the [ProjectVersionExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -282,5 +291,15 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun benchmark(action: Action<BenchmarkExtension>) {
         action.execute(benchmark)
+    }
+
+    /**
+     * Configures the changelog.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun changelog(action: Action<ChangelogExtension>) {
+        action.execute(changelog)
     }
 }

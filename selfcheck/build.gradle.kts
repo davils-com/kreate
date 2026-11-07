@@ -26,6 +26,13 @@ dependencies {
 }
 
 kreate {
+    project {
+        changelog {
+            enabled = true
+            runOnCheck = false
+        }
+    }
+
     assurance {
         enabled = true
         runOnCheck = false
