@@ -24,7 +24,7 @@ range is claimed, a build actually runs against both ends of it.
         <td>Gradle</td>
         <td>%min_gradle%</td>
         <td>%min_gradle% and the current release</td>
-        <td>Both are exercised by the full functional suite, not a smoke test.</td>
+        <td>The current release runs the whole functional suite; the minimum builds a project, measures coverage and publishes locally.</td>
     </tr>
     <tr>
         <td>JDK (build)</td>
@@ -88,8 +88,10 @@ Required only for the features that use them.
         rustup location <code>~/.cargo/bin</code> on every platform.
     </def>
     <def title="Trivy">
-        Needed by the <a href="Trivy-Overview.md">security scans</a>. The scan tasks fail with an
-        actionable message if it is missing rather than silently reporting a clean result.
+        Needed by the <a href="Trivy-Overview.md">security scans</a>. %product% downloads the version
+        it pins, checks it against a SHA-256 built into the plugin and caches it, so nothing has to be
+        installed. With <code>useInstalled = true</code> an installed Trivy is used instead. A Trivy
+        that is not available leaves the assurance gate incomplete rather than clean.
     </def>
 </deflist>
 

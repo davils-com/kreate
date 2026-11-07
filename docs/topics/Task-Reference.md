@@ -270,6 +270,28 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
     </tr>
 </table>
 
+## Detekt
+
+Registered when `project.detekt.enabled` is `true`.
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateDetekt</code></td>
+        <td>Runs Detekt over every source set that has sources. Runs as part of <code>check</code>.</td>
+        <td><code>build/reports/detekt/&lt;task&gt;/</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateFormatApply</code></td>
+        <td>Rewrites the Kotlin sources to follow the formatting rules. Only with <code>formatting</code>.</td>
+        <td>The sources</td>
+    </tr>
+</table>
+
 ## API validation
 
 Registered when `project.apiValidation.enabled` is `true`. See
@@ -323,11 +345,6 @@ See [Developer tools](Developer-Tools.md) and the workspace section of the assur
         <td><code>kreateDoctor</code></td>
         <td>Checks Java, Gradle, Git, Trivy, the proxy, the network and the cache. Root project.</td>
         <td>-</td>
-    </tr>
-    <tr>
-        <td><code>kreateFormatApply</code></td>
-        <td>Rewrites the Kotlin sources to follow the formatting rules. With <code>detekt { formatting }</code>.</td>
-        <td>The sources</td>
     </tr>
     <tr>
         <td><code>kreateExplain</code></td>

@@ -155,14 +155,24 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 ### Software Assurance
 
 - **One gate over every finding**: `assurance { }` filters findings through ignore rules that expire
-  and a baseline, writes JSON, SARIF or text, and decides.
+  and a baseline, and decides. Reports come as JSON, SARIF, text, an HTML dashboard, Markdown,
+  JUnit, Checkstyle, GitLab code quality and SonarQube.
 - **Never clean by accident**: a check that could not finish fails the gate, and `reportOnly` cannot
   hide that.
-- **Findings from other tools**: `externalFindings` reads their documents.
+- **Supply chain**: advisories from OSV.dev, an inspection of what dependency jars contain, their age
+  and maintenance through deps.dev, typosquatting and dependency confusion, and a dependency policy
+  that also checks locking, verification and the wrapper.
+- **Organisation policy**: CI names a versioned policy artifact that a build cannot weaken.
+- **Workspace**: cycles, forbidden dependencies and misaligned versions across projects, the projects
+  a change affects, and one report over all of them, safe under Isolated Projects.
+- **Findings from other tools**: Detekt, Kover and the API check are read in, and `externalFindings`
+  reads further documents.
 
 ### Project & Release
 
 - **Build constants**: generate a type-safe Kotlin object from build values.
+- **Releases**: a semantic versioning check of the public API against the last release, a changelog
+  checked and generated from conventional commits, and a Git pre-commit hook.
 - **Testing**: parallel execution, readable logging, and HTML/XML reports.
 - **Code coverage**: Kover configured from one block — reports, filters, named verification rules
   and a threshold gate that runs on `check`, plus multi-project aggregation. Ships with no default
@@ -262,6 +272,9 @@ kreate {
 ./gradlew kreateLocalPublish        # install this repository for other checkouts to resolve
 ./gradlew kreateLocalStatus         # what is published locally, or why local mode is off
 ./gradlew kreateLocalClean          # undo it
+./gradlew kreateAssurance           # run the assurance gate
+./gradlew kreateExplain --rule=FRESH_RELEASE   # explain a rule
+./gradlew kreateDoctor              # check Java, Gradle, Git, Trivy, the proxy and the network
 ```
 
 ---
@@ -271,8 +284,8 @@ kreate {
 | Block                             | Property                   | Description                                | Default      |
 |:----------------------------------|:---------------------------|:-------------------------------------------|:-------------|
 | `platform`                        | `javaVersion`              | Java toolchain and bytecode target         | `VERSION_25` |
-| `platform`                        | `explicitApi`              | Kotlin explicit API mode                   | `false`      |
-| `platform`                        | `allWarningsAsErrors`      | Compiler warnings become errors            | `true`       |
+| `platform`                        | `explicitApi`              | Kotlin explicit API mode                   | `true`       |
+| `platform`                        | `allWarningsAsErrors`      | Compiler warnings become errors            | `false`      |
 | `platform.jvm.jni`                | `enabled`                  | CMake-based JNI integration                | `false`      |
 | `platform.jvm.jni`                | `buildType`                | CMake build type                           | `Release`    |
 | `platform.jvm.jni`                | `cmakeExecutable`          | Explicit CMake path                        | *resolved*   |
@@ -284,18 +297,30 @@ kreate {
 | `project`                         | `applySerializationPlugin` | Apply the serialization compiler plugin    | `false`      |
 | `project.buildConstant`           | `enabled`                  | Generate type-safe Kotlin constants        | `false`      |
 | `project.docs`                    | `enabled`                  | Dokka documentation                        | `false`      |
-| `project.tests`                   | `enabled`                  | Test execution and reporting               | `true`       |
+| `project.tests`                   | `enabled`                  | Test execution and reporting               | `false`      |
 | `project.detekt`                  | `enabled`                  | Static analysis configuration              | `false`      |
-| `project.detekt`                  | `kreateRules`              | Kreate code style rules for Detekt          | `true`       |
+| `project.detekt`                  | `kreateRules`              | Kreate code style rules for Detekt         | `true`       |
+| `project.detekt`                  | `formatting`               | ktlint rules and `kreateFormatApply`       | `false`      |
 | `project.coverage`                | `enabled`                  | Code coverage through Kover                | `false`      |
 | `project.coverage.verify`         | `minLineCoverage`          | Coverage threshold enforced on `check`     | unset        |
 | `project.coverage.aggregate`      | `enabled`                  | Merge subproject coverage into one report  | `false`      |
 | `project.apiValidation`           | `enabled`                  | Binary compatibility validation            | `false`      |
+| `project.apiValidation.semver`    | `enabled`                  | Version check against the last release     | `false`      |
+| `project.changelog`               | `enabled`                  | Changelog check, generation and notes      | `false`      |
+| `project.gitHooks`                | `enabled`                  | Git pre-commit hook                        | `false`      |
 | `project.dependencyLocking`       | `enabled`                  | Gradle dependency locking                  | `false`      |
 | `project.benchmark`               | `enabled`                  | kotlinx-benchmark integration              | `false`      |
 | `project.benchmark.regression`    | `maxRegressionPercent`     | Benchmark regression threshold             | `10.0`       |
 | `project.publish`                 | `enabled`                  | Maven Central / GitLab publishing          | `false`      |
-| `assurance`                       | `enabled`                  | Software assurance gate          |
+| `assurance`                       | `enabled`                  | Software assurance gate                    | `false`      |
+| `assurance`                       | `failOn`                   | Severity from which a finding blocks       | `HIGH`       |
+| `assurance.advisories`            | `enabled`                  | Audit against OSV.dev                      | `false`      |
+| `assurance.inspection`            | `enabled`                  | Inspect what dependency jars contain       | `false`      |
+| `assurance.trust`                 | `enabled`                  | Age and scorecard through deps.dev         | `false`      |
+| `assurance.confusion`             | `enabled`                  | Typosquatting and dependency confusion     | `false`      |
+| `assurance.dependencyPolicy`      | `enabled`                  | Dependency policy and build hardening      | `false`      |
+| `assurance.workspace`             | `enabled`                  | Checks across the projects of a build      | `false`      |
+| `assurance.aggregate`             | `enabled`                  | One report over all projects               | `false`      |
 | `trivy`                           | `enabled`                  | Security and compliance scanning           | `false`      |
 
 ---

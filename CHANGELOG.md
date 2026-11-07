@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 4.0.0
 
-Kreate 4.0.0 restructures the plugin into one package per feature, narrows the public API to the
-build script DSL and ships four more code style rules. Plugin ids, task names and every property of
-the `kreate { }` DSL are unchanged, so a build script keeps working once its imports are updated.
+Kreate 4.0.0 adds a software assurance gate: advisories, an inspection of dependency jars, trust and
+confusion checks, a dependency policy, workspace checks and an organisation policy, decided in one
+place and reported in nine formats. It also checks semantic versions and keeps the changelog, runs
+on JDK 25 and Gradle 9.1, restructures the plugin into one package per feature, narrows the public
+API to the build script DSL and ships four more code style rules. Plugin ids, task names and the
+existing properties of the `kreate { }` DSL are unchanged, so a build script keeps working once its
+imports are updated and Gradle runs on JDK 25.
 
 ### Breaking changes
 

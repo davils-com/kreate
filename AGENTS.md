@@ -24,7 +24,7 @@ The three artifacts are included builds. Root task names do not reach them.
 
 Runs `check` of every included build and of `:example`: compilation, Detekt with the Kreate rule
 set, unit and functional tests, Kover verification and the API check. Nothing is done until it is
-green. Set `KREATE_REQUIRE_CMAKE=true KREATE_REQUIRE_TRIVY=true` so missing tools fail instead of
+green. The build runs on JDK 25; `gradle/gradle-daemon-jvm.properties` pins the daemon to it. Set `KREATE_REQUIRE_CMAKE=true KREATE_REQUIRE_TRIVY=true` so missing tools fail instead of
 skipping tests.
 
 ## Architecture of the plugin
@@ -37,9 +37,17 @@ skipping tests.
   - `wiring`: the internal `<Feature>Feature` object and its Gradle wiring;
   - domain packages: internal logic without Gradle (`api.abi`, `benchmark.comparison`, ...).
 - Shared internals: `gradle` (plugin ids, source set names, task paths, project naming), `host`
-  (the machine Kreate runs on), `tooling` (external executables), `net` (the HTTP transport) and
-  `archive` (bounded ZIP and TAR reading). `net` and `archive` stay free of Gradle types;
-  `GradleFreeGuardTest` enforces that.
+  (the machine Kreate runs on), `tooling` (external executables), `net` (the HTTP transport),
+  `archive` (bounded ZIP and TAR reading), `dependency` (resolved graphs and coordinates) and `vcs`
+  (Git history through `tooling`, revisions checked before they reach Git). Shared internals and
+  every domain package stay free of Gradle types; `GradleFreeGuardTest` lists them and enforces
+  that.
+- The assurance gate: every source of findings is a `FindingCollectTask` that writes a
+  `FindingDocument` and never fails on a finding; `kreateAssurance` alone decides. A check that could
+  not finish writes an incomplete document, never a clean one. Each source describes its rules in
+  `src/main/resources/assurance/rules/<source>.json`, which `kreateExplain` reads. The DSL of the
+  sources lives in `com.davils.kreate.assurance` (`assurance { advisories { } }`, ...), their code in
+  the feature packages `advisory`, `inspection`, `provenance`, `governance`, `workspace` and `policy`.
 - JSON goes through the tree API of `kotlinx-serialization-json`, without the compiler plugin. HTTP
   goes through the Ktor client behind `net.HttpTransport`, and redirects and retries stay in `net`.
 - Task names and DSL property names are the consumer contract and change only in a major version.

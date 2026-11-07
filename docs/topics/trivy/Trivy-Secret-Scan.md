@@ -30,7 +30,7 @@ kreate {
             })
 
             // Path to a custom Trivy secret configuration
-            secretConfig = rootProject.layout.projectDirectory.file("trivy-secret.yaml")
+            secretConfig = isolated.rootProject.projectDirectory.file("trivy-secret.yaml")
         }
     }
 }
@@ -45,11 +45,12 @@ By default, Kreate looks for a file named `trivy-secret.yaml` in the root direct
 Example `trivy-secret.yaml`:
 
 ```yaml
-secrets:
-  rules:
-    - id: custom-api-key
-      name: My Custom API Key
-      regex: 'my-app-[a-z0-9]{32}'
+rules:
+  - id: custom-api-key
+    category: general
+    title: My Custom API Key
+    severity: HIGH
+    regex: 'my-app-[a-z0-9]{32}'
 ```
 
 ## How it Works
