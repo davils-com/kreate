@@ -37,6 +37,9 @@ dependencies {
     "detektPlugins"(libs.findLibrary("detekt-rules-ktlintWrapper").get())
     "detektPlugins"(libs.findLibrary("detekt-rules-libraries").get())
     "detektPlugins"(Project.Quality.KREATE_RULES_MODULE)
+    val asmReadingJava25 = libs.findVersion("asm").get().requiredVersion
+    "bcv-rt-jvm-cp"("org.ow2.asm:asm:$asmReadingJava25")
+    "bcv-rt-jvm-cp"("org.ow2.asm:asm-tree:$asmReadingJava25")
 }
 
 tasks.withType<Detekt>().configureEach {

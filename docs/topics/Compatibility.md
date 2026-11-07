@@ -34,7 +34,7 @@ range is claimed, a build actually runs against both ends of it.
     </tr>
     <tr>
         <td>JDK (target)</td>
-        <td>%min_java%</td>
+        <td>17</td>
         <td>Any version your toolchain provides</td>
         <td>Set through <code>platform { javaVersion }</code>.</td>
     </tr>
@@ -54,8 +54,8 @@ range is claimed, a build actually runs against both ends of it.
 
 ## Why the plugin targets old versions on purpose
 
-%product% is compiled against Kotlin %kotlin_api% and Java %min_java% — the versions embedded in
-the *minimum* supported Gradle, not the newest available.
+%product% is compiled against Kotlin %kotlin_api%, the version embedded in the *minimum* supported
+Gradle, not the newest available, and for Java %min_java%, the JDK that Gradle has to run on.
 
 This is deliberate. A Gradle plugin compiled against a newer API does not fail at build time in
 the plugin's own repository; it fails at *runtime*, on a consumer's machine, with a

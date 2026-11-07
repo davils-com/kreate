@@ -14,7 +14,7 @@ Kotlin compiler settings, and the bridges to native code.
 ```kotlin
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_17
+        javaVersion = JavaVersion.VERSION_25
         explicitApi = true
         allWarningsAsErrors = true
 
@@ -54,7 +54,7 @@ kreate {
     <tr><td>Property</td><td>Default</td><td>Topic</td></tr>
     <tr>
         <td><code>javaVersion</code></td>
-        <td><code>JavaVersion.VERSION_17</code></td>
+        <td><code>JavaVersion.VERSION_25</code></td>
         <td><a href="Platform-Java-Version.md">Java version</a></td>
     </tr>
     <tr>

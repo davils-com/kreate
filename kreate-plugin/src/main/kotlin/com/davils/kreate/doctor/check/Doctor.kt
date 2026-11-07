@@ -18,9 +18,11 @@ package com.davils.kreate.doctor.check
 import java.net.URI
 import java.net.URISyntaxException
 
-private const val MIN_JAVA: Int = 17
+private const val MIN_JAVA: Int = 25
 
 private const val MIN_GRADLE_MAJOR: Int = 9
+
+private const val MIN_GRADLE_MINOR: Int = 1
 
 private const val TRIVY: String = "Trivy"
 
@@ -41,9 +43,13 @@ internal object Doctor {
 
     private fun gradleOf(facts: DoctorFacts): DoctorCheck {
         val version = facts.gradleVersion
-        val major = version.substringBefore('.').toIntOrNull() ?: 0
-        val tooOld = major < MIN_GRADLE_MAJOR
-        if (tooOld) return DoctorCheck("Gradle", DoctorStatus.FAIL, "Gradle $version; Kreate needs 9.0.")
+        val parts = version.split('.').map { part -> part.takeWhile(Char::isDigit).toIntOrNull() ?: 0 }
+        val major = parts.getOrElse(0) { 0 }
+        val minor = parts.getOrElse(1) { 0 }
+        val olderMajor = major < MIN_GRADLE_MAJOR
+        val olderMinor = major == MIN_GRADLE_MAJOR && minor < MIN_GRADLE_MINOR
+        val tooOld = olderMajor || olderMinor
+        if (tooOld) return DoctorCheck("Gradle", DoctorStatus.FAIL, "Gradle $version; Kreate needs 9.1.")
         return DoctorCheck("Gradle", DoctorStatus.OK, "Gradle $version.")
     }
 

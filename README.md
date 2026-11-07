@@ -12,10 +12,10 @@
     <img src="https://img.shields.io/badge/Kotlin-2.4-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
   </a>
   <a href="https://gradle.org">
-    <img src="https://img.shields.io/badge/Gradle-9.0%2B-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
+    <img src="https://img.shields.io/badge/Gradle-9.1%2B-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
   </a>
   <a href="https://adoptium.net">
-    <img src="https://img.shields.io/badge/JDK-17%2B-Redtronics?style=for-the-badge&logo=openjdk&labelColor=white&color=ED8B00" alt="JDK">
+    <img src="https://img.shields.io/badge/JDK-25%2B-Redtronics?style=for-the-badge&logo=openjdk&labelColor=white&color=ED8B00" alt="JDK">
   </a>
 </p>
 
@@ -208,7 +208,7 @@ group = "com.example"
 
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_17
+        javaVersion = JavaVersion.VERSION_25
         explicitApi = true
         allWarningsAsErrors = true
 
@@ -270,7 +270,7 @@ kreate {
 
 | Block                             | Property                   | Description                                | Default      |
 |:----------------------------------|:---------------------------|:-------------------------------------------|:-------------|
-| `platform`                        | `javaVersion`              | Java toolchain and bytecode target         | `VERSION_17` |
+| `platform`                        | `javaVersion`              | Java toolchain and bytecode target         | `VERSION_25` |
 | `platform`                        | `explicitApi`              | Kotlin explicit API mode                   | `false`      |
 | `platform`                        | `allWarningsAsErrors`      | Compiler warnings become errors            | `true`       |
 | `platform.jvm.jni`                | `enabled`                  | CMake-based JNI integration                | `false`      |
@@ -304,8 +304,8 @@ kreate {
 
 | Component        | Minimum | Verified in CI                     |
 |:-----------------|:--------|:-----------------------------------|
-| Gradle           | 9.0     | 9.0 and the current release        |
-| JDK              | 17      | 17                                 |
+| Gradle           | 9.1     | 9.1 and the current release        |
+| JDK              | 25      | 25                                 |
 | Kotlin           | 2.4.21  | 2.4.21                             |
 | Operating system | —       | Linux, macOS, Windows              |
 | CMake            | 3.20    | Required only for native features  |

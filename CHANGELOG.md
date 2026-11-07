@@ -13,6 +13,11 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
 
 ### Breaking changes
 
+- **Gradle runs on JDK 25, from Gradle 9.1.** Kreate is compiled for Java 25, so Gradle has to run on
+  JDK 25 or later, and Gradle 9.1 is the first release that can. Builds on Gradle 9.0 or an older JDK
+  have to move up. What your code targets stays your choice.
+- **`platform { javaVersion }` defaults to `VERSION_25`.** Set `VERSION_17` or `VERSION_21` to keep an
+  older target; that needs a matching JDK for the toolchain.
 - **Every public type moved to a feature package.** The DSL types now live directly in
   `com.davils.kreate.<feature>`. Update the imports of a build script that names them:
 

@@ -95,7 +95,7 @@ yourself to pin its version still works. See [](Plugin-Management.md).
 
 | Concern | What you write | What you would otherwise repeat |
 |---|---|---|
-| Java toolchain | `javaVersion = JavaVersion.VERSION_17` | `jvmToolchain`, `sourceCompatibility`, `targetCompatibility`, per module |
+| Java toolchain | `javaVersion = JavaVersion.VERSION_25` | `jvmToolchain`, `sourceCompatibility`, `targetCompatibility`, per module |
 | Explicit API | `explicitApi = true` | `explicitApi()` in every Kotlin block |
 | Warning policy | `allWarningsAsErrors = true` | `compilerOptions` on every compile task |
 

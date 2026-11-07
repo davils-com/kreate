@@ -50,11 +50,11 @@ class PlatformFeatureTest : FunSpec({
     fun javaOf(project: Project): JavaPluginExtension = project.extensions.getByType(JavaPluginExtension::class.java)
 
     context("platform defaults") {
-        test("a JVM project compiles for Java 17 in explicit API mode") {
+        test("a JVM project compiles for Java 25 in explicit API mode") {
             val project = evaluated("org.jetbrains.kotlin.jvm") { }
             val kotlin = project.extensions.getByType(KotlinJvmProjectExtension::class.java)
 
-            javaOf(project).targetCompatibility shouldBe JavaVersion.VERSION_17
+            javaOf(project).targetCompatibility shouldBe JavaVersion.VERSION_25
             kotlin.explicitApi shouldBe ExplicitApiMode.Strict
             kotlin.compilerOptions.allWarningsAsErrors.get() shouldBe false
         }

@@ -48,5 +48,5 @@ public class JNI {
  */
 public fun main() {
     val jni = JNI()
-    println(jni.hello())
+    System.out.println(jni.hello())
 }

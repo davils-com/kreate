@@ -20,7 +20,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 
 private val HEALTHY: DoctorFacts = DoctorFacts(
-    javaVersion = 21,
+    javaVersion = 25,
     gradleVersion = "9.9.0",
     gitVersion = "git version 2.50.0",
     trivy = TrivyFacts("0.76.2", useInstalled = false, cached = true, installed = null),
@@ -44,8 +44,10 @@ class DoctorTest : FunSpec({
 
     context("the runtime") {
         test("fails on an old Java or Gradle") {
-            statusOf(HEALTHY.copy(javaVersion = 11), "Java").status shouldBe DoctorStatus.FAIL
+            statusOf(HEALTHY.copy(javaVersion = 21), "Java").status shouldBe DoctorStatus.FAIL
             statusOf(HEALTHY.copy(gradleVersion = "8.14"), "Gradle").status shouldBe DoctorStatus.FAIL
+            statusOf(HEALTHY.copy(gradleVersion = "9.0.0"), "Gradle").status shouldBe DoctorStatus.FAIL
+            statusOf(HEALTHY.copy(gradleVersion = "9.1"), "Gradle").status shouldBe DoctorStatus.OK
         }
 
         test("warns without Git") {

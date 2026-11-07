@@ -11,7 +11,7 @@ version: 2
 # kotlinx-benchmark and the binary compatibility validator out of the updates with it.
 #
 # kotlinx-serialization and Ktor are held at the last release built on Kotlin 2.2, the stdlib of
-# Gradle 9.0, Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
+# Gradle 9.1, Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
 #
 # The list is repeated per ecosystem rather than shared through a YAML anchor: Dependabot
 # validates this file against a fixed schema and rejects an unknown top-level key.

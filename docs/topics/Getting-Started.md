@@ -25,8 +25,8 @@ assumes you already have a `build.gradle.kts` and a Kotlin plugin applied.
         plugin will refuse to apply rather than fail in a confusing way later.
     </def>
     <def title="JDK %min_java% or later">
-        %min_java% is the minimum because it is the minimum for Gradle %min_gradle%. The plugin
-        is tested on JDK %tested_java%.
+        Gradle has to run on JDK %min_java% or later, because %product% is compiled for it; Gradle
+        %min_gradle% is the first release that runs on it. The plugin is tested on JDK %tested_java%.
     </def>
     <def title="A Kotlin plugin">
         Either <code>org.jetbrains.kotlin.jvm</code> or
@@ -83,7 +83,7 @@ group = "com.example"
 
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_17
+        javaVersion = JavaVersion.VERSION_25
         explicitApi = true
         allWarningsAsErrors = true
     }

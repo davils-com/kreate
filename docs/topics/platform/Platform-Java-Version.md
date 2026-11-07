@@ -16,7 +16,7 @@ Kreate defaults to `JavaVersion.VERSION_25` if `javaVersion` is not explicitly s
 ```kotlin
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_17
+        javaVersion = JavaVersion.VERSION_25
     }
 }
 ```
@@ -40,9 +40,12 @@ Any `JavaVersion` enum value from Gradle's API is accepted. Kreate is tested aga
 
 | Value                    | Java Release      |
 |--------------------------|-------------------|
-| `JavaVersion.VERSION_17` | Java 17 (Minimum) |
+| `JavaVersion.VERSION_17` | Java 17 (LTS)     |
 | `JavaVersion.VERSION_21` | Java 21 (LTS)     |
-| `JavaVersion.VERSION_25` | Java 25 (default) |
+| `JavaVersion.VERSION_25` | Java 25 (LTS, default) |
+
+Gradle itself runs on JDK 25 or later, but your code may target an older release. A target below
+25 needs a matching JDK for the toolchain.
 
 <tip>
 For libraries published to Maven Central, Java 21 (LTS) is the recommended minimum target

@@ -8,9 +8,9 @@
 
     <!-- Compatibility. These are the single source of truth for every version stated in
          the documentation; the same values are asserted by the functional test matrix. -->
-    <var name="min_gradle" value="9.0"/>
-    <var name="min_java" value="17"/>
-    <var name="tested_java" value="17"/>
+    <var name="min_gradle" value="9.1"/>
+    <var name="min_java" value="25"/>
+    <var name="tested_java" value="25"/>
     <var name="kotlin_api" value="2.4.21"/>
     <var name="min_cmake" value="3.20"/>
 

@@ -36,7 +36,7 @@ group = "com.example"
 
 kreate {
     platform {
-        javaVersion = JavaVersion.VERSION_17
+        javaVersion = JavaVersion.VERSION_25
         explicitApi = true
         allWarningsAsErrors = false
 
