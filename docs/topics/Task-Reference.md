@@ -345,6 +345,12 @@ See [Developer tools](Developer-Tools.md) and the workspace section of the assur
         <td><code>build/kreate/workspace</code></td>
     </tr>
     <tr>
+        <td><code>kreateAssurancePolicyCheck</code>, <code>kreateAssurancePolicyTemplate</code></td>
+        <td>Check the build against the policy named by <code>-Pkreate.assurance.policy</code>; write a
+            policy from the current settings.</td>
+        <td><code>build/kreate/assurance/policy-template.json</code></td>
+    </tr>
+    <tr>
         <td><code>kreateDependencyGraph</code></td>
         <td>Draws the resolved dependencies of a project; <code>--format</code>.</td>
         <td><code>build/kreate/dependencies</code></td>

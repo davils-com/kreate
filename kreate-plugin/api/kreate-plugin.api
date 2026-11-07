@@ -737,6 +737,12 @@ public abstract class com/davils/kreate/platform/PlatformExtension {
 	public final fun multiplatform (Lorg/gradle/api/Action;)V
 }
 
+public final class com/davils/kreate/policy/PolicyTaskNames {
+	public static final field CHECK Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/policy/PolicyTaskNames;
+	public static final field TEMPLATE Ljava/lang/String;
+}
+
 public abstract class com/davils/kreate/project/ProjectExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun apiValidation (Lorg/gradle/api/Action;)V

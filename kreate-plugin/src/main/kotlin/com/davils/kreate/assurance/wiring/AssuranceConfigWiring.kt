@@ -71,7 +71,7 @@ private fun Project.urlsOf(assurance: AssuranceExtension): Provider<Map<String, 
     }
 }
 
-private fun configValues(assurance: AssuranceExtension, trivy: TrivyExtension): Map<String, String> {
+internal fun configValues(assurance: AssuranceExtension, trivy: TrivyExtension): Map<String, String> {
     val entries = mapOf(
         "enabled" to assurance.enabled,
         "runOnCheck" to assurance.runOnCheck,

@@ -35,7 +35,7 @@ internal class FindingFilter(
     fun apply(findings: List<Finding>, completeSources: Set<FindingSource>): FilterOutcome {
         val (active, expired) = rules.partition { rule -> !rule.isExpired(today) }
         val relevant = findings.filter { finding -> isRelevant(finding) }
-        val (protected, ignorable) = relevant.partition { finding -> finding.gatingSeverity in unignorable }
+        val (protected, ignorable) = relevant.partition { finding -> isProtected(finding) }
         val (suppressed, candidates) = ignorable.partition { finding -> isIgnored(finding, active) }
         val match = baseline.partition(candidates, completeSources)
 
@@ -48,7 +48,11 @@ internal class FindingFilter(
         )
     }
 
+    private fun isProtected(finding: Finding): Boolean =
+        finding.source == FindingSource.POLICY || finding.gatingSeverity in unignorable
+
     private fun isRelevant(finding: Finding): Boolean {
+        if (finding.source == FindingSource.POLICY) return true
         val isUnratedAdvisory = finding.severity == Severity.UNKNOWN && finding.gatingSeverity != Severity.UNKNOWN
         return isUnratedAdvisory || finding.gatingSeverity.isAtLeast(minSeverity)
     }

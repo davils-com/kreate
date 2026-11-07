@@ -1,0 +1,40 @@
+{
+  "source": "policy",
+  "rules": [
+    {
+      "id": "POLICY_REQUIRED_VALUE",
+      "severity": "CRITICAL",
+      "category": "policy",
+      "summary": "A setting differs from what the policy requires",
+      "explanation": "The organisation's policy fixes this setting. The build cannot change it; ask the owners of the policy instead."
+    },
+    {
+      "id": "POLICY_BELOW_MINIMUM",
+      "severity": "CRITICAL",
+      "category": "policy",
+      "summary": "A setting is weaker than the policy allows",
+      "explanation": "The policy sets the weakest value this setting may have. A stricter value is fine, a weaker one is not."
+    },
+    {
+      "id": "POLICY_IGNORE_WITHOUT_EXPIRY",
+      "severity": "CRITICAL",
+      "category": "policy",
+      "summary": "An ignore rule has no expiry, which the policy demands",
+      "explanation": "Every accepted finding has to be looked at again. Give the rule an expires date."
+    },
+    {
+      "id": "POLICY_IGNORE_TOO_LONG",
+      "severity": "CRITICAL",
+      "category": "policy",
+      "summary": "An ignore rule lasts longer than the policy allows",
+      "explanation": "The policy limits how far ahead an ignore rule may expire."
+    },
+    {
+      "id": "POLICY_DENIED_MODULE",
+      "severity": "CRITICAL",
+      "category": "policy",
+      "summary": "The build uses a module the policy denies",
+      "explanation": "The organisation's policy forbids this module, directly or transitively."
+    }
+  ]
+}

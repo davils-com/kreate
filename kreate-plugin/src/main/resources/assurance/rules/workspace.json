@@ -12,7 +12,7 @@
       "id": "DEPENDENCY_CYCLE",
       "severity": "HIGH",
       "category": "structure",
-      "summary": "Projects depend on each other in a cycle",
+     < "summary": "Projects depend on each other in a cycle",
       "explanation": "A cycle makes the projects one unit that cannot be built, tested or released apart."
     },
     {

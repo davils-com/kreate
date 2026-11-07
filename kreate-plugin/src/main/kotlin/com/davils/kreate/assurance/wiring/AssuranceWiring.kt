@@ -27,6 +27,9 @@ import com.davils.kreate.assurance.task.AssuranceVerdictTask
 import com.davils.kreate.assurance.task.CurrentDateSource
 import com.davils.kreate.assurance.task.FindingCollectTask
 import com.davils.kreate.assurance.task.IgnoreRuleInput
+import com.davils.kreate.policy.wiring.policyNotation
+import com.davils.kreate.policy.wiring.policySeverities
+import com.davils.kreate.policy.wiring.registerPolicyTasks
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -41,10 +44,12 @@ private const val RESULT_FILE: String = "kreate/assurance/result.json"
 
 internal fun Project.initializeAssurance(extension: KreateExtension) {
     val assurance = extension.assurance
-    if (!assurance.enabled.get()) return
+    val enforced = policyNotation().isPresent
+    if (!assurance.enabled.get() && !enforced) return
 
     val rules = assurance.declaredIgnoreRules().map { (id, spec) -> ignoreRuleInputOf(id, spec) }
     registerAssuranceTools(extension, rules)
+    registerPolicyTasks(extension, rules)
 
     val report = tasks.register<AssuranceReportTask>(AssuranceTaskNames.REPORT) {
         configureEvaluation(assurance, rules)
@@ -84,6 +89,7 @@ private fun AssuranceEvaluationTask.configureEvaluation(assurance: AssuranceExte
     reportOnly.set(assurance.reportOnly)
     failOnStale.set(assurance.baseline.failOnStale)
     forbidIgnoreOf.set(assurance.forbidIgnoreOf)
+    forbidIgnoreOf.addAll(project.policySeverities())
     maxAdvisoryAge.set(assurance.maxAdvisoryAge)
     maxBaselineSeverity.set(assurance.baseline.maxSeverity)
     ignoreRules.set(rules)

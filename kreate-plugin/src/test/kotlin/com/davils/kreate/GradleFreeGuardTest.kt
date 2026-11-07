@@ -74,6 +74,8 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "workspace/affected",
     "githook/hook",
     "doctor/check",
+    "policy/model",
+    "policy/check",
     "advisory/severity",
     "advisory/version",
     "trivy/provision",

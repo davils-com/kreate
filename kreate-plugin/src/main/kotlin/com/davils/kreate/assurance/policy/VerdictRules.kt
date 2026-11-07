@@ -19,6 +19,7 @@ import com.davils.kreate.assurance.Severity
 import com.davils.kreate.assurance.finding.DocumentStatus
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.FindingDocument
+import com.davils.kreate.assurance.finding.FindingSource
 import com.davils.kreate.assurance.finding.isAtLeast
 import java.time.Duration
 import java.time.Instant
@@ -35,7 +36,8 @@ internal class VerdictRules(
         val blocking = outcome.kept.count { finding -> isBlocking(finding) }
         val incomplete = documents.filter { document -> isIncomplete(document, now) }
         val incompleteSources = incomplete.map { document -> document.source.id }
-        val status = statusOf(incompleteSources, blocking, outcome.staleEntries)
+        val violatesPolicy = outcome.kept.any { finding -> finding.source == FindingSource.POLICY }
+        val status = statusOf(incompleteSources, blocking, outcome.staleEntries, violatesPolicy)
         return Verdict(status, blocking, incompleteSources, outcome.staleEntries)
     }
 
@@ -48,12 +50,19 @@ internal class VerdictRules(
     }
 
     private fun isBlocking(finding: Finding): Boolean {
+        if (finding.source == FindingSource.POLICY) return true
         val isOnlyReported = REPORT_ONLY_ATTRIBUTE in finding.attributes
         return !isOnlyReported && finding.gatingSeverity.isAtLeast(failOn)
     }
 
-    private fun statusOf(incompleteSources: List<String>, blocking: Int, staleEntries: Int): GateStatus {
+    private fun statusOf(
+        incompleteSources: List<String>,
+        blocking: Int,
+        staleEntries: Int,
+        violatesPolicy: Boolean
+    ): GateStatus {
         if (incompleteSources.isNotEmpty()) return GateStatus.INCOMPLETE
+        if (violatesPolicy) return GateStatus.FINDINGS
 
         val hasStaleEntries = failOnStale && staleEntries > 0
         val hasFailures = blocking > 0 || hasStaleEntries

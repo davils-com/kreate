@@ -101,6 +101,12 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **Organisation policies.** CI names a versioned policy artifact with
+  `-Pkreate.assurance.policy=group:name:version`. `kreateAssurancePolicyCheck` reports options that
+  differ from what the policy requires or are weaker than its minimum, ignore rules without expiry or
+  lasting too long, and denied modules. Its findings cannot be ignored, baselined or reported only,
+  the gate runs even where the build switched it off, and a policy that cannot be read leaves the gate
+  incomplete. `kreateAssurancePolicyTemplate` writes a policy from the current settings.
 - **The workspace check.** `assurance { workspace { enabled = true } }` collects the dependencies of
   every project through a consumable variant, Isolated Projects safe, and reports cycles, forbidden
   dependencies and modules resolved in different versions. `kreateWorkspaceAffected` lists the projects

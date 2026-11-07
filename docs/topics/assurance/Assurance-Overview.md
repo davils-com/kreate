@@ -330,6 +330,45 @@ defaults. `kreateAssuranceConfigLint` feeds the gate with what weakens it: `repo
 expired, service URLs over plain HTTP (loopback excepted), a disabled or unpinned Trivy, a baseline
 without `maxSeverity`, no source of findings at all, and a public lookup of internal modules.
 
+## Organisation policy
+
+A build cannot police itself: whoever may edit `build.gradle.kts` may also switch its checks off. An
+organisation therefore publishes a policy as a versioned artifact, and CI names it:
+
+```bash
+./gradlew kreateAssurance -Pkreate.assurance.policy=com.acme:assurance-policy:3
+```
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "acme",
+  "require": { "enabled": "true", "reportOnly": "false", "advisories.enabled": "true" },
+  "minimum": { "failOn": "HIGH", "maxAdvisoryAge": "P3D", "trust.freshReleaseHours": "24" },
+  "forbidIgnoreOf": ["CRITICAL"],
+  "ignoreRulesNeedExpiry": true,
+  "maxIgnoreDays": 90,
+  "denied": { "log4j:log4j": "End of life. Use org.apache.logging.log4j:log4j-core." }
+}
+```
+
+- `require` fixes options to a value; the names are those `kreateAssuranceConfig` prints.
+- `minimum` sets the weakest allowed value of an option with an order: `failOn`, `minSeverity` and
+  `baseline.maxSeverity`, where a less severe value is stricter; `maxAdvisoryAge` and `reuseVerdictFor`,
+  where shorter is stricter; and the thresholds of the inspection, the trust assessment and the
+  dependency policy.
+- `forbidIgnoreOf` adds severities that no ignore rule may hide, `ignoreRulesNeedExpiry` and
+  `maxIgnoreDays` limit ignore rules, and `denied` forbids modules, also transitively.
+
+`kreateAssurancePolicyCheck` reports every violation as a critical finding of the source `policy`.
+No ignore rule, baseline, `minSeverity` or `reportOnly` hides it, and with a policy the gate runs even
+where the build switched it off. A policy that cannot be resolved leaves the gate incomplete; a
+malformed one fails the build. The policy resolves like any dependency, so dependency verification
+covers it. A path ending in `.json`, relative to the root project, works as well, for a first try.
+
+`kreateAssurancePolicyTemplate` writes `build/kreate/assurance/policy-template.json` from the current
+settings, as a start. Publish it with `maven-publish` as an artifact with the extension `json`.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:
