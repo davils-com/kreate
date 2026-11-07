@@ -53,12 +53,25 @@ public abstract class com/davils/kreate/assurance/AssuranceBaselineExtension {
 	public final fun getMaxSeverity ()Lorg/gradle/api/provider/Property;
 }
 
+public abstract class com/davils/kreate/assurance/AssuranceConfusionExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAllow ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getCheckPublicRepository ()Lorg/gradle/api/provider/Property;
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getIncludeBuildscript ()Lorg/gradle/api/provider/Property;
+	public final fun getPopularModules ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getPublicRepository ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun advisories (Lorg/gradle/api/Action;)V
 	public final fun baseline (Lorg/gradle/api/Action;)V
+	public final fun confusion (Lorg/gradle/api/Action;)V
 	public abstract fun getAdvisories ()Lcom/davils/kreate/assurance/AssuranceAdvisoriesExtension;
 	public abstract fun getBaseline ()Lcom/davils/kreate/assurance/AssuranceBaselineExtension;
+	public abstract fun getConfusion ()Lcom/davils/kreate/assurance/AssuranceConfusionExtension;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getExternalFindings ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getFailOn ()Lorg/gradle/api/provider/Property;
@@ -71,9 +84,11 @@ public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public abstract fun getReports ()Lcom/davils/kreate/assurance/AssuranceReportsExtension;
 	public final fun getReuseVerdictFor ()Lorg/gradle/api/provider/Property;
 	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTrust ()Lcom/davils/kreate/assurance/AssuranceTrustExtension;
 	public final fun ignore (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun inspection (Lorg/gradle/api/Action;)V
 	public final fun reports (Lorg/gradle/api/Action;)V
+	public final fun trust (Lorg/gradle/api/Action;)V
 }
 
 public final class com/davils/kreate/assurance/AssuranceIgnoreSpec {
@@ -106,6 +121,17 @@ public final class com/davils/kreate/assurance/AssuranceTaskNames {
 	public static final field CHECK Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/assurance/AssuranceTaskNames;
 	public static final field REPORT Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceTrustExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFreshPackageDays ()Lorg/gradle/api/provider/Property;
+	public final fun getFreshReleaseHours ()Lorg/gradle/api/provider/Property;
+	public final fun getIncludeBuildscript ()Lorg/gradle/api/provider/Property;
+	public final fun getMinScorecard ()Lorg/gradle/api/provider/Property;
+	public final fun getYoungPackageDays ()Lorg/gradle/api/provider/Property;
 }
 
 public final class com/davils/kreate/assurance/ReportFormat : java/lang/Enum {
@@ -653,6 +679,12 @@ public abstract class com/davils/kreate/project/ProjectVersionExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnvironment ()Lorg/gradle/api/provider/Property;
 	public final fun getProperty ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/provenance/ProvenanceTaskNames {
+	public static final field CONFUSION Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/provenance/ProvenanceTaskNames;
+	public static final field TRUST Ljava/lang/String;
 }
 
 public abstract class com/davils/kreate/publish/GitLabExtension {

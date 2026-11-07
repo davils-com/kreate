@@ -144,6 +144,22 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val baseline: AssuranceBaselineExtension
 
     /**
+     * Configuration of the trust assessment through deps.dev.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val trust: AssuranceTrustExtension
+
+    /**
+     * Configuration of the checks for typosquatting and dependency confusion.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val confusion: AssuranceConfusionExtension
+
+    /**
      * Configuration of the reports.
      *
      * @since 4.0.0
@@ -171,6 +187,26 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun advisories(action: Action<AssuranceAdvisoriesExtension>) {
         action.execute(advisories)
+    }
+
+    /**
+     * Configures the trust assessment through deps.dev.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun trust(action: Action<AssuranceTrustExtension>) {
+        action.execute(trust)
+    }
+
+    /**
+     * Configures the checks for typosquatting and dependency confusion.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun confusion(action: Action<AssuranceConfusionExtension>) {
+        action.execute(confusion)
     }
 
     /**

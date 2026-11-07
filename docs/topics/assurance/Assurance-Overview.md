@@ -159,6 +159,67 @@ verification, record their checksums once, or the build stops with a verificatio
 The inspection is a filter, not a verdict: it shows what deserves a look. A clean result says nothing
 about logic that uses no sensitive API.
 
+## Trust
+
+```kotlin
+assurance {
+    trust {
+        enabled = true
+        freshReleaseHours = 24
+        minScorecard = 4.0
+    }
+}
+```
+
+`kreateDependencyTrust` asks deps.dev when every dependency and every plugin on the build script class
+path was first published, when the resolved version was published, and how its source repository
+scores on the OpenSSF Scorecard. Most malicious packages are new and are caught within a day or two, so:
+
+| Rule | Severity | When |
+|---|---|---|
+| `FRESH_PACKAGE` | Critical | The module first appeared fewer than `freshPackageDays` (7) days ago |
+| `YOUNG_PACKAGE` | Medium | The module first appeared fewer than `youngPackageDays` (30) days ago |
+| `FRESH_RELEASE` | Critical | The version was published fewer than `freshReleaseHours` (24) hours ago |
+| `LOW_SCORECARD` | Medium | The source repository scores below `minScorecard` (4.0 of 10); `0` turns it off |
+| `TRUST_DATA_UNAVAILABLE` | Low | deps.dev knows nothing; reported, never blocking |
+
+Missing data is never a risk: a module without a scorecard is simply not rated. Modules of
+`internalGroups` are never sent. Offline mode and a failing service make the assessment incomplete.
+Answers are cached for a day in the Gradle user home; `kreate.network.depsDevUrl` names a mirror.
+
+## Confusion
+
+```kotlin
+assurance {
+    confusion {
+        enabled = true
+        allow = setOf("org.openapi.generator")
+    }
+}
+```
+
+`kreateDependencyConfusion` works without the network:
+
+- `TYPOSQUAT_GROUP` (critical): a group one or two characters away from the owner of a popular module,
+  such as `com.goog1e`, or its name under another top-level domain, such as `com.slf4j`.
+- `TYPOSQUAT_ARTIFACT` (medium): the name of a popular artifact under a foreign group.
+- `SUSPICIOUS_VERSION` (medium): a major version above 50 that is not a date, the trademark of a
+  dependency confusion attack.
+- `PLUGIN_MARKER_MISMATCH` (medium): a plugin marker on the build script class path whose
+  implementation lies outside the plugin id's namespace.
+
+Maven Central verifies who owns a namespace, so a module under the owner of a popular module, such as
+any `com.google.*`, is never a typosquat. Extend the built-in list with `popularModules`.
+
+With `checkPublicRepository = true`, every module of `internalGroups` is looked up in
+`publicRepository`, Maven Central by default. One that is published there is `DEPENDENCY_CONFUSION`
+(high): a repository asked first, or one without content filtering, can serve the public module instead
+of yours. **This sends your internal coordinates to that repository**, which is why it is off by
+default. Declare your own repository with `exclusiveContent` either way.
+
+Plugins applied through the `plugins` block of `settings.gradle.kts` are not on a project's class path
+and are not checked.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

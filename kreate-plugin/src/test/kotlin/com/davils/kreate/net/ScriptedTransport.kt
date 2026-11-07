@@ -16,10 +16,12 @@
 
 package com.davils.kreate.net
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 internal class ScriptedTransport(
     private val script: (TransportRequest) -> TransportResponse
 ) : HttpTransport {
-    private val recorded: MutableList<TransportRequest> = mutableListOf()
+    private val recorded: MutableList<TransportRequest> = CopyOnWriteArrayList()
 
     val requests: List<TransportRequest>
         get() = recorded
@@ -32,7 +34,7 @@ internal class ScriptedTransport(
     companion object {
         fun inTurn(vararg steps: (TransportRequest) -> TransportResponse): ScriptedTransport {
             val remaining = ArrayDeque(steps.asList())
-            return ScriptedTransport { request -> remaining.removeFirst().invoke(request) }
+            return ScriptedTransport { request -> synchronized(remaining) { remaining.removeFirst() }.invoke(request) }
         }
     }
 }

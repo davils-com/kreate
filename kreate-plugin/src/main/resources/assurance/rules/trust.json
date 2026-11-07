@@ -1,0 +1,40 @@
+{
+  "source": "trust",
+  "rules": [
+    {
+      "id": "FRESH_PACKAGE",
+      "severity": "CRITICAL",
+      "category": "age",
+      "summary": "The module was first published only days ago",
+      "explanation": "Most malicious packages are new. A module that appeared this week has no history anyone could have reviewed; wait or verify its author."
+    },
+    {
+      "id": "YOUNG_PACKAGE",
+      "severity": "MEDIUM",
+      "category": "age",
+      "summary": "The module is only weeks old",
+      "explanation": "A young module has little history yet. Check who publishes it before you depend on it."
+    },
+    {
+      "id": "FRESH_RELEASE",
+      "severity": "CRITICAL",
+      "category": "age",
+      "summary": "This version was published hours ago",
+      "explanation": "Malicious versions are usually caught within a day or two. Wait until the release has been public for a while before building with it."
+    },
+    {
+      "id": "LOW_SCORECARD",
+      "severity": "MEDIUM",
+      "category": "maintenance",
+      "summary": "The source repository scores low on the OpenSSF Scorecard",
+      "explanation": "The Scorecard rates practices such as code review, branch protection and pinned dependencies. A low score says the project is maintained with fewer safeguards."
+    },
+    {
+      "id": "TRUST_DATA_UNAVAILABLE",
+      "severity": "LOW",
+      "category": "data",
+      "summary": "deps.dev knows nothing about this module or version",
+      "explanation": "Without data nothing can be said about the module's age or maintenance. This is not a risk by itself, but the module was not assessed."
+    }
+  ]
+}

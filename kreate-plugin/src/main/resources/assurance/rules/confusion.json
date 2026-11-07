@@ -1,0 +1,40 @@
+{
+  "source": "confusion",
+  "rules": [
+    {
+      "id": "TYPOSQUAT_GROUP",
+      "severity": "CRITICAL",
+      "category": "typosquat",
+      "summary": "The group looks like the group of a well known library",
+      "explanation": "A group one or two characters away from a popular one, or the same name under another top-level domain, is how typosquatting imitates a library people trust."
+    },
+    {
+      "id": "TYPOSQUAT_ARTIFACT",
+      "severity": "MEDIUM",
+      "category": "typosquat",
+      "summary": "A well known artifact name is published under a foreign group",
+      "explanation": "The artifact carries the name of a popular library, but its group belongs to someone else. Forks do this for good reasons, impostors for bad ones."
+    },
+    {
+      "id": "SUSPICIOUS_VERSION",
+      "severity": "MEDIUM",
+      "category": "confusion",
+      "summary": "The version number is unusually high",
+      "explanation": "Dependency confusion attacks publish an inflated version, such as 99.0.0, so that it wins conflict resolution against the real one."
+    },
+    {
+      "id": "DEPENDENCY_CONFUSION",
+      "severity": "HIGH",
+      "category": "confusion",
+      "summary": "An internal module also exists in the public repository",
+      "explanation": "A repository that is asked first, or one without content filtering, can serve the public module instead of yours. Declare your repository with exclusiveContent for your groups."
+    },
+    {
+      "id": "PLUGIN_MARKER_MISMATCH",
+      "severity": "MEDIUM",
+      "category": "plugin",
+      "summary": "The plugin marker points to a module outside the plugin's namespace",
+      "explanation": "A plugin marker maps a plugin id to the module that implements it. A marker that leads to a group unrelated to the id may have been taken over."
+    }
+  ]
+}

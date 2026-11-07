@@ -101,6 +101,14 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **The trust assessment.** `assurance { trust { enabled = true } }` adds `kreateDependencyTrust`,
+  which reads from deps.dev when a dependency first appeared, when its version was published and how
+  its source repository scores on the OpenSSF Scorecard. A module younger than a week or a version
+  younger than a day is critical. Modules of `internalGroups` are never sent.
+- **The confusion check.** `assurance { confusion { enabled = true } }` adds
+  `kreateDependencyConfusion`, which reports typosquatted groups and artifacts, inflated versions and
+  plugin markers that lead outside the plugin's namespace, all without the network. With
+  `checkPublicRepository = true` it also finds internal modules that the public repository publishes.
 - **The dependency inspection.** `assurance { inspection { enabled = true } }` adds
   `kreateDependencyInspect`, which reads the class files, resources, nested archives and POMs of the
   resolved dependencies without running or unpacking them. Single findings only inform; a module

@@ -211,6 +211,18 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
         <td>Resolved dependencies</td>
     </tr>
     <tr>
+        <td><code>kreateDependencyTrust</code></td>
+        <td>Assesses the age of the dependencies and the scorecard of their sources through deps.dev.
+            Only with <code>trust { enabled }</code>.</td>
+        <td>The resolved dependency graph</td>
+    </tr>
+    <tr>
+        <td><code>kreateDependencyConfusion</code></td>
+        <td>Looks for typosquatting, inflated versions, plugin markers that lead elsewhere and, on request,
+            internal modules in the public repository. Only with <code>confusion { enabled }</code>.</td>
+        <td>The resolved dependency graph</td>
+    </tr>
+    <tr>
         <td><code>kreateDependencyInspect</code></td>
         <td>Inspects what the resolved dependencies contain. Only with
             <code>inspection { enabled }</code>.</td>

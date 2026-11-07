@@ -22,9 +22,9 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import java.io.File
 
-private val RULE_REFERENCE: Regex = Regex("""(?:Hit\(|to )"([A-Z][A-Z_]+)"""")
+private val RULE_REFERENCE: Regex = Regex("""(?:Hit\(|to |[Ff]inding\()"([A-Z][A-Z_]+)"""")
 
-private val RULE_CONSTANT: Regex = Regex("""const val [A-Z_]+: String = "([A-Z][A-Z_]{3,})"""")
+private val RULE_CONSTANT: Regex = Regex("""const val [A-Z_]*RULE: String = "([A-Z][A-Z_]{3,})"""")
 
 class RuleCatalogTest : FunSpec({
     context("the catalog") {
@@ -49,7 +49,10 @@ class RuleCatalogTest : FunSpec({
         }
 
         test("holds every rule the scanners emit") {
-            val sources = File("src/main/kotlin/com/davils/kreate/inspection").walkTopDown()
+            val roots = listOf("inspection", "provenance").map { name ->
+                File("src/main/kotlin/com/davils/kreate/$name")
+            }
+            val sources = roots.flatMap { root -> root.walkTopDown() }
             val code = sources.filter { file -> file.extension == "kt" }.joinToString("\n") { file -> file.readText() }
             val emitted = RULE_REFERENCE.findAll(code) + RULE_CONSTANT.findAll(code)
             val ids = emitted.map { match -> match.groupValues[1] }.toSet()

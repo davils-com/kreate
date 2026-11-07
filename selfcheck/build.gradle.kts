@@ -38,6 +38,14 @@ kreate {
             enabled = true
         }
 
+        trust {
+            enabled = true
+        }
+
+        confusion {
+            enabled = true
+        }
+
         reports {
             formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
         }
