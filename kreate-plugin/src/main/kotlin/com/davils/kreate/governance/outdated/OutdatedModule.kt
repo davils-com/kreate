@@ -13,27 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.davils.kreate.provenance
+package com.davils.kreate.governance.outdated
 
-import com.davils.kreate.assurance.finding.Finding
-import com.davils.kreate.assurance.rule.RuleCatalog
 import com.davils.kreate.dependency.ModuleCoordinate
 
-internal fun provenanceFinding(
-    ruleId: String,
-    module: ModuleCoordinate,
-    title: String,
-    attributes: Map<String, String> = emptyMap()
-): Finding {
-    val rule = RuleCatalog.require(ruleId)
-    return Finding(
-        ruleId = rule.id,
-        source = rule.source,
-        severity = rule.severity,
-        title = title,
-        description = rule.explanation,
-        module = module.module,
-        version = module.version,
-        attributes = attributes
-    )
-}
+internal data class OutdatedModule(
+    val module: ModuleCoordinate,
+    val latest: String,
+    val majorsBehind: Int,
+    val libyears: Double?
+)

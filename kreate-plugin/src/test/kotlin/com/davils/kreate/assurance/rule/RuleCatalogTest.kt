@@ -49,7 +49,7 @@ class RuleCatalogTest : FunSpec({
         }
 
         test("holds every rule the scanners emit") {
-            val roots = listOf("inspection", "provenance").map { name ->
+            val roots = listOf("inspection", "provenance", "governance").map { name ->
                 File("src/main/kotlin/com/davils/kreate/$name")
             }
             val sources = roots.flatMap { root -> root.walkTopDown() }

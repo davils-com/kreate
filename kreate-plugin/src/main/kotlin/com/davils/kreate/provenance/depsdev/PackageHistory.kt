@@ -17,7 +17,7 @@ package com.davils.kreate.provenance.depsdev
 
 import java.time.Instant
 
-internal class PackageHistory(val published: Map<String, Instant>) {
+internal class PackageHistory(val published: Map<String, Instant>, val latest: String? = null) {
     val firstPublished: Instant?
         get() = published.values.minOrNull()
 

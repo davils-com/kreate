@@ -46,6 +46,11 @@ kreate {
             enabled = true
         }
 
+        dependencyPolicy {
+            enabled = true
+            checkOutdated = true
+        }
+
         reports {
             formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
         }

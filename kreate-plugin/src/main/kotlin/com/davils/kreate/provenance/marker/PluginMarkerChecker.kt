@@ -16,7 +16,7 @@
 package com.davils.kreate.provenance.marker
 
 import com.davils.kreate.assurance.finding.Finding
-import com.davils.kreate.provenance.provenanceFinding
+import com.davils.kreate.assurance.rule.ruleFinding
 import com.davils.kreate.provenance.typosquat.requiredSharedLabels
 import com.davils.kreate.provenance.typosquat.sharedLabels
 
@@ -33,7 +33,7 @@ internal class PluginMarkerChecker(private val allow: Set<String>) {
 
         val targets = marker.implementations.joinToString { module -> module.module }.ifEmpty { "nothing" }
         val title = "The plugin ${marker.pluginId} is implemented by $targets"
-        return provenanceFinding("PLUGIN_MARKER_MISMATCH", marker.marker, title, mapOf("pluginId" to marker.pluginId))
+        return ruleFinding("PLUGIN_MARKER_MISMATCH", marker.marker, title, mapOf("pluginId" to marker.pluginId))
     }
 
     private fun isRelated(pluginId: String, group: String, required: Int): Boolean {

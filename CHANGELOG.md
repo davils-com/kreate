@@ -101,6 +101,15 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **The dependency policy.** `assurance { dependencyPolicy { enabled = true } }` adds
+  `kreateDependencyPolicy`, which reports denied and unapproved modules, repositories outside the
+  allowed hosts or without TLS, `mavenLocal()`, dynamic and snapshot versions, test libraries on
+  production class paths, forced modules, and builds without lock file, dependency verification or a
+  checked Gradle distribution. `checkOutdated` adds `kreateDependencyOutdated`, which measures major
+  releases and libyears behind through deps.dev.
+- **`kreateDependencyAdd` and `kreateDependencyFix`.** The root project can add a module to
+  `gradle/libs.versions.toml` after checking exactly the version it writes, and raise vulnerable and
+  dynamic versions there, as a diff unless `--apply`. Comments and order of the catalog are kept.
 - **The trust assessment.** `assurance { trust { enabled = true } }` adds `kreateDependencyTrust`,
   which reads from deps.dev when a dependency first appeared, when its version was published and how
   its source repository scores on the OpenSSF Scorecard. A module younger than a week or a version

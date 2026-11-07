@@ -1,0 +1,117 @@
+{
+  "source": "dependencies",
+  "rules": [
+    {
+      "id": "DENIED_MODULE",
+      "severity": "HIGH",
+      "category": "policy",
+      "summary": "The build uses a module the policy denies",
+      "explanation": "The dependency policy names this module as forbidden. Remove it or use the replacement the policy names."
+    },
+    {
+      "id": "MODULE_NOT_ALLOWED",
+      "severity": "HIGH",
+      "category": "policy",
+      "summary": "A direct dependency is not on the allowed list",
+      "explanation": "The dependency policy lists the only modules the organisation approved. Ask for the module to be approved or use an approved one."
+    },
+    {
+      "id": "DISALLOWED_REPOSITORY",
+      "severity": "HIGH",
+      "category": "repository",
+      "summary": "A repository is not on the allowed list",
+      "explanation": "Dependencies may only come from the repositories the policy names. Every further repository is a further place a module can be replaced."
+    },
+    {
+      "id": "INSECURE_REPOSITORY",
+      "severity": "HIGH",
+      "category": "repository",
+      "summary": "A repository is reached without TLS",
+      "explanation": "allowInsecureProtocol lets anyone on the network path replace what the build downloads."
+    },
+    {
+      "id": "MAVEN_LOCAL_REPOSITORY",
+      "severity": "MEDIUM",
+      "category": "repository",
+      "summary": "The build resolves from the local Maven repository",
+      "explanation": "Anything installed on the machine, by any build, can replace a dependency in mavenLocal(). Resolve from it only in a local workflow and filter its content."
+    },
+    {
+      "id": "DYNAMIC_VERSION",
+      "severity": "MEDIUM",
+      "category": "version",
+      "summary": "A dependency is declared with a dynamic version",
+      "explanation": "A version such as 1.+, latest.release or a range picks up whatever is published next, including a malicious or breaking release."
+    },
+    {
+      "id": "CHANGING_VERSION",
+      "severity": "MEDIUM",
+      "category": "version",
+      "summary": "A dependency is a snapshot",
+      "explanation": "A snapshot changes under the same version, so the build cannot be reproduced and the content cannot be verified."
+    },
+    {
+      "id": "TEST_LIBRARY_IN_PRODUCTION",
+      "severity": "MEDIUM",
+      "category": "scope",
+      "summary": "A test library is on a production class path",
+      "explanation": "Test libraries ship code that has no place in production, and they widen what an attacker can reach. Declare them for tests only."
+    },
+    {
+      "id": "DEPENDENCY_OVERRIDE",
+      "severity": "MEDIUM",
+      "category": "version",
+      "summary": "A module is forced to a version",
+      "explanation": "force overrides every other request and outlives the reason it was added. Accept it with an ignore rule that names the reason and expires."
+    },
+    {
+      "id": "LOCKING_DISABLED",
+      "severity": "MEDIUM",
+      "category": "hardening",
+      "summary": "The dependencies are not locked",
+      "explanation": "Without a lock file the next resolution can pick other versions than the last one, unnoticed. Kreate's dependencyLocking writes one."
+    },
+    {
+      "id": "LENIENT_LOCKING",
+      "severity": "LOW",
+      "category": "hardening",
+      "summary": "Dependency locking is not strict",
+      "explanation": "In Gradle's default lock mode a deleted lock file goes unnoticed. LockMode.STRICT fails instead."
+    },
+    {
+      "id": "VERIFICATION_DISABLED",
+      "severity": "MEDIUM",
+      "category": "hardening",
+      "summary": "Dependency verification is off",
+      "explanation": "Without gradle/verification-metadata.xml, or with verification set to lenient or off, a replaced artifact is not noticed."
+    },
+    {
+      "id": "WRAPPER_UNVERIFIED",
+      "severity": "MEDIUM",
+      "category": "hardening",
+      "summary": "The Gradle distribution is not checked",
+      "explanation": "gradle-wrapper.properties names no distributionSha256Sum, so a replaced distribution runs with the rights of every build."
+    },
+    {
+      "id": "INSECURE_WRAPPER",
+      "severity": "HIGH",
+      "category": "hardening",
+      "summary": "The Gradle distribution is downloaded without TLS",
+      "explanation": "An http distributionUrl lets anyone on the network path replace the build tool itself."
+    },
+    {
+      "id": "OUTDATED_MAJOR",
+      "severity": "MEDIUM",
+      "category": "outdated",
+      "summary": "A dependency is several major releases behind",
+      "explanation": "Every skipped breaking release makes the upgrade harder and leaves fixes behind."
+    },
+    {
+      "id": "LIBYEAR_EXCEEDED",
+      "severity": "MEDIUM",
+      "category": "outdated",
+      "summary": "The dependencies are too far behind in total",
+      "explanation": "Libyears add up how far each direct dependency lags behind its latest release. The total exceeds what the policy allows."
+    }
+  ]
+}

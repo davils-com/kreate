@@ -64,14 +64,34 @@ public abstract class com/davils/kreate/assurance/AssuranceConfusionExtension {
 	public final fun getPublicRepository ()Lorg/gradle/api/provider/Property;
 }
 
+public abstract class com/davils/kreate/assurance/AssuranceDependencyPolicyExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun deny (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getAllowed ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getAllowedRepositoryHosts ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getCheckOutdated ()Lorg/gradle/api/provider/Property;
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getDenied ()Lorg/gradle/api/provider/MapProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getForbidChangingVersions ()Lorg/gradle/api/provider/Property;
+	public final fun getForbidDynamicVersions ()Lorg/gradle/api/provider/Property;
+	public final fun getMaxLibyears ()Lorg/gradle/api/provider/Property;
+	public final fun getMaxMajorBehind ()Lorg/gradle/api/provider/Property;
+	public final fun getRequireLocking ()Lorg/gradle/api/provider/Property;
+	public final fun getRequireVerification ()Lorg/gradle/api/provider/Property;
+	public final fun getTestLibraries ()Lorg/gradle/api/provider/SetProperty;
+}
+
 public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun advisories (Lorg/gradle/api/Action;)V
 	public final fun baseline (Lorg/gradle/api/Action;)V
 	public final fun confusion (Lorg/gradle/api/Action;)V
+	public final fun dependencyPolicy (Lorg/gradle/api/Action;)V
 	public abstract fun getAdvisories ()Lcom/davils/kreate/assurance/AssuranceAdvisoriesExtension;
 	public abstract fun getBaseline ()Lcom/davils/kreate/assurance/AssuranceBaselineExtension;
 	public abstract fun getConfusion ()Lcom/davils/kreate/assurance/AssuranceConfusionExtension;
+	public abstract fun getDependencyPolicy ()Lcom/davils/kreate/assurance/AssuranceDependencyPolicyExtension;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getExternalFindings ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getFailOn ()Lorg/gradle/api/provider/Property;
@@ -509,6 +529,14 @@ public abstract class com/davils/kreate/docs/DocsExtension {
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getModuleName ()Lorg/gradle/api/provider/Property;
 	public final fun getOutputDirectory ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/governance/GovernanceTaskNames {
+	public static final field ADD Ljava/lang/String;
+	public static final field FIX Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/governance/GovernanceTaskNames;
+	public static final field OUTDATED Ljava/lang/String;
+	public static final field POLICY Ljava/lang/String;
 }
 
 public final class com/davils/kreate/inspection/InspectionTaskNames {

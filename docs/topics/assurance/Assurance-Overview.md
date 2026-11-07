@@ -220,6 +220,75 @@ default. Declare your own repository with `exclusiveContent` either way.
 Plugins applied through the `plugins` block of `settings.gradle.kts` are not on a project's class path
 and are not checked.
 
+## Dependency policy
+
+```kotlin
+assurance {
+    dependencyPolicy {
+        enabled = true
+        deny("log4j:log4j", "End of life. Use org.apache.logging.log4j:log4j-core.")
+        allowed = setOf("org.apache", "com.fasterxml.jackson", "org.jetbrains")
+        allowedRepositoryHosts = setOf("repo.maven.apache.org", "maven.corp.example")
+        checkOutdated = true
+        maxMajorBehind = 1
+    }
+}
+```
+
+A module is named as `group:artifact`, as `group:*`, or as a group with its subgroups.
+`kreateDependencyPolicy` works offline and reports:
+
+| Rule | Severity | When |
+|---|---|---|
+| `DENIED_MODULE` | High | A denied module is resolved, also transitively |
+| `MODULE_NOT_ALLOWED` | High | A direct dependency is not on `allowed`; an empty list allows all |
+| `DISALLOWED_REPOSITORY` | High | A repository points to a host outside `allowedRepositoryHosts` |
+| `INSECURE_REPOSITORY` | High | A repository sets `allowInsecureProtocol` |
+| `INSECURE_WRAPPER` | High | `gradle-wrapper.properties` downloads Gradle over http |
+| `MAVEN_LOCAL_REPOSITORY` | Medium | The build resolves from `mavenLocal()` |
+| `DYNAMIC_VERSION` | Medium | A direct dependency is `1.+`, `latest.release` or a range |
+| `CHANGING_VERSION` | Medium | A direct dependency is a snapshot |
+| `TEST_LIBRARY_IN_PRODUCTION` | Medium | JUnit, Kotest, MockK and the like on a production class path |
+| `DEPENDENCY_OVERRIDE` | Medium | `resolutionStrategy.force` pins a module |
+| `LOCKING_DISABLED` | Medium | The project resolves external modules without a lock file |
+| `VERIFICATION_DISABLED` | Medium | No `gradle/verification-metadata.xml`, or verification is lenient or off |
+| `WRAPPER_UNVERIFIED` | Medium | The wrapper names no `distributionSha256Sum` |
+| `LENIENT_LOCKING` | Low | Locking does not run in `LockMode.STRICT` |
+
+A forced module stays reported until an ignore rule accepts it, with a reason and an expiry. Gradle
+does not show the repositories of `settings.gradle.kts` to a project, so only the repositories of the
+project and of its build script are checked.
+
+With `checkOutdated = true`, `kreateDependencyOutdated` asks deps.dev how far every direct dependency lags
+behind. It counts only major releases that exist, without pre-releases, and adds up libyears.
+`maxMajorBehind` reports `OUTDATED_MAJOR` and `maxLibyears` reports `LIBYEAR_EXCEEDED`, both medium.
+Modules of `internalGroups` are never sent.
+
+## Adding and fixing dependencies
+
+The root project gets two tasks that edit `gradle/libs.versions.toml` and keep its comments and order.
+
+```bash
+./gradlew kreateDependencyAdd --module=com.squareup.okio:okio
+```
+
+`kreateDependencyAdd` takes the latest release from deps.dev, or the version you name, and checks
+exactly that version: advisories from OSV.dev, the trust assessment, typosquatting and the dependency
+policy. A high advisory, a critical trust finding, a typosquat or a denied module stops it. `--force`
+adds the module anyway, but a check that could not complete, offline for instance, always stops it.
+`--alias` names the entry and `--dry-run` only checks. The version is written as it was checked, so the
+build cannot pick a different, unchecked release.
+
+```bash
+./gradlew kreateDependencyFix
+./gradlew kreateDependencyFix --apply
+```
+
+`kreateDependencyFix` raises every version that OSV.dev reports as vulnerable to the highest fixed
+version and pins dynamic versions to the version that resolved. Without `--apply` it only writes the diff
+to `build/kreate/dependencies/catalog-fix.diff`. A version reference that several libraries share is
+left alone with a note, because raising it changes the others too.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

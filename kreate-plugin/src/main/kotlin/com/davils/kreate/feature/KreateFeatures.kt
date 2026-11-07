@@ -27,6 +27,7 @@ import com.davils.kreate.constants.wiring.BuildConstantsFeature
 import com.davils.kreate.coverage.wiring.CoverageFeature
 import com.davils.kreate.detekt.wiring.DetektFeature
 import com.davils.kreate.docs.wiring.DocsFeature
+import com.davils.kreate.governance.wiring.GovernanceFeature
 import com.davils.kreate.inspection.wiring.InspectionFeature
 import com.davils.kreate.jni.wiring.JniFeature
 import com.davils.kreate.local.wiring.LocalWorkflowFeature
@@ -63,6 +64,7 @@ internal object KreateFeatures {
         AdvisoryFeature,
         InspectionFeature,
         ProvenanceFeature,
+        GovernanceFeature,
         AssuranceFeature,
         LocalWorkflowFeature
     )

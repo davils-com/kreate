@@ -19,6 +19,7 @@ import com.davils.kreate.assurance.finding.DocumentStatus
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.FindingDocument
 import com.davils.kreate.assurance.finding.FindingSource
+import com.davils.kreate.assurance.rule.ruleFinding
 import com.davils.kreate.dependency.ModuleCoordinate
 import com.davils.kreate.dependency.ResolvedGraph
 import com.davils.kreate.provenance.confusion.MavenMetadataClient
@@ -58,7 +59,7 @@ internal class ConfusionAuditor(
         val inflated = modules.filter { module -> InflatedVersions.isInflated(module.version) }
         return inflated.map { module ->
             val title = "Version ${module.version} of ${module.module} is unusually high"
-            provenanceFinding("SUSPICIOUS_VERSION", module, title)
+            ruleFinding("SUSPICIOUS_VERSION", module, title)
         }
     }
 
@@ -73,7 +74,7 @@ internal class ConfusionAuditor(
 
     private fun confusionOf(module: ModuleCoordinate, publicVersion: String): Finding {
         val title = "${module.module} is internal, but the public repository publishes it up to $publicVersion"
-        return provenanceFinding("DEPENDENCY_CONFUSION", module, title, mapOf("publicVersion" to publicVersion))
+        return ruleFinding("DEPENDENCY_CONFUSION", module, title, mapOf("publicVersion" to publicVersion))
     }
 
     private fun unresolvedReason(unresolved: List<String>): String? {

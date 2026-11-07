@@ -16,8 +16,8 @@
 package com.davils.kreate.provenance.typosquat
 
 import com.davils.kreate.assurance.finding.Finding
+import com.davils.kreate.assurance.rule.ruleFinding
 import com.davils.kreate.dependency.ModuleCoordinate
-import com.davils.kreate.provenance.provenanceFinding
 
 private const val NEAR: Int = 1
 
@@ -62,7 +62,7 @@ internal class TyposquatDetector(popular: Set<String>, private val allow: Set<St
         val name = owner.substringAfter('.')
         val match = owners.firstOrNull { popular -> isLookAlike(owner, popular, name) } ?: return null
         val title = "The group ${module.group} looks like $match"
-        return provenanceFinding("TYPOSQUAT_GROUP", module, title, mapOf("imitates" to match))
+        return ruleFinding("TYPOSQUAT_GROUP", module, title, mapOf("imitates" to match))
     }
 
     private fun isLookAlike(owner: String, popular: String, name: String): Boolean {
@@ -80,7 +80,7 @@ internal class TyposquatDetector(popular: Set<String>, private val allow: Set<St
         if (artifact.length < MIN_ARTIFACT_LENGTH || module.name in GENERIC_ARTIFACTS) return null
         val match = artifacts.entries.firstOrNull { (name, _) -> isNearArtifact(artifact, name) } ?: return null
         val title = "${module.name} carries the name of ${match.value} under a foreign group"
-        return provenanceFinding("TYPOSQUAT_ARTIFACT", module, title, mapOf("imitates" to match.value))
+        return ruleFinding("TYPOSQUAT_ARTIFACT", module, title, mapOf("imitates" to match.value))
     }
 
     private fun isNearArtifact(artifact: String, popular: String): Boolean {

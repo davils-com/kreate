@@ -30,8 +30,10 @@ private const val SOURCE_REPOSITORY: String = "SOURCE_REPO"
 internal object DepsDevParser {
     fun historyOf(text: String): PackageHistory {
         val versions = objectOf(text)["versions"] as? JsonArray ?: JsonArray(emptyList())
-        val entries = versions.filterIsInstance<JsonObject>().mapNotNull(::publicationOf)
-        return PackageHistory(entries.toMap())
+        val objects = versions.filterIsInstance<JsonObject>()
+        val entries = objects.mapNotNull(::publicationOf)
+        val latest = objects.firstOrNull { entry -> isDefault(entry) }
+        return PackageHistory(entries.toMap(), latest?.let(::versionOf))
     }
 
     fun sourceProjectsOf(text: String): List<String> {
@@ -57,9 +59,18 @@ internal object DepsDevParser {
         throw DepsDevUnavailableException("deps.dev answered with invalid JSON.", cause)
     }
 
-    private fun publicationOf(entry: JsonObject): Pair<String, Instant>? {
+    private fun isDefault(entry: JsonObject): Boolean {
+        val flag = entry["isDefault"] as? JsonPrimitive
+        return flag?.content == "true"
+    }
+
+    private fun versionOf(entry: JsonObject): String? {
         val key = entry["versionKey"] as? JsonObject ?: return null
-        val version = (key["version"] as? JsonPrimitive)?.content ?: return null
+        return (key["version"] as? JsonPrimitive)?.content
+    }
+
+    private fun publicationOf(entry: JsonObject): Pair<String, Instant>? {
+        val version = versionOf(entry) ?: return null
         val published = (entry["publishedAt"] as? JsonPrimitive)?.content ?: return null
         val instant = instantOf(published) ?: return null
         return version to instant

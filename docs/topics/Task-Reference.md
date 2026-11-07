@@ -211,6 +211,31 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
         <td>Resolved dependencies</td>
     </tr>
     <tr>
+        <td><code>kreateDependencyPolicy</code></td>
+        <td>Checks the dependencies, repositories, locking, verification and wrapper against the dependency
+            policy. Only with <code>dependencyPolicy { enabled }</code>.</td>
+        <td>The resolved dependency graph, lock file, verification metadata, wrapper properties</td>
+    </tr>
+    <tr>
+        <td><code>kreateDependencyOutdated</code></td>
+        <td>Measures how far the direct dependencies lag behind, through deps.dev. Only with
+            <code>dependencyPolicy { checkOutdated }</code>.</td>
+        <td>The direct dependencies</td>
+    </tr>
+    <tr>
+        <td><code>kreateDependencyAdd</code></td>
+        <td>Checks a module and adds exactly the checked version to <code>gradle/libs.versions.toml</code>.
+            Root project only; <code>--module</code>, <code>--alias</code>, <code>--force</code>,
+            <code>--dry-run</code>.</td>
+        <td>The version catalog</td>
+    </tr>
+    <tr>
+        <td><code>kreateDependencyFix</code></td>
+        <td>Raises vulnerable and dynamic versions in the catalog, as a diff unless <code>--apply</code>.
+            Root project only.</td>
+        <td>The version catalog, the advisory audit</td>
+    </tr>
+    <tr>
         <td><code>kreateDependencyTrust</code></td>
         <td>Assesses the age of the dependencies and the scorecard of their sources through deps.dev.
             Only with <code>trust { enabled }</code>.</td>

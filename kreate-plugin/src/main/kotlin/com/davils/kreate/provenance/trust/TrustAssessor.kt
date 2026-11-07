@@ -17,8 +17,8 @@ package com.davils.kreate.provenance.trust
 
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.policy.REPORT_ONLY_ATTRIBUTE
+import com.davils.kreate.assurance.rule.ruleFinding
 import com.davils.kreate.provenance.depsdev.PackageHistory
-import com.davils.kreate.provenance.provenanceFinding
 import java.time.Duration
 import java.time.Instant
 
@@ -65,5 +65,5 @@ internal class TrustAssessor(private val thresholds: TrustThresholds, private va
     }
 
     private fun finding(rule: String, evidence: TrustEvidence, title: String, attributes: Map<String, String>) =
-        provenanceFinding(rule, evidence.module, title, attributes)
+        ruleFinding(rule, evidence.module, title, attributes)
 }

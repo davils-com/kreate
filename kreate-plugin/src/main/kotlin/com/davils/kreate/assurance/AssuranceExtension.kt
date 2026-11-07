@@ -160,6 +160,14 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val confusion: AssuranceConfusionExtension
 
     /**
+     * Configuration of the dependency policy.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val dependencyPolicy: AssuranceDependencyPolicyExtension
+
+    /**
      * Configuration of the reports.
      *
      * @since 4.0.0
@@ -207,6 +215,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun confusion(action: Action<AssuranceConfusionExtension>) {
         action.execute(confusion)
+    }
+
+    /**
+     * Configures the dependency policy.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun dependencyPolicy(action: Action<AssuranceDependencyPolicyExtension>) {
+        action.execute(dependencyPolicy)
     }
 
     /**
