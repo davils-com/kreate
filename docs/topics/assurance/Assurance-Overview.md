@@ -124,6 +124,41 @@ transitive ones. `configurations` defaults to the classpaths of the main code.
 
 Point `-Pkreate.network.osvUrl` at an internal mirror.
 
+## Inspection
+
+```kotlin
+assurance {
+    inspection {
+        enabled = true
+        trustedHosts = setOf("corp.example")
+    }
+}
+```
+
+`kreateDependencyInspect` reads what the resolved dependencies contain: their class files, resources,
+nested archives and POMs. It looks for process execution and dynamic class loading, for markers of
+miners and reverse shells, for addresses on hosts you do not trust, for invisible Unicode in text files,
+for entries that escape the archive, and for code that runs at build time, such as annotation processors,
+compiler plugins and Java agents. Nothing from a jar is executed or unpacked to disk.
+
+**Single findings only inform.** Many sound libraries start processes or open sockets, so a build that
+failed on each of them would be useless. Findings are summed per module to a risk score out of 100,
+counting each rule once, and a module at `failScore`, 30 by default, gets a `RISK_SCORE` finding.
+
+That finding also only informs until you set `failOnRisk = true`. Of the 105 modules Kreate itself
+depends on, six reach the threshold, among them the Kotlin Gradle plugin and FreeMarker, so look at your
+report first and accept what you reviewed with `ignore("RISK_SCORE") { module = "..."; reason = "..." }`.
+
+POMs are fetched for every resolved module, also for those without a jar. If your build uses dependency
+verification, record their checksums once, or the build stops with a verification failure:
+
+```bash
+./gradlew --write-verification-metadata sha256 kreateDependencyInspect --no-configuration-cache
+```
+
+The inspection is a filter, not a verdict: it shows what deserves a look. A clean result says nothing
+about logic that uses no sensitive API.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

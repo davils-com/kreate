@@ -1,0 +1,264 @@
+{
+  "source": "inspection",
+  "rules": [
+    {
+      "id": "PROCESS_EXECUTION",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Starts another process",
+      "explanation": "The library can run programs on the machine it is loaded on. A build tool or a process manager does this for a reason, anything else deserves a look."
+    },
+    {
+      "id": "NATIVE_LIBRARY_LOAD",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Loads a native library",
+      "explanation": "Native code runs outside the JVM's checks and cannot be reviewed from the jar."
+    },
+    {
+      "id": "DYNAMIC_CLASS_DEFINITION",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Defines classes at runtime",
+      "explanation": "Code that is not in the jar can be loaded this way, so reading the jar does not show what runs."
+    },
+    {
+      "id": "SCRIPT_EVALUATION",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Evaluates a script",
+      "explanation": "A script engine runs text as code. Check where that text comes from."
+    },
+    {
+      "id": "JNDI_LOOKUP",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Performs a JNDI lookup",
+      "explanation": "A lookup with an attacker-controlled name can load remote code, as Log4Shell showed."
+    },
+    {
+      "id": "UNSAFE_DESERIALIZATION",
+      "severity": "MEDIUM",
+      "category": "code",
+      "summary": "Reads serialized Java objects",
+      "explanation": "Deserializing untrusted data can run code through gadget chains in the classpath."
+    },
+    {
+      "id": "RAW_SOCKET",
+      "severity": "MEDIUM",
+      "category": "code",
+      "summary": "Opens a network socket directly",
+      "explanation": "The library reaches the network on its own terms, outside any HTTP client you configure."
+    },
+    {
+      "id": "HARDCODED_URL",
+      "severity": "MEDIUM",
+      "category": "code",
+      "summary": "Contains an address on a host that is not trusted",
+      "explanation": "A library that talks to a fixed host can leak data or fetch code. Add the host to trustedHosts once you know why it is there."
+    },
+    {
+      "id": "CRYPTO_MINING",
+      "severity": "CRITICAL",
+      "category": "code",
+      "summary": "Contains markers of a crypto miner",
+      "explanation": "Mining pools and miner names have no place in a library."
+    },
+    {
+      "id": "BACKDOOR_PATTERN",
+      "severity": "CRITICAL",
+      "category": "code",
+      "summary": "Contains markers of a reverse shell",
+      "explanation": "Reverse shells and raw /dev/tcp paths are how an attacker gets a shell on a build machine."
+    },
+    {
+      "id": "DOWNLOAD_AND_EXECUTE",
+      "severity": "CRITICAL",
+      "category": "code",
+      "summary": "Pipes a download into a shell",
+      "explanation": "Running what was just downloaded executes code nobody reviewed."
+    },
+    {
+      "id": "ENCODED_POWERSHELL",
+      "severity": "HIGH",
+      "category": "code",
+      "summary": "Runs an encoded PowerShell command",
+      "explanation": "Encoding a command hides it from review, which is rarely an accident."
+    },
+    {
+      "id": "HIGH_ENTROPY_STRING",
+      "severity": "MEDIUM",
+      "category": "entropy",
+      "summary": "Contains a string that looks encrypted or packed",
+      "explanation": "Long random-looking strings can be keys, or payloads hidden from review."
+    },
+    {
+      "id": "BIDI_OVERRIDE",
+      "severity": "CRITICAL",
+      "category": "unicode",
+      "summary": "Uses a character that reorders text",
+      "explanation": "Bidirectional controls make text read differently from what runs, as in Trojan Source."
+    },
+    {
+      "id": "ZERO_WIDTH",
+      "severity": "HIGH",
+      "category": "unicode",
+      "summary": "Uses an invisible character",
+      "explanation": "Invisible characters hide data or make two names look the same."
+    },
+    {
+      "id": "TAG_CHARACTER",
+      "severity": "CRITICAL",
+      "category": "unicode",
+      "summary": "Uses a Unicode tag character",
+      "explanation": "Tag characters are invisible and carry hidden text, which is used to smuggle instructions."
+    },
+    {
+      "id": "PRIVATE_USE_CHARACTER",
+      "severity": "CRITICAL",
+      "category": "unicode",
+      "summary": "Uses a private use character",
+      "explanation": "These characters have no meaning of their own and are used as a hidden payload carrier."
+    },
+    {
+      "id": "HOMOGLYPH",
+      "severity": "HIGH",
+      "category": "unicode",
+      "summary": "Mixes letters from look-alike alphabets",
+      "explanation": "A word that mixes Latin with Cyrillic or Greek looks like another name."
+    },
+    {
+      "id": "PATH_TRAVERSAL",
+      "severity": "CRITICAL",
+      "category": "archive",
+      "summary": "An entry escapes the archive",
+      "explanation": "An entry with '..' overwrites files outside the target directory when it is extracted."
+    },
+    {
+      "id": "ABSOLUTE_PATH",
+      "severity": "CRITICAL",
+      "category": "archive",
+      "summary": "An entry has an absolute path",
+      "explanation": "An absolute path overwrites any file the extracting user can write."
+    },
+    {
+      "id": "OVERLONG_NAME",
+      "severity": "HIGH",
+      "category": "archive",
+      "summary": "An entry has an overlong name",
+      "explanation": "Very long names are used to confuse tools that read archives."
+    },
+    {
+      "id": "DUPLICATE_ENTRY",
+      "severity": "HIGH",
+      "category": "archive",
+      "summary": "An entry appears twice",
+      "explanation": "Tools disagree on which of two equal names wins, so a reviewer may read another file than the JVM loads."
+    },
+    {
+      "id": "CASE_COLLISION",
+      "severity": "MEDIUM",
+      "category": "archive",
+      "summary": "Two entries differ only in case",
+      "explanation": "On a case-insensitive filesystem one entry silently replaces the other."
+    },
+    {
+      "id": "HIDDEN_EXECUTABLE",
+      "severity": "HIGH",
+      "category": "archive",
+      "summary": "Contains a hidden executable file",
+      "explanation": "A dotfile script in a jar has no reason to be there and is easily overlooked."
+    },
+    {
+      "id": "NATIVE_BINARY",
+      "severity": "MEDIUM",
+      "category": "archive",
+      "summary": "Contains a native binary",
+      "explanation": "Native code cannot be reviewed from the jar and runs outside the JVM's checks."
+    },
+    {
+      "id": "NESTED_ARCHIVE",
+      "severity": "MEDIUM",
+      "category": "archive",
+      "summary": "Contains another archive",
+      "explanation": "A nested jar hides its content from tools that read only the outer one. Kreate inspects it as well."
+    },
+    {
+      "id": "MALFORMED_ARCHIVE",
+      "severity": "HIGH",
+      "category": "archive",
+      "summary": "The archive could not be read",
+      "explanation": "A jar that fails strict reading may be crafted to look different to different tools."
+    },
+    {
+      "id": "MALFORMED_CLASS",
+      "severity": "HIGH",
+      "category": "archive",
+      "summary": "A class file could not be read",
+      "explanation": "A broken class cannot be loaded, so its presence is either damage or an attempt to confuse scanners."
+    },
+    {
+      "id": "ANNOTATION_PROCESSOR",
+      "severity": "MEDIUM",
+      "category": "buildtime",
+      "summary": "Runs as an annotation processor",
+      "explanation": "An annotation processor runs inside the compiler with the build's privileges."
+    },
+    {
+      "id": "COMPILER_PLUGIN",
+      "severity": "MEDIUM",
+      "category": "buildtime",
+      "summary": "Runs as a compiler or KSP plugin",
+      "explanation": "A compiler plugin runs inside the compiler and can change the code it compiles."
+    },
+    {
+      "id": "GRADLE_PLUGIN_DESCRIPTOR",
+      "severity": "MEDIUM",
+      "category": "buildtime",
+      "summary": "Declares a Gradle plugin",
+      "explanation": "A Gradle plugin runs inside the build with all of its privileges."
+    },
+    {
+      "id": "JAVA_AGENT",
+      "severity": "HIGH",
+      "category": "buildtime",
+      "summary": "Declares a Java agent",
+      "explanation": "An agent can rewrite any class that is loaded."
+    },
+    {
+      "id": "MANIFEST_CLASS_PATH",
+      "severity": "MEDIUM",
+      "category": "buildtime",
+      "summary": "Adds to the classpath through its manifest",
+      "explanation": "Class-Path entries pull in more code than the dependency declares."
+    },
+    {
+      "id": "SHADOWED_PLATFORM_CLASS",
+      "severity": "HIGH",
+      "category": "buildtime",
+      "summary": "Ships a class in a platform package",
+      "explanation": "A class in java/, kotlin/ or org/gradle/ from another library can replace the real one."
+    },
+    {
+      "id": "RISK_SCORE",
+      "severity": "HIGH",
+      "category": "summary",
+      "summary": "Reached the risk score",
+      "explanation": "The findings of this module together reach inspection { failScore }. Review them, then accept the module with an ignore rule."
+    },
+    {
+      "id": "POM_RELOCATED",
+      "severity": "MEDIUM",
+      "category": "pom",
+      "summary": "The module moved to another coordinate",
+      "explanation": "A relocation sends a dependency to another group. Check that the new owner is who you expect."
+    },
+    {
+      "id": "POM_REPOSITORY",
+      "severity": "MEDIUM",
+      "category": "pom",
+      "summary": "The POM declares its own repository",
+      "explanation": "A dependency that brings its own repository can pull later versions from anywhere."
+    }
+  ]
+}

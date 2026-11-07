@@ -211,6 +211,12 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
         <td>Resolved dependencies</td>
     </tr>
     <tr>
+        <td><code>kreateDependencyInspect</code></td>
+        <td>Inspects what the resolved dependencies contain. Only with
+            <code>inspection { enabled }</code>.</td>
+        <td>Jars and POMs of the dependencies</td>
+    </tr>
+    <tr>
         <td><code>kreateAssuranceReport</code></td>
         <td>Writes the reports. Runs after <code>kreateAssurance</code>, also when that fails.</td>
         <td>Finding documents, baseline, ignore rules</td>

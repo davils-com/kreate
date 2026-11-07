@@ -34,6 +34,10 @@ kreate {
             enabled = true
         }
 
+        inspection {
+            enabled = true
+        }
+
         reports {
             formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
         }

@@ -50,6 +50,8 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "assurance/baseline",
     "assurance/report",
     "advisory/osv",
+    "assurance/rule",
+    "inspection/scan",
     "advisory/severity",
     "advisory/version",
     "trivy/provision",

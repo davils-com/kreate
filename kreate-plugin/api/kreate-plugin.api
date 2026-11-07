@@ -63,6 +63,7 @@ public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public final fun getExternalFindings ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getFailOn ()Lorg/gradle/api/provider/Property;
 	public final fun getForbidIgnoreOf ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getInspection ()Lcom/davils/kreate/assurance/AssuranceInspectionExtension;
 	public final fun getInternalGroups ()Lorg/gradle/api/provider/SetProperty;
 	public final fun getMaxAdvisoryAge ()Lorg/gradle/api/provider/Property;
 	public final fun getMinSeverity ()Lorg/gradle/api/provider/Property;
@@ -71,6 +72,7 @@ public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public final fun getReuseVerdictFor ()Lorg/gradle/api/provider/Property;
 	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
 	public final fun ignore (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun inspection (Lorg/gradle/api/Action;)V
 	public final fun reports (Lorg/gradle/api/Action;)V
 }
 
@@ -82,6 +84,15 @@ public final class com/davils/kreate/assurance/AssuranceIgnoreSpec {
 	public final fun setExpires (Ljava/lang/String;)V
 	public final fun setModule (Ljava/lang/String;)V
 	public final fun setReason (Ljava/lang/String;)V
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceInspectionExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFailOnRisk ()Lorg/gradle/api/provider/Property;
+	public final fun getFailScore ()Lorg/gradle/api/provider/Property;
+	public final fun getTrustedHosts ()Lorg/gradle/api/provider/SetProperty;
 }
 
 public abstract class com/davils/kreate/assurance/AssuranceReportsExtension {
@@ -472,6 +483,11 @@ public abstract class com/davils/kreate/docs/DocsExtension {
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getModuleName ()Lorg/gradle/api/provider/Property;
 	public final fun getOutputDirectory ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/inspection/InspectionTaskNames {
+	public static final field INSPECT Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/inspection/InspectionTaskNames;
 }
 
 public abstract class com/davils/kreate/jni/JniExtension {

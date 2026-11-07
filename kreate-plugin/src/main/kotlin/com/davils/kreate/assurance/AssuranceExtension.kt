@@ -128,6 +128,14 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val advisories: AssuranceAdvisoriesExtension
 
     /**
+     * Configuration of the inspection of what the dependencies contain.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val inspection: AssuranceInspectionExtension
+
+    /**
      * Configuration of the baseline.
      *
      * @since 4.0.0
@@ -163,6 +171,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun advisories(action: Action<AssuranceAdvisoriesExtension>) {
         action.execute(advisories)
+    }
+
+    /**
+     * Configures the inspection of what the dependencies contain.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun inspection(action: Action<AssuranceInspectionExtension>) {
+        action.execute(inspection)
     }
 
     /**

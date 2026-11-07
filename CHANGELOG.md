@@ -101,6 +101,10 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **The dependency inspection.** `assurance { inspection { enabled = true } }` adds
+  `kreateDependencyInspect`, which reads the class files, resources, nested archives and POMs of the
+  resolved dependencies without running or unpacking them. Single findings only inform; a module
+  reaching `failScore` gets a `RISK_SCORE` finding, which blocks the gate only with `failOnRisk`.
 - **`assurance { externalFindings }`** reads finding documents written by other tools.
 - **Trivy joins the gate.** With `assurance` enabled, the scans write their findings to a document and
   `kreateAssurance` decides, so ignore rules and the baseline apply to them. Without it, they fail on
