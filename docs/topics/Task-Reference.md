@@ -299,6 +299,58 @@ Registered when `project.apiValidation.enabled` is `true`. See
     </tr>
 </table>
 
+## Developer tools
+
+See [Developer tools](Developer-Tools.md) and the workspace section of the assurance overview.
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateGitHookInstall</code>, <code>kreateGitHookUninstall</code></td>
+        <td>Install or remove the pre-commit hook. Root project, with <code>gitHooks { enabled }</code>.</td>
+        <td><code>.git/hooks/pre-commit</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateGitHookRun</code></td>
+        <td>Runs the tasks of the hook.</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td><code>kreateDoctor</code></td>
+        <td>Checks Java, Gradle, Git, Trivy, the proxy, the network and the cache. Root project.</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td><code>kreateFormatApply</code></td>
+        <td>Rewrites the Kotlin sources to follow the formatting rules. With <code>detekt { formatting }</code>.</td>
+        <td>The sources</td>
+    </tr>
+    <tr>
+        <td><code>kreateExplain</code></td>
+        <td>Explains a rule; <code>--rule</code>. With <code>assurance { enabled }</code>.</td>
+        <td>-</td>
+    </tr>
+    <tr>
+        <td><code>kreateAssuranceConfig</code>, <code>kreateAssuranceConfigLint</code></td>
+        <td>Show the effective configuration; report settings that weaken the gate.</td>
+        <td><code>build/kreate/assurance/config.json</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateWorkspaceCheck</code>, <code>kreateWorkspaceAffected</code>, <code>kreateWorkspaceGraph</code></td>
+        <td>Check, select and draw the projects of the build. Root project, with <code>workspace { enabled }</code>.</td>
+        <td><code>build/kreate/workspace</code></td>
+    </tr>
+    <tr>
+        <td><code>kreateDependencyGraph</code></td>
+        <td>Draws the resolved dependencies of a project; <code>--format</code>.</td>
+        <td><code>build/kreate/dependencies</code></td>
+    </tr>
+</table>
+
 ## Changelog
 
 Registered when `project.changelog.enabled` is `true`. See [Changelog](Changelog.md).

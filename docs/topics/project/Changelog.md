@@ -53,5 +53,5 @@ another start, and `--write` inserts the section below `Unreleased`. Without `--
 
 writes the section of a release to `build/kreate/changelog/notes.md`, for the release page.
 
-Git runs without a pager, prompts, hooks or file system monitor. A revision is checked before it is
+Git runs without a pager, prompts or file system monitor, and only reads. A revision is checked before it is
 passed on, so it cannot be read as an option.

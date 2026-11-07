@@ -24,9 +24,11 @@ import com.davils.kreate.settings.local.fakeProviders
 import com.davils.kreate.settings.local.freshDirectory
 import com.davils.kreate.settings.wiring.DeactivateLockingAction
 import com.davils.kreate.settings.wiring.LocalResolutionAction
+import com.davils.kreate.settings.wiring.WorkspaceMembersAction
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.engine.spec.tempdir
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
@@ -39,6 +41,7 @@ import org.gradle.api.IsolatedAction
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.initialization.ProjectDescriptor
 import org.gradle.api.initialization.Settings
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.invocation.GradleLifecycle
@@ -46,6 +49,13 @@ import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.testfixtures.ProjectBuilder
 import java.io.File
+
+private fun descriptorOf(path: String, vararg children: ProjectDescriptor): ProjectDescriptor {
+    val descriptor = mockk<ProjectDescriptor>()
+    every { descriptor.path } returns path
+    every { descriptor.children } returns children.toSet()
+    return descriptor
+}
 
 class KreateSettingsPluginTest : FunSpec({
 
@@ -94,6 +104,8 @@ class KreateSettingsPluginTest : FunSpec({
         every { settings.extensions } returns extensions
         every { settings.gradle } returns gradle
         every { settings.providers } returns providers
+        val nested = descriptorOf(":a", descriptorOf(":a:x"))
+        every { settings.rootProject } returns descriptorOf(":", descriptorOf(":b"), nested)
 
         KreateSettingsPlugin().apply(settings)
         return Build(
@@ -116,9 +128,9 @@ class KreateSettingsPluginTest : FunSpec({
         )
 
     fun beforeProjectOf(build: Build): IsolatedAction<in Project> {
-        val captured = slot<IsolatedAction<in Project>>()
+        val captured = mutableListOf<IsolatedAction<in Project>>()
         verify { build.lifecycle.beforeProject(capture(captured)) }
-        return captured.captured
+        return captured.last { action -> action !is WorkspaceMembersAction }
     }
 
     context("applying the plugin") {
@@ -132,11 +144,31 @@ class KreateSettingsPluginTest : FunSpec({
         test("defers everything else until the settings script was evaluated") {
             val created = build(extension(), publishedProviders(workspace.freshDirectory()))
 
-            verify(exactly = 0) { created.lifecycle.beforeProject(any()) }
+            verify(exactly = 0) { created.lifecycle.beforeProject(ofType<LocalResolutionAction>()) }
         }
     }
 
     context("once the settings were evaluated") {
+
+        test("shares the paths of every project with the root project, sorted and nested") {
+            val created = build(extension(), fakeProviders())
+
+            created.evaluate()
+
+            val captured = mutableListOf<IsolatedAction<in Project>>()
+            verify { created.lifecycle.beforeProject(capture(captured)) }
+            val action = captured.single { candidate -> candidate is WorkspaceMembersAction }
+            val builder = ProjectBuilder.builder().withProjectDir(workspace.freshDirectory("root"))
+            val root = builder.build()
+            action.execute(root)
+            val rootExtras = root.extensions.extraProperties
+            rootExtras.get("kreate.workspace.members") shouldBe ":,:a,:a:x,:b"
+            val childBuilder = ProjectBuilder.builder().withParent(root)
+            val child = childBuilder.withName("child").build()
+            action.execute(child)
+            val childExtras = child.extensions.extraProperties
+            childExtras.has("kreate.workspace.members") shouldBe false
+        }
 
         test("does nothing when the repository switched local mode off") {
             val disabled = extension()
@@ -145,7 +177,7 @@ class KreateSettingsPluginTest : FunSpec({
 
             created.evaluate()
 
-            verify(exactly = 0) { created.lifecycle.beforeProject(any()) }
+            verify(exactly = 0) { created.lifecycle.beforeProject(ofType<LocalResolutionAction>()) }
             verify(exactly = 0) { created.lifecycle.afterProject(any()) }
         }
 
@@ -154,7 +186,7 @@ class KreateSettingsPluginTest : FunSpec({
 
             created.evaluate()
 
-            verify(exactly = 0) { created.lifecycle.beforeProject(any()) }
+            verify(exactly = 0) { created.lifecycle.beforeProject(ofType<LocalResolutionAction>()) }
             verify(exactly = 0) { created.lifecycle.afterProject(any()) }
         }
 

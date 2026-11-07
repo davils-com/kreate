@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.assurance.wiring
 
+import com.davils.kreate.KreateExtension
 import com.davils.kreate.assurance.AssuranceExtension
 import com.davils.kreate.assurance.AssuranceIgnoreSpec
 import com.davils.kreate.assurance.AssuranceTaskNames
@@ -38,10 +39,12 @@ private const val REPORT_DIRECTORY: String = "kreate/assurance/reports"
 
 private const val RESULT_FILE: String = "kreate/assurance/result.json"
 
-internal fun Project.initializeAssurance(assurance: AssuranceExtension) {
+internal fun Project.initializeAssurance(extension: KreateExtension) {
+    val assurance = extension.assurance
     if (!assurance.enabled.get()) return
 
     val rules = assurance.declaredIgnoreRules().map { (id, spec) -> ignoreRuleInputOf(id, spec) }
+    registerAssuranceTools(extension, rules)
 
     val report = tasks.register<AssuranceReportTask>(AssuranceTaskNames.REPORT) {
         configureEvaluation(assurance, rules)

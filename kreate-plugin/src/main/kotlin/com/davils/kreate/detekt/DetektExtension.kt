@@ -74,6 +74,14 @@ public abstract class DetektExtension @Inject constructor(factory: ObjectFactory
     public val kreateRules: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
     /**
+     * Whether the formatting rules of ktlint run with Detekt, and `kreateFormatApply` rewrites the
+     * sources to follow them. Defaults to `false`.
+     *
+     * @since 4.0.0
+     */
+    public val formatting: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
      * The Detekt configuration file.
      *
      * Defaults to `detekt.yaml` in the root project directory.

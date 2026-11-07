@@ -28,4 +28,11 @@ public object DetektTaskNames {
      * @since 4.0.0
      */
     public const val ANALYSE: String = "kreateDetekt"
+
+    /**
+     * Rewrites the Kotlin sources to follow the formatting rules. Only with `detekt { formatting }`.
+     *
+     * @since 4.0.0
+     */
+    public const val FORMAT_APPLY: String = "kreateFormatApply"
 }

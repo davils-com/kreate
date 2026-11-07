@@ -24,6 +24,6 @@ internal object AssuranceFeature : KreateFeature {
     override val phase: FeaturePhase = FeaturePhase.ASSURANCE
 
     override fun apply(project: Project, extension: KreateExtension) {
-        project.initializeAssurance(extension.assurance)
+        project.initializeAssurance(extension)
     }
 }

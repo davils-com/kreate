@@ -31,6 +31,11 @@ internal fun resultOf(exitCode: Int, stdout: String = ""): ToolResult =
 
 private fun historyOf(runner: ToolRunner): GitHistory = GitHistory(runner, "git", File("."))
 
+private fun listingOf(arguments: List<String>): ToolResult {
+    if ("diff" in arguments) return resultOf(0, "a/One.kt\nb/Two.kt\n")
+    return resultOf(0, "b/Two.kt\nc/New.kt\n")
+}
+
 class GitHistoryTest : FunSpec({
     context("the release tags") {
         test("pick the highest version with the prefix") {
@@ -63,6 +68,18 @@ class GitHistoryTest : FunSpec({
             val commits = historyOf(RecordingRunner { resultOf(0, log) }).commits("1.0.0")
 
             commits shouldBe listOf(GitCommit("abc", "feat: one\n\nbody"), GitCommit("def", "fix!: two"))
+        }
+
+        test("lists changed and untracked files once") {
+            val runner = RecordingRunner { arguments -> listingOf(arguments) }
+
+            historyOf(runner).changedFiles("origin/main") shouldBe listOf("a/One.kt", "b/Two.kt", "c/New.kt")
+        }
+
+        test("resolves the path of a hook against the project") {
+            val runner = RecordingRunner { resultOf(0, ".git/hooks/pre-commit\n") }
+
+            historyOf(runner).gitPath("hooks/pre-commit") shouldBe File(".").resolve(".git/hooks/pre-commit")
         }
 
         test("refuses a revision that would be read as an option") {

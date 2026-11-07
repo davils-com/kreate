@@ -101,6 +101,15 @@ the `kreate { }` DSL are unchanged, so a build script keeps working once its imp
   which asks OSV.dev about every resolved dependency and feeds the gate. Modules of `internalGroups`
   are never sent. The audit reads again after `reuseVerdictFor`, even though no input changed, and
   `maxAdvisoryAge` makes older data incomplete.
+- **The workspace check.** `assurance { workspace { enabled = true } }` collects the dependencies of
+  every project through a consumable variant, Isolated Projects safe, and reports cycles, forbidden
+  dependencies and modules resolved in different versions. `kreateWorkspaceAffected` lists the projects
+  a change touches, `kreateWorkspaceGraph` and `kreateDependencyGraph` draw text, DOT or Mermaid. The
+  settings plugin hands the paths of all projects to the root project.
+- **Developer tools.** `project { gitHooks { enabled = true } }` adds a pre-commit hook that never
+  replaces a foreign one, `kreateDoctor` checks the machine including the proxy trap, `detekt {
+  formatting = true }` adds the ktlint rules and `kreateFormatApply`, `kreateExplain` explains a rule,
+  and `kreateAssuranceConfig` and `kreateAssuranceConfigLint` show and check the assurance settings.
 - **`kreateApiSemverCheck`.** `apiValidation { semver { enabled = true } }` compares the API dump with
   the one committed at the last release tag and fails when the version is too low for the difference,
   or when a breaking change has no commit marked as breaking.

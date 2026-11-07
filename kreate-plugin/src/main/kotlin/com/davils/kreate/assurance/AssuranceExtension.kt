@@ -168,6 +168,14 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val dependencyPolicy: AssuranceDependencyPolicyExtension
 
     /**
+     * Configuration of the workspace check.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val workspace: AssuranceWorkspaceExtension
+
+    /**
      * Configuration of the reports.
      *
      * @since 4.0.0
@@ -215,6 +223,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun confusion(action: Action<AssuranceConfusionExtension>) {
         action.execute(confusion)
+    }
+
+    /**
+     * Configures the workspace check.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun workspace(action: Action<AssuranceWorkspaceExtension>) {
+        action.execute(workspace)
     }
 
     /**

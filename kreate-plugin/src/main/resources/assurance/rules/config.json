@@ -1,0 +1,75 @@
+{
+  "source": "config",
+  "rules": [
+    {
+      "id": "CONFIG_GATE_NOT_FAILING",
+      "severity": "MEDIUM",
+      "category": "gate",
+      "summary": "The gate never fails",
+      "explanation": "reportOnly = true turns every finding into a report entry. Use it while introducing the gate, not for good."
+    },
+    {
+      "id": "CONFIG_MIN_SEVERITY",
+      "severity": "LOW",
+      "category": "gate",
+      "summary": "Findings below a severity are hidden",
+      "explanation": "minSeverity drops findings before anyone sees them. A hidden finding cannot be reviewed or accepted."
+    },
+    {
+      "id": "CONFIG_IGNORE_WITHOUT_EXPIRY",
+      "severity": "LOW",
+      "category": "ignore",
+      "summary": "An ignore rule never expires",
+      "explanation": "An accepted finding is a decision for now. An expiry date makes sure it is looked at again."
+    },
+    {
+      "id": "CONFIG_IGNORE_EXPIRED",
+      "severity": "MEDIUM",
+      "category": "ignore",
+      "summary": "An ignore rule has expired",
+      "explanation": "The rule no longer applies and its finding is reported again. Review it, then renew or remove the rule."
+    },
+    {
+      "id": "CONFIG_INSECURE_URL",
+      "severity": "HIGH",
+      "category": "network",
+      "summary": "A service is reached without TLS",
+      "explanation": "Advisories, metadata or Trivy read over plain HTTP can be changed by anyone on the network path. Use an https URL."
+    },
+    {
+      "id": "CONFIG_TRIVY_DISABLED",
+      "severity": "LOW",
+      "category": "coverage",
+      "summary": "Trivy does not scan this project",
+      "explanation": "Without Trivy, secrets, licenses and misconfigurations are not checked."
+    },
+    {
+      "id": "CONFIG_UNPINNED_TRIVY",
+      "severity": "MEDIUM",
+      "category": "coverage",
+      "summary": "Trivy is taken from the machine",
+      "explanation": "useInstalled = true runs whatever trivy is installed, unverified and in whatever version. Results then differ between machines."
+    },
+    {
+      "id": "CONFIG_BASELINE_UNBOUNDED",
+      "severity": "LOW",
+      "category": "baseline",
+      "summary": "The baseline may hide any severity",
+      "explanation": "A baseline without maxSeverity can accept critical findings for good. Limit what it may hold."
+    },
+    {
+      "id": "CONFIG_NO_SOURCES",
+      "severity": "MEDIUM",
+      "category": "coverage",
+      "summary": "The gate has nothing to judge",
+      "explanation": "The assurance gate is enabled, but no source of findings is. It passes without checking anything."
+    },
+    {
+      "id": "CONFIG_PUBLIC_LOOKUP",
+      "severity": "LOW",
+      "category": "privacy",
+      "summary": "Internal coordinates are sent to a public repository",
+      "explanation": "confusion { checkPublicRepository = true } asks the public repository about every module of internalGroups."
+    }
+  ]
+}

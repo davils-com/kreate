@@ -28,16 +28,20 @@ private const val FIELD_SEPARATOR: Char = '\u001f'
 
 private const val RECORD_SEPARATOR: Char = '\u001e'
 
+private const val REV_PARSE: String = "rev-parse"
+
+private const val NOT_A_REPOSITORY: String = " is not inside a Git repository."
+
 private val GIT_TIMEOUT: Duration = Duration.ofMinutes(2)
 
-private val HARDENING: List<String> = listOf("-c", "core.fsmonitor=false", "-c", "core.hooksPath=", "--no-pager")
+private val HARDENING: List<String> = listOf("-c", "core.fsmonitor=false", "--no-pager")
 
 internal class GitHistory(private val runner: ToolRunner, private val git: String, private val directory: File) {
-    fun isRepository(): Boolean = run("rev-parse", "--is-inside-work-tree").isSuccess()
+    fun isRepository(): Boolean = run(REV_PARSE, "--is-inside-work-tree").isSuccess()
 
     fun root(): File {
-        val result = run("rev-parse", "--show-toplevel")
-        if (!result.isSuccess()) throw GitUnavailableException("${directory.path} is not inside a Git repository.")
+        val result = run(REV_PARSE, "--show-toplevel")
+        if (!result.isSuccess()) throw GitUnavailableException(directory.path + NOT_A_REPOSITORY)
         return File(result.stdout.text.trim())
     }
 
@@ -62,6 +66,32 @@ internal class GitHistory(private val runner: ToolRunner, private val git: Strin
         if (!result.isSuccess()) throw GitUnavailableException("git log failed: ${result.stderr.text.trim()}")
         val records = result.stdout.text.split(RECORD_SEPARATOR).map { record -> record.trim() }
         return records.filter { record -> record.isNotEmpty() }.map(::commitOf)
+    }
+
+    fun gitPath(name: String): File {
+        val result = run(REV_PARSE, "--git-path", name)
+        if (!result.isSuccess()) throw GitUnavailableException(directory.path + NOT_A_REPOSITORY)
+        val path = File(result.stdout.text.trim())
+        if (path.isAbsolute) return path
+        return directory.resolve(path)
+    }
+
+    fun changedFiles(base: String): List<String> {
+        requireRevision(base)
+        val changed = run("diff", "--name-only", base, "--")
+        if (!changed.isSuccess()) {
+            throw GitUnavailableException("git diff against $base failed: ${changed.stderr.text.trim()}")
+        }
+        val untracked = run("ls-files", "--others", "--exclude-standard")
+        val files = changed.stdout.text.lines() + untracked.stdout.text.lines()
+        val trimmed = files.map { file -> file.trim() }
+        return trimmed.filter { file -> file.isNotEmpty() }.distinct()
+    }
+
+    fun version(): String? {
+        val result = run("--version")
+        if (!result.isSuccess()) return null
+        return result.stdout.text.trim()
     }
 
     private fun commitOf(record: String): GitCommit {

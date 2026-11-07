@@ -117,10 +117,12 @@ public abstract class com/davils/kreate/assurance/AssuranceExtension {
 	public final fun getReuseVerdictFor ()Lorg/gradle/api/provider/Property;
 	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTrust ()Lcom/davils/kreate/assurance/AssuranceTrustExtension;
+	public abstract fun getWorkspace ()Lcom/davils/kreate/assurance/AssuranceWorkspaceExtension;
 	public final fun ignore (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun inspection (Lorg/gradle/api/Action;)V
 	public final fun reports (Lorg/gradle/api/Action;)V
 	public final fun trust (Lorg/gradle/api/Action;)V
+	public final fun workspace (Lorg/gradle/api/Action;)V
 }
 
 public final class com/davils/kreate/assurance/AssuranceIgnoreSpec {
@@ -151,6 +153,9 @@ public final class com/davils/kreate/assurance/AssuranceTaskNames {
 	public static final field BASELINE_CREATE Ljava/lang/String;
 	public static final field BASELINE_PRUNE Ljava/lang/String;
 	public static final field CHECK Ljava/lang/String;
+	public static final field CONFIG Ljava/lang/String;
+	public static final field CONFIG_LINT Ljava/lang/String;
+	public static final field EXPLAIN Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/assurance/AssuranceTaskNames;
 	public static final field REPORT Ljava/lang/String;
 }
@@ -164,6 +169,17 @@ public abstract class com/davils/kreate/assurance/AssuranceTrustExtension {
 	public final fun getIncludeBuildscript ()Lorg/gradle/api/provider/Property;
 	public final fun getMinScorecard ()Lorg/gradle/api/provider/Property;
 	public final fun getYoungPackageDays ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class com/davils/kreate/assurance/AssuranceWorkspaceExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun forbid (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getAffectedBase ()Lorg/gradle/api/provider/Property;
+	public final fun getAlignVersions ()Lorg/gradle/api/provider/Property;
+	public final fun getConfigurations ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getForbidden ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getMembers ()Lorg/gradle/api/provider/SetProperty;
 }
 
 public final class com/davils/kreate/assurance/ReportFormat : java/lang/Enum {
@@ -511,6 +527,7 @@ public abstract class com/davils/kreate/detekt/DetektExtension {
 	public final fun getBuildUponDefaultConfig ()Lorg/gradle/api/provider/Property;
 	public final fun getConfig ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getFormatting ()Lorg/gradle/api/provider/Property;
 	public final fun getKreateRules ()Lorg/gradle/api/provider/Property;
 	public abstract fun getReports ()Lcom/davils/kreate/detekt/DetektReportExtension;
 	public final fun reports (Lorg/gradle/api/Action;)V
@@ -548,6 +565,7 @@ public abstract class com/davils/kreate/detekt/DetektSarifReportSpec : com/davil
 
 public final class com/davils/kreate/detekt/DetektTaskNames {
 	public static final field ANALYSE Ljava/lang/String;
+	public static final field FORMAT_APPLY Ljava/lang/String;
 	public static final field INSTANCE Lcom/davils/kreate/detekt/DetektTaskNames;
 }
 
@@ -557,6 +575,24 @@ public abstract class com/davils/kreate/docs/DocsExtension {
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
 	public final fun getModuleName ()Lorg/gradle/api/provider/Property;
 	public final fun getOutputDirectory ()Lorg/gradle/api/provider/Property;
+}
+
+public final class com/davils/kreate/doctor/DoctorTaskNames {
+	public static final field DOCTOR Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/doctor/DoctorTaskNames;
+}
+
+public final class com/davils/kreate/githook/GitHookTaskNames {
+	public static final field INSTALL Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/githook/GitHookTaskNames;
+	public static final field RUN Ljava/lang/String;
+	public static final field UNINSTALL Ljava/lang/String;
+}
+
+public abstract class com/davils/kreate/githook/GitHooksExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getTasks ()Lorg/gradle/api/provider/ListProperty;
 }
 
 public final class com/davils/kreate/governance/GovernanceTaskNames {
@@ -724,10 +760,12 @@ public abstract class com/davils/kreate/project/ProjectExtension {
 	public final fun getDescription ()Lorg/gradle/api/provider/Property;
 	public abstract fun getDetekt ()Lcom/davils/kreate/detekt/DetektExtension;
 	public abstract fun getDocs ()Lcom/davils/kreate/docs/DocsExtension;
+	public abstract fun getGitHooks ()Lcom/davils/kreate/githook/GitHooksExtension;
 	public final fun getName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPublish ()Lcom/davils/kreate/publish/PublishExtension;
 	public abstract fun getTests ()Lcom/davils/kreate/testing/TestsExtension;
 	public abstract fun getVersion ()Lcom/davils/kreate/project/ProjectVersionExtension;
+	public final fun gitHooks (Lorg/gradle/api/Action;)V
 	public final fun publish (Lorg/gradle/api/Action;)V
 	public final fun tests (Lorg/gradle/api/Action;)V
 	public final fun version (Lorg/gradle/api/Action;)V
@@ -1054,5 +1092,13 @@ public abstract class com/davils/kreate/trivy/TrivyVulnerabilityExtension {
 	public final fun getIgnoreUnfixed ()Lorg/gradle/api/provider/Property;
 	public final fun getLockFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getSeverity ()Lorg/gradle/api/provider/ListProperty;
+}
+
+public final class com/davils/kreate/workspace/WorkspaceTaskNames {
+	public static final field AFFECTED Ljava/lang/String;
+	public static final field CHECK Ljava/lang/String;
+	public static final field DEPENDENCY_GRAPH Ljava/lang/String;
+	public static final field GRAPH Ljava/lang/String;
+	public static final field INSTANCE Lcom/davils/kreate/workspace/WorkspaceTaskNames;
 }
 

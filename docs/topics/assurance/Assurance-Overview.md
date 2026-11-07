@@ -289,6 +289,47 @@ version and pins dynamic versions to the version that resolved. Without `--apply
 to `build/kreate/dependencies/catalog-fix.diff`. A version reference that several libraries share is
 left alone with a note, because raising it changes the others too.
 
+## Workspace
+
+```kotlin
+assurance {
+    workspace {
+        enabled = true
+        forbid(":core:**", ":app:**")
+    }
+}
+```
+
+Every project with the workspace check describes what it depends on; the root project collects the
+descriptions through a consumable variant, so the check works with Isolated Projects. With the settings
+plugin `com.davils.kreate.settings` the root project knows every project of the build; without it,
+name them in `members`. `kreateWorkspaceCheck` feeds the gate:
+
+| Rule | Severity | When |
+|---|---|---|
+| `DEPENDENCY_CYCLE` | High | Projects depend on each other in a cycle |
+| `FORBIDDEN_DEPENDENCY` | High | A dependency matches a `forbid` rule; `*` stays within a path segment, `**` crosses them |
+| `WORKSPACE_VERSION_MISMATCH` | Medium | Projects resolve a module in different versions; `alignVersions = false` turns it off |
+| `WORKSPACE_MEMBER_MISSING` | Low | A member shares nothing because it does not enable the check; never blocking |
+
+`kreateWorkspaceAffected --base=origin/main` lists the projects whose files changed since the revision,
+uncommitted and untracked files included, with every project depending on them, in
+`build/kreate/workspace/affected.txt`. A change of shared build files, such as `gradle/` or
+`settings.gradle.kts`, affects every project. `kreateWorkspaceGraph` draws the projects and
+`kreateDependencyGraph` the resolved dependencies of one project, as `--format=text`, `dot` or
+`mermaid`.
+
+## Explaining rules and checking the configuration
+
+`kreateExplain --rule=FRESH_RELEASE` explains a rule of the catalog, and without `--rule` lists all
+of them. An advisory id such as `GHSA-...` points to its record on OSV.dev.
+
+`kreateAssuranceConfig` prints the effective configuration and marks with `*` what differs from the
+defaults. `kreateAssuranceConfigLint` feeds the gate with what weakens it: `reportOnly`
+(`CONFIG_GATE_NOT_FAILING`), a `minSeverity` that drops findings, ignore rules without expiry or
+expired, service URLs over plain HTTP (loopback excepted), a disabled or unpinned Trivy, a baseline
+without `maxSeverity`, no source of findings at all, and a public lookup of internal modules.
+
 ## Findings from other tools
 
 `externalFindings.from("findings.json")` reads a finding document:

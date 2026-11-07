@@ -1,0 +1,33 @@
+{
+  "source": "workspace",
+  "rules": [
+    {
+      "id": "WORKSPACE_VERSION_MISMATCH",
+      "severity": "MEDIUM",
+      "category": "alignment",
+      "summary": "Members resolve a module in different versions",
+      "explanation": "Two projects of one build that run with different versions of the same library behave differently and are tested against what the other does not ship. Align them with a platform or a version catalog."
+    },
+    {
+      "id": "DEPENDENCY_CYCLE",
+      "severity": "HIGH",
+      "category": "structure",
+      "summary": "Projects depend on each other in a cycle",
+      "explanation": "A cycle makes the projects one unit that cannot be built, tested or released apart."
+    },
+    {
+      "id": "FORBIDDEN_DEPENDENCY",
+      "severity": "HIGH",
+      "category": "structure",
+      "summary": "A project depends on one it must not",
+      "explanation": "The workspace forbids this dependency to keep its layers apart."
+    },
+    {
+      "id": "WORKSPACE_MEMBER_MISSING",
+      "severity": "LOW",
+      "category": "coverage",
+      "summary": "A project of the build was not checked",
+      "explanation": "The project does not apply Kreate with the workspace check, so its dependencies are unknown to the workspace."
+    }
+  ]
+}

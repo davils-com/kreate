@@ -48,4 +48,25 @@ public object AssuranceTaskNames {
      * @since 4.0.0
      */
     public const val BASELINE_PRUNE: String = "kreateAssuranceBaselinePrune"
+
+    /**
+     * Shows the effective assurance configuration and what differs from the defaults.
+     *
+     * @since 4.0.0
+     */
+    public const val CONFIG: String = "kreateAssuranceConfig"
+
+    /**
+     * Checks the assurance configuration for settings that weaken the gate.
+     *
+     * @since 4.0.0
+     */
+    public const val CONFIG_LINT: String = "kreateAssuranceConfigLint"
+
+    /**
+     * Explains a rule of the catalog, or lists all rules.
+     *
+     * @since 4.0.0
+     */
+    public const val EXPLAIN: String = "kreateExplain"
 }

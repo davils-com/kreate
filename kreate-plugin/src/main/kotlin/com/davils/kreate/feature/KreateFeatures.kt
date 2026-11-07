@@ -28,6 +28,8 @@ import com.davils.kreate.constants.wiring.BuildConstantsFeature
 import com.davils.kreate.coverage.wiring.CoverageFeature
 import com.davils.kreate.detekt.wiring.DetektFeature
 import com.davils.kreate.docs.wiring.DocsFeature
+import com.davils.kreate.doctor.wiring.DoctorFeature
+import com.davils.kreate.githook.wiring.GitHookFeature
 import com.davils.kreate.governance.wiring.GovernanceFeature
 import com.davils.kreate.inspection.wiring.InspectionFeature
 import com.davils.kreate.jni.wiring.JniFeature
@@ -41,6 +43,7 @@ import com.davils.kreate.provenance.wiring.ProvenanceFeature
 import com.davils.kreate.publish.wiring.PublishFeature
 import com.davils.kreate.testing.wiring.TestingFeature
 import com.davils.kreate.trivy.wiring.TrivyFeature
+import com.davils.kreate.workspace.wiring.WorkspaceFeature
 import org.gradle.api.Project
 
 internal object KreateFeatures {
@@ -67,7 +70,10 @@ internal object KreateFeatures {
         InspectionFeature,
         ProvenanceFeature,
         GovernanceFeature,
+        WorkspaceFeature,
         AssuranceFeature,
+        GitHookFeature,
+        DoctorFeature,
         LocalWorkflowFeature
     )
 

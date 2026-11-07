@@ -24,6 +24,7 @@ import com.davils.kreate.constants.BuildConstantsExtension
 import com.davils.kreate.coverage.CoverageExtension
 import com.davils.kreate.detekt.DetektExtension
 import com.davils.kreate.docs.DocsExtension
+import com.davils.kreate.githook.GitHooksExtension
 import com.davils.kreate.locking.DependencyLockingExtension
 import com.davils.kreate.publish.PublishExtension
 import com.davils.kreate.testing.TestsExtension
@@ -184,6 +185,14 @@ public abstract class ProjectExtension @Inject constructor(
     public abstract val changelog: ChangelogExtension
 
     /**
+     * Configuration of the Git pre-commit hook.
+     *
+     * @since 4.0.0
+     */
+    @get:Nested
+    public abstract val gitHooks: GitHooksExtension
+
+    /**
      * Configures the [ProjectVersionExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -301,5 +310,15 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun changelog(action: Action<ChangelogExtension>) {
         action.execute(changelog)
+    }
+
+    /**
+     * Configures the Git pre-commit hook.
+     *
+     * @param action The configuration action.
+     * @since 4.0.0
+     */
+    public fun gitHooks(action: Action<GitHooksExtension>) {
+        action.execute(gitHooks)
     }
 }

@@ -23,6 +23,7 @@ import com.davils.kreate.settings.local.resolveLocalMode
 import com.davils.kreate.settings.wiring.DeactivateLockingAction
 import com.davils.kreate.settings.wiring.LocalResolutionAction
 import com.davils.kreate.settings.wiring.announceLocalMode
+import com.davils.kreate.settings.wiring.shareWorkspaceMembers
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.kotlin.dsl.create
@@ -77,6 +78,7 @@ public class KreateSettingsPlugin : Plugin<Settings> {
         val extension = settings.extensions.create<KreateSettingsExtension>(EXTENSION_NAME)
 
         settings.gradle.settingsEvaluated {
+            settings.shareWorkspaceMembers()
             settings.installLocalResolution(extension)
         }
     }
