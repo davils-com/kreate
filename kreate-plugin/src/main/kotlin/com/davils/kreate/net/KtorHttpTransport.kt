@@ -94,11 +94,11 @@ internal class KtorHttpTransport(
 
     private suspend fun readResponse(request: TransportRequest, response: HttpResponse): TransportResponse {
         val declaredLength = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
-        if (request.method != HttpMethod.HEAD && declaredLength != null) {
-            checkDeclaredLength(request, declaredLength)
-        }
+        val carriesBody = request.method != HttpMethod.HEAD
+        val bodyLength = declaredLength?.takeIf { carriesBody }
+        if (bodyLength != null) checkDeclaredLength(request, bodyLength)
 
-        val bytes = readBounded(request, response)
+        val bytes = readBounded(request, response, bodyLength)
         val headers = response.headers.toMap()
         return TransportResponse(request.uri, response.status.value, headers, bytes, clock.instant())
     }
@@ -108,11 +108,12 @@ internal class KtorHttpTransport(
         throw tooLarge(request)
     }
 
-    private suspend fun readBounded(request: TransportRequest, response: HttpResponse): ByteArray {
+    private suspend fun readBounded(request: TransportRequest, response: HttpResponse, bodyLength: Long?): ByteArray {
         val channel = response.bodyAsChannel()
         val target = request.downloadTo
         if (target != null && response.status.isSuccess()) {
-            writeBounded(request, channel, target)
+            val received = writeBounded(request, channel, target)
+            checkComplete(request, received, bodyLength)
             return ByteArray(0)
         }
 
@@ -120,10 +121,11 @@ internal class KtorHttpTransport(
         val bytes = packet.readByteArray()
 
         if (bytes.size > request.maxBytes) throw tooLarge(request)
+        checkComplete(request, bytes.size.toLong(), bodyLength)
         return bytes
     }
 
-    private suspend fun writeBounded(request: TransportRequest, channel: ByteReadChannel, target: Path) {
+    private suspend fun writeBounded(request: TransportRequest, channel: ByteReadChannel, target: Path): Long =
         Files.newOutputStream(target).use { output ->
             var received = 0L
             while (!channel.isClosedForRead) {
@@ -133,7 +135,13 @@ internal class KtorHttpTransport(
                 if (received > request.maxBytes) throw tooLarge(request)
                 output.write(chunk)
             }
+            received
         }
+
+    private fun checkComplete(request: TransportRequest, received: Long, bodyLength: Long?) {
+        if (bodyLength == null || received >= bodyLength) return
+        val host = request.uri.host
+        throw NetworkException.Unavailable("The response of $host broke off after $received of $bodyLength bytes.")
     }
 
     private fun tooLarge(request: TransportRequest): NetworkException.TooLarge =

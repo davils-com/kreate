@@ -151,6 +151,19 @@ class KtorHttpTransportTest : FunSpec({
             shouldThrow<NetworkException.TooLarge> { transport().send(request) }
         }
 
+        test("reports a file that breaks off") {
+            server.handle("/broken-file") { exchange ->
+                exchange.sendResponseHeaders(200, 100)
+                exchange.responseBody.write(ByteArray(10))
+                exchange.responseBody.flush()
+                exchange.close()
+            }
+            val target = kotlin.io.path.createTempFile()
+            val request = TransportRequest(HttpMethod.GET, server.uri("/broken-file"), downloadTo = target)
+
+            shouldThrow<NetworkException.Unavailable> { transport().send(request) }
+        }
+
         test("keeps the body of a redirect in memory, so that it cannot overwrite the file") {
             server.redirect("/moved", "/elsewhere")
             val target = kotlin.io.path.createTempFile()
