@@ -99,15 +99,21 @@ class ExecutableResolverTest : FunSpec({
             }
 
         test("ignores a relative PATH entry, which would resolve against the Gradle daemon's directory") {
-            val directory = workspace.freshDirectory("planted")
-            installExecutable(directory, "cargo")
             val workingDirectory = File("").absoluteFile
-            val relativeEntry = directory.relativeTo(workingDirectory).path
-            val home = workspace.freshDirectory("home")
-            val cargo = installExecutable(home.resolve(".cargo/bin"), "cargo")
-            val resolver = ExecutableResolver(WINDOWS_HOST, home.path, environmentOf("PATH" to relativeEntry))
+            val scratch = workingDirectory.resolve("build/tmp")
+            scratch.mkdirs()
+            val directory = scratch.freshDirectory("planted")
+            try {
+                installExecutable(directory, "cargo")
+                val relativeEntry = directory.relativeTo(workingDirectory).path
+                val home = workspace.freshDirectory("home")
+                val cargo = installExecutable(home.resolve(".cargo/bin"), "cargo")
+                val resolver = ExecutableResolver(WINDOWS_HOST, home.path, environmentOf("PATH" to relativeEntry))
 
-            resolver.resolve(ExternalTool.CARGO) shouldBe cargo.absolutePath
+                resolver.resolve(ExternalTool.CARGO) shouldBe cargo.absolutePath
+            } finally {
+                directory.deleteRecursively()
+            }
         }
 
         test("finds a tool installed below the user's home directory") {
