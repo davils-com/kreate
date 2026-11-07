@@ -41,6 +41,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
 import java.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import io.ktor.http.HttpMethod as KtorHttpMethod
 
 private const val DOWNLOAD_CHUNK_BYTES: Long = 1024L * 1024L
@@ -67,7 +68,7 @@ internal class KtorHttpTransport(
     }
 
     private suspend fun exchangeWithin(limit: Duration, request: TransportRequest): TransportResponse =
-        withTimeout(limit.toMillis()) {
+        withTimeout(limit.toMillis().milliseconds) {
             val statement = client.prepareRequest { describe(request) }
             statement.execute { response -> readResponse(request, response) }
         }
