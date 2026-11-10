@@ -67,7 +67,8 @@ internal class TyposquatDetector(popular: Set<String>, private val allow: Set<St
 
     private fun isLookAlike(owner: String, popular: String, name: String): Boolean {
         val popularName = popular.substringAfter('.')
-        if (name == popularName && owner != popular) return true
+        val isUnderDomains = startsWithTopLevelDomain(owner) && startsWithTopLevelDomain(popular)
+        if (name == popularName && owner != popular && isUnderDomains) return true
         if (normalised(owner) == normalised(popular)) return true
         val distance = boundedEditDistance(owner, popular, FAR)
         if (distance == NEAR) return name.length >= MIN_NEAR_LENGTH

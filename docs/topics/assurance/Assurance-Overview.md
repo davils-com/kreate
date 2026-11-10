@@ -234,7 +234,9 @@ assurance {
 `kreateDependencyConfusion` works without the network:
 
 - `TYPOSQUAT_GROUP` (critical): a group one or two characters away from the owner of a popular module,
-  such as `com.goog1e`, or its name under another top-level domain, such as `com.slf4j`.
+  such as `com.goog1e`, or its name under another top-level domain, such as `com.slf4j`. A namespace
+  that starts with no top-level domain, such as `androidx` or `jakarta`, is only compared by distance,
+  so `androidx.annotation` does not imitate `jakarta.annotation`.
 - `TYPOSQUAT_ARTIFACT` (medium): the name of a popular artifact under a foreign group.
 - `SUSPICIOUS_VERSION` (medium): a major version above 50 that is not a date, the trademark of a
   dependency confusion attack.

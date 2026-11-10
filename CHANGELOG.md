@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`ChainedCallLimit` takes `ignoredReceivers`.** A chain that starts at a listed name, such as the
   `Modifier` of Jetpack Compose, is not counted.
 
+### Fixed
+
+- **`TYPOSQUAT_GROUP` no longer reports a namespace that starts with no top-level domain** because of
+  its second label alone: `androidx.annotation` does not imitate `jakarta.annotation`. Such groups are
+  still compared by distance.
+
 ## 4.0.0
 
 Kreate 4.0.0 adds a software assurance gate: advisories, an inspection of dependency jars, trust and

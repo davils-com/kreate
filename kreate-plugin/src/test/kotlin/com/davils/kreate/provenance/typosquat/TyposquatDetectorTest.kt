@@ -26,7 +26,8 @@ private val POPULAR: Set<String> = setOf(
     "org.slf4j:slf4j-api",
     "com.fasterxml.jackson.core:jackson-databind",
     "org.jetbrains:annotations",
-    "io.ktor:ktor-client-core"
+    "io.ktor:ktor-client-core",
+    "jakarta.annotation:jakarta.annotation-api"
 )
 
 private fun findingsOf(group: String, name: String, allow: Set<String> = emptySet()): List<Finding> {
@@ -55,6 +56,14 @@ class TyposquatDetectorTest : FunSpec({
 
         test("with the name of a popular one under another top-level domain is reported") {
             rulesOf("com.slf4j", "slf4j-api") shouldBe listOf("TYPOSQUAT_GROUP")
+        }
+
+        test("with the name of a popular one under another namespace that is no domain is accepted") {
+            rulesOf("androidx.annotation", "annotation").shouldBeEmpty()
+        }
+
+        test("one character away from a popular one in a namespace that is no domain is reported") {
+            rulesOf("jakarta.annotatlon", "jakarta.annotation-api") shouldBe listOf("TYPOSQUAT_GROUP")
         }
 
         test("names the group it imitates") {
