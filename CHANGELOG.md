@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`TYPOSQUAT_GROUP` no longer reports a namespace that starts with no top-level domain** because of
   its second label alone: `androidx.annotation` does not imitate `jakarta.annotation`. Such groups are
   still compared by distance.
+- **`DISALLOWED_REPOSITORY` no longer reports the copies of the `pluginManagement` repositories**
+  (`__plugin_repository__...`) that Gradle places on every build script. They belong to the settings,
+  which the dependency policy does not check, and carried no URL, so every one of them was reported.
 
 ## 4.0.0
 

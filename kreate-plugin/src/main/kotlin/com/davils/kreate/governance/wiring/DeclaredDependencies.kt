@@ -32,6 +32,8 @@ import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 
+private const val PLUGIN_REPOSITORY_PREFIX: String = "__plugin_repository__"
+
 internal fun Project.declaredDependencies(names: Set<String>): ListProperty<DeclaredDependency> {
     val merged = objects.listProperty(DeclaredDependency::class.java)
     checkedConfigurations(names).forEach { configuration ->
@@ -49,9 +51,12 @@ internal fun Project.forcedModules(names: Set<String>): Provider<List<ModuleCoor
 }
 
 internal fun Project.repositoryDeclarations(): Provider<List<RepositoryDeclaration>> {
-    val declared = repositories.toList() + buildscript.repositories.toList()
+    val buildscriptRepositories = buildscript.repositories.filterNot { repository -> repository.isPluginMirror() }
+    val declared = repositories.toList() + buildscriptRepositories
     return provider { declared.map(::declarationOf) }
 }
+
+private fun ArtifactRepository.isPluginMirror(): Boolean = name.startsWith(PLUGIN_REPOSITORY_PREFIX)
 
 private fun Project.checkedConfigurations(names: Set<String>): List<Configuration> {
     val selected = configurations.filter { configuration -> configuration.name in names }

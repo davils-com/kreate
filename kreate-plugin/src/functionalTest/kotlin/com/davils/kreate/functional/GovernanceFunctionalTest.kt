@@ -142,6 +142,35 @@ class GovernanceFunctionalTest : FunSpec({
             document shouldContain "VERIFICATION_DISABLED"
         }
 
+        test("leaves the plugin repositories of the settings out of the project's repositories") {
+            val fixture = newBuild("""allowedRepositoryHosts = setOf("repo.maven.apache.org", "plugins.gradle.org")""")
+            fixture.write(
+                "settings.gradle.kts",
+                """
+                pluginManagement {
+                    repositories {
+                        mavenCentral()
+                        gradlePluginPortal()
+                    }
+                }
+
+                dependencyResolutionManagement {
+                    repositories {
+                        mavenCentral()
+                    }
+                }
+
+                rootProject.name = "sample"
+                """.trimIndent()
+            )
+
+            fixture.build("kreateDependencyPolicy")
+
+            val document = fixture.file(POLICY_DOCUMENT).readText()
+            document shouldNotContain "DISALLOWED_REPOSITORY"
+            document shouldNotContain "__plugin_repository__"
+        }
+
         test("reuses the configuration cache") {
             val fixture = newBuild()
             fixture.build("kreateDependencyPolicy")

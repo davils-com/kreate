@@ -292,7 +292,9 @@ A module is named as `group:artifact`, as `group:*`, or as a group with its subg
 
 A forced module stays reported until an ignore rule accepts it, with a reason and an expiry. Gradle
 does not show the repositories of `settings.gradle.kts` to a project, so only the repositories of the
-project and of its build script are checked.
+project and of its build script are checked. The copies of the `pluginManagement` repositories that
+Gradle places on every build script, named `__plugin_repository__...`, belong to the settings and are
+left out as well.
 
 With `checkOutdated = true`, `kreateDependencyOutdated` asks deps.dev how far every direct dependency lags
 behind. It counts only major releases that exist, without pre-releases, and adds up libyears.
