@@ -22,6 +22,7 @@ import com.davils.kreate.tooling.ExecutableResolver
 import com.davils.kreate.tooling.ExternalTool
 import com.davils.kreate.tooling.toCmakePath
 import org.gradle.api.GradleException
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
@@ -29,6 +30,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
@@ -53,6 +55,10 @@ internal abstract class ConfigureNative @Inject constructor(
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val cmakeListsFile: RegularFileProperty
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    public abstract val externalSources: ConfigurableFileCollection
 
     @get:Input
     public abstract val cacheBoundPaths: ListProperty<String>

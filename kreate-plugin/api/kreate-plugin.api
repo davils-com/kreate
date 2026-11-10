@@ -629,6 +629,7 @@ public abstract class com/davils/kreate/jni/JniExtension {
 	public final fun getBuildType ()Lorg/gradle/api/provider/Property;
 	public final fun getCmakeExecutable ()Lorg/gradle/api/provider/Property;
 	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getExternalSources ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getGenerator ()Lorg/gradle/api/provider/Property;
 	public abstract fun getHeaders ()Lcom/davils/kreate/jni/JniHeaderExtension;
 	public final fun getLibraryIncludePaths ()Lorg/gradle/api/provider/ListProperty;

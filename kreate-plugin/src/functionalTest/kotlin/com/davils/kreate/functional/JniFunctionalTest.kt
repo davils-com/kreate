@@ -152,6 +152,50 @@ class JniFunctionalTest : FunSpec({
             changed.task(":kreateJniBuild")?.outcome shouldBe TaskOutcome.SUCCESS
         }
 
+        test("rebuilds after a change to an external source instead of reporting UP-TO-DATE") {
+            val fixture = KreateBuildFixture.createIn(workspace)
+            fixture.writeSettings()
+            fixture.writeBuild(
+                """
+                ${KreateBuildFixture.platformBlock}
+
+                platform {
+                    jvm {
+                        jni {
+                            enabled = true
+                            nameOverride = "sample"
+                            libraryIncludePaths.add("../../shared")
+                            externalSources.from("shared")
+                        }
+                    }
+                }
+                """.trimIndent()
+            )
+            val declaration = "package com.example\n\nclass Native { external fun greet(): String }"
+            fixture.writeKotlin("com/example/Native.kt", declaration)
+            fixture.write(
+                "jni/sample/src/sample.cpp",
+                """
+                #include "sample_jni.h"
+                #include "greeting.h"
+
+                JNIEXPORT jstring JNICALL Java_com_example_Native_greet(JNIEnv* env, jobject receiver) {
+                    return env->NewStringUTF(GREETING);
+                }
+                """.trimIndent()
+            )
+            fixture.write("shared/greeting.h", "#define GREETING \"first\"")
+            fixture.build("kreateJniBuild")
+
+            val unchanged = fixture.build("kreateJniBuild")
+            unchanged.task(":kreateJniBuild")?.outcome shouldBe TaskOutcome.UP_TO_DATE
+
+            fixture.write("shared/greeting.h", "#define GREETING \"second\"")
+            val changed = fixture.build("kreateJniBuild")
+
+            changed.task(":kreateJniBuild")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
         test("reconfigures instead of failing when the project is relocated") {
             val fixture = newFixture()
             fixture.writeNativeSource("hello")

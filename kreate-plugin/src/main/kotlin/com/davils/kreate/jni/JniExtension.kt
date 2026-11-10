@@ -17,6 +17,7 @@
 package com.davils.kreate.jni
 
 import org.gradle.api.Action
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -96,6 +97,21 @@ public abstract class JniExtension @Inject constructor(
      * @since 1.3.1
      */
     public val libraryRuntimePaths: ListProperty<String> = factory.listProperty(String::class.java)
+
+    /**
+     * Native files outside the native project that its build reads.
+     *
+     * CMake does not tell Gradle which files it reads, so Kreate tracks the native project directory
+     * only. List here what the project pulls in from elsewhere, such as shared CMake modules it
+     * `include`s, the sources of a library it builds with `add_subdirectory`, or the headers of a
+     * library on [libraryIncludePaths]. Every file listed is an input of the configure and the build
+     * step, so changing it builds the library again instead of leaving the step up to date.
+     *
+     * Defaults to an empty collection.
+     *
+     * @since 4.1.0
+     */
+    public val externalSources: ConfigurableFileCollection = factory.fileCollection()
 
     /**
      * The CMake build type used for both the configure and the build step.

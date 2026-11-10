@@ -87,6 +87,7 @@ internal fun Project.initializeJni(extension: KreateExtension) {
     val configure = tasks.register<ConfigureNative>(JniTaskNames.CONFIGURE) {
         sourceDirectory.set(layout.dir(provider { nativeProjectDir }))
         cmakeListsFile.set(layout.file(provider { nativeProjectDir.resolve(CMAKE_LISTS_FILE_NAME) }))
+        externalSources.from(jniConfig.externalSources)
         cacheBoundPaths.set(
             cmakeBuildDir.map { listOf(nativeProjectDir.absolutePath, it.asFile.absolutePath) }
         )
@@ -107,7 +108,8 @@ internal fun Project.initializeJni(extension: KreateExtension) {
             fileTree(nativeProjectDir) {
                 include(CMAKE_LISTS_FILE_NAME, "src/**", "include/**")
             },
-            headerDir
+            headerDir,
+            jniConfig.externalSources
         )
         cmakeCache.set(configure.flatMap { it.cmakeCache })
         buildType.set(jniConfig.buildType)

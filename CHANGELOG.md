@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`ChainedCallLimit` takes `ignoredReceivers`.** A chain that starts at a listed name, such as the
   `Modifier` of Jetpack Compose, is not counted.
+- **`jni { externalSources }`** lists native files outside the native project that its build reads,
+  such as shared CMake modules or a library built with `add_subdirectory`. They are inputs of
+  `kreateJniConfigure` and `kreateJniBuild`, so changing them builds the library again instead of
+  leaving it up to date.
 
 ### Fixed
 

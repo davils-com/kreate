@@ -103,6 +103,13 @@ kreate {
         <td>Additional include directories, forwarded through <code>KREATE_JNI_INCLUDE_DIRS</code>.</td>
     </tr>
     <tr>
+        <td><code>externalSources</code></td><td><code>ConfigurableFileCollection</code></td><td><i>empty</i></td>
+        <td>Native files outside the native project that the build reads, such as shared CMake modules,
+        a library built with <code>add_subdirectory</code> or the headers on <code>libraryIncludePaths</code>.
+        They are inputs of the configure and the build step, so a change to them rebuilds the library.
+        Since 4.1.0.</td>
+    </tr>
+    <tr>
         <td><code>libraryRuntimePaths</code></td><td><code>List&lt;String&gt;</code></td><td><i>empty</i></td>
         <td>Additional directories appended to <code>java.library.path</code>.</td>
     </tr>
