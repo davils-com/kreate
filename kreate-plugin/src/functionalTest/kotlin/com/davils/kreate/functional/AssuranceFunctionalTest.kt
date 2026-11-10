@@ -31,6 +31,14 @@ private fun documentWith(status: String, severity: String = "HIGH"): String = ""
     ]}
 """.trimIndent()
 
+private fun documentOf(vararg modules: String): String {
+    val findings = modules.map { module ->
+        """{"ruleId":"EXAMPLE_RULE","source":"external","severity":"HIGH","title":"An example","module":"$module"}"""
+    }
+    val listed = findings.joinToString(",")
+    return """{"source":"external","status":"COMPLETE","evaluatedAt":"$EVALUATED_AT","findings":[$listed]}"""
+}
+
 class AssuranceFunctionalTest : FunSpec({
     val workspace = kreateWorkspace()
 
@@ -125,6 +133,31 @@ class AssuranceFunctionalTest : FunSpec({
             val result = fixture.build("kreateAssurance")
 
             result.task(":kreateAssurance")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("one id can be ignored for several modules, each with a rule of its own") {
+            val fixture = newBuild(
+                extra = """
+                    ignore("EXAMPLE_RULE") { reason = "Not reachable."; module = "com.example:lib"; expires = "2999-01-31" }
+                    ignore("EXAMPLE_RULE") { reason = "Test only."; module = "com.example:other"; expires = "2999-01-31" }
+                """.trimIndent()
+            )
+            fixture.write("findings.json", documentOf("com.example:lib", "com.example:other"))
+
+            val result = fixture.build("kreateAssurance")
+
+            result.task(":kreateAssurance")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("an ignore rule for one module leaves the same id of another module reported") {
+            val fixture = newBuild(
+                extra = """
+                    ignore("EXAMPLE_RULE") { reason = "Not reachable."; module = "com.example:lib"; expires = "2999-01-31" }
+                """.trimIndent()
+            )
+            fixture.write("findings.json", documentOf("com.example:lib", "com.example:other"))
+
+            fixture.buildAndFail("kreateAssurance").output shouldContain "[FINDINGS]"
         }
 
         test("an expired ignore rule accepts nothing") {

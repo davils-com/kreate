@@ -57,7 +57,13 @@ vulnerability is not a harmless one.
 ## Accepting a finding
 
 An ignore rule needs a reason, and it should have an end. A rule stops matching the day after
-`expires`, and the report names it.
+`expires`, and the report names it. `module` limits a rule to one module. Every `ignore` declares a
+rule of its own, so the same id can be accepted for several modules, each with its own reason:
+
+```kotlin
+ignore("RISK_SCORE") { module = "org.jetbrains.compose.ui:ui-desktop"; reason = "..."; expires = "2027-05-10" }
+ignore("RISK_SCORE") { module = "org.jetbrains.skiko:skiko-awt"; reason = "..."; expires = "2027-05-10" }
+```
 
 For an existing code base, record what is there and judge only what is new:
 

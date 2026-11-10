@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`DISALLOWED_REPOSITORY` no longer reports the copies of the `pluginManagement` repositories**
   (`__plugin_repository__...`) that Gradle places on every build script. They belong to the settings,
   which the dependency policy does not check, and carried no URL, so every one of them was reported.
+- **`ignore` declares a rule per call.** Two `ignore` calls for the same id used to configure one shared
+  rule, so the second module overwrote the first. Each call now accepts its own module with its own
+  reason and expiry.
 
 ## 4.0.0
 

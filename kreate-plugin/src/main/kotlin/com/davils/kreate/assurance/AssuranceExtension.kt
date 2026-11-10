@@ -39,7 +39,7 @@ private const val DEFAULT_REUSE_HOURS: Long = 6
  * @since 4.0.0
  */
 public abstract class AssuranceExtension @Inject constructor(factory: ObjectFactory) {
-    private val ignoreRules: MutableMap<String, AssuranceIgnoreSpec> = linkedMapOf()
+    private val ignoreRules: MutableList<Pair<String, AssuranceIgnoreSpec>> = mutableListOf()
 
     /**
      * Whether the gate is enabled for this project. Defaults to `false`.
@@ -192,15 +192,17 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val reports: AssuranceReportsExtension
 
     /**
-     * Accepts the findings with the given rule id, advisory id or alias.
+     * Accepts the findings with the given rule id, advisory id or alias. Every call declares a rule of
+     * its own, so one id can be accepted for several modules, each with its own reason and expiry.
      *
      * @param id The rule id, advisory id or alias.
      * @param action The configuration of the rule.
      * @since 4.0.0
      */
     public fun ignore(id: String, action: Action<AssuranceIgnoreSpec>) {
-        val spec = ignoreRules.getOrPut(id) { AssuranceIgnoreSpec() }
+        val spec = AssuranceIgnoreSpec()
         action.execute(spec)
+        ignoreRules += id to spec
     }
 
     /**
@@ -293,5 +295,5 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
         action.execute(reports)
     }
 
-    internal fun declaredIgnoreRules(): Map<String, AssuranceIgnoreSpec> = ignoreRules.toMap()
+    internal fun declaredIgnoreRules(): List<Pair<String, AssuranceIgnoreSpec>> = ignoreRules.toList()
 }
