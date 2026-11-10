@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 4.1.0
+
+Kreate 4.1.0 lets a Compose code base keep the chained call limit, tracks native sources that a JNI
+project pulls in from outside its own directory, and fixes three findings of the assurance gate that
+blocked builds for the wrong reason. A build that called `ignore` twice for the same id now gets two
+rules instead of one shared rule; every other build keeps working unchanged.
 
 ### Added
 

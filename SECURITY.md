@@ -60,7 +60,7 @@ Releases are published to Maven Central and signed. Each release also carries a 
 provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
 
 ```bash
-gh attestation verify kreate-4.0.0.jar --repo davils-com/kreate
+gh attestation verify kreate-4.1.0.jar --repo davils-com/kreate
 ```
 
 CI builds the plugin JAR twice on one runner and compares the checksums, which guards against

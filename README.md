@@ -200,7 +200,7 @@ dependencyResolutionManagement {
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.21"
-    id("com.davils.kreate") version "4.0.0"
+    id("com.davils.kreate") version "4.1.0"
 }
 ```
 
