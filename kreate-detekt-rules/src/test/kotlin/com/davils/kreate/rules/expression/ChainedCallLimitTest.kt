@@ -73,6 +73,30 @@ class ChainedCallLimitTest : FunSpec({
             findings shouldHaveSize 1
         }
 
+        test("a chain that starts at a receiver which is not ignored") {
+            val rule = ChainedCallLimit(TestConfig("ignoredReceivers" to listOf("Modifier")))
+
+            val findings = rule.lint(
+                """
+                    public fun styled(modifier: Modifier): Modifier = modifier.fillMaxWidth().padding(8).background(0)
+                """.trimIndent()
+            )
+
+            findings shouldHaveSize 1
+        }
+
+        test("an ignored name that appears inside the chain but does not start it") {
+            val rule = ChainedCallLimit(TestConfig("ignoredReceivers" to listOf("Modifier")))
+
+            val findings = rule.lint(
+                """
+                    public fun styled(): Modifier = create().Modifier.fillMaxWidth().padding(8)
+                """.trimIndent()
+            )
+
+            findings shouldHaveSize 1
+        }
+
         test("more calls than a configured limit") {
             val rule = ChainedCallLimit(TestConfig("maxCalls" to 1))
 
@@ -180,6 +204,18 @@ class ChainedCallLimitTest : FunSpec({
             val findings = ChainedCallLimit(Config.empty).lint(
                 """
                     public fun file(path: String): java.io.File = java.io.File(path)
+                """.trimIndent()
+            )
+
+            findings shouldHaveSize 0
+        }
+
+        test("a chain that starts at an ignored receiver") {
+            val rule = ChainedCallLimit(TestConfig("ignoredReceivers" to listOf("Modifier")))
+
+            val findings = rule.lint(
+                """
+                    public fun styled(): Modifier = Modifier.fillMaxWidth().padding(8).background(0)
                 """.trimIndent()
             )
 

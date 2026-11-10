@@ -11,6 +11,7 @@ kreate:
   ChainedCallLimit:
     active: true
     maxCalls: 2
+    ignoredReceivers: []
   OneTopLevelTypePerFile:
     active: true
   KDocOnNonPublicDeclaration:

@@ -27,6 +27,7 @@ import dev.detekt.api.config
 import org.jetbrains.kotlin.psi.KtArrayAccessExpression
 import org.jetbrains.kotlin.psi.KtCallExpression
 import org.jetbrains.kotlin.psi.KtExpression
+import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtParenthesizedExpression
 import org.jetbrains.kotlin.psi.KtPostfixExpression
 import org.jetbrains.kotlin.psi.KtQualifiedExpression
@@ -41,10 +42,14 @@ internal class ChainedCallLimit(config: Config) : Rule(
     @Configuration("The number of calls one qualified expression may chain.")
     private val maxCalls: Int by config(DEFAULT_MAX_CALLS)
 
+    @Configuration("Names a chain may start with to be exempt, such as the Modifier of Jetpack Compose.")
+    private val ignoredReceivers: List<String> by config(emptyList())
+
     override fun visitQualifiedExpression(expression: KtQualifiedExpression) {
         super.visitQualifiedExpression(expression)
 
         if (expression.continuesInParent()) return
+        if (expression.startsAtIgnoredReceiver()) return
 
         val calls = expression.chainedCalls()
         if (calls <= maxCalls) return
@@ -68,6 +73,12 @@ internal class ChainedCallLimit(config: Config) : Rule(
         val continuesChain = enclosing.chainReceiver() == this
         if (!continuesChain) return null
         return enclosing
+    }
+
+    private fun KtQualifiedExpression.startsAtIgnoredReceiver(): Boolean {
+        val links = generateSequence<KtExpression>(this) { link -> link.chainReceiver() }
+        val root = links.last() as? KtNameReferenceExpression ?: return false
+        return root.getReferencedName() in ignoredReceivers
     }
 
     private fun KtQualifiedExpression.chainedCalls(): Int {

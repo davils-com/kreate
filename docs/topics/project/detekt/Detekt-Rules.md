@@ -126,9 +126,16 @@ An index access (`[0]`), a non-null assertion (`!!`) or a pair of parentheses do
 the count runs through them, so `rows.first()[0].trim().lowercase()` and
 `(value.trim()).lowercase().uppercase()` both chain three calls and are reported once, as a whole.
 
-| Option     | Type  | Default | Meaning                                              |
-|------------|-------|---------|------------------------------------------------------|
-| `maxCalls` | `Int` | `2`     | The number of calls one qualified expression may chain. |
+A chain that starts at a name listed in `ignoredReceivers` is not counted. Builders whose whole
+point is a fluent chain, such as the `Modifier` of Jetpack Compose, stay readable that way:
+`Modifier.fillMaxWidth().padding(8.dp).background(color)` passes with `ignoredReceivers: ['Modifier']`.
+Only the name the chain starts with is compared, so `modifier.fillMaxWidth().padding(8.dp)` needs
+`modifier` listed as well.
+
+| Option             | Type           | Default | Meaning                                                 |
+|--------------------|----------------|---------|---------------------------------------------------------|
+| `maxCalls`         | `Int`          | `2`     | The number of calls one qualified expression may chain. |
+| `ignoredReceivers` | `List<String>` | `[]`    | Names a chain may start with to be exempt. Since 4.1.0. |
 
 ### OneTopLevelTypePerFile
 
