@@ -34,10 +34,11 @@ check:
     artifacts: ["kreate-plugin/build/libs/*.jar"]
 
 policy:
-  # Pull requests stay on Linux. A platform problem shows on develop, before a release.
+  # Pull requests stay on Linux. develop adds Windows, so a platform problem shows before a
+  # release. macOS runs on main and for a tag only: a snapshot must not wait for a macOS runner.
   push-develop:
     stages: [check, snapshot]
-    os: [ubuntu-latest, macos-latest, windows-latest]
+    os: [ubuntu-latest, windows-latest]
     overrides:
       check:
         reproducible: { enabled: true }
