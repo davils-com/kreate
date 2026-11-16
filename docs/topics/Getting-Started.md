@@ -56,16 +56,35 @@ kotlinx-benchmark, Dokka and the publishing plugins itself, for whichever featur
 
 ## Step 2: Declare your repositories
 
-%product% does not add repositories to your project. Declare them where Gradle expects them,
-in `settings.gradle.kts`:
+%product% is published to `https://repo.davils.com/releases` and does not add repositories to
+your project. Declare them where Gradle expects them, in `settings.gradle.kts`, once for plugins
+and once for dependencies:
 
 ```kotlin
+pluginManagement {
+    repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
     }
 }
 ```
+
+See [Where %product% is published](Installation-Repository.md) for why it is needed twice and for
+moving a build that still resolves %product% from Maven Central.
 
 <tip>
 If you would rather have %product% add Maven Central, the Gradle Plugin Portal, and Google for

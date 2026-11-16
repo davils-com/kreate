@@ -56,7 +56,8 @@ The following are **not** vulnerabilities in Kreate:
 
 ## Verifying a Release
 
-Releases are published to Maven Central and signed. Each release also carries a signed build
+Releases are published to `https://repo.davils.com/releases` and signed; versions up to 4.1.0 are
+on Maven Central. Each release also carries a signed build
 provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
 
 ```bash

@@ -188,14 +188,34 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 
 ### Installation
 
+Kreate is published to `https://repo.davils.com/releases`. Declare the repository for plugins and
+for dependencies:
+
 ```kotlin
 // settings.gradle.kts
+pluginManagement {
+    repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
     }
 }
 ```
+
+Versions up to 4.1.0 are on Maven Central.
 
 ```kotlin
 // build.gradle.kts

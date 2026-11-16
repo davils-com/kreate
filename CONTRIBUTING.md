@@ -20,6 +20,8 @@ To ensure a smooth and professional collaboration, please follow these guideline
   - [Testing](#testing)
   - [The public API is a gate](#the-public-api-is-a-gate)
   - [Documentation](#documentation)
+- [Changing a Dependency](#changing-a-dependency)
+- [Snapshots and Releases](#snapshots-and-releases)
 - [Commit Messages](#commit-messages)
 
 ---
@@ -163,6 +165,50 @@ including a Dependabot pull request, is red until both are updated:
 Read the diff of the metadata: a checksum that changes for a version that did not is a tampered
 artifact, not a chore. Kotlin, `kotlinx-serialization` and Ktor are held back on purpose, see
 `gradle/libs.versions.toml`.
+
+## Snapshots and Releases
+
+Kreate is published to `https://repo.davils.com`, never to Maven Central.
+
+`gradle.properties` on `develop` carries the version **in development**. Every build without a
+release tag is `<version>-SNAPSHOT`; only a tag build produces `<version>`, and it refuses a tag
+that does not match `gradle.properties`.
+
+| What | When | Where |
+|---|---|---|
+| Snapshot | every push to `develop`, by the `Snapshot` workflow | `repo.davils.com/snapshots`, unsigned, overwritten |
+| Release | a tag on `main`, by the `Publish` workflow | `repo.davils.com/releases`, signed, attested, never overwritten |
+
+Cutting a release:
+
+1. On `develop`, finish the `## <version>` section of `CHANGELOG.md` and set `README.md`,
+   `SECURITY.md` and `docs/v.list` to the version. Those three always show the latest release.
+   Commit as `chore(release): prepare <version>`.
+2. Merge `develop` into `main` and push the tag `<version>`, without a `v`.
+3. Approve the `release` environment. The workflow verifies, uploads, attests and then resolves the
+   release the way a consumer does.
+4. On `develop`, raise `version` in `gradle.properties` to the next version and commit as
+   `chore(release): start <next version>`.
+
+The workflows need two secrets: `DAVILS_MAVEN_NAME`, the name of a repository token, and
+`DAVILS_MAVEN_SECRET`, its secret. They are organisation secrets today. An environment secret of
+the same name takes precedence, which is how `snapshot` can be given a token that writes
+`/snapshots` only.
+
+### A release that stopped half way
+
+The releases repository refuses to overwrite a file, so the publish job cannot simply run again
+after a failure. Its preflight tells the three states apart: a publication that is not there yet
+is uploaded, one that is complete is skipped, and one that is there without being listed in its
+`maven-metadata.xml` stops the job and names its directory.
+
+1. Delete the named directory, such as `com/davils/kreate/<version>`, in the repository.
+2. Run the failed jobs of the workflow again.
+
+Never move or re-push the tag: a consumer may already have resolved the publications that did
+arrive.
+
+---
 
 ## Commit Messages
 

@@ -9,6 +9,7 @@
     <toc-element topic="Home.topic"/>
     <toc-element topic="Overview.md"/>
     <toc-element topic="Getting-Started.md"/>
+    <toc-element topic="Installation-Repository.md"/>
     <toc-element topic="Plugin-Management.md"/>
     <toc-element topic="Compatibility.md"/>
     <toc-element topic="Task-Reference.md"/>
