@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+- **Kotest 6.2.7.** The default of `tests { kotest { version } }` is now 6.2.7 instead of 6.2.6. A
+  build that verifies or locks its test classpaths records the new artifacts.
+
 ## 4.2.0
 
 Kreate 4.2.0 moves to a repository of its own and learns to publish to one. From this version on
