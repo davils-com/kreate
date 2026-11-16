@@ -34,20 +34,22 @@ check:
     artifacts: ["kreate-plugin/build/libs/*.jar"]
 
 policy:
-  # Pull requests stay on Linux. A platform problem shows on develop, before a release.
+  # Pull requests stay on Linux. develop, main and a tag add Windows, so a platform problem shows
+  # before a release. macOS is left out: GitHub regularly starts no macOS runner for this
+  # organisation, and a job that waits for one holds back the snapshot and every later run.
   push-develop:
     stages: [check, snapshot]
-    os: [ubuntu-latest, macos-latest, windows-latest]
+    os: [ubuntu-latest, windows-latest]
     overrides:
       check:
         reproducible: { enabled: true }
   push-main:
-    os: [ubuntu-latest, macos-latest, windows-latest]
+    os: [ubuntu-latest, windows-latest]
     overrides:
       check:
         reproducible: { enabled: true }
   tag:
-    os: [ubuntu-latest, macos-latest, windows-latest]
+    os: [ubuntu-latest, windows-latest]
 
 security:
   gradle:
