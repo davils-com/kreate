@@ -13,8 +13,9 @@ version: 2
 # kotlinx-serialization and Ktor are held at the last release built on Kotlin 2.2, the stdlib of
 # Gradle 9.1, Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
 #
-# The list is repeated per ecosystem rather than shared through a YAML anchor: Dependabot
-# validates this file against a fixed schema and rejects an unknown top-level key.
+# Gradle is watched from the repository root only. Every included build reads its versions from
+# the one catalog in gradle/libs.versions.toml and declares none of its own, so an entry per
+# included build would open the same pull request once more for each of them.
 
 updates:
   - package-ecosystem: "gradle"
@@ -30,34 +31,6 @@ updates:
       - dependency-name: "org.jetbrains.kotlin.jvm:*"
       - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
       # the compiler plugins Kreate applies: serialization, allopen
-      - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
-      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
-      - dependency-name: "io.ktor:*"
-
-  - package-ecosystem: "gradle"
-    directory: "/kreate-plugin"
-    schedule:
-      interval: "daily"
-    target-branch: "develop"
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "org.jetbrains.kotlin:*"
-      - dependency-name: "org.jetbrains.kotlin.jvm:*"
-      - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
-      - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
-      - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
-      - dependency-name: "io.ktor:*"
-
-  - package-ecosystem: "gradle"
-    directory: "/build-logic"
-    schedule:
-      interval: "daily"
-    target-branch: "develop"
-    open-pull-requests-limit: 10
-    ignore:
-      - dependency-name: "org.jetbrains.kotlin:*"
-      - dependency-name: "org.jetbrains.kotlin.jvm:*"
-      - dependency-name: "org.jetbrains.kotlin.multiplatform:*"
       - dependency-name: "org.jetbrains.kotlin.plugin.*:*"
       - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
       - dependency-name: "io.ktor:*"
