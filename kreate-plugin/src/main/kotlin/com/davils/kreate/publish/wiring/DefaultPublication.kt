@@ -52,6 +52,7 @@ internal fun Project.registerDefaultPublication(
     artifactId: String,
     target: String,
 ) {
+    if (pluginManager.hasPlugin(GradlePluginId.MAVEN_CENTRAL)) return
     if (!publishing.publications.withType<MavenPublication>().isEmpty()) return
 
     val component = publishableComponent()

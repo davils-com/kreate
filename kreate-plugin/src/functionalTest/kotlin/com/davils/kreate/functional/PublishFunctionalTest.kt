@@ -123,6 +123,39 @@ class PublishFunctionalTest : FunSpec({
             result.output shouldContain ":publishMavenPublicationToBomRegistryRepository"
         }
 
+        test("shares one publication with Maven Central") {
+            val fixture = newFixture()
+            fixture.withCiEnvironment()
+            val kreateBlock = """
+                ${KreateBuildFixture.platformBlock}
+
+                project {
+                    description = "Fixture"
+
+                    publish {
+                        enabled = true
+                        website = "https://example.com"
+
+                        repositories {
+                            gitlab {
+                                name = "TestRegistry"
+                                tokenEnv = "KREATE_TEST_TOKEN"
+                                projectIdEnv = "KREATE_TEST_PROJECT_ID"
+                                apiUrlEnv = "KREATE_TEST_API_URL"
+                            }
+                            mavenCentral { signPublications = false }
+                        }
+                    }
+                }
+            """.trimIndent()
+            fixture.writeBuild(kreateBlock)
+
+            val dryRunTaskGraph = fixture.build("publish", "--dry-run")
+
+            dryRunTaskGraph.output shouldContain ":publishMavenPublicationToTestRegistryRepository"
+            dryRunTaskGraph.output shouldContain ":publishMavenPublicationToMavenCentralRepository"
+        }
+
         test("fails with a readable message when the registry URL is incomplete") {
             val fixture = newFixture()
             fixture.withEnvironment("KREATE_TEST_TOKEN", "test-job-token")
