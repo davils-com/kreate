@@ -13,20 +13,20 @@ permissions: {}
 
 env:
   CI_COMMIT_TAG: ${{ github.ref_name }}
-  KREATE_REQUIRE_CMAKE: 'true'
-  KREATE_REQUIRE_TRIVY: 'true'
+  KREATE_REPOSITORY_URL: https://repo.davils.com/releases
 
 jobs:
-  # Everything that runs third-party code happens here, in a job that holds no secret. A compromised
-  # tool or test dependency has nothing to steal: the signing key exists only in the publish job.
-  verify:
-    name: Verify the release
+  gate:
+    name: Refuse a tag that is not a release of main
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 10
 
     permissions:
       contents: read
+
+    outputs:
+      version: ${{ steps.release.outputs.version }}
 
     steps:
       - name: Checkout
@@ -37,7 +37,8 @@ jobs:
       # A tag can point at any commit, so without this anyone allowed to push a tag could release
       # an unreviewed commit. The tag name reaches the script through the environment, never
       # through an expression, so it cannot inject shell.
-      - name: Refuse a tag that is not a release of main
+      - name: Check the tag
+        id: release
         run: |
           set -euo pipefail
 
@@ -51,57 +52,63 @@ jobs:
           declared="$(sed -n 's/^version=//p' gradle.properties)"
           released="${CI_COMMIT_TAG#v}"
 
+          case "$released" in
+            *-SNAPSHOT)
+              echo "::error::Tag $CI_COMMIT_TAG is a snapshot. Snapshots are published from develop, without a tag."
+              exit 1
+              ;;
+          esac
+
           if [ "$declared" != "$released" ]; then
             echo "::error::Tag $CI_COMMIT_TAG does not match version=$declared in gradle.properties."
             exit 1
           fi
 
-      - name: Set up JDK 25
-        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
-        with:
-          distribution: temurin
-          java-version: '25'
+          echo "version=$released" >>"$GITHUB_OUTPUT"
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
-        with:
-          validate-wrappers: true
-          cache-read-only: true
+  verify:
+    name: Verify the release
+    needs: gate
+    uses: ./.github/workflows/_verify.yml
+    permissions:
+      contents: read
+    with:
+      release-tag: ${{ github.ref_name }}
+      sbom: true
 
-      - name: Install CMake
-        run: sudo apt-get update && sudo apt-get install -y cmake
+  # The releases repository refuses to overwrite a file, so a release that failed half way cannot
+  # simply be run again. This job decides, without credentials, which publications are still
+  # missing, and stops when one was left half uploaded.
+  preflight:
+    name: Decide what is left to upload
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-      # The example's secret scan runs as part of `check`, so `verify` below needs Trivy.
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
-        with:
-          version: v0.76.2
-          path: ${{ runner.temp }}
+    permissions:
+      contents: read
 
-      # A tag build must not be the first time the suite runs. Verifying before publishing
-      # is the difference between a bad release and a red build.
-      - name: Verify
-        run: ./gradlew verify --configuration-cache --stacktrace
+    outputs:
+      tasks: ${{ steps.pending.outputs.tasks }}
 
-      - name: Generate a CycloneDX SBOM
-        run: trivy fs --format cyclonedx --output sbom.cdx.json .
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Keep the SBOM for the publish job
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: release-sbom
-          path: sbom.cdx.json
-          retention-days: 90
+      - name: Look the release up in the repository
+        id: pending
+        env:
+          KREATE_RELEASE_VERSION: ${{ needs.gate.outputs.version }}
+        run: .github/scripts/release-preflight.sh
 
   publish:
-    name: Publish to Maven Central
-    needs: verify
-    if: github.ref_type == 'tag'
+    name: Publish to repo.davils.com
+    needs: [gate, verify, preflight]
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     # The environment is the approval gate: give it required reviewers and restrict it to release
-    # tags, because `automaticRelease` leaves nothing to approve on Maven Central afterwards.
+    # tags, because a release cannot be taken back once the repository serves it.
     environment: release
 
     permissions:
@@ -127,21 +134,33 @@ jobs:
           validate-wrappers: true
           cache-disabled: true
 
-      # Both artefacts, in one invocation: the plugin pins the rule set to its own version, so
-      # a release that shipped only the plugin would configure a `detektPlugins` dependency that
-      # cannot resolve. The secrets live on this one step, and the configuration cache stays off so
-      # that they are never serialised.
+      # Built before any secret exists in the job, and always all three, so that a run which only
+      # finishes an interrupted release still attests every JAR.
+      - name: Build the JARs
+        run: >
+          ./gradlew
+          :kreate-detekt-rules:assemble :kreate-settings:assemble :kreate-plugin:assemble
+          --no-configuration-cache --stacktrace
+
+      # One publication per invocation, in the order the preflight lists them: the rule set and
+      # the settings plugin first, because the plugin pins both to its own version, and every
+      # plugin marker after its artefact. The secrets live on this one step, and the
+      # configuration cache stays off so that they are never serialised.
       - name: Publish
+        if: needs.preflight.outputs.tasks != ''
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          KREATE_PUBLISH_TASKS: ${{ needs.preflight.outputs.tasks }}
+          DAVILS_MAVEN_NAME: ${{ secrets.DAVILS_MAVEN_NAME }}
+          DAVILS_MAVEN_SECRET: ${{ secrets.DAVILS_MAVEN_SECRET }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
-        run: >
-          ./gradlew
-          :kreate-plugin:publishToMavenCentral :kreate-settings:publishToMavenCentral :kreate-detekt-rules:publishToMavenCentral
-          --no-configuration-cache --stacktrace
+        run: |
+          set -euo pipefail
+
+          for task in $KREATE_PUBLISH_TASKS; do
+            ./gradlew "$task" --no-configuration-cache --stacktrace
+          done
 
       - name: Attest the provenance of the released JARs
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -164,3 +183,59 @@ jobs:
             kreate-settings/build/libs/*.jar
             kreate-detekt-rules/build/libs/*.jar
           sbom-path: sbom.cdx.json
+
+  # What a consumer gets, checked the way a consumer gets it: without credentials, from the
+  # repository, into an empty Gradle home.
+  smoke:
+    name: Resolve the release as a consumer
+    needs: [gate, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      attestations: read
+
+    env:
+      KREATE_RELEASE_VERSION: ${{ needs.gate.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download every published file
+        env:
+          KREATE_SMOKE_DIRECTORY: ${{ runner.temp }}/release
+        run: .github/scripts/release-smoke.sh
+
+      # The JAR the repository serves has to be the JAR this workflow built and attested.
+      - name: Verify the provenance of the served JARs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KREATE_SMOKE_DIRECTORY: ${{ runner.temp }}/release
+        run: |
+          set -euo pipefail
+
+          for jar in "$KREATE_SMOKE_DIRECTORY"/*.jar; do
+            gh attestation verify "$jar" --repo "$GITHUB_REPOSITORY"
+          done
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          validate-wrappers: true
+          cache-disabled: true
+
+      # Applies the plugin by its version and runs Detekt, which resolves the rule set the plugin
+      # pins to that version.
+      - name: Build a consumer project against the release
+        run: >
+          ./gradlew -p .github/smoke detekt
+          "-PkreateVersion=$KREATE_RELEASE_VERSION"
+          --no-configuration-cache --stacktrace
