@@ -19,29 +19,20 @@ import com.davils.buildlogic.LOCAL_TASK_GROUP
 import com.davils.buildlogic.LocalPublishTask
 import com.davils.buildlogic.Project
 import com.davils.buildlogic.SNAPSHOT_SUFFIX
-import com.davils.buildlogic.compositeVersion
 import com.davils.buildlogic.isContinuousIntegration
 import com.davils.buildlogic.publishedPluginCoordinates
-import com.davils.buildlogic.requestsLocalPublish
+import com.davils.buildlogic.publishedVersion
+import com.davils.buildlogic.registerDavilsRepository
 
 plugins {
     id("com.vanniktech.maven.publish")
     signing
 }
 
-version = compositeVersion(providers, layout.settingsDirectory)
+version = publishedVersion(providers, layout.settingsDirectory)
 
-val releaseTag = providers.environmentVariable("CI_COMMIT_TAG")
-val taggedVersion = releaseTag.map { tag -> tag.removePrefix("v") }
-if (taggedVersion.isPresent) {
-    version = taggedVersion.get()
-}
-
-val isLocalPublish = requestsLocalPublish(gradle, providers)
-val isSnapshot = version.toString().endsWith(SNAPSHOT_SUFFIX)
-if (isLocalPublish && !isSnapshot) {
-    version = "$version$SNAPSHOT_SUFFIX"
-}
+val resolvedVersion = version.toString()
+val isRelease = !resolvedVersion.endsWith(SNAPSHOT_SUFFIX)
 
 group = Project.Identity.GROUP
 
@@ -51,10 +42,9 @@ val publishedName = providers.gradleProperty("kreate.publish.name").getOrElse(Pr
 val publishedDescription = providers.gradleProperty("kreate.publish.description").getOrElse(Project.Identity.DESCRIPTION)
 
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
+    if (isRelease) signAllPublications()
 
-    coordinates(Project.Identity.GROUP, publishedArtifactId, version.toString())
+    coordinates(Project.Identity.GROUP, publishedArtifactId, resolvedVersion)
 
     pom {
         name = publishedName
@@ -98,9 +88,9 @@ mavenPublishing {
     }
 }
 
-val primaryCoordinate = "${Project.Identity.GROUP}:$publishedArtifactId"
+registerDavilsRepository(project, resolvedVersion)
 
-val resolvedVersion = version.toString()
+val primaryCoordinate = "${Project.Identity.GROUP}:$publishedArtifactId"
 
 tasks.register<LocalPublishTask>(LOCAL_PUBLISH_TASK) {
     group = LOCAL_TASK_GROUP

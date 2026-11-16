@@ -69,6 +69,20 @@ public object Project {
         public const val LICENSE_DISTRIBUTION: String = "repo"
     }
 
+    public object Repository {
+        public const val NAME: String = "Davils"
+
+        public const val HOST: String = "repo.davils.com"
+
+        public const val RELEASES_URL: String = "https://repo.davils.com/releases"
+
+        public const val SNAPSHOTS_URL: String = "https://repo.davils.com/snapshots"
+
+        public const val USERNAME_VARIABLE: String = "DAVILS_MAVEN_NAME"
+
+        public const val PASSWORD_VARIABLE: String = "DAVILS_MAVEN_SECRET"
+    }
+
     public object IssueManagement {
         public const val SYSTEM: String = "Github Issues"
 

@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 4.2.0
 
+Kreate 4.2.0 moves to a repository of its own and learns to publish to one. From this version on
+Kreate is published to `https://repo.davils.com/releases` and no longer to Maven Central, so a build
+has to declare that repository before it raises the version. In return every build can publish to a
+Maven repository that keeps releases and snapshots apart, and can be asked to carry a snapshot
+version. The `kreate { }` DSL and every task name are unchanged.
+
+### Upgrading
+
+- **Declare `https://repo.davils.com/releases` in `settings.gradle.kts`**, in `pluginManagement` and
+  in `dependencyResolutionManagement`. The second is needed because Kreate adds its Detekt rule set
+  to the project as a dependency of its own version:
+
+  ```kotlin
+  exclusiveContent {
+      forRepository { maven("https://repo.davils.com/releases") }
+      filter { includeGroupAndSubgroups("com.davils") }
+  }
+  ```
+
+  A build with conventions in an included build declares it in the settings of that build as well.
+  Versions up to 4.1.0 stay on Maven Central.
+- **A build that restricts repositories** adds `repo.davils.com` to
+  `assurance { dependencyPolicy { allowedRepositoryHosts } }`, and a build that verifies or locks its
+  dependencies records the new artifacts.
+
 ### Added
 
 - **`publish { repositories { maven { } } }`** publishes to a Maven repository with separate
@@ -21,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`version { snapshot }`**, the Gradle property `kreate.snapshot` and the environment variable
   `KREATE_SNAPSHOT` ask for a snapshot version, in that order. Kreate appends `-SNAPSHOT` to the
   version it resolved, unless it is already there.
+
+### Changed
+
+- **Kreate is published to `repo.davils.com`.** Releases are signed and attested as before and go
+  to `/releases`; every push to `develop` publishes `<version>-SNAPSHOT` to the private `/snapshots`.
+- **A build of Kreate without a release tag is a snapshot.** `gradle.properties` carries the version
+  in development, and only a tag that matches it produces that version.
 
 ### Fixed
 

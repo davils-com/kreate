@@ -59,7 +59,7 @@ public abstract class LocalPublishTask : DefaultTask() {
         check(version.endsWith(SNAPSHOT_SUFFIX)) {
             "Refusing to install '$version' into the local Maven repository: a local publication " +
                 "has to carry the '$SNAPSHOT_SUFFIX' suffix so that it can never shadow a " +
-                "release. Run the task by name, or pass -P$LOCAL_PUBLISH_PROPERTY=true."
+                "release. Every build without a release tag carries it, so unset CI_COMMIT_TAG."
         }
 
         val published = coordinates.get()
