@@ -6,8 +6,8 @@ Security fixes are released for the latest minor version of the current major re
 
 | Version | Supported |
 |---------|-----------|
-| 4.0.x   | Yes       |
-| < 4.0   | No        |
+| 4.2.x   | Yes       |
+| < 4.2   | No        |
 
 ## Reporting a Vulnerability
 
@@ -61,16 +61,13 @@ on Maven Central. Each release also carries a signed build
 provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
 
 ```bash
-gh attestation verify kreate-4.1.0.jar --repo davils-com/kreate
+gh attestation verify kreate-4.2.0.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
 ```
 
 From 4.2.0 on the release is built by the reusable pipeline of
 [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), which is therefore the signer of
-the attestation and has to be named:
-
-```bash
-gh attestation verify kreate-4.2.0.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
-```
+the attestation and has to be named. A release up to 4.1.0 was built by a workflow of Kreate itself
+and is verified without `--signer-repo`.
 
 CI builds the plugin JAR twice on one runner and compares the checksums, which guards against
 accidental non-determinism in the build. It does not cover the other artefacts or a build on another

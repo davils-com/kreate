@@ -160,6 +160,16 @@ three-platform matrix is the only way to find that out before a user does — mu
 generator behaviour, shared library naming, and path handling all differ.
 </tip>
 
+### A pipeline that is already written
+
+%product% itself is built by [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), a
+reusable pipeline for GitHub Actions made for builds on %product%. A project calls it from one
+workflow file and sets everything else in `.github/kotlin-workflow.yml`: it verifies once per
+commit on the operating systems you name, sends the findings of Detekt and of the assurance gate to
+code scanning, publishes a snapshot from the development branch and a signed, attested release from
+a tag, and records the locks and checksums of a Dependabot pull request. Its
+[documentation](https://davils-com.github.io/kotlin-workflow/) lists every setting.
+
 ### Publishing findings to code scanning
 
 Detekt and Trivy both emit SARIF, which GitHub renders as inline pull request annotations:

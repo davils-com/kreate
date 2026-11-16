@@ -53,6 +53,9 @@ version. The `kreate { }` DSL and every task name are unchanged.
   to `/releases`; every push to `develop` publishes `<version>-SNAPSHOT` to the private `/snapshots`.
 - **A build of Kreate without a release tag is a snapshot.** `gradle.properties` carries the version
   in development, and only a tag that matches it produces that version.
+- **Jackson 2.23.0 on the plugin's classpath.** Kreate does not use Jackson itself; it constrains
+  the version its dependencies bring along, now to 2.23.0 instead of 2.22.3. A build that verifies
+  or locks the classpath of its build script records the new artifacts.
 - **Releases are built by the pipeline of kotlin-workflow.** Kreate's own workflows are replaced by
   the reusable pipeline of [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), so the
   attestation of a release is signed by that repository: verify it with
