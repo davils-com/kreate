@@ -851,9 +851,23 @@ public abstract class com/davils/kreate/publish/MavenCentralExtension {
 public abstract class com/davils/kreate/publish/MavenRepositoriesExtension {
 	public fun <init> ()V
 	public abstract fun getGitlab ()Lcom/davils/kreate/publish/GitLabExtension;
+	public abstract fun getMaven ()Lcom/davils/kreate/publish/MavenTargetExtension;
 	public abstract fun getMavenCentral ()Lcom/davils/kreate/publish/MavenCentralExtension;
 	public final fun gitlab (Lorg/gradle/api/Action;)V
+	public final fun maven (Lorg/gradle/api/Action;)V
 	public final fun mavenCentral (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/publish/MavenTargetExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getAllowInsecureProtocol ()Lorg/gradle/api/provider/Property;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public final fun getName ()Lorg/gradle/api/provider/Property;
+	public final fun getPasswordEnv ()Lorg/gradle/api/provider/Property;
+	public final fun getReleases ()Lorg/gradle/api/provider/Property;
+	public final fun getSignPublications ()Lorg/gradle/api/provider/Property;
+	public final fun getSnapshots ()Lorg/gradle/api/provider/Property;
+	public final fun getUsernameEnv ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class com/davils/kreate/publish/PomCiManagementExtension {

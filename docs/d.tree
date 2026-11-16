@@ -111,6 +111,7 @@
         <toc-element toc-title="Publishing">
             <toc-element topic="Publishing-Overview.md"/>
             <toc-element topic="Publishing-Maven-Central.md"/>
+            <toc-element topic="Publishing-Maven-Repository.md"/>
             <toc-element topic="Publishing-Gitlab-Registry.md"/>
             <toc-element topic="Publishing-POM-Configuration.md"/>
             <toc-element topic="Publishing-Examples.md"/>

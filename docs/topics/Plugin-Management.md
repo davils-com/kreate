@@ -60,6 +60,7 @@ Nothing is applied speculatively. A plugin appears only when the feature that ne
 | `org.jetbrains.kotlinx.benchmark`| `project { benchmark { enabled = true } }`             |
 | `maven-publish`                  | `project { publish { enabled = true } }`               |
 | `com.vanniktech.maven.publish`   | `publish { repositories { mavenCentral { enabled = true } } }` |
+| `com.vanniktech.maven.publish.base` | `publish { repositories { maven { signPublications = true } } }` |
 | `org.jetbrains.dokka`            | `project { docs { enabled = true } }`                  |
 | `org.jetbrains.kotlin.plugin.allopen` | `project { benchmark { enabled = true } }` — JMH subclasses every `@State` class |
 | `org.jetbrains.kotlin.plugin.serialization` | `project { applySerializationPlugin = true }` |

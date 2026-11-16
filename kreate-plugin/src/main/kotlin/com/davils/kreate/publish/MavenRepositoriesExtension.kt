@@ -23,7 +23,8 @@ import javax.inject.Inject
 /**
  * Extension for configuring Maven publishing repositories.
  *
- * This extension provides nested configurations for GitLab and Maven Central.
+ * This extension provides nested configurations for GitLab, Maven Central and a Maven
+ * repository with separate release and snapshot URLs.
  *
  * @since 1.0.0
  */
@@ -41,6 +42,13 @@ public abstract class MavenRepositoriesExtension @Inject constructor() {
      */
     @get:Nested
     public abstract val mavenCentral: MavenCentralExtension
+
+    /**
+     * Configuration for publishing to a Maven repository that keeps releases and snapshots apart.
+     * @since 4.2.0
+     */
+    @get:Nested
+    public abstract val maven: MavenTargetExtension
 
     /**
      * Configures the [GitLabExtension] using the provided action and enables it.
@@ -62,5 +70,16 @@ public abstract class MavenRepositoriesExtension @Inject constructor() {
     public fun mavenCentral(action: Action<MavenCentralExtension>) {
         mavenCentral.enabled.set(true)
         action.execute(mavenCentral)
+    }
+
+    /**
+     * Configures the [MavenTargetExtension] using the provided action and enables it.
+     *
+     * @param action The configuration action.
+     * @since 4.2.0
+     */
+    public fun maven(action: Action<MavenTargetExtension>) {
+        maven.enabled.set(true)
+        action.execute(maven)
     }
 }

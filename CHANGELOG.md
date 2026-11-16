@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`publish { repositories { maven { } } }`** publishes to a Maven repository with separate
+  `releases` and `snapshots` URLs. A version ending in `-SNAPSHOT` goes to `snapshots`, every other
+  to `releases`, and Kreate never falls back to the other one. The user name and the password come
+  from two environment variables, `usernameEnv` and `passwordEnv`, and are sent as basic
+  authentication. Without them the repository is skipped; with only one of them the build fails and
+  names the variable that is empty. A plain `http` URL needs `allowInsecureProtocol`, and a URL that
+  carries credentials is refused without being printed.
+- **`maven { signPublications = true }`** signs every publication with the in-memory key, without
+  Maven Central being a target.
 - **`version { snapshot }`**, the Gradle property `kreate.snapshot` and the environment variable
   `KREATE_SNAPSHOT` ask for a snapshot version, in that order. Kreate appends `-SNAPSHOT` to the
   version it resolved, unless it is already there.

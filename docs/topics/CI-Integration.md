@@ -304,6 +304,37 @@ published as <code>1.0.0</code> cannot be taken back from a public repository.
 
 See [Version resolution](Project-Version-Resolution.md).
 
+### Snapshots and releases from one build
+
+A pipeline that publishes every commit of a development branch as a snapshot and every tag as a
+release needs no second build file. Ask for a snapshot wherever no tag is built, and let a
+[Maven repository target](Publishing-Maven-Repository.md) route the upload by the version:
+
+```yaml
+# Snapshot job, on the development branch
+- run: ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+  env:
+    KREATE_SNAPSHOT: 'true'
+    REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+    REPOSITORY_SECRET: ${{ secrets.REPOSITORY_SECRET }}
+
+# Release job, on a tag
+- run: ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+  env:
+    CI_COMMIT_TAG: ${{ github.ref_name }}
+    REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+    REPOSITORY_SECRET: ${{ secrets.REPOSITORY_SECRET }}
+```
+
+<warning>
+Call the task of the repository, not <code>publish</code>. %product% skips a repository whose
+credentials are missing, and <code>publish</code> then succeeds without uploading anything; the
+task of the repository does not exist in that case, so the job fails.
+</warning>
+
+Give the snapshot job a token that can write snapshots only. A release repository that refuses to
+overwrite a version then stays out of reach of every branch build.
+
 ## Caching
 
 <deflist type="medium">
