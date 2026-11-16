@@ -16,14 +16,27 @@ version: 2
 # Gradle is watched from the repository root only. Every included build reads its versions from
 # the one catalog in gradle/libs.versions.toml and declares none of its own, so an entry per
 # included build would open the same pull request once more for each of them.
+#
+# Minor and patch updates arrive as one pull request per ecosystem, majors one by one, and a new
+# version waits a few days before it is proposed. Dependabot changes versions only: the
+# dependencies stage of the pipeline regenerates the lock files and the verification metadata
+# and commits them to the pull request, see CONTRIBUTING.md.
 
 updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: "develop"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 3
+      semver-major-days: 14
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(deps)"
     ignore:
       # kotlin-gradle-plugin, kotlin-metadata-jvm, kotlin-test, the stdlib
       - dependency-name: "org.jetbrains.kotlin:*"
@@ -35,9 +48,18 @@ updates:
       - dependency-name: "org.jetbrains.kotlinx:kotlinx-serialization-*"
       - dependency-name: "io.ktor:*"
 
+  # The only action this repository names is the pipeline of davils-com/kotlin-workflow, pinned
+  # to a commit in .github/workflows/pipeline.yml. This entry moves that pin forward.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     target-branch: "develop"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(deps)"

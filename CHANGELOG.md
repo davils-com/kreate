@@ -53,6 +53,10 @@ version. The `kreate { }` DSL and every task name are unchanged.
   to `/releases`; every push to `develop` publishes `<version>-SNAPSHOT` to the private `/snapshots`.
 - **A build of Kreate without a release tag is a snapshot.** `gradle.properties` carries the version
   in development, and only a tag that matches it produces that version.
+- **Releases are built by the pipeline of kotlin-workflow.** Kreate's own workflows are replaced by
+  the reusable pipeline of [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), so the
+  attestation of a release is signed by that repository: verify it with
+  `gh attestation verify <jar> --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow`.
 
 ### Fixed
 

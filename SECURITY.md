@@ -64,6 +64,14 @@ provenance attestation and an SBOM attestation, made by the GitHub Actions run t
 gh attestation verify kreate-4.1.0.jar --repo davils-com/kreate
 ```
 
+From 4.2.0 on the release is built by the reusable pipeline of
+[kotlin-workflow](https://github.com/davils-com/kotlin-workflow), which is therefore the signer of
+the attestation and has to be named:
+
+```bash
+gh attestation verify kreate-4.2.0.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
+```
+
 CI builds the plugin JAR twice on one runner and compares the checksums, which guards against
 accidental non-determinism in the build. It does not cover the other artefacts or a build on another
 machine, so treat the attestation, not a rebuild, as the proof of origin.

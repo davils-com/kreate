@@ -89,8 +89,13 @@ Every release is signed, and each JAR carries a build provenance attestation and
 attestation made by the GitHub Actions run that built it:
 
 ```bash
-gh attestation verify kreate-%version%.jar --repo davils-com/kreate
+gh attestation verify kreate-%version%.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
 ```
+
+The signer is the reusable pipeline of
+[kotlin-workflow](https://github.com/davils-com/kotlin-workflow) that builds every release from
+4.2.0 on. A release up to 4.1.0 was built by a workflow of Kreate itself and is verified without
+`--signer-repo`.
 
 ## Snapshots
 

@@ -69,7 +69,7 @@ We are open to new ideas! For major changes, please open an **Issue** first to d
 ./gradlew verify
 ```
 
-That is exactly what CI and the release workflow run. It covers compilation, Detekt with the Kreate
+That is exactly what the pipeline runs, for a pull request as for a release. It covers compilation, Detekt with the Kreate
 rule set, the unit and functional test suites, coverage verification and the API check. Set
 `KREATE_REQUIRE_CMAKE=true` and `KREATE_REQUIRE_TRIVY=true` to turn a missing native toolchain into
 a failure instead of skipped tests.
@@ -151,8 +151,13 @@ in the same change:
 ## Changing a Dependency
 
 The build verifies every dependency against `gradle/verification-metadata.xml`, and the published
-modules lock their runtime classpath in `gradle.lockfile`, in strict mode. A dependency bump,
-including a Dependabot pull request, is red until both are updated:
+modules lock their runtime classpath in `gradle.lockfile`, in strict mode. A dependency bump is
+red until both are updated.
+
+For a pull request of Dependabot the `dependencies` stage of the pipeline does that: it
+regenerates the lock files and the checksums, commits them to the pull request as
+`build(deps): record locks and checksums` and starts the pipeline again on that commit. For a
+change of your own, run:
 
 ```bash
 ./gradlew :kreate-plugin:dependencies :kreate-settings:dependencies :kreate-detekt-rules:dependencies --configuration runtimeClasspath --write-locks
@@ -163,11 +168,11 @@ including a Dependabot pull request, is red until both are updated:
 ```
 
 `:selfcheck:kreateAssurance` is part of that command on purpose: the audit of Kreate's own
-dependencies reads their POMs as artifacts, which `verify` never resolves, and it runs in the Trivy
-workflow rather than in `verify`.
+dependencies reads their POMs as artifacts, which `verify` never resolves, and it runs in the
+`security` stage of the pipeline rather than in `verify`.
 
-Read the diff of the metadata: a checksum that changes for a version that did not is a tampered
-artifact, not a chore. Kotlin, `kotlinx-serialization` and Ktor are held back on purpose, see
+Read the diff of the metadata, also when the pipeline wrote it: a checksum that changes for a
+version that did not is a tampered artifact, not a chore. Kotlin, `kotlinx-serialization` and Ktor are held back on purpose, see
 `gradle/libs.versions.toml`.
 
 ## Snapshots and Releases
@@ -180,8 +185,14 @@ that does not match `gradle.properties`.
 
 | What | When | Where |
 |---|---|---|
-| Snapshot | every push to `develop`, by the `Snapshot` workflow | `repo.davils.com/snapshots`, unsigned, overwritten |
-| Release | a tag on `main`, by the `Publish` workflow | `repo.davils.com/releases`, signed, attested, never overwritten |
+| Snapshot | every push to `develop`, by the `snapshot` stage | `repo.davils.com/snapshots`, unsigned, overwritten |
+| Release | a tag on `main`, by the `release` stage | `repo.davils.com/releases`, signed, attested, never overwritten |
+
+Both are stages of the one workflow `Pipeline` in `.github/workflows/pipeline.yml`. It calls the
+reusable pipeline of [kotlin-workflow](https://github.com/davils-com/kotlin-workflow) at a pinned
+commit, and everything it does for Kreate, the tasks, the operating systems per event and the
+publications of a release, is set in `.github/kotlin-workflow.yml`. A stage publishes only after
+the `check` stage of the same run passed, so a commit is verified once.
 
 Cutting a release:
 
@@ -189,25 +200,30 @@ Cutting a release:
    `SECURITY.md` and `docs/v.list` to the version. Those three always show the latest release.
    Commit as `chore(release): prepare <version>`.
 2. Merge `develop` into `main` and push the tag `<version>`, without a `v`.
-3. Approve the `release` environment. The workflow verifies, uploads, attests and then resolves the
+3. Approve the `release` environment. The pipeline verifies, uploads, attests and then resolves the
    release the way a consumer does.
 4. On `develop`, raise `version` in `gradle.properties` to the next version and commit as
    `chore(release): start <next version>`.
 
-The workflows need two secrets: `DAVILS_MAVEN_NAME`, the name of a repository token, and
-`DAVILS_MAVEN_SECRET`, its secret. They are organisation secrets today. An environment secret of
-the same name takes precedence, which is how `snapshot` can be given a token that writes
-`/snapshots` only.
+The pipeline needs two secrets: `DAVILS_MAVEN_NAME`, the name of a repository token, and
+`DAVILS_MAVEN_SECRET`, its secret. They are organisation secrets, which `pipeline.yml` hands to
+the reusable pipeline as `MAVEN_USERNAME` and `MAVEN_PASSWORD`. A secret of one of those two
+names on the environment `snapshot` or `release` takes precedence, which is how `snapshot` can be
+given a token that writes `/snapshots` only. A release is signed with `SIGNING_KEY`,
+`SIGNING_KEY_ID` and `SIGNING_PASSWORD`.
+
+To rehearse a release without uploading anything, start `Pipeline` by hand with `stages` set to
+`release` and `dry-run` switched on.
 
 ### A release that stopped half way
 
 The releases repository refuses to overwrite a file, so the publish job cannot simply run again
-after a failure. Its preflight tells the three states apart: a publication that is not there yet
+after a failure. The preflight of the `release` stage tells the three states apart: a publication that is not there yet
 is uploaded, one that is complete is skipped, and one that is there without being listed in its
 `maven-metadata.xml` stops the job and names its directory.
 
 1. Delete the named directory, such as `com/davils/kreate/<version>`, in the repository.
-2. Run the failed jobs of the workflow again.
+2. Run the failed jobs of the pipeline again.
 
 Never move or re-push the tag: a consumer may already have resolved the publications that did
 arrive.

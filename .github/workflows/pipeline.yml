@@ -1,0 +1,66 @@
+# Everything a run does is decided by .github/kotlin-workflow.yml and the defaults of
+# davils-com/kotlin-workflow; this file only says when a run starts and which secrets it may use.
+# The status check to require is "Pipeline / Pipeline".
+name: Pipeline
+
+on:
+  # A branch is checked through its pull request, so only the long-lived branches and tags start
+  # a run on push. That is what keeps a commit from being checked twice.
+  push:
+    branches: [develop, main]
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+  pull_request:
+    branches: [develop, main]
+  merge_group:
+  schedule:
+    # Security: new vulnerabilities are published for dependencies nobody touched.
+    - cron: '0 4 * * 1'
+    # Benchmarks, see schedule.crons in .github/kotlin-workflow.yml.
+    - cron: '0 4 * * 0'
+  # Also what the dependencies stage uses to start a run on a pull request it repaired.
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: Comma separated stages to run instead of the policy, such as check,docs
+        type: string
+        default: ''
+      dry-run:
+        description: Rehearse the release stage without uploading anything
+        type: boolean
+        default: false
+
+# A new push makes the run of a pull request obsolete. Nothing else is ever cancelled: a
+# snapshot or a release that is under way finishes.
+concurrency:
+  group: pipeline-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+jobs:
+  pipeline:
+    name: Pipeline
+    if: github.repository == 'davils-com/kreate'
+    # The commit of davils-com/kotlin-workflow's main branch. Dependabot moves it forward.
+    uses: davils-com/kotlin-workflow/.github/workflows/pipeline.yml@92aecb7174b73550fbf8b544a94c221454a2bfa0 # main
+    permissions:
+      contents: write
+      actions: write
+      security-events: write
+      id-token: write
+      attestations: write
+      pages: write
+      pull-requests: read
+    with:
+      stages: ${{ inputs.stages }}
+      dry-run: ${{ inputs.dry-run || false }}
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.DAVILS_MAVEN_NAME }}
+      MAVEN_PASSWORD: ${{ secrets.DAVILS_MAVEN_SECRET }}
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
