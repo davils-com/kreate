@@ -29,6 +29,34 @@ kreate {
 
 This design makes the version injectable from CI/CD pipelines without modifying build files.
 
+## Snapshots {id="snapshots"}
+
+A build can be asked to carry a snapshot version. Kreate then appends `-SNAPSHOT` to the version
+it resolved, unless the version already ends in it:
+
+| Source                  | Key                        | Priority |
+|-------------------------|----------------------------|----------|
+| DSL                     | `version { snapshot = … }` | 1st      |
+| Gradle property         | `-Pkreate.snapshot=true`   | 2nd      |
+| Environment variable    | `KREATE_SNAPSHOT=true`     | 3rd      |
+
+Without any of them a build is a release. `snapshot = false` in the DSL rules a snapshot out,
+whatever the property and the variable say.
+
+```kotlin
+kreate {
+    project {
+        version {
+            snapshot = providers.environmentVariable("CI_COMMIT_TAG").map { false }.orElse(true)
+        }
+    }
+}
+```
+
+The block above makes every build without a tag a snapshot. A
+[Maven repository target](Publishing-Maven-Repository.md) publishes a snapshot to its `snapshots`
+URL and everything else to `releases`, so the same task serves both.
+
 <seealso>
     <category ref="project">
         <a href="Project-Metadata.md">Project metadata</a>

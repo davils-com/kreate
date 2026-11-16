@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 4.2.0
 
+### Added
+
+- **`version { snapshot }`**, the Gradle property `kreate.snapshot` and the environment variable
+  `KREATE_SNAPSHOT` ask for a snapshot version, in that order. Kreate appends `-SNAPSHOT` to the
+  version it resolved, unless it is already there.
+
 ### Fixed
 
 - **GitLab and Maven Central can be enabled together.** The GitLab target registered a publication

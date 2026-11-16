@@ -156,6 +156,7 @@ kreate {
         version {
             environment = "CI_COMMIT_TAG"
             property = "version"
+            snapshot = false
         }
 
         buildConstant {

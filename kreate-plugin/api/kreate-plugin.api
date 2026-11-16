@@ -798,6 +798,7 @@ public abstract class com/davils/kreate/project/ProjectVersionExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getEnvironment ()Lorg/gradle/api/provider/Property;
 	public final fun getProperty ()Lorg/gradle/api/provider/Property;
+	public final fun getSnapshot ()Lorg/gradle/api/provider/Property;
 }
 
 public final class com/davils/kreate/provenance/ProvenanceTaskNames {
