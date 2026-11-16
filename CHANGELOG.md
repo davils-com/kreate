@@ -63,6 +63,10 @@ version. The `kreate { }` DSL and every task name are unchanged.
 
 ### Fixed
 
+- **GitHub code scanning accepts the SARIF report of the assurance gate.** A finding about a
+  dependency names no file, and Kreate wrote it without a location, which code scanning refuses for
+  the whole upload with `expected at least one location`. Such a finding is now filed under
+  `build.gradle.kts`, as the GitLab and SonarQube reports already do. Its fingerprint is unchanged.
 - **GitLab and Maven Central can be enabled together.** The GitLab target registered a publication
   named `maven` before the Maven Central plugin created its own, and the build failed with
   `Cannot add a Publication with name 'maven'`. Kreate now leaves the publication to the Maven

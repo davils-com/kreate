@@ -97,7 +97,7 @@ when that fails. `reports { formats }` selects any of:
 | Format | File | For |
 |---|---|---|
 | `JSON` | `report.json` | Scripts; a stable schema |
-| `SARIF` | `report.sarif` | GitHub code scanning; carries the `kreate/v1` fingerprint |
+| `SARIF` | `report.sarif` | GitHub code scanning; carries the `kreate/v1` fingerprint, and files a finding that names no file under `build.gradle.kts` |
 | `TEXT` | `report.txt` | Reading |
 | `HTML` | `report.html` | A self-contained dashboard with filters |
 | `MARKDOWN` | `report.md` | A pull request comment or a job summary |

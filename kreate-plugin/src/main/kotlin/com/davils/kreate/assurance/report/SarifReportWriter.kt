@@ -87,10 +87,10 @@ internal object SarifReportWriter {
     }
 
     private fun JsonObjectBuilder.putLocation(finding: Finding) {
-        val location = finding.location ?: return
+        val line = finding.location?.line
         val physical = buildJsonObject {
-            put("artifactLocation", buildJsonObject { put("uri", location.path) })
-            location.line?.let { line -> put("region", buildJsonObject { put("startLine", line) }) }
+            put("artifactLocation", buildJsonObject { put("uri", ReportFacts.filePathOf(finding)) })
+            line?.let { startLine -> put("region", buildJsonObject { put("startLine", startLine) }) }
         }
         val entry = buildJsonObject { put("physicalLocation", physical) }
         put("locations", buildJsonArray { add(entry) })

@@ -125,6 +125,16 @@ class ReportWritersTest : FunSpec({
             rendered shouldContain "startLine"
         }
 
+        test("files a finding without a location under the build file, without a line") {
+            val results = resultsOf(runOf(SarifReportWriter.render(evaluationOf(listOf(finding())))))
+
+            val locations = results.single().jsonObject.getValue("locations").jsonArray
+            val physical = locations.single().jsonObject.getValue("physicalLocation").jsonObject
+            val artifact = physical.getValue("artifactLocation").jsonObject
+            artifact.getValue("uri").jsonPrimitive.content shouldBe "build.gradle.kts"
+            physical.containsKey("region") shouldBe false
+        }
+
         test("marks a quality finding as maintainability, without a security severity") {
             val quality = finding(source = FindingSource.QUALITY)
 
