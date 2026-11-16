@@ -25,7 +25,7 @@ kreate {
 
             kotest {
                 enabled = true
-                version = "6.2.6"
+                version = "6.2.7"
                 modules = listOf(KotestModule.ASSERTIONS, KotestModule.PROPERTY)
             }
         }
