@@ -20,6 +20,7 @@ internal object GradlePluginId {
     const val JAVA: String = "java"
     const val MAVEN_PUBLISH: String = "maven-publish"
     const val MAVEN_CENTRAL: String = "com.vanniktech.maven.publish"
+    const val MAVEN_PUBLISH_BASE: String = "com.vanniktech.maven.publish.base"
     const val DETEKT: String = "dev.detekt"
     const val KOVER: String = "org.jetbrains.kotlinx.kover"
     const val BENCHMARK: String = "org.jetbrains.kotlinx.benchmark"

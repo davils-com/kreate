@@ -28,11 +28,12 @@ internal object VersionFeature : KreateFeature {
     override fun apply(project: Project, extension: KreateExtension) {
         val versionExtension = extension.project.version
         val isLocalPublish = isLocalPublish(project, extension)
+        val isSnapshot = isLocalPublish || project.requestsSnapshot(versionExtension)
 
         project.configureVersion(
             environmentVariable = versionExtension.environment.get(),
             propertyName = versionExtension.property.get(),
-            localPublish = isLocalPublish
+            snapshot = isSnapshot
         )
         project.configureDescription(projectExtension = extension.project)
     }

@@ -160,6 +160,16 @@ three-platform matrix is the only way to find that out before a user does — mu
 generator behaviour, shared library naming, and path handling all differ.
 </tip>
 
+### A pipeline that is already written
+
+%product% itself is built by [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), a
+reusable pipeline for GitHub Actions made for builds on %product%. A project calls it from one
+workflow file and sets everything else in `.github/kotlin-workflow.yml`: it verifies once per
+commit on the operating systems you name, sends the findings of Detekt and of the assurance gate to
+code scanning, publishes a snapshot from the development branch and a signed, attested release from
+a tag, and records the locks and checksums of a Dependabot pull request. Its
+[documentation](https://davils-com.github.io/kotlin-workflow/) lists every setting.
+
 ### Publishing findings to code scanning
 
 Detekt and Trivy both emit SARIF, which GitHub renders as inline pull request annotations:
@@ -303,6 +313,37 @@ published as <code>1.0.0</code> cannot be taken back from a public repository.
 </warning>
 
 See [Version resolution](Project-Version-Resolution.md).
+
+### Snapshots and releases from one build
+
+A pipeline that publishes every commit of a development branch as a snapshot and every tag as a
+release needs no second build file. Ask for a snapshot wherever no tag is built, and let a
+[Maven repository target](Publishing-Maven-Repository.md) route the upload by the version:
+
+```yaml
+# Snapshot job, on the development branch
+- run: ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+  env:
+    KREATE_SNAPSHOT: 'true'
+    REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+    REPOSITORY_SECRET: ${{ secrets.REPOSITORY_SECRET }}
+
+# Release job, on a tag
+- run: ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+  env:
+    CI_COMMIT_TAG: ${{ github.ref_name }}
+    REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+    REPOSITORY_SECRET: ${{ secrets.REPOSITORY_SECRET }}
+```
+
+<warning>
+Call the task of the repository, not <code>publish</code>. %product% skips a repository whose
+credentials are missing, and <code>publish</code> then succeeds without uploading anything; the
+task of the repository does not exist in that case, so the job fails.
+</warning>
+
+Give the snapshot job a token that can write snapshots only. A release repository that refuses to
+overwrite a version then stays out of reach of every branch build.
 
 ## Caching
 

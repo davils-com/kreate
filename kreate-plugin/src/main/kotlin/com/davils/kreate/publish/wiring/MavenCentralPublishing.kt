@@ -22,7 +22,7 @@ import com.davils.kreate.gradle.declaredProjectName
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import org.gradle.api.Project
 
-private const val MAVEN_PUBLISHING_EXTENSION_NAME: String = "mavenPublishing"
+internal const val MAVEN_PUBLISHING_EXTENSION_NAME: String = "mavenPublishing"
 
 internal fun Project.configureMavenCentral(
     kreateExtension: KreateExtension,
@@ -37,7 +37,6 @@ internal fun Project.configureMavenCentral(
 
     extensions.configure<MavenPublishBaseExtension>(MAVEN_PUBLISHING_EXTENSION_NAME) {
         publishToMavenCentral(automaticRelease = mavenCentralConfig.automaticRelease.get())
-        if (mavenCentralConfig.signPublications.get()) signAllPublications()
 
         coordinates(projectGroup, projectName, version.toString())
 

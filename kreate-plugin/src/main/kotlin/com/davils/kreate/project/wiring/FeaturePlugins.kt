@@ -20,6 +20,7 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.gradle.GradlePluginId
 import com.davils.kreate.project.ProjectExtension
 import com.davils.kreate.publish.PublishExtension
+import com.davils.kreate.publish.wiring.signsMavenTarget
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.kotlinx.serialization.gradle.SerializationGradleSubplugin
@@ -46,4 +47,5 @@ private fun Project.applyPublishingPlugins(publish: PublishExtension) {
 
     val isMavenCentralEnabled = publish.repositories.mavenCentral.enabled.get()
     if (isMavenCentralEnabled) pluginManager.apply(GradlePluginId.MAVEN_CENTRAL)
+    if (signsMavenTarget(publish.repositories)) pluginManager.apply(GradlePluginId.MAVEN_PUBLISH_BASE)
 }

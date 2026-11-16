@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 4.2.0
+
+Kreate 4.2.0 moves to a repository of its own and learns to publish to one. From this version on
+Kreate is published to `https://repo.davils.com/releases` and no longer to Maven Central, so a build
+has to declare that repository before it raises the version. In return every build can publish to a
+Maven repository that keeps releases and snapshots apart, and can be asked to carry a snapshot
+version. The `kreate { }` DSL and every task name are unchanged.
+
+### Upgrading
+
+- **Declare `https://repo.davils.com/releases` in `settings.gradle.kts`**, in `pluginManagement` and
+  in `dependencyResolutionManagement`. The second is needed because Kreate adds its Detekt rule set
+  to the project as a dependency of its own version:
+
+  ```kotlin
+  exclusiveContent {
+      forRepository { maven("https://repo.davils.com/releases") }
+      filter { includeGroupAndSubgroups("com.davils") }
+  }
+  ```
+
+  A build with conventions in an included build declares it in the settings of that build as well.
+  Versions up to 4.1.0 stay on Maven Central.
+- **A build that restricts repositories** adds `repo.davils.com` to
+  `assurance { dependencyPolicy { allowedRepositoryHosts } }`, and a build that verifies or locks its
+  dependencies records the new artifacts.
+
+### Added
+
+- **`publish { repositories { maven { } } }`** publishes to a Maven repository with separate
+  `releases` and `snapshots` URLs. A version ending in `-SNAPSHOT` goes to `snapshots`, every other
+  to `releases`, and Kreate never falls back to the other one. The user name and the password come
+  from two environment variables, `usernameEnv` and `passwordEnv`, and are sent as basic
+  authentication. Without them the repository is skipped; with only one of them the build fails and
+  names the variable that is empty. A plain `http` URL needs `allowInsecureProtocol`, and a URL that
+  carries credentials is refused without being printed.
+- **`maven { signPublications = true }`** signs every publication with the in-memory key, without
+  Maven Central being a target.
+- **`version { snapshot }`**, the Gradle property `kreate.snapshot` and the environment variable
+  `KREATE_SNAPSHOT` ask for a snapshot version, in that order. Kreate appends `-SNAPSHOT` to the
+  version it resolved, unless it is already there.
+
+### Changed
+
+- **Kreate is published to `repo.davils.com`.** Releases are signed and attested as before and go
+  to `/releases`; every push to `develop` publishes `<version>-SNAPSHOT` to the private `/snapshots`.
+- **A build of Kreate without a release tag is a snapshot.** `gradle.properties` carries the version
+  in development, and only a tag that matches it produces that version.
+- **Jackson 2.23.0 on the plugin's classpath.** Kreate does not use Jackson itself; it constrains
+  the version its dependencies bring along, now to 2.23.0 instead of 2.22.3. A build that verifies
+  or locks the classpath of its build script records the new artifacts.
+- **Releases are built by the pipeline of kotlin-workflow.** Kreate's own workflows are replaced by
+  the reusable pipeline of [kotlin-workflow](https://github.com/davils-com/kotlin-workflow), so the
+  attestation of a release is signed by that repository: verify it with
+  `gh attestation verify <jar> --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow`.
+
+### Fixed
+
+- **GitHub code scanning accepts the SARIF report of the assurance gate.** A finding about a
+  dependency names no file, and Kreate wrote it without a location, which code scanning refuses for
+  the whole upload with `expected at least one location`. Such a finding is now filed under
+  `build.gradle.kts`, as the GitLab and SonarQube reports already do. Its fingerprint is unchanged.
+- **GitLab and Maven Central can be enabled together.** The GitLab target registered a publication
+  named `maven` before the Maven Central plugin created its own, and the build failed with
+  `Cannot add a Publication with name 'maven'`. Kreate now leaves the publication to the Maven
+  Central plugin whenever that target is enabled.
+
 ## 4.1.0
 
 Kreate 4.1.0 lets a Compose code base keep the chained call limit, tracks native sources that a JNI

@@ -9,6 +9,7 @@
 
 # Anything that decides what CI trusts or what leaves the build.
 /.github/workflows/      @davils-com/maintainers
+/.github/kotlin-workflow.yml @davils-com/maintainers
 /config/detekt/          @davils-com/maintainers
 /trivy-secret.yaml       @davils-com/maintainers
 /SECURITY.md             @davils-com/maintainers

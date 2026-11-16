@@ -41,7 +41,7 @@
                 Security and compliance
             </a>
             <a href="Publishing-Overview.md"
-               summary="Signed releases to Maven Central and the GitLab Package Registry with full POM metadata.">
+               summary="Signed releases to Maven Central, GitLab and your own Maven repository with full POM metadata.">
                 Publishing
             </a>
             <a href="Local-Development-Overview.md"

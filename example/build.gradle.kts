@@ -156,6 +156,7 @@ kreate {
         version {
             environment = "CI_COMMIT_TAG"
             property = "version"
+            snapshot = false
         }
 
         buildConstant {
@@ -348,6 +349,17 @@ kreate {
                     enabled = true
                     automaticRelease = true
                     signPublications = true
+                }
+
+                maven {
+                    enabled = true
+                    name = "ExampleRepository"
+                    releases = "https://repo.example.com/releases"
+                    snapshots = "https://repo.example.com/snapshots"
+                    usernameEnv = "MAVEN_USERNAME"
+                    passwordEnv = "MAVEN_PASSWORD"
+                    signPublications = false
+                    allowInsecureProtocol = false
                 }
             }
         }

@@ -1,0 +1,140 @@
+# What the pipeline of Kreate does. Every key overrides a default of
+# actions/plan/defaults.yml in davils-com/kotlin-workflow; a key that is not there stops the run.
+version: 1
+
+# Kreate is a composite build. A task name given at the root does not reach the included builds,
+# so every task below names its build.
+
+tools:
+  cmake: true
+  # The functional tests run the scans against a real Trivy.
+  trivy: v0.76.2
+
+env:
+  # Turn a missing tool into a failing test instead of a skipped one.
+  KREATE_REQUIRE_CMAKE: "true"
+  KREATE_REQUIRE_TRIVY: "true"
+
+check:
+  tasks: [verify]
+  # On the first runner only, in the same invocation as verify: the coverage reports of the
+  # plugin, and Kreate's own dependencies through Kreate's own gate. That gate reads OSV.dev,
+  # which is why it stays out of verify.
+  primary-tasks:
+    - ":kreate-plugin:koverXmlReport"
+    - ":kreate-plugin:koverHtmlReport"
+    - ":kreate-plugin:koverLog"
+    - ":selfcheck:kreateAssurance"
+  # The example consumer, end to end.
+  invocations:
+    - [":example:run"]
+  reproducible:
+    clean-tasks: [":kreate-plugin:clean"]
+    tasks: [":kreate-plugin:jar"]
+    artifacts: ["kreate-plugin/build/libs/*.jar"]
+
+policy:
+  # Pull requests stay on Linux. develop, main and a tag add Windows, so a platform problem shows
+  # before a release. macOS is left out: GitHub regularly starts no macOS runner for this
+  # organisation, and a job that waits for one holds back the snapshot and every later run.
+  push-develop:
+    stages: [check, snapshot]
+    os: [ubuntu-latest, windows-latest]
+    overrides:
+      check:
+        reproducible: { enabled: true }
+  push-main:
+    os: [ubuntu-latest, windows-latest]
+    overrides:
+      check:
+        reproducible: { enabled: true }
+  tag:
+    os: [ubuntu-latest, windows-latest]
+
+security:
+  gradle:
+    # The example locks its dependencies first: Trivy reads the lock files.
+    pre-tasks: [":example:kreateResolveAndLockAll", "--write-locks"]
+    tasks: [":example:kreateTrivyScan", ":selfcheck:kreateAssurance"]
+  dependency-submission:
+    enabled: false
+
+publish:
+  build-tasks:
+    - ":kreate-detekt-rules:assemble"
+    - ":kreate-settings:assemble"
+    - ":kreate-plugin:assemble"
+  # The rule set and the settings plugin first: the plugin pins both to its own version.
+  tasks:
+    - ":kreate-detekt-rules:publishAllPublicationsToDavilsRepository"
+    - ":kreate-settings:publishAllPublicationsToDavilsRepository"
+    - ":kreate-plugin:publishAllPublicationsToDavilsRepository"
+
+snapshot:
+  # Kreate's own build makes every build without a release tag a snapshot.
+  kreate-snapshot: false
+  smoke:
+    enabled: true
+    project-dir: .github/smoke
+    tasks: [detekt]
+    args: ["-PkreateVersion={version}", "-PkreateRepository={repository}"]
+
+release:
+  publications:
+    discovery: explicit
+    # In upload order, every plugin marker after its artifact.
+    list:
+      - path: com/davils/kreate-detekt-rules
+        artifact: kreate-detekt-rules
+        task: ":kreate-detekt-rules:publishMavenPublicationToDavilsRepository"
+      - path: com/davils/kreate-settings
+        artifact: kreate-settings
+        task: ":kreate-settings:publishPluginMavenPublicationToDavilsRepository"
+      - path: com/davils/kreate/settings/com.davils.kreate.settings.gradle.plugin
+        artifact: com.davils.kreate.settings.gradle.plugin
+        task: ":kreate-settings:publishKreateSettingsPluginMarkerMavenPublicationToDavilsRepository"
+      - path: com/davils/kreate
+        artifact: kreate
+        task: ":kreate-plugin:publishPluginMavenPublicationToDavilsRepository"
+      - path: com/davils/kreate/com.davils.kreate.gradle.plugin
+        artifact: com.davils.kreate.gradle.plugin
+        task: ":kreate-plugin:publishKreatePluginMarkerMavenPublicationToDavilsRepository"
+  attest:
+    subjects:
+      - "kreate-plugin/build/libs/*.jar"
+      - "kreate-settings/build/libs/*.jar"
+      - "kreate-detekt-rules/build/libs/*.jar"
+  github-release:
+    enabled: false
+  smoke:
+    project-dir: .github/smoke
+    tasks: [detekt]
+    args: ["-PkreateVersion={version}"]
+
+docs:
+  engine: writerside
+  writerside:
+    instance: docs/d
+    docker-version: "2026.04.8711"
+
+benchmark:
+  tasks: [":example:kreateBenchmarkCheck"]
+  summary: "example/build/reports/kreate/benchmark/comparison.md"
+  paths: ["example/build/reports/kreate/benchmark/**"]
+
+schedule:
+  crons:
+    "0 4 * * 0": [benchmark]
+
+# How a pull request of Dependabot repairs itself, see CONTRIBUTING.md, "Changing a Dependency".
+dependencies:
+  lock:
+    invocations:
+      - - ":kreate-plugin:dependencies"
+        - ":kreate-settings:dependencies"
+        - ":kreate-detekt-rules:dependencies"
+        - "--configuration"
+        - "runtimeClasspath"
+        - "--write-locks"
+  verification:
+    tasks: [verify, ":selfcheck:kreateAssurance"]

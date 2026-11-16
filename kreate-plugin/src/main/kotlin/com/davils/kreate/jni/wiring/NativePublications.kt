@@ -93,7 +93,8 @@ private fun Project.requireMainPublication(publications: PublicationContainer) {
 
                 kreate { project { publish { repositories {
                     gitlab { enabled = true }        // or
-                    mavenCentral { enabled = true }
+                    mavenCentral { enabled = true }  // or
+                    maven { releases = "https://repo.example.com/releases" }
                 } } } }
 
             Or declare a MavenPublication of your own.

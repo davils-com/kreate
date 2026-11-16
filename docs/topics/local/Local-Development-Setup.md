@@ -21,6 +21,10 @@ most, because it is where the %product% plugin marker itself is resolved:
 ```kotlin
 pluginManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -38,7 +42,7 @@ dependencyResolutionManagement {
 That is the whole change. **No** edit to `gradle/libs.versions.toml`, **no** edit to any
 `gradle.lockfile`, and **no** edit to `settings-gradle.lockfile`.
 
-> The settings plugin is always resolved from Maven Central at a released version, never from the
+> The settings plugin is always resolved from its [repository](Installation-Repository.md) at a released version, never from the
 > local Maven repository. It substitutes the local snapshot for the *project* plugin; it does not
 > substitute itself. The two live on different class paths and never conflict.
 >

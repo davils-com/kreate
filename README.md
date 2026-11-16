@@ -178,8 +178,9 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
   and a threshold gate that runs on `check`, plus multi-project aggregation. Ships with no default
   threshold on purpose: you measure first, then set one.
 - **Documentation**: Dokka configured from the same metadata as your POM.
-- **Publishing**: signed releases to Maven Central and the GitLab Package Registry, with a
-  declarative DSL for licences, developers, and SCM information.
+- **Publishing**: signed releases to Maven Central, the GitLab Package Registry and any Maven
+  repository with separate release and snapshot URLs, with a declarative DSL for licences,
+  developers, and SCM information.
 
 ---
 
@@ -187,20 +188,40 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 
 ### Installation
 
+Kreate is published to `https://repo.davils.com/releases`. Declare the repository for plugins and
+for dependencies:
+
 ```kotlin
 // settings.gradle.kts
+pluginManagement {
+    repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
     }
 }
 ```
 
+Versions up to 4.1.0 are on Maven Central.
+
 ```kotlin
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.21"
-    id("com.davils.kreate") version "4.1.0"
+    id("com.davils.kreate") version "4.2.0"
 }
 ```
 
@@ -311,7 +332,7 @@ kreate {
 | `project.dependencyLocking`       | `enabled`                  | Gradle dependency locking                  | `false`      |
 | `project.benchmark`               | `enabled`                  | kotlinx-benchmark integration              | `false`      |
 | `project.benchmark.regression`    | `maxRegressionPercent`     | Benchmark regression threshold             | `10.0`       |
-| `project.publish`                 | `enabled`                  | Maven Central / GitLab publishing          | `false`      |
+| `project.publish`                 | `enabled`                  | Maven Central, GitLab and Maven repository | `false`      |
 | `assurance`                       | `enabled`                  | Software assurance gate                    | `false`      |
 | `assurance`                       | `failOn`                   | Severity from which a finding blocks       | `HIGH`       |
 | `assurance.advisories`            | `enabled`                  | Audit against OSV.dev                      | `false`      |

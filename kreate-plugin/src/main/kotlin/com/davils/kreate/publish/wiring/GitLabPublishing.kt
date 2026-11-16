@@ -17,35 +17,20 @@
 package com.davils.kreate.publish.wiring
 
 import com.davils.kreate.KreateExtension
-import com.davils.kreate.gradle.GradlePluginId
-import com.davils.kreate.gradle.configurePom
 import com.davils.kreate.gradle.declaredProjectName
 import com.davils.kreate.publish.GitLabExtension
 import com.davils.kreate.publish.GitLabHeader
-import com.davils.kreate.publish.PublishExtension
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.component.SoftwareComponent
 import org.gradle.api.credentials.HttpHeaderCredentials
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.kotlin.dsl.credentials
-import org.gradle.kotlin.dsl.withType
 import java.net.URI
 
 private const val DEFAULT_GITLAB_REPOSITORY_NAME: String = "GitlabPackageRegistry"
 
-private const val DEFAULT_PUBLICATION_NAME: String = "maven"
-
-private const val PUBLISHING_EXTENSION_NAME: String = "publishing"
-
-private const val JAVA_EXTENSION_NAME: String = "java"
-
-private const val JAVA_COMPONENT_NAME: String = "java"
-
-private const val JAVA_PLATFORM_COMPONENT_NAME: String = "javaPlatform"
+private const val GITLAB_TARGET: String = "GitLab"
 
 private const val UNSET_DESCRIPTION: String = "unset"
 
@@ -60,56 +45,9 @@ internal fun Project.configureGitLab(
     val projectDescription = kreateExtension.project.description.orNull
 
     extensions.configure<PublishingExtension>(PUBLISHING_EXTENSION_NAME) {
-        registerDefaultPublication(this, projectName)
+        registerDefaultPublication(this, projectName, GITLAB_TARGET)
         addGitLabRepository(this, gitLabConfig)
         configurePublicationPoms(this, publishConfig, projectName, projectDescription)
-    }
-}
-
-private fun configurePublicationPoms(
-    publishing: PublishingExtension,
-    publishConfig: PublishExtension,
-    projectName: String,
-    projectDescription: String?
-) {
-    publishing.publications.withType<MavenPublication>().configureEach {
-        pom { configurePom(publishConfig, projectName, projectDescription) }
-    }
-}
-
-private fun Project.registerDefaultPublication(
-    publishing: PublishingExtension,
-    artifactId: String,
-) {
-    if (!publishing.publications.withType<MavenPublication>().isEmpty()) return
-
-    val component = publishableComponent()
-    if (component == null) {
-        logger.warn(
-            "Kreate's GitLab publishing is enabled for project '$path', but the project " +
-                "publishes no software component ('java' or 'javaPlatform'). Apply a plugin " +
-                "that provides one, or declare a publication yourself - `publish` will " +
-                "otherwise succeed without uploading anything."
-        )
-        return
-    }
-
-    includeSourcesJar()
-
-    publishing.publications.register(DEFAULT_PUBLICATION_NAME, MavenPublication::class.java) {
-        from(component)
-        this.artifactId = artifactId
-    }
-}
-
-private fun Project.publishableComponent(): SoftwareComponent? =
-    components.findByName(JAVA_COMPONENT_NAME) ?: components.findByName(JAVA_PLATFORM_COMPONENT_NAME)
-
-private fun Project.includeSourcesJar() {
-    if (!plugins.hasPlugin(GradlePluginId.JAVA)) return
-
-    extensions.configure<JavaPluginExtension>(JAVA_EXTENSION_NAME) {
-        withSourcesJar()
     }
 }
 
@@ -145,11 +83,6 @@ private fun Project.addGitLabRepository(
             create(GitLabHeader.AUTHENTICATION_NAME, HttpHeaderAuthentication::class.java)
         }
     }
-}
-
-private fun Project.environmentValueOf(variable: String): String? {
-    val value = providers.environmentVariable(variable).orNull
-    return value?.takeIf { it.isNotBlank() }
 }
 
 private fun Project.unbuildableRegistryUrlFailure(

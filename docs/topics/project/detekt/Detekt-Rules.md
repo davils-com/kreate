@@ -15,6 +15,10 @@ is added to the project's `detektPlugins` configuration and every rule in it is 
 your `detekt.yml` is required, because the artifact carries its own default configuration and Kreate
 runs with `buildUponDefaultConfig = true`.
 
+The artifact is resolved from the repositories your build declares for dependencies, so
+`dependencyResolutionManagement` needs the [repository Kreate is published to](Installation-Repository.md),
+not only `pluginManagement`.
+
 The rules encode the Kreate Kotlin standard: **no comments, no `else`, at most two calls per
 expression, one top-level type per file, KDoc on the published surface only, and a `@since` tag on
 everything that is documented.**

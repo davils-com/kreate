@@ -18,7 +18,6 @@ package com.davils.buildlogic
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.plugin.devel.GradlePluginDevelopmentExtension
 import java.io.File
@@ -34,22 +33,9 @@ public const val LOCAL_PUBLISH_TASK: String = "kreateLocalPublish"
 
 public const val LOCAL_TASK_GROUP: String = "kreate local"
 
-public const val LOCAL_PUBLISH_PROPERTY: String = "kreate.local.publish"
-
 private const val STATE_DIRECTORY: String = "kreate/local"
 
-private const val TASK_PATH_SEPARATOR: Char = ':'
-
 private val CI_VARIABLES: List<String> = listOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
-
-public fun requestsLocalPublish(gradle: Gradle, providers: ProviderFactory): Boolean {
-    val property = providers.gradleProperty(LOCAL_PUBLISH_PROPERTY)
-    val isRequestedByProperty = property.map { value -> value.equals("true", ignoreCase = true) }
-    if (isRequestedByProperty.getOrElse(false)) return true
-
-    val requestedTasks = rootOf(gradle).startParameter.taskNames
-    return requestedTasks.any { requested -> requested.substringAfterLast(TASK_PATH_SEPARATOR) == LOCAL_PUBLISH_TASK }
-}
 
 public fun isContinuousIntegration(providers: ProviderFactory): Boolean =
     CI_VARIABLES.any { variable -> isSet(providers, variable) }
@@ -103,11 +89,6 @@ private fun writeUtf8(file: File, contents: Properties) {
     file.writer(StandardCharsets.UTF_8).use { writer ->
         contents.store(writer, "Written by $LOCAL_PUBLISH_TASK. Delete with kreateLocalClean.")
     }
-}
-
-private fun rootOf(gradle: Gradle): Gradle {
-    val parent = gradle.parent ?: return gradle
-    return rootOf(parent)
 }
 
 private fun isSet(providers: ProviderFactory, variable: String): Boolean {

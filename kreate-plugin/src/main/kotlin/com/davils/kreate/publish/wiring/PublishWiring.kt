@@ -32,6 +32,8 @@ internal fun Project.initializePublish(extension: KreateExtension) {
 
     configureMavenCentral(extension)
     configureGitLab(extension)
+    configureMaven(extension)
+    configureSigning(extension)
     guardRemotePublishing(extension)
 }
 

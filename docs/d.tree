@@ -9,6 +9,7 @@
     <toc-element topic="Home.topic"/>
     <toc-element topic="Overview.md"/>
     <toc-element topic="Getting-Started.md"/>
+    <toc-element topic="Installation-Repository.md"/>
     <toc-element topic="Plugin-Management.md"/>
     <toc-element topic="Compatibility.md"/>
     <toc-element topic="Task-Reference.md"/>
@@ -111,6 +112,7 @@
         <toc-element toc-title="Publishing">
             <toc-element topic="Publishing-Overview.md"/>
             <toc-element topic="Publishing-Maven-Central.md"/>
+            <toc-element topic="Publishing-Maven-Repository.md"/>
             <toc-element topic="Publishing-Gitlab-Registry.md"/>
             <toc-element topic="Publishing-POM-Configuration.md"/>
             <toc-element topic="Publishing-Examples.md"/>

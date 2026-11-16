@@ -157,6 +157,43 @@ kreate {
 }
 ```
 
+## A Maven Repository With Releases and Snapshots
+
+```kotlin
+kreate {
+    project {
+        name = "my-library"
+        description = "A Kotlin library published to the company repository"
+
+        publish {
+            enabled = true
+            website = "https://example.com/my-library"
+
+            repositories {
+                maven {
+                    name = "Company"
+                    releases = "https://repo.example.com/releases"
+                    snapshots = "https://repo.example.com/snapshots"
+                    usernameEnv = "REPOSITORY_NAME"
+                    passwordEnv = "REPOSITORY_SECRET"
+                    signPublications = true
+                }
+            }
+        }
+    }
+}
+```
+
+```bash
+# Publishes 1.4.0 to releases
+VERSION=1.4.0 ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+
+# Publishes 1.5.0-SNAPSHOT to snapshots
+VERSION=1.5.0 KREATE_SNAPSHOT=true ./gradlew publishAllPublicationsToCompanyRepository --no-configuration-cache
+```
+
+See [Maven repository](Publishing-Maven-Repository.md) for the routing and the credentials.
+
 ## Manual Release (No Auto-Release)
 
 Upload to the Central Portal staging area and release manually via the web UI.

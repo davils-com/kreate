@@ -46,4 +46,13 @@ public abstract class ProjectVersionExtension @Inject constructor(
      * @since 1.0.0
      */
     public val property: Property<String> = factory.property(String::class.java).convention("version")
+
+    /**
+     * Whether the resolved version is a snapshot, which appends `-SNAPSHOT` unless the version
+     * already ends in it.
+     * Unset by default, which leaves the decision to the Gradle property `kreate.snapshot` and,
+     * after it, to the environment variable `KREATE_SNAPSHOT`.
+     * @since 4.2.0
+     */
+    public val snapshot: Property<Boolean> = factory.property(Boolean::class.java)
 }

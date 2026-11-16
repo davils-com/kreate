@@ -19,16 +19,16 @@ package com.davils.kreate.project.wiring
 import com.davils.kreate.settings.local.snapshotVersionOf
 import org.gradle.api.Project
 
-internal fun Project.configureVersion(environmentVariable: String, propertyName: String, localPublish: Boolean) {
+internal fun Project.configureVersion(environmentVariable: String, propertyName: String, snapshot: Boolean) {
     val resolved = getProjectVersion(environmentVariable, propertyName)
-    val projectVersion = configuredVersionOf(resolved, localPublish)
+    val projectVersion = configuredVersionOf(resolved, snapshot)
 
     if (projectVersion != version.toString()) {
         version = projectVersion
     }
 }
 
-private fun configuredVersionOf(resolved: String, localPublish: Boolean): String {
-    if (localPublish) return snapshotVersionOf(resolved)
+private fun configuredVersionOf(resolved: String, snapshot: Boolean): String {
+    if (snapshot) return snapshotVersionOf(resolved)
     return resolved
 }

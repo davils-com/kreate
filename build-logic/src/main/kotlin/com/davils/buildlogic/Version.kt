@@ -26,6 +26,20 @@ private const val VERSION_PROPERTY: String = "version"
 
 private const val COMPOSITE_PROPERTIES_PATH: String = "../gradle.properties"
 
+private const val RELEASE_TAG_VARIABLE: String = "CI_COMMIT_TAG"
+
+private const val TAG_PREFIX: String = "v"
+
+public fun publishedVersion(providers: ProviderFactory, settingsDirectory: Directory): String {
+    val declared = compositeVersion(providers, settingsDirectory)
+    val tag = releaseTag(providers) ?: return snapshotOf(declared)
+
+    val released = tag.removePrefix(TAG_PREFIX)
+    if (released.endsWith(SNAPSHOT_SUFFIX)) throw snapshotTag(tag)
+    if (released != declared) throw mismatchedTag(tag, declared)
+    return released
+}
+
 public fun compositeVersion(providers: ProviderFactory, settingsDirectory: Directory): String {
     val propertiesFile = settingsDirectory.file(COMPOSITE_PROPERTIES_PATH)
     val location = propertiesFile.asFile
@@ -38,6 +52,26 @@ public fun compositeVersion(providers: ProviderFactory, settingsDirectory: Direc
     if (declared.isNullOrEmpty()) throw missingVersion(location)
     return declared
 }
+
+private fun releaseTag(providers: ProviderFactory): String? {
+    val tag = providers.environmentVariable(RELEASE_TAG_VARIABLE).orNull
+    return tag?.takeIf { it.isNotBlank() }
+}
+
+private fun snapshotOf(declared: String): String {
+    if (declared.endsWith(SNAPSHOT_SUFFIX)) return declared
+    return "$declared$SNAPSHOT_SUFFIX"
+}
+
+private fun snapshotTag(tag: String): GradleException = GradleException(
+    "Kreate refuses to release from tag '$tag': a release tag never carries the " +
+        "'$SNAPSHOT_SUFFIX' suffix. Snapshots are published from the develop branch, without a tag."
+)
+
+private fun mismatchedTag(tag: String, declared: String): GradleException = GradleException(
+    "Kreate refuses to release from tag '$tag': the composite root declares " +
+        "'$VERSION_PROPERTY=$declared'. Tag the commit whose gradle.properties carries the released version."
+)
 
 private fun unreadableVersion(location: File): GradleException = GradleException(
     "Kreate could not read the composite root's version: '${location.absolutePath}' does not exist " +
