@@ -29,7 +29,8 @@ check:
   invocations:
     - [":example:run"]
   reproducible:
-    tasks: [":kreate-plugin:clean", ":kreate-plugin:jar"]
+    clean-tasks: [":kreate-plugin:clean"]
+    tasks: [":kreate-plugin:jar"]
     artifacts: ["kreate-plugin/build/libs/*.jar"]
 
 policy:
