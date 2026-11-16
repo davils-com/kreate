@@ -159,8 +159,12 @@ including a Dependabot pull request, is red until both are updated:
 ```
 
 ```bash
-./gradlew --write-verification-metadata sha256 --no-configuration-cache verify
+./gradlew --write-verification-metadata sha256 --no-configuration-cache verify :selfcheck:kreateAssurance
 ```
+
+`:selfcheck:kreateAssurance` is part of that command on purpose: the audit of Kreate's own
+dependencies reads their POMs as artifacts, which `verify` never resolves, and it runs in the Trivy
+workflow rather than in `verify`.
 
 Read the diff of the metadata: a checksum that changes for a version that did not is a tampered
 artifact, not a chore. Kotlin, `kotlinx-serialization` and Ktor are held back on purpose, see
