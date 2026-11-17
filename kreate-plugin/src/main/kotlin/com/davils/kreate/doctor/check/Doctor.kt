@@ -22,7 +22,7 @@ private const val MIN_JAVA: Int = 25
 
 private const val MIN_GRADLE_MAJOR: Int = 9
 
-private const val MIN_GRADLE_MINOR: Int = 1
+private const val MIN_GRADLE_MINOR: Int = 9
 
 private const val TRIVY: String = "Trivy"
 
@@ -49,7 +49,7 @@ internal object Doctor {
         val olderMajor = major < MIN_GRADLE_MAJOR
         val olderMinor = major == MIN_GRADLE_MAJOR && minor < MIN_GRADLE_MINOR
         val tooOld = olderMajor || olderMinor
-        if (tooOld) return DoctorCheck("Gradle", DoctorStatus.FAIL, "Gradle $version; Kreate needs 9.1.")
+        if (tooOld) return DoctorCheck("Gradle", DoctorStatus.FAIL, "Gradle $version; Kreate needs 9.9.")
         return DoctorCheck("Gradle", DoctorStatus.OK, "Gradle $version.")
     }
 

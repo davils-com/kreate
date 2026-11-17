@@ -19,5 +19,6 @@ internal data class Verdict(
     val status: GateStatus,
     val blockingFindings: Int,
     val incompleteSources: List<String>,
-    val staleEntries: Int
+    val staleEntries: Int,
+    val incompleteReasons: List<String> = emptyList()
 )

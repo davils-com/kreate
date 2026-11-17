@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.0.0
+
+Kreate 5.0.0 needs Gradle 9.9. In return it runs on the current kotlinx-serialization and Ktor, and
+takes over the conventions a library build used to program itself: license headers, the release
+guard, Java modules, compiler options, the main jar and version floors for tools.
+
+### Upgrading
+
+- **Gradle 9.9 or newer.** Kreate now uses kotlinx-serialization 1.13.0 and Ktor 3.6.1, which need
+  the Kotlin 2.4 stdlib that Gradle embeds from 9.9 on. On an older Gradle the plugin would fail at
+  runtime, so the minimum moves from 9.1 to 9.9 and `kreateDoctor` reports an older Gradle.
+
+### Added
+
+- **License headers.** `project { licenseHeader { } }` registers `kreateLicenseHeaderCheck`, which
+  `check` runs. It verifies that every Kotlin, Java, build script, property and YAML file starts
+  with the notice, in a block comment or in `#` lines, and names every file that does not.
+  `apacheLicense("Copyright 2026 Example")` sets the notice of the Apache License 2.0.
+- **Release guard.** `publish { releaseGuard { enabled = true } }` registers `kreateReleaseGuard`,
+  which every task that publishes to a Maven repository depends on. It refuses a version the
+  environment changed, a release without a release tag, a tag that names another version or no
+  Semantic Versioning release, a tag outside the release branch and a release built with snapshot
+  tooling. Tags are read from GitHub Actions and GitLab CI.
+- **Snapshots unless tagged.** `version { snapshotUnlessTagged = true }` makes every build without
+  a release tag a snapshot, so local builds and branch pipelines never resolve a release.
+- **Kotlin compiler options.** `platform { compiler { } }` sets progressive mode, the extra
+  warnings, the language and API version and the JVM default methods on every Kotlin compilation.
+- **Java modules.** `platform { jvm { moduleName } }` patches the Kotlin classes into the module of
+  `src/main/java/module-info.java`, so its `exports` compile, and otherwise names the jar as an
+  automatic module. `jvm { javaWarningsAsErrors = true }` compiles Java with `--release`,
+  `-Xlint:all` and `-Werror`.
+- **Main jar.** `project { archives { } }` adds legal files such as `LICENSE` and `NOTICE` to
+  `META-INF` of the main jar and names the implementation in its manifest.
+- **Version floors for tools.** `project { toolClasspaths { floor("com.fasterxml.jackson", "2.22.3") } }`
+  raises the modules of a group on the classpaths of Dokka, Detekt, Kover and the Kotlin Gradle
+  plugin, never on the classpaths of the project.
+- **Detekt.** `detekt { libraryRules = true }` adds the `libraries` rule set of the Detekt version
+  in use, and `detekt { typeResolution = true }` makes `check` and `kreateDetekt` run the analysis
+  with type resolution, such as `detektMain`.
+
+### Changed
+
+- **kotlinx-serialization 1.13.0 and Ktor 3.6.1.** Both were held at the last releases built on
+  Kotlin 2.2, the stdlib of Gradle 9.1. A build that verifies or locks the classpath of its build
+  logic records the new artifacts.
+- **kotlinx-benchmark runtime 0.5.0.** The default of `benchmark { runtimeVersion }` is now 0.5.0
+  instead of 0.4.17, in step with the kotlinx-benchmark plugin Kreate applies. A build that verifies
+  or locks its benchmark classpath records the new artifacts.
+- **Kotest 6.2.7.** The default of `tests { kotest { version } }` is now 6.2.7 instead of 6.2.6. A
+  build that verifies or locks its test classpaths records the new artifacts.
+
+### Fixed
+
+- **An incomplete gate says why.** `kreateAssurance [INCOMPLETE]` named only the sources that could
+  not finish. It now names the reason of each, such as the error of Trivy, and a Trivy scan the gate
+  owns logs its failure as a warning instead of keeping it in the document only.
+- **`skipDirectories` of Trivy work on Windows.** An absolute directory such as
+  `D:\a\project/**/build` reached Trivy with backslashes, which no path matched, so Trivy walked into
+  the output of the running build. Kreate now hands Trivy the pattern with forward slashes on
+  Windows.
+- **`check` never formats.** With `assurance { reports { ingestQuality } }` the quality ingest read
+  the SARIF report of every Detekt task, so `check` ran `kreateFormatApply` and rewrote the sources.
+  The formatter is no analysis any more: it writes no SARIF report and the ingest leaves it out.
+
 ## 4.2.0
 
 Kreate 4.2.0 moves to a repository of its own and learns to publish to one. From this version on

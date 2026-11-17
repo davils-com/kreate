@@ -414,6 +414,42 @@ Registered when `project.changelog.enabled` is `true`. See [Changelog](Changelog
     </tr>
 </table>
 
+## License header
+
+Registered when `project.licenseHeader.enabled` is `true`. See [License header](Project-License-Header.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateLicenseHeaderCheck</code></td>
+        <td>Checks that every selected file starts with the license header. Runs as part of
+            <code>check</code>.</td>
+        <td><code>build/kreate/license/headers.txt</code></td>
+    </tr>
+</table>
+
+## Release guard
+
+Registered when `project.publish.releaseGuard.enabled` is `true`. See [Release guard](Publishing-Release-Guard.md).
+
+<table>
+    <tr>
+        <td>Task</td>
+        <td>Purpose</td>
+        <td>Outputs</td>
+    </tr>
+    <tr>
+        <td><code>kreateReleaseGuard</code></td>
+        <td>Refuses to publish a version that does not belong to the build. Every task that publishes
+            to a Maven repository depends on it.</td>
+        <td>-</td>
+    </tr>
+</table>
+
 ## Configuration schema
 
 Registered when `project.configurationSchema.enabled` is `true`. The dump and the check read and

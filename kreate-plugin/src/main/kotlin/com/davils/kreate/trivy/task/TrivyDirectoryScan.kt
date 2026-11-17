@@ -22,8 +22,18 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
+import java.io.File
 
 private const val SKIP_DIRECTORIES_FLAG: String = "--skip-dirs"
+
+private const val WINDOWS_SEPARATOR: Char = '\\'
+
+private const val GLOB_SEPARATOR: Char = '/'
+
+internal fun globOf(directory: String, separator: Char = File.separatorChar): String {
+    if (separator != WINDOWS_SEPARATOR) return directory
+    return directory.replace(oldChar = WINDOWS_SEPARATOR, newChar = GLOB_SEPARATOR)
+}
 
 @DisableCachingByDefault(because = "Trivy scans depend on external vulnerability databases and tools")
 internal abstract class TrivyDirectoryScan(
@@ -39,7 +49,7 @@ internal abstract class TrivyDirectoryScan(
     public abstract val skipDirectories: ListProperty<String>
 
     override fun scannerArguments(): List<String> = skipDirectories.get().flatMap { directory ->
-        listOf(SKIP_DIRECTORIES_FLAG, directory)
+        listOf(SKIP_DIRECTORIES_FLAG, globOf(directory))
     }
 
     @TaskAction

@@ -73,6 +73,14 @@ public abstract class PublishExtension @Inject constructor(
     public abstract val repositories: MavenRepositoriesExtension
 
     /**
+     * Configuration of the release guard.
+     *
+     * @since 5.0.0
+     */
+    @get:Nested
+    public abstract val releaseGuard: ReleaseGuardExtension
+
+    /**
      * Configures the [PomExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -90,5 +98,15 @@ public abstract class PublishExtension @Inject constructor(
      */
     public fun repositories(action: Action<MavenRepositoriesExtension>) {
         action.execute(repositories)
+    }
+
+    /**
+     * Configures the release guard.
+     *
+     * @param action The configuration action.
+     * @since 5.0.0
+     */
+    public fun releaseGuard(action: Action<ReleaseGuardExtension>) {
+        action.execute(releaseGuard)
     }
 }

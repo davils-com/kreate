@@ -34,10 +34,15 @@ internal object PlatformFeature : KreateFeature {
     private fun applyMultiplatform(project: Project, extension: KreateExtension) {
         project.configureJava(extension)
         project.configureMultiplatformCompiler(extension)
+        project.configureCompilerOptions(extension)
+        project.configureJavaCompilation(extension)
     }
 
     private fun applyJvm(project: Project, extension: KreateExtension) {
         project.configureJava(extension)
         project.configureJvmCompiler(extension)
+        project.configureCompilerOptions(extension)
+        project.configureJavaCompilation(extension)
+        project.configureJavaModule(extension)
     }
 }

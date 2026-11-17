@@ -26,6 +26,8 @@ import java.time.Instant
 
 internal const val REPORT_ONLY_ATTRIBUTE: String = "reportOnly"
 
+private const val NO_REASON: String = "it gave no reason"
+
 internal class VerdictRules(
     private val failOn: Severity,
     private val reportOnly: Boolean = false,
@@ -36,9 +38,17 @@ internal class VerdictRules(
         val blocking = outcome.kept.count { finding -> isBlocking(finding) }
         val incomplete = documents.filter { document -> isIncomplete(document, now) }
         val incompleteSources = incomplete.map { document -> document.source.id }
+        val reasons = incomplete.map { document -> "${document.source.id}: ${reasonOf(document)}" }
         val violatesPolicy = outcome.kept.any { finding -> finding.source == FindingSource.POLICY }
         val status = statusOf(incompleteSources, blocking, outcome.staleEntries, violatesPolicy)
-        return Verdict(status, blocking, incompleteSources, outcome.staleEntries)
+        return Verdict(status, blocking, incompleteSources, outcome.staleEntries, reasons)
+    }
+
+    private fun reasonOf(document: FindingDocument): String {
+        val reason = document.reason
+        if (reason != null) return reason
+        if (document.status == DocumentStatus.INCOMPLETE) return NO_REASON
+        return "its data is older than $maxDataAge"
     }
 
     private fun isIncomplete(document: FindingDocument, now: Instant): Boolean {

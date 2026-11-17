@@ -28,6 +28,7 @@ private const val REQUESTED: String = "true"
 internal fun Project.requestsSnapshot(versionExtension: ProjectVersionExtension): Boolean {
     val declared = versionExtension.snapshot.orNull
     if (declared != null) return declared
+    if (versionExtension.snapshotUnlessTagged.get()) return !ciReleaseTag().isPresent
 
     val fromProperty = providers.gradleProperty(SNAPSHOT_PROPERTY)
     val fromVariable = providers.environmentVariable(SNAPSHOT_VARIABLE)

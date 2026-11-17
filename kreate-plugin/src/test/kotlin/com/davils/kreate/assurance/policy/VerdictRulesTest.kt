@@ -75,6 +75,20 @@ class VerdictRulesTest : FunSpec({
 
             verdict.status shouldBe GateStatus.INCOMPLETE
             verdict.incompleteSources shouldContainExactly listOf("osv")
+            verdict.incompleteReasons shouldContainExactly listOf("osv: it gave no reason")
+        }
+
+        test("names why each source could not finish") {
+            val failed = FindingDocument(
+                FindingSource.TRIVY,
+                DocumentStatus.INCOMPLETE,
+                Instant.EPOCH,
+                reason = "exited with 1"
+            )
+
+            val verdict = VerdictRules(Severity.HIGH).decide(complete + failed, outcome())
+
+            verdict.incompleteReasons shouldContainExactly listOf("trivy: exited with 1")
         }
 
         test("puts incomplete above findings") {
@@ -112,7 +126,10 @@ class VerdictRulesTest : FunSpec({
         test("is incomplete once it is too old, because a stale pass says nothing about today") {
             val now = readAt.plus(Duration.ofDays(4))
 
-            rules.decide(listOf(document), outcome(), now).status shouldBe GateStatus.INCOMPLETE
+            val verdict = rules.decide(listOf(document), outcome(), now)
+
+            verdict.status shouldBe GateStatus.INCOMPLETE
+            verdict.incompleteReasons shouldContainExactly listOf("osv: its data is older than PT72H")
         }
 
         test("does not concern a source without data of its own") {

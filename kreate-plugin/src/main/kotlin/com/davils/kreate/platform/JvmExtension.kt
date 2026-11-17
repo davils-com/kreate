@@ -18,6 +18,7 @@ package com.davils.kreate.platform
 
 import com.davils.kreate.jni.JniExtension
 import org.gradle.api.Action
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
 
@@ -39,6 +40,25 @@ public abstract class JvmExtension @Inject constructor() {
      */
     @get:Nested
     public abstract val jni: JniExtension
+
+    /**
+     * The name of the Java module the project builds, such as `com.example.library`. Unset by default.
+     *
+     * When `src/main/java/module-info.java` exists, javac compiles the descriptor with the classes of
+     * the Kotlin compiler patched into this module, so its `exports` see them. Without a descriptor the
+     * name becomes the `Automatic-Module-Name` of the jar.
+     *
+     * @since 5.0.0
+     */
+    public abstract val moduleName: Property<String>
+
+    /**
+     * Whether javac compiles with `--release` of the platform Java version, reports every lint warning
+     * and treats warnings as errors. Defaults to `false`.
+     *
+     * @since 5.0.0
+     */
+    public abstract val javaWarningsAsErrors: Property<Boolean>
 
     /**
      * Configures JNI settings.

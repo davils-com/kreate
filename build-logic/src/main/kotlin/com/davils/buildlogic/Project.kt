@@ -30,7 +30,7 @@ public object Project {
     public object Compatibility {
         public const val TARGET_JAVA_VERSION: Int = 25
 
-        public const val MIN_GRADLE_VERSION: String = "9.1.0"
+        public const val MIN_GRADLE_VERSION: String = "9.9.0"
     }
 
     public object Quality {
