@@ -21,7 +21,7 @@ package com.davils.kreate.floor
  *
  * @property group The group whose modules are raised; it matches itself and every subgroup.
  * @property version The lowest version that may be resolved, such as `2.22.3`.
- * @since 4.3.0
+ * @since 5.0.0
  */
 public class VersionFloorSpec internal constructor(
     public val group: String,
@@ -37,7 +37,7 @@ public class VersionFloorSpec internal constructor(
      * that follows a numbering of its own.
      *
      * @param names The names of the modules, without their group.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun exclude(vararg names: String) {
         excludedModules += names

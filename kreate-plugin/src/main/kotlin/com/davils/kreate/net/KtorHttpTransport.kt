@@ -31,7 +31,7 @@ import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.isSuccess
 import io.ktor.util.toMap
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readBuffer
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -117,7 +117,7 @@ internal class KtorHttpTransport(
             return ByteArray(0)
         }
 
-        val packet = channel.readRemaining(request.maxBytes + 1L)
+        val packet = channel.readBuffer(request.maxBytes + 1L)
         val bytes = packet.readByteArray()
 
         if (bytes.size > request.maxBytes) throw tooLarge(request)
@@ -129,7 +129,7 @@ internal class KtorHttpTransport(
         Files.newOutputStream(target).use { output ->
             var received = 0L
             while (!channel.isClosedForRead) {
-                val packet = channel.readRemaining(DOWNLOAD_CHUNK_BYTES)
+                val packet = channel.readBuffer(DOWNLOAD_CHUNK_BYTES)
                 val chunk = packet.readByteArray()
                 received += chunk.size
                 if (received > request.maxBytes) throw tooLarge(request)

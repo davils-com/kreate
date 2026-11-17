@@ -61,7 +61,7 @@ public abstract class ProjectVersionExtension @Inject constructor(
      * `GITHUB_REF_TYPE` and `GITHUB_REF_NAME` on GitHub Actions and from `CI_COMMIT_TAG` on GitLab CI,
      * so a local build is always a snapshot. An explicit [snapshot] takes precedence.
      * Defaults to `false`.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val snapshotUnlessTagged: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 }

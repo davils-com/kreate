@@ -198,7 +198,7 @@ public abstract class ProjectExtension @Inject constructor(
     /**
      * Configuration of the license header check.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     @get:Nested
     public abstract val licenseHeader: LicenseHeaderExtension
@@ -206,7 +206,7 @@ public abstract class ProjectExtension @Inject constructor(
     /**
      * Configuration of the archives the project builds.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     @get:Nested
     public abstract val archives: ArchivesExtension
@@ -214,7 +214,7 @@ public abstract class ProjectExtension @Inject constructor(
     /**
      * Version floors for the classpaths of the tools the build runs.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     @get:Nested
     public abstract val toolClasspaths: ToolClasspathsExtension
@@ -353,7 +353,7 @@ public abstract class ProjectExtension @Inject constructor(
      * Configures the license header check.
      *
      * @param action The configuration action.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun licenseHeader(action: Action<LicenseHeaderExtension>) {
         action.execute(licenseHeader)
@@ -363,7 +363,7 @@ public abstract class ProjectExtension @Inject constructor(
      * Configures the archives the project builds.
      *
      * @param action The configuration action.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun archives(action: Action<ArchivesExtension>) {
         action.execute(archives)
@@ -373,7 +373,7 @@ public abstract class ProjectExtension @Inject constructor(
      * Configures the version floors of the tool classpaths.
      *
      * @param action The configuration action.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun toolClasspaths(action: Action<ToolClasspathsExtension>) {
         action.execute(toolClasspaths)

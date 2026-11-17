@@ -47,7 +47,8 @@ class DoctorTest : FunSpec({
             statusOf(HEALTHY.copy(javaVersion = 21), "Java").status shouldBe DoctorStatus.FAIL
             statusOf(HEALTHY.copy(gradleVersion = "8.14"), "Gradle").status shouldBe DoctorStatus.FAIL
             statusOf(HEALTHY.copy(gradleVersion = "9.0.0"), "Gradle").status shouldBe DoctorStatus.FAIL
-            statusOf(HEALTHY.copy(gradleVersion = "9.1"), "Gradle").status shouldBe DoctorStatus.OK
+            statusOf(HEALTHY.copy(gradleVersion = "9.8.1"), "Gradle").status shouldBe DoctorStatus.FAIL
+            statusOf(HEALTHY.copy(gradleVersion = "9.9"), "Gradle").status shouldBe DoctorStatus.OK
         }
 
         test("warns without Git") {

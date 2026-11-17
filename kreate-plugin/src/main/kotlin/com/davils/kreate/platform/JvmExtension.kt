@@ -48,7 +48,7 @@ public abstract class JvmExtension @Inject constructor() {
      * the Kotlin compiler patched into this module, so its `exports` see them. Without a descriptor the
      * name becomes the `Automatic-Module-Name` of the jar.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public abstract val moduleName: Property<String>
 
@@ -56,7 +56,7 @@ public abstract class JvmExtension @Inject constructor() {
      * Whether javac compiles with `--release` of the platform Java version, reports every lint warning
      * and treats warnings as errors. Defaults to `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public abstract val javaWarningsAsErrors: Property<Boolean>
 

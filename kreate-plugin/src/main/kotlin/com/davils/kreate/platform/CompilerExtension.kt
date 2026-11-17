@@ -28,42 +28,42 @@ import javax.inject.Inject
  * An option that is left unset keeps the value the Kotlin Gradle plugin or the build gives it.
  *
  * @param factory The object factory used to create the properties.
- * @since 4.3.0
+ * @since 5.0.0
  */
 public abstract class CompilerExtension @Inject constructor(factory: ObjectFactory) {
     /**
      * Whether the compiler runs in progressive mode, which fixes deprecations and bugs right away
      * instead of after a deprecation cycle. Defaults to `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val progressiveMode: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * Whether the compiler reports its additional warnings. Defaults to `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val extraWarnings: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * The version of the Kotlin language the sources are compiled with. Unset by default.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val languageVersion: Property<KotlinVersion> = factory.property(KotlinVersion::class.java)
 
     /**
      * The version of the Kotlin standard library API the sources may use. Unset by default.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val apiVersion: Property<KotlinVersion> = factory.property(KotlinVersion::class.java)
 
     /**
      * How the JVM compilations emit default methods of interfaces. Unset by default.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val jvmDefault: Property<JvmDefaultMode> = factory.property(JvmDefaultMode::class.java)
 }

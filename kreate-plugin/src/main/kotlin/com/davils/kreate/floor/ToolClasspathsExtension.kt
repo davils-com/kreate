@@ -28,7 +28,7 @@ import javax.inject.Inject
  * compile or runtime classpath of the project and only ever raises a version, never lowers it. The
  * raised classpaths are locked and scanned like every other configuration.
  *
- * @since 4.3.0
+ * @since 5.0.0
  */
 public abstract class ToolClasspathsExtension @Inject constructor() {
     private val floors: MutableList<VersionFloorSpec> = mutableListOf()
@@ -39,7 +39,7 @@ public abstract class ToolClasspathsExtension @Inject constructor() {
      * @param group The group whose modules are raised; it matches itself and every subgroup.
      * @param version The lowest version that may be resolved, such as `2.22.3`.
      * @throws IllegalArgumentException If [group] is blank or [version] is no numeric version.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun floor(group: String, version: String) {
         floor(group, version) { }
@@ -53,7 +53,7 @@ public abstract class ToolClasspathsExtension @Inject constructor() {
      * @param version The lowest version that may be resolved, such as `2.22.3`.
      * @param action The configuration action.
      * @throws IllegalArgumentException If [group] is blank or [version] is no numeric version.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun floor(group: String, version: String, action: Action<VersionFloorSpec>) {
         require(group.isNotBlank()) { "A version floor needs a group." }

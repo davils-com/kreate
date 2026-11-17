@@ -83,7 +83,7 @@ public abstract class PlatformExtension @Inject constructor(
     /**
      * Options of the Kotlin compiler.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     @get:Nested
     public abstract val compiler: CompilerExtension
@@ -110,7 +110,7 @@ public abstract class PlatformExtension @Inject constructor(
      * Configures the options of the Kotlin compiler.
      *
      * @param action The configuration action.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun compiler(action: Action<CompilerExtension>) {
         action.execute(compiler)

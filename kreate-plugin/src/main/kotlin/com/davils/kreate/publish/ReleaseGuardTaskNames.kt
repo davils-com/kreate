@@ -19,13 +19,13 @@ package com.davils.kreate.publish
 /**
  * The names of the release guard tasks.
  *
- * @since 4.3.0
+ * @since 5.0.0
  */
 public object ReleaseGuardTaskNames {
     /**
      * Refuses to publish a version that does not belong to the build it comes from.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public const val GUARD: String = "kreateReleaseGuard"
 }

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+Kreate 5.0.0 needs Gradle 9.9. In return it runs on the current kotlinx-serialization and Ktor, and
+takes over the conventions a library build used to program itself: license headers, the release
+guard, Java modules, compiler options, the main jar and version floors for tools.
+
+### Upgrading
+
+- **Gradle 9.9 or newer.** Kreate now uses kotlinx-serialization 1.13.0 and Ktor 3.6.1, which need
+  the Kotlin 2.4 stdlib that Gradle embeds from 9.9 on. On an older Gradle the plugin would fail at
+  runtime, so the minimum moves from 9.1 to 9.9 and `kreateDoctor` reports an older Gradle.
+
 ### Added
 
 - **License headers.** `project { licenseHeader { } }` registers `kreateLicenseHeaderCheck`, which
@@ -37,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **kotlinx-serialization 1.13.0 and Ktor 3.6.1.** Both were held at the last releases built on
+  Kotlin 2.2, the stdlib of Gradle 9.1. A build that verifies or locks the classpath of its build
+  logic records the new artifacts.
 - **kotlinx-benchmark runtime 0.5.0.** The default of `benchmark { runtimeVersion }` is now 0.5.0
   instead of 0.4.17, in step with the kotlinx-benchmark plugin Kreate applies. A build that verifies
   or locks its benchmark classpath records the new artifacts.

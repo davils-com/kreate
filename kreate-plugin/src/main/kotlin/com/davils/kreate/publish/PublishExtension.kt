@@ -75,7 +75,7 @@ public abstract class PublishExtension @Inject constructor(
     /**
      * Configuration of the release guard.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     @get:Nested
     public abstract val releaseGuard: ReleaseGuardExtension
@@ -104,7 +104,7 @@ public abstract class PublishExtension @Inject constructor(
      * Configures the release guard.
      *
      * @param action The configuration action.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun releaseGuard(action: Action<ReleaseGuardExtension>) {
         action.execute(releaseGuard)

@@ -28,13 +28,13 @@ import javax.inject.Inject
  * The main jar is `jar` of a JVM project and `jvmJar` of a multiplatform project.
  *
  * @param factory The object factory used to create the properties.
- * @since 4.3.0
+ * @since 5.0.0
  */
 public abstract class ArchivesExtension @Inject constructor(factory: ObjectFactory) {
     /**
      * The files the main jar carries in `META-INF`, such as `LICENSE` and `NOTICE`. Empty by default.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val legalFiles: ConfigurableFileCollection = factory.fileCollection()
 
@@ -43,14 +43,14 @@ public abstract class ArchivesExtension @Inject constructor(factory: ObjectFacto
      * module name or else the project name, `Implementation-Version`, the project version, and
      * `Implementation-Vendor`, the [vendor] when it is set. Defaults to `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val implementationManifest: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * The vendor the manifest names as `Implementation-Vendor`. Unset by default.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val vendor: Property<String> = factory.property(String::class.java)
 }

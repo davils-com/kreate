@@ -38,35 +38,35 @@ import javax.inject.Inject
  * branch.
  *
  * @param factory The object factory used to create the properties.
- * @since 4.3.0
+ * @since 5.0.0
  */
 public abstract class ReleaseGuardExtension @Inject constructor(factory: ObjectFactory) {
     /**
      * Whether `kreateReleaseGuard` is registered and every publish task depends on it. Defaults to
      * `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
      * The branch every release tag must be part of. Defaults to `main`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val releaseBranch: Property<String> = factory.property(String::class.java).convention("main")
 
     /**
      * The remote the release branch is read from. Defaults to `origin`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val remote: Property<String> = factory.property(String::class.java).convention("origin")
 
     /**
      * The prefix of release tags, such as `v`. Defaults to none.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val tagPrefix: Property<String> = factory.property(String::class.java).convention("")
 }

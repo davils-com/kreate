@@ -10,8 +10,8 @@ version: 2
 # `org.jetbrains.kotlin*` would also swallow `org.jetbrains.kotlinx`, taking Kover,
 # kotlinx-benchmark and the binary compatibility validator out of the updates with it.
 #
-# kotlinx-serialization and Ktor are held at the last release built on Kotlin 2.2, the stdlib of
-# Gradle 9.1, Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
+# kotlinx-serialization and Ktor may not need a newer stdlib than Kotlin 2.4.21, the one of
+# Gradle 9.9, Kreate's minimum. The reason is in gradle/libs.versions.toml; it moves when the minimum does.
 #
 # Gradle is watched from the repository root only. Every included build reads its versions from
 # the one catalog in gradle/libs.versions.toml and declares none of its own, so an entry per

@@ -31,13 +31,13 @@ import javax.inject.Inject
  * module descriptors and the configuration of the build.
  *
  * @param factory The object factory used to create the properties.
- * @since 4.3.0
+ * @since 5.0.0
  */
 public abstract class LicenseHeaderExtension @Inject constructor(factory: ObjectFactory) {
     /**
      * Whether `kreateLicenseHeaderCheck` is registered. Defaults to `false`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val enabled: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
@@ -45,7 +45,7 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
      * The notice without comment markers, one line per line of the header. Required once the check
      * is enabled; [apacheLicense] sets the notice of the Apache License 2.0.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val notice: Property<String> = factory.property(String::class.java)
 
@@ -53,7 +53,7 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
      * The Ant patterns, relative to the project directory, of the files that are checked. Defaults
      * to Kotlin, Kotlin script, Java, property and YAML files.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val includes: SetProperty<String> = factory.setProperty(String::class.java).convention(DEFAULT_INCLUDES)
 
@@ -62,14 +62,14 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
      * Kotlin and the IDE, the Git directory and the files Gradle generates in `gradle/` are never
      * checked either, whatever this property holds.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val excludes: SetProperty<String> = factory.setProperty(String::class.java).convention(emptySet())
 
     /**
      * Whether `check` runs `kreateLicenseHeaderCheck`. Defaults to `true`.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public val runOnCheck: Property<Boolean> = factory.property(Boolean::class.java).convention(true)
 
@@ -78,7 +78,7 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
      *
      * @param copyright The copyright line, such as `Copyright 2026 Davils`.
      * @throws IllegalArgumentException If [copyright] is blank or spans more than one line.
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public fun apacheLicense(copyright: String) {
         notice.set(apacheLicenseNotice(copyright))

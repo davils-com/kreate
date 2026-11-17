@@ -19,13 +19,13 @@ package com.davils.kreate.license
 /**
  * The names of the license header tasks.
  *
- * @since 4.3.0
+ * @since 5.0.0
  */
 public object LicenseHeaderTaskNames {
     /**
      * Checks that every selected file starts with the license header.
      *
-     * @since 4.3.0
+     * @since 5.0.0
      */
     public const val CHECK: String = "kreateLicenseHeaderCheck"
 }
