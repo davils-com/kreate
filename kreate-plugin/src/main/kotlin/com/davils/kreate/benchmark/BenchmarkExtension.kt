@@ -147,7 +147,7 @@ public abstract class BenchmarkExtension @Inject constructor(factory: ObjectFact
     }
 
     private companion object {
-        private const val DEFAULT_RUNTIME_VERSION = "0.4.17"
+        private const val DEFAULT_RUNTIME_VERSION = "0.5.0"
         private const val DEFAULT_JMH_VERSION = "1.37"
     }
 }

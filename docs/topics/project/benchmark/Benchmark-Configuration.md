@@ -11,7 +11,7 @@
 | `enabled`        | `Property<Boolean>` | `false`        | Activates the feature                                     |
 | `sourceSetName`  | `Property<String>`  | `benchmarks`   | Name of the source set holding the benchmarks             |
 | `createSourceSet`| `Property<Boolean>` | `true`         | Whether Kreate creates and wires that source set          |
-| `runtimeVersion` | `Property<String>`  | `0.4.17`       | Version of `kotlinx-benchmark-runtime`                    |
+| `runtimeVersion` | `Property<String>`  | `0.5.0`        | Version of `kotlinx-benchmark-runtime`                    |
 | `jmhVersion`     | `Property<String>`  | `1.37`         | JMH version used for JVM targets                          |
 | `applyAllOpen`   | `Property<Boolean>` | `true`         | Whether Kreate applies `allopen` for `@State`             |
 

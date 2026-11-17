@@ -25,8 +25,12 @@ kreate {
 | `enabled`     | `false`                                                                 | Registers `kreateLicenseHeaderCheck`                           |
 | `notice`      | none, required                                                          | The notice without comment markers                             |
 | `includes`    | `**/*.kt`, `**/*.kts`, `**/*.java`, `**/*.properties`, `**/*.yaml`, `**/*.yml` | Ant patterns of the checked files, relative to the project |
-| `excludes`    | `build`, `.gradle`, `.kotlin`, `.idea`, `.git`, `gradle/wrapper`, `gradle/gradle-daemon-jvm.properties` | Ant patterns that are never checked |
+| `excludes`    | empty                                                                   | Further Ant patterns that are never checked                    |
 | `runOnCheck`  | `true`                                                                  | Whether `check` runs the check                                 |
+
+The output of Gradle, Kotlin and the IDE (`build`, `.gradle`, `.kotlin`, `.idea`), the `.git`
+directory, `gradle/wrapper` and `gradle/gradle-daemon-jvm.properties` are never checked, whatever
+`excludes` holds.
 
 `apacheLicense(copyright)` sets `notice` to the copyright line followed by the notice of the Apache
 License 2.0. Any other notice is set as text:

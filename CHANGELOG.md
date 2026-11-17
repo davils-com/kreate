@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **kotlinx-benchmark runtime 0.5.0.** The default of `benchmark { runtimeVersion }` is now 0.5.0
+  instead of 0.4.17, in step with the kotlinx-benchmark plugin Kreate applies. A build that verifies
+  or locks its benchmark classpath records the new artifacts.
 - **Kotest 6.2.7.** The default of `tests { kotest { version } }` is now 6.2.7 instead of 6.2.6. A
   build that verifies or locks its test classpaths records the new artifacts.
 

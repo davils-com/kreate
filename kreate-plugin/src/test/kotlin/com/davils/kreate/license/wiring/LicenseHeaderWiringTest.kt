@@ -71,6 +71,29 @@ class LicenseHeaderWiringTest : FunSpec({
             project.checkDependencies() shouldContain LicenseHeaderTaskNames.CHECK
         }
 
+        test("keeps the generated files out when further files are excluded") {
+            val directory = workspace.freshDirectory()
+            directory.resolve("src/main/kotlin").mkdirs()
+            directory.resolve("src/main/kotlin/A.kt").writeText("class A\n")
+            directory.resolve("build/generated").mkdirs()
+            directory.resolve("build/generated/B.kt").writeText("class B\n")
+            directory.resolve(".port").mkdirs()
+            directory.resolve(".port/C.kt").writeText("class C\n")
+            val project = evaluatedKreateProject(directory, JVM_PLUGIN) { kreate ->
+                kreate.project.licenseHeader {
+                    enabled.set(true)
+                    apacheLicense("Copyright 2026 Example")
+                    excludes.add(".port/**")
+                }
+            }
+            val check = project.tasks.getByName(LicenseHeaderTaskNames.CHECK) as LicenseHeaderCheck
+            val names = check.sources.files.map { file -> file.name }
+
+            names shouldContain "A.kt"
+            names shouldNotContain "B.kt"
+            names shouldNotContain "C.kt"
+        }
+
         test("stays out of check when asked to") {
             val project = evaluatedKreateProject(workspace.freshDirectory(), JVM_PLUGIN) { kreate ->
                 kreate.project.licenseHeader {

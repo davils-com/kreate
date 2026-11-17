@@ -26,6 +26,16 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 private const val REPORT: String = "kreate/license/headers.txt"
 
+private val GENERATED: Set<String> = setOf(
+    "**/build/**",
+    "**/.gradle/**",
+    "**/.kotlin/**",
+    "**/.idea/**",
+    "**/.git/**",
+    "gradle/wrapper/**",
+    "gradle/gradle-daemon-jvm.properties",
+)
+
 internal fun Project.registerLicenseHeaderCheck(licenseHeader: LicenseHeaderExtension) {
     if (!licenseHeader.notice.isPresent) {
         throw InvalidUserDataException(
@@ -35,7 +45,7 @@ internal fun Project.registerLicenseHeaderCheck(licenseHeader: LicenseHeaderExte
     }
     val owner = this
     val includes = licenseHeader.includes.get()
-    val excludes = licenseHeader.excludes.get()
+    val excludes = GENERATED + licenseHeader.excludes.get()
     val selected = fileTree(layout.projectDirectory) {
         include(includes)
         exclude(excludes)

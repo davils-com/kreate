@@ -58,12 +58,13 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
     public val includes: SetProperty<String> = factory.setProperty(String::class.java).convention(DEFAULT_INCLUDES)
 
     /**
-     * The Ant patterns of the files that are never checked. Defaults to the output of Gradle,
-     * Kotlin and the IDE, the Git directory and the files Gradle generates in `gradle/`.
+     * Further Ant patterns of files that are never checked. Empty by default. The output of Gradle,
+     * Kotlin and the IDE, the Git directory and the files Gradle generates in `gradle/` are never
+     * checked either, whatever this property holds.
      *
      * @since 4.3.0
      */
-    public val excludes: SetProperty<String> = factory.setProperty(String::class.java).convention(DEFAULT_EXCLUDES)
+    public val excludes: SetProperty<String> = factory.setProperty(String::class.java).convention(emptySet())
 
     /**
      * Whether `check` runs `kreateLicenseHeaderCheck`. Defaults to `true`.
@@ -91,16 +92,6 @@ public abstract class LicenseHeaderExtension @Inject constructor(factory: Object
             "**/*.properties",
             "**/*.yaml",
             "**/*.yml",
-        )
-
-        val DEFAULT_EXCLUDES: Set<String> = setOf(
-            "**/build/**",
-            "**/.gradle/**",
-            "**/.kotlin/**",
-            "**/.idea/**",
-            "**/.git/**",
-            "gradle/wrapper/**",
-            "gradle/gradle-daemon-jvm.properties",
         )
     }
 }

@@ -1,11 +1,8 @@
 [versions]
 kotlin = "2.4.21"
 poet = "2.4.0"
-# Held at the last release built on Kotlin 2.2, the stdlib of Gradle 9.1, Kreate's minimum. Later
-# releases need a newer stdlib than a plugin finds at runtime on that Gradle.
-serialization = "1.9.0"
-# Held at the last line built on Kotlin 2.2 or older, for the same reason.
-ktor = "3.2.4"
+serialization = "1.13.0"
+ktor = "3.6.1"
 freemarker = "2.3.35"
 jackson = "2.23.0"
 dokka = "2.3.0"
@@ -30,27 +27,19 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 
-# Floors for transitive dependencies with a known vulnerability, see `kreate-plugin/build.gradle.kts`.
 freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 
 asm-core = { module = "org.ow2.asm:asm", version.ref = "asm" }
-
-# Reads the `kotlin.Metadata` annotation so that ABI validation can tell a Kotlin
-# `internal` declaration from a genuinely public one — both are `public` in bytecode.
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 
-# detekt rule sets applied to the plugin's own sources via `detektPlugins`
 detekt-rules-ktlintWrapper = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 detekt-rules-libraries = { module = "dev.detekt:detekt-rules-libraries", version.ref = "detekt" }
 
-# The API `:kreate-detekt-rules` is written against. `compileOnly` there: Detekt puts its own copy
-# on the analysis classpath, and a rule set that shipped a second one would load two of everything.
 detekt-api = { module = "dev.detekt:detekt-api", version.ref = "detekt" }
 detekt-test = { module = "dev.detekt:detekt-test", version.ref = "detekt" }
 
-# testing
 jacoco-agent = { module = "org.jacoco:org.jacoco.agent", version.ref = "jacoco" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -71,8 +60,6 @@ kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", ve
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
-# `:kreate-detekt-rules` is a plain Kotlin/JVM library, so it names the Kotlin plugin explicitly
-# rather than inheriting the one `kotlin-dsl` embeds in the plugin build.
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]

@@ -25,7 +25,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -42,7 +41,6 @@ internal abstract class LicenseHeaderCheck : KreateTask(
     KreateTaskGroup.KREATE
 ) {
     @get:InputFiles
-    @get:IgnoreEmptyDirectories
     @get:PathSensitive(PathSensitivity.RELATIVE)
     public abstract val sources: ConfigurableFileCollection
 
