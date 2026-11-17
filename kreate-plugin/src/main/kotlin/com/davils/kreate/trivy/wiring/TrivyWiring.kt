@@ -107,7 +107,7 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
         ignoreUnfixed.set(trivyVulnerabilityExtension.ignoreUnfixed)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
-        usesService(trivyDatabaseService())
+        usesService(trivyCacheService())
     }
 
     val directoryScans = directoryScans(trivyExtension, isGated)
@@ -146,7 +146,7 @@ private fun Project.directoryScans(
     if (filesystem.enabled.get()) {
         scans += tasks.register<TrivyFilesystemScan>(TrivyTaskNames.FILESYSTEM) {
             configureDirectoryScan(filesystem, isGated, "trivy-filesystem.json")
-            usesService(trivyDatabaseService())
+            usesService(trivyCacheService())
         }
     }
 

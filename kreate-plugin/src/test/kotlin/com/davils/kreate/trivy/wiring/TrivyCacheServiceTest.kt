@@ -26,10 +26,10 @@ import io.kotest.matchers.shouldBe
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testfixtures.ProjectBuilder
 
-class TrivyDatabaseServiceTest : FunSpec({
+class TrivyCacheServiceTest : FunSpec({
     val workspace = tempdir()
 
-    context("TrivyDatabaseService") {
+    context("TrivyCacheService") {
         test("admits one vulnerability scan at a time") {
             val builder = ProjectBuilder.builder()
             builder.withProjectDir(workspace.freshDirectory("project"))
@@ -42,7 +42,7 @@ class TrivyDatabaseServiceTest : FunSpec({
             project.tasks.getByName(TrivyTaskNames.VULNERABILITIES)
 
             val registrations = project.gradle.sharedServices.registrations
-            registrations.getByName(TRIVY_DATABASE_SERVICE).maxParallelUsages.get() shouldBe 1
+            registrations.getByName(TRIVY_CACHE_SERVICE).maxParallelUsages.get() shouldBe 1
         }
     }
 })
