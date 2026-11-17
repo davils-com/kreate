@@ -19,19 +19,14 @@ import com.davils.kreate.net.HttpMethod
 import com.davils.kreate.net.HttpTransport
 import com.davils.kreate.net.TransportRequest
 import java.net.URI
-import java.nio.file.AtomicMoveNotSupportedException
-import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
 
 private const val MAX_ARCHIVE_BYTES: Int = 256 * 1024 * 1024
 
 private const val MAX_CHECKSUM_FILE_BYTES: Int = 1024 * 1024
-
-private const val DIGEST_SUFFIX: String = ".sha256"
 
 private val GITHUB_RELEASE_HOSTS: Set<String> = setOf(
     "github.com",
@@ -48,6 +43,8 @@ internal class TrivyInstaller(
 
     private val allowedHosts: Set<String> = allowedHostsOf(baseUri)
 
+    private val publisher: BinaryPublisher = BinaryPublisher(warn)
+
     @OptIn(ExperimentalPathApi::class)
     fun install(version: String, asset: TrivyAsset, expectedDigest: String?, directory: Path): Path {
         Files.createDirectories(directory)
@@ -61,7 +58,7 @@ internal class TrivyInstaller(
             val binary = workspace.resolve(asset.binaryName)
             TrivyArchive.extract(archive, asset, binary)
             binary.toFile().setExecutable(true, false)
-            publish(binary, directory.resolve(asset.binaryName))
+            publisher.publish(binary, directory.resolve(asset.binaryName))
         } finally {
             workspace.deleteRecursively()
         }
@@ -120,24 +117,7 @@ internal class TrivyInstaller(
     private fun releaseUri(version: String, fileName: String): URI =
         URI("${baseUri.toString().trimEnd('/')}/v$version/$fileName")
 
-    private fun publish(binary: Path, target: Path): Path {
-        val digest = sha256Of(binary)
-        val digestFile = digestFileOf(target)
-        try {
-            Files.move(binary, target, StandardCopyOption.ATOMIC_MOVE)
-        } catch (cause: FileAlreadyExistsException) {
-            warn("Another build installed Trivy at the same time: ${cause.message}")
-            return target
-        } catch (cause: AtomicMoveNotSupportedException) {
-            throw TrivyUnavailableException("The Trivy cache does not support an atomic move: ${cause.message}", cause)
-        }
-        Files.writeString(digestFile, digest)
-        return target
-    }
-
-    companion object {
-        fun digestFileOf(binary: Path): Path = binary.resolveSibling(binary.fileName.toString() + DIGEST_SUFFIX)
-
+    private companion object {
         private fun allowedHostsOf(uri: URI): Set<String> {
             val host = uri.host.orEmpty()
             if (host == "github.com") return GITHUB_RELEASE_HOSTS

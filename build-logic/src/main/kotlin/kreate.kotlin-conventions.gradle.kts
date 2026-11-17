@@ -49,6 +49,20 @@ configurations.matching { it.name == JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_
     resolutionStrategy.activateDependencyLocking()
 }
 
+val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+val bouncyCastleFloor = libs.findVersion("bouncycastle").get().requiredVersion
+val bouncyCastleModules = listOf("bcprov-jdk18on", "bcpg-jdk18on", "bcpkix-jdk18on", "bcutil-jdk18on")
+
+configurations.matching { it.name == "kotlinBouncyCastleConfiguration" }.configureEach {
+    val bouncyCastleConfiguration = name
+    val constraintHandler = project.dependencies.constraints
+    bouncyCastleModules.forEach { module ->
+        constraintHandler.add(bouncyCastleConfiguration, "org.bouncycastle:$module:$bouncyCastleFloor") {
+            because("CVE-2026-8763 and CVE-2026-13506")
+        }
+    }
+}
+
 tasks.withType<ValidatePlugins>().configureEach {
     failOnWarning = true
     enableStricterValidation = true

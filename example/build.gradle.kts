@@ -137,6 +137,12 @@ kreate {
             enabled = true
         }
 
+        toolClasspaths {
+            floor("com.fasterxml.jackson", libs.versions.jackson.get()) {
+                exclude("jackson-annotations")
+            }
+        }
+
         apiValidation {
             enabled = true
         }

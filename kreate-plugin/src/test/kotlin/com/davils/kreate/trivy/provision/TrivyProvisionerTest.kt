@@ -22,6 +22,8 @@ import com.davils.kreate.host.Architecture
 import com.davils.kreate.host.OperatingSystem
 import com.davils.kreate.net.HttpTransports
 import com.davils.kreate.net.LoopbackServer
+import com.davils.kreate.net.LoopbackServer.Companion.HTTP_OK
+import com.davils.kreate.net.LoopbackServer.Companion.reply
 import com.davils.kreate.net.NetworkSettings
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
@@ -35,10 +37,19 @@ import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.Clock
 import java.util.HexFormat
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 private const val VERSION: String = "9.9.9"
 
 private val ASSET: TrivyAsset = TrivyAsset("Linux-64bit", "tar.gz", "trivy")
+
+private const val PARALLEL_TASKS: Int = 6
+
+private const val SLOW_DOWNLOAD_MILLIS: Long = 200
+
+private const val WAIT_SECONDS: Long = 30
 
 private val BINARY: ByteArray = "#!/bin/sh\necho trivy\n".toByteArray()
 
@@ -226,6 +237,41 @@ class TrivyProvisionerTest : FunSpec({
             server.requests.size shouldBe before
         }
 
+        test("downloads once when parallel tasks find it empty at the same time") {
+            server.handle(archivePath) { exchange ->
+                Thread.sleep(SLOW_DOWNLOAD_MILLIS)
+                exchange.reply(HTTP_OK, body = archive)
+            }
+            val cache = workspace.freshDirectory("cache")
+            val start = CountDownLatch(1)
+            val pool = Executors.newFixedThreadPool(PARALLEL_TASKS)
+
+            val tasks = List(PARALLEL_TASKS) {
+                pool.submit<String> {
+                    start.await()
+                    provisioner(settings(cache)).provision()
+                }
+            }
+            start.countDown()
+            val provisioned = tasks.map { task -> task.get(WAIT_SECONDS, TimeUnit.SECONDS) }
+            pool.shutdown()
+
+            provisioned.toSet().single() shouldContain cache.path
+            server.requests.count { request -> request.path == archivePath } shouldBe 1
+        }
+
+        test("installs the digest beside a binary an interrupted install left without one") {
+            server.respond(archivePath, body = archive)
+            val cache = workspace.freshDirectory("cache")
+            val binary = File(provisioner(settings(cache)).provision())
+            Files.delete(BinaryPublisher.digestFileOf(binary.toPath()))
+
+            provisioner(settings(cache)).provision()
+
+            val digestFile = BinaryPublisher.digestFileOf(binary.toPath())
+            Files.readString(digestFile) shouldBe sha256(BINARY)
+        }
+
         test("notices a cached binary that changed, and installs it again") {
             server.respond(archivePath, body = archive)
             val cache = workspace.freshDirectory("cache")
@@ -243,7 +289,7 @@ class TrivyProvisionerTest : FunSpec({
             server.respond(archivePath, body = archive)
             val cache = workspace.freshDirectory("cache")
             val binary = File(provisioner(settings(cache)).provision())
-            Files.delete(TrivyInstaller.digestFileOf(binary.toPath()))
+            Files.delete(BinaryPublisher.digestFileOf(binary.toPath()))
             binary.delete()
 
             provisioner(settings(cache)).provision()

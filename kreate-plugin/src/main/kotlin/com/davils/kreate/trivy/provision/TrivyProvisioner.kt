@@ -43,14 +43,26 @@ internal class TrivyProvisioner(
 
     private fun cachedBinary(): Path? {
         val binary = binaryPath() ?: return null
-        val digestFile = TrivyInstaller.digestFileOf(binary)
-        if (!Files.isRegularFile(binary) || !Files.isRegularFile(digestFile)) return null
-        if (sha256Of(binary) == Files.readString(digestFile).trim()) return binary
-
-        warn("The cached Trivy at $binary was changed after it was installed. Installing it again.")
-        Files.delete(binary)
-        Files.delete(digestFile)
+        val recorded = recordedDigestOf(binary) ?: return null
+        if (sha256Of(binary) == recorded) return binary
         return null
+    }
+
+    private fun reusableBinary(): Path? {
+        val cached = cachedBinary()
+        if (cached != null) return cached
+
+        val binary = binaryPath() ?: return null
+        val changed = recordedDigestOf(binary) != null
+        if (changed) warn("The cached Trivy at $binary was changed after it was installed. Installing it again.")
+        return null
+    }
+
+    private fun recordedDigestOf(binary: Path): String? {
+        val digestFile = BinaryPublisher.digestFileOf(binary)
+        if (!Files.isRegularFile(binary) || !Files.isRegularFile(digestFile)) return null
+        val recorded = Files.readString(digestFile)
+        return recorded.trim()
     }
 
     private fun binaryPath(): Path? {
@@ -67,8 +79,11 @@ internal class TrivyProvisioner(
         val version = settings.version
         val asset = requireDownloadable(installedElsewhere)
         val expected = settings.checksums[asset.platform] ?: TrivyPins.digestOf(version, asset.platform)
+        val directory = directoryOf(asset)
         return try {
-            installer().install(version, asset, expected, directoryOf(asset))
+            CacheLock.holding(directory) {
+                reusableBinary() ?: installer().install(version, asset, expected, directory)
+            }
         } catch (cause: NetworkException) {
             throw TrivyUnavailableException("Trivy $version could not be downloaded: ${cause.message}", cause)
         }

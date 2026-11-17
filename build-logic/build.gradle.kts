@@ -26,4 +26,10 @@ kotlin {
 
 dependencies {
     implementation(libs.bundles.build.logic)
+
+    constraints {
+        implementation(libs.freemarker) {
+            because("CVE-2026-84939: path traversal through a malformed locale identifier")
+        }
+    }
 }

@@ -8,6 +8,9 @@ serialization = "1.13.0"
 ktor = "3.6.1"
 freemarker = "2.3.35"
 jackson = "2.23.0"
+# Floor of the Bouncy Castle that the Kotlin Gradle plugin resolves, see
+# `build-logic/src/main/kotlin/kreate.kotlin-conventions.gradle.kts`.
+bouncycastle = "1.85"
 dokka = "2.3.0"
 publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
@@ -30,7 +33,8 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 
-# Floors for transitive dependencies with a known vulnerability, see `kreate-plugin/build.gradle.kts`.
+# Floors for transitive dependencies with a known vulnerability, see `kreate-plugin/build.gradle.kts`,
+# `build-logic/build.gradle.kts` and the tool classpaths of `example/build.gradle.kts`.
 freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
