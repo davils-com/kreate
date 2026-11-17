@@ -16,12 +16,9 @@
 
 package com.davils.kreate.trivy.wiring
 
-import org.gradle.api.Project
-import org.gradle.api.provider.Provider
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
 
-private const val MAX_PARALLEL_DATABASE_USAGES = 1
+internal const val TRIVY_CACHE_SERVICE: String = "kreateTrivyCache"
 
-internal fun Project.trivyDatabaseService(): Provider<TrivyDatabaseService> =
-    gradle.sharedServices.registerIfAbsent(TRIVY_DATABASE_SERVICE, TrivyDatabaseService::class.java) {
-        maxParallelUsages.set(MAX_PARALLEL_DATABASE_USAGES)
-    }
+internal abstract class TrivyCacheService : BuildService<BuildServiceParameters.None>

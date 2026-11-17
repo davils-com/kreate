@@ -64,7 +64,10 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
 
     val isGated = extension.assurance.enabled.get()
 
-    tasks.withType<TrivyScan>().configureEach { project.configureTool(tool, trivyExtension) }
+    tasks.withType<TrivyScan>().configureEach {
+        project.configureTool(tool, trivyExtension)
+        usesService(project.trivyCacheService())
+    }
     tasks.register<TrivyProvision>(TrivyTaskNames.PROVISION) { project.configureTool(tool, trivyExtension) }
 
     val trivySecretExtension = trivyExtension.secrets
@@ -107,7 +110,6 @@ internal fun Project.initializeTrivy(extension: KreateExtension) {
         failOnMissingLockFiles.set(trivyVulnerabilityExtension.failOnMissingLockFiles)
         ignoreUnfixed.set(trivyVulnerabilityExtension.ignoreUnfixed)
         lockFiles.setFrom(trivyVulnerabilityExtension.lockFiles)
-        usesService(trivyDatabaseService())
     }
 
     val directoryScans = directoryScans(trivyExtension, isGated)
@@ -146,7 +148,6 @@ private fun Project.directoryScans(
     if (filesystem.enabled.get()) {
         scans += tasks.register<TrivyFilesystemScan>(TrivyTaskNames.FILESYSTEM) {
             configureDirectoryScan(filesystem, isGated, "trivy-filesystem.json")
-            usesService(trivyDatabaseService())
         }
     }
 

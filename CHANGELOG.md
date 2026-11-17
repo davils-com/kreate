@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.0.2
+
+### Fixed
+
+- **Trivy scans take turns with the cache of Trivy.** Only the vulnerability and the filesystem scan
+  waited for each other, so the misconfiguration scan ran beside them with the configuration cache.
+  One scan replaced the checks bundle under `trivy/policy` while another loaded it, and on Windows
+  Trivy failed with `The system cannot find the path specified`. Every Trivy scan, secrets and
+  licenses included, now runs through the build service `kreateTrivyCache`, which admits one scan at
+  a time, and a test keeps a new scan from leaving it out.
+
 ## 5.0.1
 
 ### Fixed
