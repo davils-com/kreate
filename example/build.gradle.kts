@@ -58,7 +58,13 @@ kreate {
             }
         }
 
+        compiler {
+            progressiveMode = true
+        }
+
         jvm {
+            moduleName = "com.davils.example"
+
             jni {
                 enabled = true
                 projectDirectory = layout.projectDirectory.dir("jni")
@@ -157,6 +163,11 @@ kreate {
             environment = "CI_COMMIT_TAG"
             property = "version"
             snapshot = false
+        }
+
+        archives {
+            implementationManifest = true
+            vendor = "Example"
         }
 
         buildConstant {

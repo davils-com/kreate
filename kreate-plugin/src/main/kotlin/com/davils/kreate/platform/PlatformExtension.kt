@@ -81,6 +81,14 @@ public abstract class PlatformExtension @Inject constructor(
     public abstract val jvm: JvmExtension
 
     /**
+     * Options of the Kotlin compiler.
+     *
+     * @since 4.3.0
+     */
+    @get:Nested
+    public abstract val compiler: CompilerExtension
+
+    /**
      * Configures the [MultiplatformExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -96,5 +104,15 @@ public abstract class PlatformExtension @Inject constructor(
      * */
     public fun jvm(action: Action<JvmExtension>) {
         action.execute(jvm)
+    }
+
+    /**
+     * Configures the options of the Kotlin compiler.
+     *
+     * @param action The configuration action.
+     * @since 4.3.0
+     */
+    public fun compiler(action: Action<CompilerExtension>) {
+        action.execute(compiler)
     }
 }

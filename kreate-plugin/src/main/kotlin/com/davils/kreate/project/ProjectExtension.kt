@@ -24,8 +24,11 @@ import com.davils.kreate.constants.BuildConstantsExtension
 import com.davils.kreate.coverage.CoverageExtension
 import com.davils.kreate.detekt.DetektExtension
 import com.davils.kreate.docs.DocsExtension
+import com.davils.kreate.floor.ToolClasspathsExtension
 import com.davils.kreate.githook.GitHooksExtension
+import com.davils.kreate.license.LicenseHeaderExtension
 import com.davils.kreate.locking.DependencyLockingExtension
+import com.davils.kreate.packaging.ArchivesExtension
 import com.davils.kreate.publish.PublishExtension
 import com.davils.kreate.testing.TestsExtension
 import org.gradle.api.Action
@@ -193,6 +196,30 @@ public abstract class ProjectExtension @Inject constructor(
     public abstract val gitHooks: GitHooksExtension
 
     /**
+     * Configuration of the license header check.
+     *
+     * @since 4.3.0
+     */
+    @get:Nested
+    public abstract val licenseHeader: LicenseHeaderExtension
+
+    /**
+     * Configuration of the archives the project builds.
+     *
+     * @since 4.3.0
+     */
+    @get:Nested
+    public abstract val archives: ArchivesExtension
+
+    /**
+     * Version floors for the classpaths of the tools the build runs.
+     *
+     * @since 4.3.0
+     */
+    @get:Nested
+    public abstract val toolClasspaths: ToolClasspathsExtension
+
+    /**
      * Configures the [ProjectVersionExtension] using the provided action.
      *
      * @param action The configuration action.
@@ -320,5 +347,35 @@ public abstract class ProjectExtension @Inject constructor(
      */
     public fun gitHooks(action: Action<GitHooksExtension>) {
         action.execute(gitHooks)
+    }
+
+    /**
+     * Configures the license header check.
+     *
+     * @param action The configuration action.
+     * @since 4.3.0
+     */
+    public fun licenseHeader(action: Action<LicenseHeaderExtension>) {
+        action.execute(licenseHeader)
+    }
+
+    /**
+     * Configures the archives the project builds.
+     *
+     * @param action The configuration action.
+     * @since 4.3.0
+     */
+    public fun archives(action: Action<ArchivesExtension>) {
+        action.execute(archives)
+    }
+
+    /**
+     * Configures the version floors of the tool classpaths.
+     *
+     * @param action The configuration action.
+     * @since 4.3.0
+     */
+    public fun toolClasspaths(action: Action<ToolClasspathsExtension>) {
+        action.execute(toolClasspaths)
     }
 }

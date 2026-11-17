@@ -82,6 +82,22 @@ public abstract class DetektExtension @Inject constructor(factory: ObjectFactory
     public val formatting: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 
     /**
+     * Whether Detekt also runs the `libraries` rule set, `dev.detekt:detekt-rules-libraries` of the
+     * Detekt version in use, which checks the public API of a library. Defaults to `false`.
+     *
+     * @since 4.3.0
+     */
+    public val libraryRules: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
+     * Whether `check` also runs the Detekt tasks with type resolution, such as `detektMain` and
+     * `detektTest`, which find what the analysis of the plain sources cannot. Defaults to `false`.
+     *
+     * @since 4.3.0
+     */
+    public val typeResolution: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
      * The Detekt configuration file.
      *
      * Defaults to `detekt.yaml` in the root project directory.

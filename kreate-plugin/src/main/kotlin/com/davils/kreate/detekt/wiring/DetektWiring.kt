@@ -43,8 +43,10 @@ internal fun Project.initializeDetekt(extension: KreateExtension) {
     configureDetektTasks(detektExtension)
     addKreateRuleSet(detektExtension)
     addFormatting(detektExtension)
+    addLibraryRules(detektExtension)
     registerAnalyseTask()
     analyseOnCheck()
+    analyseTypesOnCheck(detektExtension)
 }
 
 private fun Project.registerAnalyseTask() {
@@ -72,6 +74,8 @@ private fun Project.configureDetektTasks(extension: DetektExtension) {
 
     tasks.withType<Detekt>().configureEach {
         exclude(generated)
+        val isFormatter = name == DetektTaskNames.FORMAT_APPLY
+        val sarifRequired = extension.reports.sarif.required.map { required -> required && !isFormatter }
 
         reports {
             checkstyle {
@@ -90,7 +94,7 @@ private fun Project.configureDetektTasks(extension: DetektExtension) {
             }
 
             sarif {
-                required.set(extension.reports.sarif.required)
+                required.set(sarifRequired)
                 outputLocation.set(perTaskReport(extension.reports.sarif.outputLocation, name))
             }
         }

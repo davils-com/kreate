@@ -92,4 +92,29 @@ class GitHistoryTest : FunSpec({
             history.show("1.0.0", "api/a.api").shouldBeNull()
         }
     }
+
+    context("the ancestry") {
+        test("holds when git merge-base succeeds") {
+            val runner = RecordingRunner { resultOf(0) }
+
+            historyOf(runner).isAncestor("HEAD", "origin/main") shouldBe true
+            runner.invocations.single().arguments shouldContainAll listOf("merge-base", "--is-ancestor", "HEAD")
+        }
+
+        test("does not hold when git merge-base answers no") {
+            historyOf(RecordingRunner { resultOf(1) }).isAncestor("HEAD", "origin/main") shouldBe false
+        }
+
+        test("cannot be told when the branch is unknown") {
+            shouldThrow<GitUnavailableException> {
+                historyOf(RecordingRunner { resultOf(128) }).isAncestor("HEAD", "origin/main")
+            }
+        }
+
+        test("refuses a branch that would be read as an option") {
+            shouldThrow<IllegalArgumentException> {
+                historyOf(RecordingRunner { resultOf(0) }).isAncestor("HEAD", "--exec=x")
+            }
+        }
+    }
 })

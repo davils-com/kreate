@@ -18,10 +18,9 @@ package com.davils.kreate.assurance.wiring
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.api.ApiValidationTaskNames
 import com.davils.kreate.assurance.task.QualityIngest
-import dev.detekt.gradle.Detekt
+import com.davils.kreate.detekt.wiring.analysisTasks
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.withType
 
 private const val INGEST_TASK: String = "kreateAssuranceIngest"
 
@@ -41,7 +40,7 @@ internal fun Project.registerQualityIngest(extension: KreateExtension) {
 
     tasks.register<QualityIngest>(INGEST_TASK) {
         if (project.detekt.enabled.get()) {
-            val detektTasks = owner.tasks.withType<Detekt>()
+            val detektTasks = owner.analysisTasks()
             sarifReports.from(owner.provider { detektTasks.map { task -> task.reports.sarif.outputLocation } })
             mustRunAfter(detektTasks)
         }

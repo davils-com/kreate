@@ -53,7 +53,21 @@ kreate {
 }
 ```
 
-The block above makes every build without a tag a snapshot. A
+The block above makes every build without a tag a snapshot. `snapshotUnlessTagged` does the same for
+GitHub Actions and GitLab CI, which name a release tag in `GITHUB_REF_TYPE` and `GITHUB_REF_NAME` or in
+`CI_COMMIT_TAG`; a local build is always a snapshot. An explicit `snapshot` wins over it:
+
+```kotlin
+kreate {
+    project {
+        version {
+            snapshotUnlessTagged = true
+        }
+    }
+}
+```
+
+A
 [Maven repository target](Publishing-Maven-Repository.md) publishes a snapshot to its `snapshots`
 URL and everything else to `releases`, so the same task serves both.
 

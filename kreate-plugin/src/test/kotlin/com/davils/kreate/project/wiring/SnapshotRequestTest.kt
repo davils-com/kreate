@@ -47,6 +47,25 @@ class SnapshotRequestTest : FunSpec({
             gradleProject.requestsSnapshot(version) shouldBe true
         }
 
+        test("a build without a release tag is a snapshot when asked to be one unless tagged") {
+            val gradleProject = project()
+            val version = kreate(gradleProject).project.version
+            version.snapshotUnlessTagged.set(true)
+            val isGitHubTag = System.getenv("GITHUB_REF_TYPE") == "tag"
+            val isGitLabTag = !System.getenv("CI_COMMIT_TAG").isNullOrBlank()
+
+            gradleProject.requestsSnapshot(version) shouldBe !(isGitHubTag || isGitLabTag)
+        }
+
+        test("an explicit snapshot decision wins over the release tag rule") {
+            val gradleProject = project()
+            val version = kreate(gradleProject).project.version
+            version.snapshotUnlessTagged.set(true)
+            version.snapshot.set(false)
+
+            gradleProject.requestsSnapshot(version) shouldBe false
+        }
+
         test("the DSL can rule a snapshot out") {
             val gradleProject = project()
             val version = kreate(gradleProject).project.version

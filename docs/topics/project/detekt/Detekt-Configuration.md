@@ -34,6 +34,16 @@ The following properties are available directly within the `detekt { }` block:
 - **Default**: `true`
 - **Description**: Adds `com.davils:kreate-detekt-rules` to the project's `detektPlugins` configuration, pinned to the version of Kreate that is running. The rule set enforces the Kreate comment and KDoc standard and reports only — it never rewrites a file. Set to `false` to keep the artifact off the analysis classpath. See [](Detekt-Rules.md).
 
+### `libraryRules`
+- **Type**: `Property<Boolean>`
+- **Default**: `false`
+- **Description**: Adds `dev.detekt:detekt-rules-libraries` of the Detekt version in use to `detektPlugins`. The rule set checks the public API of a library.
+
+### `typeResolution`
+- **Type**: `Property<Boolean>`
+- **Default**: `false`
+- **Description**: Makes `check` and `kreateDetekt` run the Detekt tasks with type resolution, such as `detektMain` and `detektTest`. They find what the analysis of the plain sources cannot, and take longer.
+
 ### `config`
 - **Type**: `RegularFileProperty`
 - **Default**: `detekt.yaml` at the root project level.

@@ -7,10 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **License headers.** `project { licenseHeader { } }` registers `kreateLicenseHeaderCheck`, which
+  `check` runs. It verifies that every Kotlin, Java, build script, property and YAML file starts
+  with the notice, in a block comment or in `#` lines, and names every file that does not.
+  `apacheLicense("Copyright 2026 Example")` sets the notice of the Apache License 2.0.
+- **Release guard.** `publish { releaseGuard { enabled = true } }` registers `kreateReleaseGuard`,
+  which every task that publishes to a Maven repository depends on. It refuses a version the
+  environment changed, a release without a release tag, a tag that names another version or no
+  Semantic Versioning release, a tag outside the release branch and a release built with snapshot
+  tooling. Tags are read from GitHub Actions and GitLab CI.
+- **Snapshots unless tagged.** `version { snapshotUnlessTagged = true }` makes every build without
+  a release tag a snapshot, so local builds and branch pipelines never resolve a release.
+- **Kotlin compiler options.** `platform { compiler { } }` sets progressive mode, the extra
+  warnings, the language and API version and the JVM default methods on every Kotlin compilation.
+- **Java modules.** `platform { jvm { moduleName } }` patches the Kotlin classes into the module of
+  `src/main/java/module-info.java`, so its `exports` compile, and otherwise names the jar as an
+  automatic module. `jvm { javaWarningsAsErrors = true }` compiles Java with `--release`,
+  `-Xlint:all` and `-Werror`.
+- **Main jar.** `project { archives { } }` adds legal files such as `LICENSE` and `NOTICE` to
+  `META-INF` of the main jar and names the implementation in its manifest.
+- **Version floors for tools.** `project { toolClasspaths { floor("com.fasterxml.jackson", "2.22.3") } }`
+  raises the modules of a group on the classpaths of Dokka, Detekt, Kover and the Kotlin Gradle
+  plugin, never on the classpaths of the project.
+- **Detekt.** `detekt { libraryRules = true }` adds the `libraries` rule set of the Detekt version
+  in use, and `detekt { typeResolution = true }` makes `check` and `kreateDetekt` run the analysis
+  with type resolution, such as `detektMain`.
+
 ### Changed
 
 - **Kotest 6.2.7.** The default of `tests { kotest { version } }` is now 6.2.7 instead of 6.2.6. A
   build that verifies or locks its test classpaths records the new artifacts.
+
+### Fixed
+
+- **`check` never formats.** With `assurance { reports { ingestQuality } }` the quality ingest read
+  the SARIF report of every Detekt task, so `check` ran `kreateFormatApply` and rewrote the sources.
+  The formatter is no analysis any more: it writes no SARIF report and the ingest leaves it out.
 
 ## 4.2.0
 

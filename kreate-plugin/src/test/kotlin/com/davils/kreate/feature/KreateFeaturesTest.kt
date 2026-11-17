@@ -28,12 +28,15 @@ import com.davils.kreate.coverage.wiring.CoverageFeature
 import com.davils.kreate.detekt.wiring.DetektFeature
 import com.davils.kreate.docs.wiring.DocsFeature
 import com.davils.kreate.doctor.wiring.DoctorFeature
+import com.davils.kreate.floor.wiring.ToolClasspathsFeature
 import com.davils.kreate.githook.wiring.GitHookFeature
 import com.davils.kreate.governance.wiring.GovernanceFeature
 import com.davils.kreate.inspection.wiring.InspectionFeature
 import com.davils.kreate.jni.wiring.JniFeature
+import com.davils.kreate.license.wiring.LicenseHeaderFeature
 import com.davils.kreate.local.wiring.LocalWorkflowFeature
 import com.davils.kreate.locking.wiring.DependencyLockingFeature
+import com.davils.kreate.packaging.wiring.ArchivesFeature
 import com.davils.kreate.platform.wiring.PlatformFeature
 import com.davils.kreate.project.wiring.PluginsFeature
 import com.davils.kreate.project.wiring.RepositoriesFeature
@@ -73,6 +76,8 @@ class KreateFeaturesTest : FunSpec({
                 ConfigurationSchemaFeature,
                 BenchmarkFeature,
                 ChangelogFeature,
+                LicenseHeaderFeature,
+                ArchivesFeature,
                 CoverageFeature
             )
         }
@@ -82,6 +87,7 @@ class KreateFeaturesTest : FunSpec({
                 PluginsFeature,
                 RepositoriesFeature,
                 DependencyLockingFeature,
+                ToolClasspathsFeature,
                 VersionFeature,
                 BuildConstantsFeature,
                 DocsFeature,
@@ -92,6 +98,8 @@ class KreateFeaturesTest : FunSpec({
                 ConfigurationSchemaFeature,
                 BenchmarkFeature,
                 ChangelogFeature,
+                LicenseHeaderFeature,
+                ArchivesFeature,
                 CoverageFeature,
                 PlatformFeature,
                 CInteropFeature,

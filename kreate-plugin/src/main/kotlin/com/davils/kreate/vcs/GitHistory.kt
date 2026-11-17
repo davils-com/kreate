@@ -68,6 +68,15 @@ internal class GitHistory(private val runner: ToolRunner, private val git: Strin
         return records.filter { record -> record.isNotEmpty() }.map(::commitOf)
     }
 
+    fun isAncestor(ancestor: String, descendant: String): Boolean {
+        requireRevision(ancestor)
+        requireRevision(descendant)
+        val result = run("merge-base", "--is-ancestor", ancestor, descendant)
+        if (result.exitCode == 0) return true
+        if (result.exitCode == 1) return false
+        throw GitUnavailableException("git merge-base failed: ${result.stderr.text.trim()}")
+    }
+
     fun gitPath(name: String): File {
         val result = run(REV_PARSE, "--git-path", name)
         if (!result.isSuccess()) throw GitUnavailableException(directory.path + NOT_A_REPOSITORY)

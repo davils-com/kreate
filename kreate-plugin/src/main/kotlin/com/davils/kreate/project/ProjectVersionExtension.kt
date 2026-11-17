@@ -55,4 +55,13 @@ public abstract class ProjectVersionExtension @Inject constructor(
      * @since 4.2.0
      */
     public val snapshot: Property<Boolean> = factory.property(Boolean::class.java)
+
+    /**
+     * Whether every build without a release tag resolves a snapshot. A release tag is read from
+     * `GITHUB_REF_TYPE` and `GITHUB_REF_NAME` on GitHub Actions and from `CI_COMMIT_TAG` on GitLab CI,
+     * so a local build is always a snapshot. An explicit [snapshot] takes precedence.
+     * Defaults to `false`.
+     * @since 4.3.0
+     */
+    public val snapshotUnlessTagged: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 }
