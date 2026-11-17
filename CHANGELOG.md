@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- **Parallel Trivy tasks install Trivy once.** With `org.gradle.parallel=true`, every Trivy task
+  that found the cache empty downloaded Trivy at the same time and moved its binary over the others.
+  On Windows that move fails with `AccessDeniedException` as soon as another task runs `trivy.exe`.
+  Kreate now installs a version and platform under a lock that holds across threads and Gradle
+  processes, looks into the cache again once it holds it, never replaces a binary that is already in
+  place with the same content, and writes the digest before the binary, so no task takes a binary
+  without its digest for a missing one.
+
 ## 5.0.0
 
 Kreate 5.0.0 needs Gradle 9.9. In return it runs on the current kotlinx-serialization and Ktor, and
