@@ -243,7 +243,7 @@ class TrivyProvisionerTest : FunSpec({
             server.respond(archivePath, body = archive)
             val cache = workspace.freshDirectory("cache")
             val binary = File(provisioner(settings(cache)).provision())
-            Files.delete(TrivyInstaller.digestFileOf(binary.toPath()))
+            Files.delete(BinaryPublisher.digestFileOf(binary.toPath()))
             binary.delete()
 
             provisioner(settings(cache)).provision()

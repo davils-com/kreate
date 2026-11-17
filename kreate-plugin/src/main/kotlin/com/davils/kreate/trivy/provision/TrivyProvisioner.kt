@@ -43,7 +43,7 @@ internal class TrivyProvisioner(
 
     private fun cachedBinary(): Path? {
         val binary = binaryPath() ?: return null
-        val digestFile = TrivyInstaller.digestFileOf(binary)
+        val digestFile = BinaryPublisher.digestFileOf(binary)
         if (!Files.isRegularFile(binary) || !Files.isRegularFile(digestFile)) return null
         if (sha256Of(binary) == Files.readString(digestFile).trim()) return binary
 
