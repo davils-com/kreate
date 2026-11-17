@@ -96,6 +96,7 @@ internal abstract class TrivyScan(
         val findings = runs.flatMap { run -> run.findings }
         writeDocument(documentOf(findings, failures))
         findings.forEach { finding -> logger.lifecycle(describe(finding)) }
+        failures.forEach { failure -> logger.warn(failure) }
 
         if (gated.get()) return
         if (failures.isNotEmpty()) throw GradleException(failures.joinToString("\n"))

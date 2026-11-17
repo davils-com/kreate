@@ -58,6 +58,13 @@ guard, Java modules, compiler options, the main jar and version floors for tools
 
 ### Fixed
 
+- **An incomplete gate says why.** `kreateAssurance [INCOMPLETE]` named only the sources that could
+  not finish. It now names the reason of each, such as the error of Trivy, and a Trivy scan the gate
+  owns logs its failure as a warning instead of keeping it in the document only.
+- **`skipDirectories` of Trivy work on Windows.** An absolute directory such as
+  `D:\a\project/**/build` reached Trivy with backslashes, which no path matched, so Trivy walked into
+  the output of the running build. Kreate now hands Trivy the pattern with forward slashes on
+  Windows.
 - **`check` never formats.** With `assurance { reports { ingestQuality } }` the quality ingest read
   the SARIF report of every Detekt task, so `check` ran `kreateFormatApply` and rewrote the sources.
   The formatter is no analysis any more: it writes no SARIF report and the ingest leaves it out.

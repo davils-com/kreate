@@ -63,6 +63,7 @@ internal abstract class AssuranceVerdictTask : AssuranceEvaluationTask("Decides 
 
     private fun incompleteMessage(verdict: Verdict): String {
         val sources = verdict.incompleteSources.joinToString()
-        return "These sources could not finish, so nothing can be said about them: $sources."
+        val reasons = verdict.incompleteReasons.joinToString(separator = "") { reason -> "\n  $reason" }
+        return "These sources could not finish, so nothing can be said about them: $sources.$reasons"
     }
 }
