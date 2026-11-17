@@ -6,8 +6,8 @@ Security fixes are released for the latest minor version of the current major re
 
 | Version | Supported |
 |---------|-----------|
-| 4.2.x   | Yes       |
-| < 4.2   | No        |
+| 5.0.x   | Yes       |
+| < 5.0   | No        |
 
 ## Reporting a Vulnerability
 
@@ -61,7 +61,7 @@ on Maven Central. Each release also carries a signed build
 provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
 
 ```bash
-gh attestation verify kreate-4.2.0.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
+gh attestation verify kreate-5.0.0.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
 ```
 
 From 4.2.0 on the release is built by the reusable pipeline of

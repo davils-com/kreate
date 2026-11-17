@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/Kotlin-2.4-Redtronics?style=for-the-badge&logo=kotlin&labelColor=white&color=purple" alt="Kotlin">
   </a>
   <a href="https://gradle.org">
-    <img src="https://img.shields.io/badge/Gradle-9.1%2B-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
+    <img src="https://img.shields.io/badge/Gradle-9.9%2B-Redtronics?style=for-the-badge&logo=gradle&labelColor=white&color=02303A" alt="Gradle">
   </a>
   <a href="https://adoptium.net">
     <img src="https://img.shields.io/badge/JDK-25%2B-Redtronics?style=for-the-badge&logo=openjdk&labelColor=white&color=ED8B00" alt="JDK">
@@ -221,7 +221,7 @@ Versions up to 4.1.0 are on Maven Central.
 // build.gradle.kts
 plugins {
     kotlin("jvm") version "2.4.21"
-    id("com.davils.kreate") version "4.2.0"
+    id("com.davils.kreate") version "5.0.0"
 }
 ```
 
@@ -350,7 +350,7 @@ kreate {
 
 | Component        | Minimum | Verified in CI                     |
 |:-----------------|:--------|:-----------------------------------|
-| Gradle           | 9.1     | 9.1 and the current release        |
+| Gradle           | 9.9     | 9.9 and the current release        |
 | JDK              | 25      | 25                                 |
 | Kotlin           | 2.4.21  | 2.4.21                             |
 | Operating system | —       | Linux, macOS, Windows              |
