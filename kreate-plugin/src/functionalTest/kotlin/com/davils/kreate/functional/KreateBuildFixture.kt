@@ -179,7 +179,8 @@ class KreateBuildFixture(
     private fun environmentWith(extra: Map<String, String>): Map<String, String> {
         val inherited = System.getenv()
         val withoutCi = inherited.filterKeys { key -> key !in CI_VARIABLES }
-        return withoutCi + extra
+        val withoutRelease = withoutCi.filterKeys { key -> key !in RELEASE_VARIABLES }
+        return withoutRelease + extra
     }
 
     private fun runner(arguments: List<String>): GradleRunner {
@@ -208,6 +209,14 @@ class KreateBuildFixture(
 
     companion object {
         val CI_VARIABLES: Set<String> = setOf("CI", "GITLAB_CI", "GITHUB_ACTIONS", "CI_PIPELINE_ID")
+
+        val RELEASE_VARIABLES: Set<String> = setOf(
+            "GITHUB_REF_TYPE",
+            "GITHUB_REF_NAME",
+            "CI_COMMIT_TAG",
+            "KREATE_SNAPSHOT",
+            "VERSION"
+        )
 
         val javaVersion: Int = Runtime.version().feature()
 
