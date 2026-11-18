@@ -43,7 +43,7 @@ internal fun Project.shareSuiteWithNonJvmTargets(
 
     val sharedName = sharedSourceSetName(suite.sourceSetName.get())
     val shared = kotlin.sourceSets.getByName(sharedName)
-    val targets = kotlin.targets.filterIsInstance<KotlinTargetWithTests<*, *>>().filterNot { it.isJvm() }
+    val targets = nonJvmTargetsWithTests(kotlin)
     targets.forEach { target -> shareWith(target, suite, shared) }
 
     val testRuns = targets.flatMap { target -> target.testRuns.filterIsInstance<ExecutionTaskHolder<*>>() }
@@ -51,11 +51,29 @@ internal fun Project.shareSuiteWithNonJvmTargets(
     tasksBySuite[suite.name]?.configure { dependsOn(testTasks) }
 }
 
+internal fun nonJvmTestNamesTakenOver(
+    suites: List<TestSuiteExtension>,
+    kotlin: KotlinMultiplatformExtension
+): Set<String> {
+    val isSharing = suites.any { suite -> suite.nonJvmTargets.get() }
+    if (!isSharing) return emptySet()
+
+    val targets = nonJvmTargetsWithTests(kotlin)
+    return targets.map { target -> testSourceSetOf(target).name }.toSet()
+}
+
+private fun nonJvmTargetsWithTests(kotlin: KotlinMultiplatformExtension): List<KotlinTargetWithTests<*, *>> =
+    kotlin.targets.filterIsInstance<KotlinTargetWithTests<*, *>>().filterNot { it.isJvm() }
+
+private fun testSourceSetOf(target: KotlinTarget): KotlinSourceSet {
+    val test = target.compilations.getByName(KotlinCompilation.TEST_COMPILATION_NAME)
+    return test.defaultSourceSet
+}
+
 private fun KotlinTarget.isJvm(): Boolean = this is KotlinJvmTarget
 
 private fun Project.shareWith(target: KotlinTarget, suite: TestSuiteExtension, shared: KotlinSourceSet) {
-    val test = target.compilations.getByName(KotlinCompilation.TEST_COMPILATION_NAME)
-    val testSourceSet = test.defaultSourceSet
+    val testSourceSet = testSourceSetOf(target)
     testSourceSet.kotlin.srcDirs(shared.kotlin.srcDirs)
     testSourceSet.resources.srcDirs(shared.resources.srcDirs)
 
