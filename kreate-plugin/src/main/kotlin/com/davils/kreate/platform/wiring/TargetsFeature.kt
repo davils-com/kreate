@@ -29,6 +29,7 @@ internal object TargetsFeature : KreateFeature {
         val multiplatform = extension.platform.multiplatform
         project.useSettingsToolRepositories(multiplatform)
         project.pinNpmPackages(multiplatform)
+        project.runYarnOneAtATime()
 
         val pluginManager = project.pluginManager
         if (pluginManager.hasPlugin(KotlinPluginId.MULTIPLATFORM)) project.declareTargets(multiplatform.targets)

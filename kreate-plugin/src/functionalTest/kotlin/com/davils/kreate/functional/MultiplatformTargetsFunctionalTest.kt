@@ -326,9 +326,7 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
                 package com.example
 
                 import io.kotest.core.spec.style.FunSpec
-                import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.ints.shouldBeLessThan
-import io.kotest.matchers.shouldBe
+                import io.kotest.matchers.shouldBe
 
                 class SampleTest : FunSpec({
                     test("counts the characters") {
