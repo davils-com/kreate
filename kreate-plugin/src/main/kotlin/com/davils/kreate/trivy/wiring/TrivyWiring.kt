@@ -41,7 +41,11 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 private val SOURCE_SCAFFOLDING_TASKS: Set<String> = setOf(
     JniTaskNames.INITIALIZE,
-    CInteropTaskNames.INITIALIZE
+    CInteropTaskNames.INITIALIZE,
+    "kotlinStoreYarnLock",
+    "kotlinWasmStoreYarnLock",
+    "kotlinUpgradeYarnLock",
+    "kotlinWasmUpgradeYarnLock"
 )
 
 private const val DOCUMENT_DIRECTORY: String = "kreate/assurance/documents"

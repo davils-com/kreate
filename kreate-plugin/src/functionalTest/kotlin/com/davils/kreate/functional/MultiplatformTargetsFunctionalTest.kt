@@ -18,6 +18,7 @@ package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
@@ -166,6 +167,23 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             fixture.file("build/wasm/package.json").readText() shouldContain "\"serialize-javascript\": \"7.1.3\""
         }
 
+        test("scans for secrets only after the Kotlin plugin stored its Yarn lock files") {
+            val fixture = newBuild()
+            fixture.writeTargetsBuild(
+                extra = """
+                    kreate {
+                        trivy {
+                            enabled = true
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            val output = fixture.build("kreateTrivySecretScan", "kotlinStoreYarnLock", "--dry-run").output
+
+            output.indexOf(":kotlinStoreYarnLock") shouldBeLessThan output.indexOf(":kreateTrivySecretScan")
+        }
+
         test("fails when a project with the Kotlin JVM plugin asks for targets") {
             val fixture = newBuild()
             fixture.writeSettings()
@@ -309,6 +327,7 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
 
                 import io.kotest.core.spec.style.FunSpec
                 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 
                 class SampleTest : FunSpec({

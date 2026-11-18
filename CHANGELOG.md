@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The secret scan waits for the Yarn lock files of the Kotlin plugin.** `kreateTrivySecretScan`
+  reads `kotlin-js-store`, which `kotlinStoreYarnLock` and `kotlinWasmStoreYarnLock` write, without
+  depending on them, so Gradle refused a build that ran both. The scan now runs after them, like
+  after the scaffolding tasks of JNI and C-interop.
 - **Kotest specs compile on JavaScript and Wasm under extra warnings.** The entry point that the Kotest
   symbol processor generates declares `public` explicitly, which `compiler { extraWarnings = true }`
   reports as redundant and `allWarningsAsErrors` turns into an error. The test compilations a suite
