@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Node.js and Yarn from the settings repositories.** `toolsFromSettingsRepositories = true` keeps
   the Kotlin plugin from adding the repositories of Node.js and Yarn to the project, so JavaScript
   and Wasm targets build under `RepositoriesMode.FAIL_ON_PROJECT_REPOS`.
+- **Java modules on the JVM target of a multiplatform project.** `src/jvmMain/java/module-info.java`
+  is compiled against the classes of the Kotlin compiler like `src/main/java/module-info.java` on a
+  JVM project, and without a descriptor `moduleName` becomes the `Automatic-Module-Name` of `jvmJar`.
 
 ### Fixed
 

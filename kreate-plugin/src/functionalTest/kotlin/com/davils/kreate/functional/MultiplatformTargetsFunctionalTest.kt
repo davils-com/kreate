@@ -17,10 +17,12 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
+import java.util.zip.ZipFile
 
 private const val SETTINGS_WITH_TOOL_REPOSITORIES: String = """
 dependencyResolutionManagement {
@@ -155,6 +157,40 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             val result = fixture.buildAndFail("help")
 
             result.output shouldContain "asks Kreate for multiplatform targets"
+        }
+    }
+
+    context("the Java module of the jvm target") {
+        test("compiles module-info.java of jvmMain against the classes of the Kotlin compiler") {
+            val fixture = newBuild()
+            fixture.write(
+                "src/jvmMain/java/module-info.java",
+                """
+                module com.example.sample {
+                    requires kotlin.stdlib;
+                    exports com.example;
+                }
+                """.trimIndent()
+            )
+            fixture.writeTargetsBuild(
+                kreateBlock = """
+                    platform {
+                        jvm {
+                            moduleName = "com.example.sample"
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            val result = fixture.build("jvmJar")
+
+            result.task(":compileJvmMainJava")?.outcome shouldBe TaskOutcome.SUCCESS
+            val libs = fixture.file("build/libs")
+            val jars = libs.listFiles().orEmpty()
+            val jar = jars.single { it.name.contains("-jvm") }
+            val entries = ZipFile(jar).use { zip -> zip.entries().toList() }
+            val names = entries.map { entry -> entry.name }
+            names shouldContain "module-info.class"
         }
     }
 })
