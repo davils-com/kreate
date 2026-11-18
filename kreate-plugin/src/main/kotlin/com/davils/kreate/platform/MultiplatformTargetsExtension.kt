@@ -65,6 +65,7 @@ public abstract class MultiplatformTargetsExtension @Inject constructor(
     public val wasmJs: SetProperty<WebEnvironment> =
         factory.setProperty(WebEnvironment::class.java).convention(emptySet())
 
+    @Transient
     private var declaration: Action<MultiplatformTargetsExtension>? = null
 
     internal fun declareWith(action: Action<MultiplatformTargetsExtension>) {
