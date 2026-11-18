@@ -142,7 +142,7 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             val fixture = newBuild()
             fixture.writeTargetsBuild()
 
-            val result = fixture.build("assemble")
+            val result = fixture.build("compileKotlinJs", "compileKotlinWasmJs")
 
             result.task(":compileKotlinJs")?.outcome shouldBe TaskOutcome.SUCCESS
             result.task(":compileKotlinWasmJs")?.outcome shouldBe TaskOutcome.SUCCESS
@@ -289,6 +289,10 @@ import io.kotest.matchers.shouldBe
                     test("counts the characters") {
                         Sample().length("kreate") shouldBe 6
                     }
+
+                    test("counts nothing in empty text") {
+                        Sample().length("") shouldBe 0
+                    }
                 })
                 """.trimIndent()
             )
@@ -299,8 +303,10 @@ import io.kotest.matchers.shouldBe
             result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
             result.task(":jsNodeTest")?.outcome shouldBe TaskOutcome.SUCCESS
             result.task(":wasmJsNodeTest")?.outcome shouldBe TaskOutcome.SUCCESS
-            fixture.reportSummaryOf("jsNodeTest") shouldContain "1 tests 0 failures"
-            fixture.reportSummaryOf("wasmJsNodeTest") shouldContain "1 tests 0 failures"
+            result.task(":kspTestKotlinJs")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":kspTestKotlinWasmJs")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.reportSummaryOf("jsNodeTest") shouldContain "jsNodeTest.com.example.SampleTest 2 0 0"
+            fixture.reportSummaryOf("wasmJsNodeTest") shouldContain "wasmJsNodeTest.com.example.SampleTest 2 0 0"
         }
 
         test("refuses a second suite that shares its tests with the other targets") {

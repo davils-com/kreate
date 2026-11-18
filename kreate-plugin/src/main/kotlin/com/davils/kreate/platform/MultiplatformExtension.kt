@@ -61,13 +61,15 @@ public abstract class MultiplatformExtension @Inject constructor() {
     public abstract val toolsFromSettingsRepositories: Property<Boolean>
 
     /**
-     * Configures the targets Kreate declares.
+     * Configures the targets Kreate declares, and declares them right away on a project with the
+     * Kotlin Multiplatform plugin.
      *
      * @param action The configuration action.
      * @since 5.1.0
      */
     public fun targets(action: Action<MultiplatformTargetsExtension>) {
         action.execute(targets)
+        targets.declareNow()
     }
 
     /**

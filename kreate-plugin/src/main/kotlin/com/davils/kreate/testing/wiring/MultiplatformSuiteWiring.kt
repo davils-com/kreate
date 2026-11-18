@@ -46,11 +46,12 @@ internal fun Project.initializeMultiplatformSuites(extension: KreateExtension) {
 
     wireSuites(tests, tasksBySuite)
 
+    val takenOver = nonJvmTestNamesTakenOver(suites, kotlin)
     applyLegacyTestPolicy(
         tests = tests,
         unitSuiteTask = tasksBySuite[TestSuiteNames.UNIT],
-        legacySourceSets = legacyMultiplatformSourceSets(kotlin),
-        legacyTaskNames = legacyTestTaskNames(kotlin)
+        legacySourceSets = legacyMultiplatformSourceSets(kotlin) - takenOver,
+        legacyTaskNames = legacyTestTaskNames(kotlin) - takenOver
     )
 
     shareSuiteWithNonJvmTargets(suites, kotlin, tasksBySuite)

@@ -16,6 +16,7 @@
 
 package com.davils.kreate.platform
 
+import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -24,10 +25,12 @@ import javax.inject.Inject
 /**
  * The targets Kreate declares on a Kotlin Multiplatform project.
  *
- * Kreate declares them once the build script is evaluated and before any other feature reads the
- * targets, so test suites, the Java module, API validation and publishing see them like targets
- * declared in `kotlin { }`. Targets declared there stay untouched; declaring the same target in both
- * places fails in the Kotlin plugin.
+ * Kreate declares them as soon as the `targets { }` block has run, while the build script is still
+ * evaluated, so the Kotlin plugin applies compiler plugins such as KSP or kotlinx-serialization to
+ * them like to targets declared in `kotlin { }`. Once the build script is evaluated, Kreate declares
+ * the targets again before any other feature reads them, which takes up values set outside the
+ * block; a target first declared there misses the compiler plugins. Declaring a target that already
+ * exists, here or in `kotlin { }`, configures the existing one.
  *
  * Setting a target on a project with the Kotlin JVM plugin fails the build, and on a project without
  * a Kotlin plugin it has no effect.
@@ -61,4 +64,15 @@ public abstract class MultiplatformTargetsExtension @Inject constructor(
      */
     public val wasmJs: SetProperty<WebEnvironment> =
         factory.setProperty(WebEnvironment::class.java).convention(emptySet())
+
+    @Transient
+    private var declaration: Action<MultiplatformTargetsExtension>? = null
+
+    internal fun declareWith(action: Action<MultiplatformTargetsExtension>) {
+        declaration = action
+    }
+
+    internal fun declareNow() {
+        declaration?.execute(this)
+    }
 }
