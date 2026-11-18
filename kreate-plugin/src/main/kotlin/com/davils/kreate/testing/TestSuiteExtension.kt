@@ -160,6 +160,25 @@ public abstract class TestSuiteExtension @Inject constructor(
         factory.listProperty(String::class.java).convention(emptyList())
 
     /**
+     * Whether the shared source set of this suite also runs on every target that is not a JVM
+     * target, on multiplatform projects. Defaults to `false`.
+     *
+     * The Kotlin plugin runs the tests of a JavaScript, Wasm or Native target only from its `test`
+     * compilation. When this is `true`, Kreate adds the directories of the shared source set, such
+     * as `src/commonUnitTest/kotlin`, to the `test` source set of each of those targets, gives it the
+     * dependencies and the Kotest modules of the suite, and makes the suite task run their tests.
+     * Kotest modules that exist only for the JVM, such as [KotestModule.JUNIT_XML], stay on the JVM.
+     * With Kotest enabled, Kreate applies the Kotest Gradle plugin and KSP, which Kotest needs to
+     * find specs outside the JVM.
+     *
+     * Only one suite of a project can set it, because every target has a single `test` compilation.
+     * Ignored on Kotlin/JVM projects.
+     *
+     * @since 5.1.0
+     */
+    public val nonJvmTargets: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
+
+    /**
      * The maximum number of parallel forks for this suite.
      *
      * Inherited from the enclosing `tests { }` block. Worth overriding to `1` on a suite

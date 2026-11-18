@@ -18,9 +18,12 @@ package com.davils.kreate.project.wiring
 
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.gradle.GradlePluginId
+import com.davils.kreate.gradle.KotlinPluginId
 import com.davils.kreate.project.ProjectExtension
 import com.davils.kreate.publish.PublishExtension
 import com.davils.kreate.publish.wiring.signsMavenTarget
+import com.davils.kreate.testing.TestsExtension
+import com.davils.kreate.testing.suite.enabledSuites
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.kotlinx.serialization.gradle.SerializationGradleSubplugin
@@ -37,6 +40,7 @@ internal fun Project.applyFeaturePlugins(extension: KreateExtension) {
     if (projectExtension.detekt.enabled.get()) pluginManager.apply(GradlePluginId.DETEKT)
     if (projectExtension.coverage.enabled.get()) pluginManager.apply(GradlePluginId.KOVER)
     if (projectExtension.benchmark.enabled.get()) pluginManager.apply(GradlePluginId.BENCHMARK)
+    applyNonJvmKotestPlugins(projectExtension.tests)
     applyPublishingPlugins(projectExtension.publish)
 }
 
@@ -48,4 +52,16 @@ private fun Project.applyPublishingPlugins(publish: PublishExtension) {
     val isMavenCentralEnabled = publish.repositories.mavenCentral.enabled.get()
     if (isMavenCentralEnabled) pluginManager.apply(GradlePluginId.MAVEN_CENTRAL)
     if (signsMavenTarget(publish.repositories)) pluginManager.apply(GradlePluginId.MAVEN_PUBLISH_BASE)
+}
+
+private fun Project.applyNonJvmKotestPlugins(tests: TestsExtension) {
+    if (!pluginManager.hasPlugin(KotlinPluginId.MULTIPLATFORM)) return
+    if (!tests.enabled.get()) return
+
+    val suites = tests.enabledSuites()
+    val runsKotestElsewhere = suites.any { suite -> suite.nonJvmTargets.get() && suite.kotest.enabled.get() }
+    if (!runsKotestElsewhere) return
+
+    pluginManager.apply(GradlePluginId.KSP)
+    pluginManager.apply(GradlePluginId.KOTEST)
 }

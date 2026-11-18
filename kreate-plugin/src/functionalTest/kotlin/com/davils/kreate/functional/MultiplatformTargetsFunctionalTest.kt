@@ -70,6 +70,16 @@ class Sample {
 }
 """
 
+private val MARKUP: Regex = Regex("<[^>]*>")
+
+private val WHITESPACE: Regex = Regex("\\s+")
+
+private fun KreateBuildFixture.reportSummaryOf(task: String): String {
+    val html = file("build/reports/tests/$task/index.html").readText()
+    val text = html.replace(MARKUP, " ")
+    return text.replace(WHITESPACE, " ")
+}
+
 class MultiplatformTargetsFunctionalTest : FunSpec({
     val workspace = kreateWorkspace()
 
@@ -191,6 +201,79 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             val entries = ZipFile(jar).use { zip -> zip.entries().toList() }
             val names = entries.map { entry -> entry.name }
             names shouldContain "module-info.class"
+        }
+    }
+
+    context("a suite shared with the JavaScript and Wasm targets") {
+        fun KreateBuildFixture.writeSharedSuiteBuild(suites: String = "") {
+            writeTargetsBuild(
+                kreateBlock = """
+                    project {
+                        tests {
+                            enabled = true
+
+                            kotest {
+                                enabled = true
+                            }
+
+                            suites {
+                                named("unitTest") {
+                                    nonJvmTargets = true
+                                }
+                                named("integrationTest") {
+                                    enabled = false
+                                }
+                                $suites
+                            }
+                        }
+                    }
+                """.trimIndent()
+            )
+        }
+
+        test("runs the Kotest specs of the shared source set on every target").config(tags = setOf(Slow)) {
+            val fixture = newBuild()
+            fixture.writeKotlin(
+                "commonUnitTest",
+                "com/example/SampleTest.kt",
+                """
+                package com.example
+
+                import io.kotest.core.spec.style.FunSpec
+                import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
+
+                class SampleTest : FunSpec({
+                    test("counts the characters") {
+                        Sample().length("kreate") shouldBe 6
+                    }
+                })
+                """.trimIndent()
+            )
+            fixture.writeSharedSuiteBuild()
+
+            val result = fixture.build("unitTest")
+
+            result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":jsNodeTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            result.task(":wasmJsNodeTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.reportSummaryOf("jsNodeTest") shouldContain "1 tests 0 failures"
+            fixture.reportSummaryOf("wasmJsNodeTest") shouldContain "1 tests 0 failures"
+        }
+
+        test("refuses a second suite that shares its tests with the other targets") {
+            val fixture = newBuild()
+            fixture.writeSharedSuiteBuild(
+                suites = """
+                    register("contractTest") {
+                        nonJvmTargets = true
+                    }
+                """.trimIndent()
+            )
+
+            val result = fixture.buildAndFail("help")
+
+            result.output shouldContain "all set nonJvmTargets = true"
         }
     }
 })

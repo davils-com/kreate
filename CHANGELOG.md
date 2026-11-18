@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Java modules on the JVM target of a multiplatform project.** `src/jvmMain/java/module-info.java`
   is compiled against the classes of the Kotlin compiler like `src/main/java/module-info.java` on a
   JVM project, and without a descriptor `moduleName` becomes the `Automatic-Module-Name` of `jvmJar`.
+- **A test suite on JavaScript, Wasm and Native targets.** `nonJvmTargets = true` on one suite adds
+  its shared directories, dependencies and Kotest modules to the `test` source set of every target
+  that is not a JVM target and makes the suite task run their tests. With Kotest enabled, Kreate
+  applies the Kotest Gradle plugin and KSP, which now come with Kreate.
 
 ### Fixed
 

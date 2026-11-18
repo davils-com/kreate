@@ -1087,6 +1087,7 @@ public abstract class com/davils/kreate/testing/TestSuiteExtension {
 	public final fun getMaxParallelForks ()Lorg/gradle/api/provider/Property;
 	public final fun getMustRunAfterSuites ()Lorg/gradle/api/provider/ListProperty;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getNonJvmTargets ()Lorg/gradle/api/provider/Property;
 	public final fun getReport ()Lcom/davils/kreate/testing/TestsReportExtension;
 	public final fun getRunOnCheck ()Lorg/gradle/api/provider/Property;
 	public final fun getSourceSetName ()Lorg/gradle/api/provider/Property;

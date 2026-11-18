@@ -21,5 +21,7 @@ internal enum class SuitePlatform(
 ) {
     JVM("kotest-runner-junit5"),
 
-    COMMON("kotest-framework-engine")
+    COMMON("kotest-framework-engine"),
+
+    NON_JVM("kotest-framework-engine")
 }

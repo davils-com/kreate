@@ -52,6 +52,8 @@ internal fun Project.initializeMultiplatformSuites(extension: KreateExtension) {
         legacySourceSets = legacyMultiplatformSourceSets(kotlin),
         legacyTaskNames = legacyTestTaskNames(kotlin)
     )
+
+    shareSuiteWithNonJvmTargets(suites, kotlin, tasksBySuite)
 }
 
 private fun Project.prepareSuiteSourceSets(

@@ -26,7 +26,8 @@ package com.davils.kreate.testing
  * @since 3.0.0
  */
 public enum class KotestModule(
-    internal val artifact: String
+    internal val artifact: String,
+    internal val isJvmOnly: Boolean = false
 ) {
     /**
      * The matcher library (`kotest-assertions-core`).
@@ -50,5 +51,5 @@ public enum class KotestModule(
      * JUnit XML report output (`kotest-extensions-junitxml`).
      * @since 3.0.0
      */
-    JUNIT_XML("kotest-extensions-junitxml")
+    JUNIT_XML("kotest-extensions-junitxml", isJvmOnly = true)
 }
