@@ -250,6 +250,14 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
         fun KreateBuildFixture.writeSharedSuiteBuild(suites: String = "") {
             writeTargetsBuild(
                 kreateBlock = """
+                    platform {
+                        allWarningsAsErrors = true
+
+                        compiler {
+                            extraWarnings = true
+                        }
+                    }
+
                     project {
                         tests {
                             enabled = true
