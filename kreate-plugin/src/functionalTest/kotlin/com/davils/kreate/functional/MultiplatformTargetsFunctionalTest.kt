@@ -277,8 +277,11 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
 
             val output = fixture.build("tasks", "--all").output
 
+            output shouldContain "generatePomFileForKotlinMultiplatformPublication"
             output shouldContain "generatePomFileForJvmPublication"
+            output shouldContain "generatePomFileForJsPublication"
             output shouldContain "generatePomFileForWasmJsPublication"
+            output shouldNotContain "generatePomFileForMavenPublication"
         }
     }
 
