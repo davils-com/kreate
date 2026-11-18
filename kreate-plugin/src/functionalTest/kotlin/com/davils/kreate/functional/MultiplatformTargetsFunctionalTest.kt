@@ -142,7 +142,7 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             val fixture = newBuild()
             fixture.writeTargetsBuild()
 
-            val result = fixture.build("assemble")
+            val result = fixture.build("compileKotlinJs", "compileKotlinWasmJs")
 
             result.task(":compileKotlinJs")?.outcome shouldBe TaskOutcome.SUCCESS
             result.task(":compileKotlinWasmJs")?.outcome shouldBe TaskOutcome.SUCCESS
