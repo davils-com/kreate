@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 5.1.0
 
+### Added
+
+- **Multiplatform targets from the `kreate` block.** `platform { multiplatform { targets { } } }`
+  declares `jvm`, `js` and `wasmJs`, each JavaScript or Wasm target in the `WebEnvironment`s it
+  names, before any other feature reads the targets. A convention plugin no longer has to program
+  `kotlin { }` for them. A project with the Kotlin JVM plugin that asks for targets fails the build.
+- **Node.js and Yarn from the settings repositories.** `toolsFromSettingsRepositories = true` keeps
+  the Kotlin plugin from adding the repositories of Node.js and Yarn to the project, so JavaScript
+  and Wasm targets build under `RepositoriesMode.FAIL_ON_PROJECT_REPOS`.
+
 ### Fixed
 
 - **Kotest runs on the JVM targets of a multiplatform project.** A suite with Kotest enabled got the

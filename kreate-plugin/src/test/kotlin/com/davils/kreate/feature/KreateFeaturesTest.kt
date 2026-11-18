@@ -38,6 +38,7 @@ import com.davils.kreate.local.wiring.LocalWorkflowFeature
 import com.davils.kreate.locking.wiring.DependencyLockingFeature
 import com.davils.kreate.packaging.wiring.ArchivesFeature
 import com.davils.kreate.platform.wiring.PlatformFeature
+import com.davils.kreate.platform.wiring.TargetsFeature
 import com.davils.kreate.project.wiring.PluginsFeature
 import com.davils.kreate.project.wiring.RepositoriesFeature
 import com.davils.kreate.project.wiring.VersionFeature
@@ -85,6 +86,7 @@ class KreateFeaturesTest : FunSpec({
         test("pins the complete application order") {
             KreateFeatures.ordered() shouldBe listOf(
                 PluginsFeature,
+                TargetsFeature,
                 RepositoriesFeature,
                 DependencyLockingFeature,
                 ToolClasspathsFeature,

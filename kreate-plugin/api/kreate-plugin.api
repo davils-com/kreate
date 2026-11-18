@@ -788,6 +788,16 @@ public abstract class com/davils/kreate/platform/MultiplatformExtension {
 	public fun <init> ()V
 	public final fun cInterop (Lorg/gradle/api/Action;)V
 	public abstract fun getCInterop ()Lcom/davils/kreate/cinterop/CInteropExtension;
+	public abstract fun getTargets ()Lcom/davils/kreate/platform/MultiplatformTargetsExtension;
+	public abstract fun getToolsFromSettingsRepositories ()Lorg/gradle/api/provider/Property;
+	public final fun targets (Lorg/gradle/api/Action;)V
+}
+
+public abstract class com/davils/kreate/platform/MultiplatformTargetsExtension {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getJs ()Lorg/gradle/api/provider/SetProperty;
+	public final fun getJvm ()Lorg/gradle/api/provider/Property;
+	public final fun getWasmJs ()Lorg/gradle/api/provider/SetProperty;
 }
 
 public abstract class com/davils/kreate/platform/PlatformExtension {
@@ -801,6 +811,14 @@ public abstract class com/davils/kreate/platform/PlatformExtension {
 	public abstract fun getMultiplatform ()Lcom/davils/kreate/platform/MultiplatformExtension;
 	public final fun jvm (Lorg/gradle/api/Action;)V
 	public final fun multiplatform (Lorg/gradle/api/Action;)V
+}
+
+public final class com/davils/kreate/platform/WebEnvironment : java/lang/Enum {
+	public static final field BROWSER Lcom/davils/kreate/platform/WebEnvironment;
+	public static final field NODE Lcom/davils/kreate/platform/WebEnvironment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/davils/kreate/platform/WebEnvironment;
+	public static fun values ()[Lcom/davils/kreate/platform/WebEnvironment;
 }
 
 public final class com/davils/kreate/policy/PolicyTaskNames {
