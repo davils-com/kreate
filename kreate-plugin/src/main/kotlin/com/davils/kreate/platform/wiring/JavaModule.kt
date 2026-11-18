@@ -76,16 +76,14 @@ private fun Project.configureJavaModule(moduleName: String, layout: JavaModuleLa
     val descriptor = this.layout.projectDirectory.file(layout.descriptor)
     if (descriptor.asFile.isFile) return patchModule(moduleName, layout)
 
-    tasks.named<Jar>(layout.jar) {
-        manifest.attributes(mapOf(AUTOMATIC_MODULE_NAME to moduleName))
-    }
+    val jars = tasks.withType<Jar>().matching { jar -> jar.name == layout.jar }
+    jars.configureEach { manifest.attributes(mapOf(AUTOMATIC_MODULE_NAME to moduleName)) }
 }
 
 private fun Project.patchModule(moduleName: String, layout: JavaModuleLayout) {
     val kotlinCompile = tasks.named<KotlinJvmCompile>(layout.compileKotlin)
     val kotlinClasses = kotlinCompile.flatMap { compile -> compile.destinationDirectory }
 
-    tasks.named<JavaCompile>(layout.compileJava) {
-        options.compilerArgumentProviders.add(ModulePatch(moduleName, kotlinClasses))
-    }
+    val javaCompilations = tasks.withType<JavaCompile>().matching { compile -> compile.name == layout.compileJava }
+    javaCompilations.configureEach { options.compilerArgumentProviders.add(ModulePatch(moduleName, kotlinClasses)) }
 }

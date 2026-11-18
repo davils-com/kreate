@@ -22,6 +22,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.gradle.testkit.runner.TaskOutcome
+import java.util.jar.JarFile
 import java.util.zip.ZipFile
 
 private const val SETTINGS_WITH_TOOL_REPOSITORIES: String = """
@@ -171,6 +172,27 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
     }
 
     context("the Java module of the jvm target") {
+        test("names jvmJar as an automatic module when jvmMain has no descriptor") {
+            val fixture = newBuild()
+            fixture.writeTargetsBuild(
+                kreateBlock = """
+                    platform {
+                        jvm {
+                            moduleName = "com.example.sample"
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            fixture.build("jvmJar")
+
+            val libs = fixture.file("build/libs")
+            val jars = libs.listFiles().orEmpty()
+            val jar = jars.single { it.name.contains("-jvm") }
+            val attributes = JarFile(jar).use { archive -> archive.manifest.mainAttributes }
+            attributes.getValue("Automatic-Module-Name") shouldBe "com.example.sample"
+        }
+
         test("compiles module-info.java of jvmMain against the classes of the Kotlin compiler") {
             val fixture = newBuild()
             fixture.write(
