@@ -136,6 +136,15 @@ package asks for, so run the JavaScript and Wasm tests after pinning a new major
 same entries on the root project of a multi-project build, where the Kotlin plugin installs the
 packages, and refresh the lock files with `kotlinUpgradeYarnLock` and `kotlinWasmUpgradeYarnLock`.
 
+## One Yarn process at a time
+
+`kotlinNpmInstall`, `kotlinWasmNpmInstall` and `kotlinWasmToolingSetup` each start Yarn, and with the
+configuration cache Gradle runs them side by side. Yarn guards its shared cache with a network mutex
+that does not hold on every machine, and on Windows a Yarn process could end successfully without
+writing `yarn.lock`, so `kotlinStoreYarnLock` or `kotlinWasmStoreYarnLock` failed. Kreate lets these
+tasks of the project it is applied to run one at a time; apply Kreate to the root project of a
+multi-project build, where the Kotlin plugin registers them.
+
 <seealso>
     <category ref="platform">
         <a href="Platform-Overview.md">Platform overview</a>

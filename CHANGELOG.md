@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Yarn runs one process at a time.** With the configuration cache, Gradle ran `kotlinNpmInstall`,
+  `kotlinWasmNpmInstall` and `kotlinWasmToolingSetup` side by side, and on Windows a Yarn process
+  sometimes ended successfully without writing `yarn.lock`, so `kotlinStoreYarnLock` or
+  `kotlinWasmStoreYarnLock` failed for want of it. These tasks now share a build service that admits
+  one of them at a time. The first release of 5.2.0 failed this way on Windows and was never
+  published.
 - **The secret scan waits for the Yarn lock files of the Kotlin plugin.** `kreateTrivySecretScan`
   reads `kotlin-js-store`, which `kotlinStoreYarnLock` and `kotlinWasmStoreYarnLock` write, without
   depending on them, so Gradle refused a build that ran both. The scan now runs after them, like
