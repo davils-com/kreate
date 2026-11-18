@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Compiler plugins reach the targets of the `kreate` block.** Kreate declared the targets of
+  `platform { multiplatform { targets { } } }` after the build script was evaluated, when the Kotlin
+  plugin no longer applies compiler plugins to new targets. KSP did not run for them, so Kotest found
+  no spec on JavaScript and Wasm and reported a single skipped placeholder instead. Kreate now
+  declares the targets as soon as the `targets { }` block has run.
 - **The build verifies the POMs of KSP and the Kotest Gradle plugin.** Kreate's own assurance gate
   reads them, and the verification metadata of 5.1.0 lacked their checksums, so the release of 5.1.0
   failed its check and was never published.

@@ -19,6 +19,7 @@ package com.davils.kreate
 import com.davils.kreate.feature.KreateFeatures
 import com.davils.kreate.gradle.GradlePluginId
 import com.davils.kreate.gradle.KotlinPluginId
+import com.davils.kreate.platform.wiring.declareTargetsWhileEvaluated
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -45,6 +46,7 @@ public class KreatePlugin : Plugin<Project> {
         val extension = project.extensions.create<KreateExtension>(EXTENSION_NAME)
         val pluginManager = project.pluginManager
         pluginManager.withPlugin(KotlinPluginId.MULTIPLATFORM) { pluginManager.apply(GradlePluginId.MAVEN_PUBLISH) }
+        extension.platform.multiplatform.targets.declareWith { project.declareTargetsWhileEvaluated(this) }
         project.afterEvaluate { KreateFeatures.applyAll(this, extension) }
     }
 

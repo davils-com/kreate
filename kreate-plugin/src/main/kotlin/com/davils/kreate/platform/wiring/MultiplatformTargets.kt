@@ -16,6 +16,7 @@
 
 package com.davils.kreate.platform.wiring
 
+import com.davils.kreate.gradle.KotlinPluginId
 import com.davils.kreate.platform.MultiplatformTargetsExtension
 import com.davils.kreate.platform.WebEnvironment
 import org.gradle.api.GradleException
@@ -35,6 +36,11 @@ internal fun Project.declareTargets(targets: MultiplatformTargetsExtension) {
 
     val wasmJsEnvironments = targets.wasmJs.get()
     if (wasmJsEnvironments.isNotEmpty()) kotlin.declareWasmJs(wasmJsEnvironments)
+}
+
+internal fun Project.declareTargetsWhileEvaluated(targets: MultiplatformTargetsExtension) {
+    if (!pluginManager.hasPlugin(KotlinPluginId.MULTIPLATFORM)) return
+    declareTargets(targets)
 }
 
 internal fun Project.rejectTargets(targets: MultiplatformTargetsExtension) {

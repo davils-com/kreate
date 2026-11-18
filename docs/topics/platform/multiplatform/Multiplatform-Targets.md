@@ -28,8 +28,9 @@ kreate {
 ## Why declare targets here
 
 A convention plugin of a library holds the `kreate { }` block and nothing else. The targets used to be
-the one thing it still had to program in `kotlin { }`. Kreate now declares them itself, once the build
-script is evaluated and before any other feature looks at them, so the
+the one thing it still had to program in `kotlin { }`. Kreate now declares them itself as soon as the
+`targets { }` block has run, while the build script is still evaluated, so the Kotlin plugin applies
+compiler plugins such as KSP or kotlinx-serialization to them, and the
 [Java module](Platform-Java-Modules.md), the [test suites](Testing-Multiplatform.md), API validation
 and publishing see them like targets declared in `kotlin { }`.
 
@@ -43,9 +44,11 @@ and publishing see them like targets declared in `kotlin { }`.
 library is the same for both, so a library that only tests on Node.js still works in the browser.
 Browser tests run through Karma and need a headless browser on the machine.
 
-Targets declared in `kotlin { }` stay as they are. Declaring the same target in both places fails in
-the Kotlin plugin. A project with the Kotlin JVM plugin that asks for targets fails the build; a project
-without a Kotlin plugin ignores them.
+Targets declared in `kotlin { }` stay as they are; declaring the same target in both places configures
+the one target. A value set outside the `targets { }` block, such as `targets.jvm = true`, is taken
+up only after the build script is evaluated, too late for compiler plugins, so keep the block. A
+project with the Kotlin JVM plugin that asks for targets fails the build; a project without a Kotlin
+plugin ignores them.
 
 ## Node.js and Yarn from the settings
 
