@@ -204,6 +204,26 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
         }
     }
 
+    context("publishing a multiplatform project") {
+        test("creates a publication per target although Kreate applies its plugins after evaluation") {
+            val fixture = newBuild()
+            fixture.writeTargetsBuild(
+                kreateBlock = """
+                    project {
+                        publish {
+                            enabled = true
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            val output = fixture.build("tasks", "--all").output
+
+            output shouldContain "generatePomFileForJvmPublication"
+            output shouldContain "generatePomFileForWasmJsPublication"
+        }
+    }
+
     context("a suite shared with the JavaScript and Wasm targets") {
         fun KreateBuildFixture.writeSharedSuiteBuild(suites: String = "") {
             writeTargetsBuild(

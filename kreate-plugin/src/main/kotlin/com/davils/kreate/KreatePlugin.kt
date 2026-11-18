@@ -17,6 +17,8 @@
 package com.davils.kreate
 
 import com.davils.kreate.feature.KreateFeatures
+import com.davils.kreate.gradle.GradlePluginId
+import com.davils.kreate.gradle.KotlinPluginId
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -25,7 +27,10 @@ import org.gradle.kotlin.dsl.create
  * The Kreate project plugin, applied as `com.davils.kreate`.
  *
  * Registers the `kreate { }` extension and applies every Kreate feature once the build script has
- * been evaluated, so that each feature reads the configuration the consumer declared.
+ * been evaluated, so that each feature reads the configuration the consumer declared. On a Kotlin
+ * Multiplatform project it applies `maven-publish` as soon as the Kotlin plugin is applied, because the
+ * Kotlin plugin creates its publications only for a `maven-publish` applied while the build script is
+ * evaluated.
  *
  * @since 4.0.0
  */
@@ -38,6 +43,8 @@ public class KreatePlugin : Plugin<Project> {
      */
     override fun apply(project: Project) {
         val extension = project.extensions.create<KreateExtension>(EXTENSION_NAME)
+        val pluginManager = project.pluginManager
+        pluginManager.withPlugin(KotlinPluginId.MULTIPLATFORM) { pluginManager.apply(GradlePluginId.MAVEN_PUBLISH) }
         project.afterEvaluate { KreateFeatures.applyAll(this, extension) }
     }
 

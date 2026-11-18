@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Multiplatform projects can publish.** Kreate applied `maven-publish` after the build script was
+  evaluated, which the Kotlin Multiplatform plugin refuses with `Plugin 'maven-publish' was applied
+  too late`. Kreate now applies it as soon as the Kotlin Multiplatform plugin is applied.
 - **Kotest runs on the JVM targets of a multiplatform project.** A suite with Kotest enabled got the
   Kotest engine but not the JUnit Platform runner, so its JVM task failed with `Cannot create
   Launcher without at least one TestEngine`. The runner now goes to the suite source set of every
