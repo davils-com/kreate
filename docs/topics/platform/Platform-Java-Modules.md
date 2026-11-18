@@ -21,6 +21,10 @@ When `src/main/java/module-info.java` exists, Kreate hands javac the classes the
 with `--patch-module <moduleName>=<classes>`. Without it, every `exports` of the descriptor fails,
 because javac sees the Kotlin packages on the class path only.
 
+On a Kotlin Multiplatform project the descriptor of the JVM target lives in
+`src/jvmMain/java/module-info.java`, javac runs as `compileJvmMainJava` and the jar is `jvmJar`. The
+module name and the patch work the same way.
+
 Without a descriptor, `moduleName` becomes the `Automatic-Module-Name` of the jar. A name that is
 no Java module name fails the configuration.
 

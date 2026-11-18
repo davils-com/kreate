@@ -111,6 +111,46 @@ tests {
 The suites are then created beside the conventional test source set rather than instead of it, and
 `linuxX64Test`, `wasmJsNodeTest` and friends keep running. See [](Testing-Suites-Migration.md).
 
+## Running a suite on JavaScript, Wasm and Native targets
+
+One suite per project can still reach the other targets: not with a compilation of its own, but by
+handing its shared directories to the `test` compilation the Kotlin plugin already runs.
+
+```kotlin
+tests {
+    enabled = true
+
+    kotest {
+        enabled = true
+    }
+
+    suites {
+        named("unitTest") {
+            nonJvmTargets = true
+        }
+    }
+}
+```
+
+With `nonJvmTargets = true`, %product%
+
+- adds the directories of `commonUnitTest`, such as `src/commonUnitTest/kotlin`, to `jsTest`,
+  `wasmJsTest`, `linuxX64Test` and every other `test` source set of a target that is not a JVM
+  target;
+- gives those source sets the dependencies of the suite and its Kotest modules, without the ones
+  that exist only for the JVM, such as `JUNIT_XML`;
+- makes the suite task, `unitTest`, run their tests, such as `jsNodeTest` and `wasmJsNodeTest`;
+- applies the Kotest Gradle plugin and KSP when Kotest is enabled, because Kotest finds specs
+  outside the JVM through a symbol processor. Both come with %product% and match its default Kotest
+  version.
+
+The same specs then run on every target, and `src/jvmUnitTest/kotlin` keeps what only the JVM can
+test. No `dependsOn` edge is added, so the default hierarchy stays intact; the directory is shared
+instead, which the IDE shows under one of the source sets.
+
+A second suite that sets `nonJvmTargets` fails the build, because every target has only one `test`
+compilation.
+
 ## Restricting a suite to some targets
 
 `targets` is empty by default, which means every JVM target. Name them to narrow it:

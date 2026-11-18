@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.1.0
+
+### Added
+
+- **Multiplatform targets from the `kreate` block.** `platform { multiplatform { targets { } } }`
+  declares `jvm`, `js` and `wasmJs`, each JavaScript or Wasm target in the `WebEnvironment`s it
+  names, before any other feature reads the targets. A convention plugin no longer has to program
+  `kotlin { }` for them. A project with the Kotlin JVM plugin that asks for targets fails the build.
+- **Node.js and Yarn from the settings repositories.** `toolsFromSettingsRepositories = true` keeps
+  the Kotlin plugin from adding the repositories of Node.js and Yarn to the project, so JavaScript
+  and Wasm targets build under `RepositoriesMode.FAIL_ON_PROJECT_REPOS`.
+- **Java modules on the JVM target of a multiplatform project.** `src/jvmMain/java/module-info.java`
+  is compiled against the classes of the Kotlin compiler like `src/main/java/module-info.java` on a
+  JVM project, and without a descriptor `moduleName` becomes the `Automatic-Module-Name` of `jvmJar`.
+- **A test suite on JavaScript, Wasm and Native targets.** `nonJvmTargets = true` on one suite adds
+  its shared directories, dependencies and Kotest modules to the `test` source set of every target
+  that is not a JVM target and makes the suite task run their tests. With Kotest enabled, Kreate
+  applies the Kotest Gradle plugin and KSP, which now come with Kreate.
+- **Expect and actual classes without the Beta warning.** `compiler { expectActualClasses = true }`
+  passes `-Xexpect-actual-classes` to every Kotlin compilation, so a multiplatform library with
+  `allWarningsAsErrors` can declare expect classes, annotations and actual type aliases.
+
+### Fixed
+
+- **Multiplatform projects can publish.** Kreate applied `maven-publish` after the build script was
+  evaluated, which the Kotlin Multiplatform plugin refuses with `Plugin 'maven-publish' was applied
+  too late`. Kreate now applies it as soon as the Kotlin Multiplatform plugin is applied.
+- **Kotest runs on the JVM targets of a multiplatform project.** A suite with Kotest enabled got the
+  Kotest engine but not the JUnit Platform runner, so its JVM task failed with `Cannot create
+  Launcher without at least one TestEngine`. The runner now goes to the suite source set of every
+  JVM target.
+
 ## 5.0.2
 
 ### Fixed

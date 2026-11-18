@@ -21,6 +21,7 @@
         <toc-element topic="Platform-Warning-As-Errors.md"/>
         <toc-element topic="Platform-Compiler-Options.md"/>
         <toc-element topic="Platform-Java-Modules.md"/>
+        <toc-element topic="Multiplatform-Targets.md"/>
         <toc-element toc-title="JVM">
             <toc-element toc-title="JNI">
                 <toc-element topic="JNI-Support.md"/>

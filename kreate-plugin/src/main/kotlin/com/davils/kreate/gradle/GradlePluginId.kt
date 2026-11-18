@@ -24,4 +24,6 @@ internal object GradlePluginId {
     const val DETEKT: String = "dev.detekt"
     const val KOVER: String = "org.jetbrains.kotlinx.kover"
     const val BENCHMARK: String = "org.jetbrains.kotlinx.benchmark"
+    const val KSP: String = "com.google.devtools.ksp"
+    const val KOTEST: String = "io.kotest"
 }

@@ -64,7 +64,18 @@ internal fun Project.addKotestBundle(
     val version = kotest.version.get()
     dependencies.add(configurationName, "$KOTEST_GROUP:${platform.runnerArtifact}:$version")
 
-    kotest.modules.get().forEach { module ->
+    val modules = kotest.modules.get()
+    val isJvm = platform != SuitePlatform.NON_JVM
+    val available = modules.filter { module -> isJvm || !module.isJvmOnly }
+    available.forEach { module ->
         dependencies.add(configurationName, "$KOTEST_GROUP:${module.artifact}:$version")
     }
+}
+
+internal fun Project.addKotestJvmRunner(suite: TestSuiteExtension, configurationName: String) {
+    val kotest = suite.kotest
+    if (!kotest.enabled.get()) return
+
+    val runner = SuitePlatform.JVM.runnerArtifact
+    dependencies.add(configurationName, "$KOTEST_GROUP:$runner:${kotest.version.get()}")
 }

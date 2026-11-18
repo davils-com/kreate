@@ -23,6 +23,7 @@ kreate {
         }
 
         multiplatform {
+            targets { /* jvm, js and wasmJs */ }
             cInterop { /* Rust, C, C++ on Kotlin/Native */ }
         }
     }
@@ -39,7 +40,8 @@ kreate {
         <a href="JNI-Support.md">JNI</a> path.
     </def>
     <def title="org.jetbrains.kotlin.multiplatform">
-        Configures the multiplatform extension, enables
+        Configures the multiplatform extension, declares the
+        <a href="Multiplatform-Targets.md">targets</a> of the <code>kreate</code> block, enables
         <a href="C-Interoperation-Overview.md">C-interop</a> for native targets, and applies JNI
         to the JVM target only.
     </def>

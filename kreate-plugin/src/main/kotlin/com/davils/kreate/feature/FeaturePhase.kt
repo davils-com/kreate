@@ -18,6 +18,7 @@ package com.davils.kreate.feature
 
 internal enum class FeaturePhase {
     PLUGINS,
+    TARGETS,
     REPOSITORIES,
     LOCKING,
     VERSION,

@@ -20,6 +20,7 @@ kreate {
             languageVersion = KotlinVersion.KOTLIN_2_4
             apiVersion = KotlinVersion.KOTLIN_2_4
             jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
+            expectActualClasses = true
         }
     }
 }
@@ -32,8 +33,12 @@ kreate {
 | `languageVersion` | unset   | The Kotlin language version                                      |
 | `apiVersion`      | unset   | The version of the standard library API the sources may use      |
 | `jvmDefault`      | unset   | How JVM compilations emit default methods of interfaces          |
+| `expectActualClasses` | `false` | Accepts expect and actual classes without the Beta warning   |
 
 Together with [warnings as errors](Platform-Warning-As-Errors.md), the extra warnings fail the build.
+So does the warning that `expect` and `actual` classes, annotations and type aliases are in Beta;
+`expectActualClasses = true` passes `-Xexpect-actual-classes` and keeps such a multiplatform library
+building. Expect and actual functions and properties never need it.
 
 <seealso>
     <category ref="platform">

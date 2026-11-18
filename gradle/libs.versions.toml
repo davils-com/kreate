@@ -24,6 +24,7 @@ mockk = "1.14.12"
 asm = "9.11.1"
 bcv = "0.18.2"
 benchmark = "0.5.0"
+ksp = "2.3.14"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
@@ -72,6 +73,8 @@ detekt-gradle-plugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref
 bcv-gradle-plugin = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "bcv" }
 benchmark-gradle-plugin = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-plugin", version.ref = "benchmark" }
 kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+kotest-gradle-plugin = { module = "io.kotest:kotest-framework-plugin-gradle", version.ref = "kotest" }
 
 [plugins]
 kreate = { id = "com.davils.kreate" }
@@ -102,7 +105,9 @@ kreate-plugin = [
     "publish-gradle-plugin",
     "detekt-gradle-plugin",
     "kover-gradle-plugin",
-    "benchmark-gradle-plugin"
+    "benchmark-gradle-plugin",
+    "ksp-gradle-plugin",
+    "kotest-gradle-plugin"
 ]
 
 kreate-test = [

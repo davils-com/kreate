@@ -36,6 +36,7 @@ internal object PlatformFeature : KreateFeature {
         project.configureMultiplatformCompiler(extension)
         project.configureCompilerOptions(extension)
         project.configureJavaCompilation(extension)
+        project.configureTargetJavaModules(extension)
     }
 
     private fun applyJvm(project: Project, extension: KreateExtension) {
