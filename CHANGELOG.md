@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.1.1
+
+### Fixed
+
+- **The build verifies the POMs of KSP and the Kotest Gradle plugin.** Kreate's own assurance gate
+  reads them, and the verification metadata of 5.1.0 lacked their checksums, so the release of 5.1.0
+  failed its check and was never published.
+
 ## 5.1.0
 
 ### Added
