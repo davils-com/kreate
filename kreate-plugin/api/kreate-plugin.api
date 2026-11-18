@@ -764,6 +764,7 @@ public abstract class com/davils/kreate/packaging/ArchivesExtension {
 public abstract class com/davils/kreate/platform/CompilerExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getApiVersion ()Lorg/gradle/api/provider/Property;
+	public final fun getExpectActualClasses ()Lorg/gradle/api/provider/Property;
 	public final fun getExtraWarnings ()Lorg/gradle/api/provider/Property;
 	public final fun getJvmDefault ()Lorg/gradle/api/provider/Property;
 	public final fun getLanguageVersion ()Lorg/gradle/api/provider/Property;

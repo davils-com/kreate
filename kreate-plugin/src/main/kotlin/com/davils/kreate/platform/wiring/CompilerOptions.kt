@@ -22,6 +22,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
+private const val EXPECT_ACTUAL_CLASSES: String = "-Xexpect-actual-classes"
+
 internal fun Project.configureCompilerOptions(extension: KreateExtension) {
     val compiler = extension.platform.compiler
     val isProgressive = compiler.progressiveMode.get()
@@ -29,6 +31,7 @@ internal fun Project.configureCompilerOptions(extension: KreateExtension) {
     val languageVersion = compiler.languageVersion.orNull
     val apiVersion = compiler.apiVersion.orNull
     val jvmDefault = compiler.jvmDefault.orNull
+    val acceptsExpectActualClasses = compiler.expectActualClasses.get()
 
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         val options = compilerOptions
@@ -36,6 +39,7 @@ internal fun Project.configureCompilerOptions(extension: KreateExtension) {
         if (reportsExtraWarnings) options.extraWarnings.set(true)
         languageVersion?.let { version -> options.languageVersion.set(version) }
         apiVersion?.let { version -> options.apiVersion.set(version) }
+        if (acceptsExpectActualClasses) options.freeCompilerArgs.add(EXPECT_ACTUAL_CLASSES)
     }
 
     if (jvmDefault == null) return

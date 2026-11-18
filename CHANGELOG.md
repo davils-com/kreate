@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its shared directories, dependencies and Kotest modules to the `test` source set of every target
   that is not a JVM target and makes the suite task run their tests. With Kotest enabled, Kreate
   applies the Kotest Gradle plugin and KSP, which now come with Kreate.
+- **Expect and actual classes without the Beta warning.** `compiler { expectActualClasses = true }`
+  passes `-Xexpect-actual-classes` to every Kotlin compilation, so a multiplatform library with
+  `allWarningsAsErrors` can declare expect classes, annotations and actual type aliases.
 
 ### Fixed
 

@@ -66,4 +66,18 @@ public abstract class CompilerExtension @Inject constructor(factory: ObjectFacto
      * @since 5.0.0
      */
     public val jvmDefault: Property<JvmDefaultMode> = factory.property(JvmDefaultMode::class.java)
+
+    /**
+     * Whether the compiler accepts `expect` and `actual` classes, interfaces, objects, annotations
+     * and enums, and `actual` type aliases, without warning that they are in Beta. Defaults to
+     * `false`.
+     *
+     * The Kotlin compiler reports every such declaration of a multiplatform project, which fails a
+     * build with [PlatformExtension.allWarningsAsErrors]. When this is `true`, Kreate passes
+     * `-Xexpect-actual-classes` to every Kotlin compilation. Expect and actual functions and
+     * properties never need it.
+     *
+     * @since 5.1.0
+     */
+    public val expectActualClasses: Property<Boolean> = factory.property(Boolean::class.java).convention(false)
 }

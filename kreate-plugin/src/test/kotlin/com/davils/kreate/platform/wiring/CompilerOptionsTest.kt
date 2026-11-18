@@ -74,6 +74,22 @@ class CompilerOptionsTest : FunSpec({
             options.apiVersion.get() shouldBe KotlinVersion.KOTLIN_2_3
             options.jvmDefault.get() shouldBe JvmDefaultMode.NO_COMPATIBILITY
         }
+
+        test("leaves expect and actual classes to the warning of the compiler by default") {
+            val project = evaluatedKreateProject(workspace.freshDirectory(), JVM_PLUGIN) { }
+            val options = project.kotlinCompile().compilerOptions
+
+            options.freeCompilerArgs.get() shouldNotContain "-Xexpect-actual-classes"
+        }
+
+        test("accepts expect and actual classes when asked to") {
+            val project = evaluatedKreateProject(workspace.freshDirectory(), JVM_PLUGIN) { kreate ->
+                kreate.platform.compiler { expectActualClasses.set(true) }
+            }
+            val options = project.kotlinCompile().compilerOptions
+
+            options.freeCompilerArgs.get() shouldContainAll listOf("-Xexpect-actual-classes")
+        }
     }
 
     context("javac") {
