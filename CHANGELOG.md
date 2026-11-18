@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.2.0
+
+### Added
+
+- **Pinned npm packages of the JavaScript and Wasm toolchain.** `platform { multiplatform {
+  npmResolutions = mapOf("serialize-javascript" to "7.1.3") } }` turns each entry into a Yarn
+  resolution of the JavaScript and the Wasm toolchain, so a vulnerable package that the test runner
+  of the Kotlin plugin pulls in, such as a dependency of Mocha, resolves to its fixed version.
+
+### Fixed
+
+- **The secret scan waits for the Yarn lock files of the Kotlin plugin.** `kreateTrivySecretScan`
+  reads `kotlin-js-store`, which `kotlinStoreYarnLock` and `kotlinWasmStoreYarnLock` write, without
+  depending on them, so Gradle refused a build that ran both. The scan now runs after them, like
+  after the scaffolding tasks of JNI and C-interop.
+- **Kotest specs compile on JavaScript and Wasm under extra warnings.** The entry point that the Kotest
+  symbol processor generates declares `public` explicitly, which `compiler { extraWarnings = true }`
+  reports as redundant and `allWarningsAsErrors` turns into an error. The test compilations a suite
+  with `nonJvmTargets = true` and Kotest takes over now accept that modifier.
+
 ## 5.1.1
 
 ### Fixed

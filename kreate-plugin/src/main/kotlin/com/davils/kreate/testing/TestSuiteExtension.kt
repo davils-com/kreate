@@ -169,7 +169,8 @@ public abstract class TestSuiteExtension @Inject constructor(
      * dependencies and the Kotest modules of the suite, and makes the suite task run their tests.
      * Kotest modules that exist only for the JVM, such as [KotestModule.JUNIT_XML], stay on the JVM.
      * With Kotest enabled, Kreate applies the Kotest Gradle plugin and KSP, which Kotest needs to
-     * find specs outside the JVM.
+     * find specs outside the JVM, and lets those test compilations accept the explicit `public` of
+     * the entry point Kotest generates, which extra warnings would otherwise turn into an error.
      *
      * Only one suite of a project can set it, because every target has a single `test` compilation.
      * Ignored on Kotlin/JVM projects.

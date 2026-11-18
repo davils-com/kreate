@@ -32,6 +32,8 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetWithTests
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
+private const val REDUNDANT_VISIBILITY_ACCEPTED: String = "-Xwarning-level=REDUNDANT_VISIBILITY_MODIFIER:disabled"
+
 internal fun Project.shareSuiteWithNonJvmTargets(
     suites: List<TestSuiteExtension>,
     kotlin: KotlinMultiplatformExtension,
@@ -79,6 +81,12 @@ private fun Project.shareWith(target: KotlinTarget, suite: TestSuiteExtension, s
 
     addSuiteDependencies(suite, testSourceSet.name)
     addKotestBundle(suite, implementationName(testSourceSet.name), SuitePlatform.NON_JVM)
+    if (suite.kotest.enabled.get()) acceptGeneratedKotestEntry(target)
+}
+
+private fun acceptGeneratedKotestEntry(target: KotlinTarget) {
+    val test = target.compilations.getByName(KotlinCompilation.TEST_COMPILATION_NAME)
+    test.compileTaskProvider.configure { compilerOptions.freeCompilerArgs.add(REDUNDANT_VISIBILITY_ACCEPTED) }
 }
 
 private fun Project.tooManySharingSuites(sharing: List<TestSuiteExtension>): GradleException {

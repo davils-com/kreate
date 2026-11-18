@@ -24,10 +24,13 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.web.yarn.BaseYarnRootExtension
 
 internal fun Project.useSettingsToolRepositories(multiplatform: MultiplatformExtension) {
     if (!multiplatform.toolsFromSettingsRepositories.getOrElse(false)) return
@@ -45,5 +48,24 @@ private fun <S : EnvSpec<*>> Project.withoutDownloadRepository(
     plugins.withType(pluginType).configureEach {
         val spec = extensions.getByType(specType)
         spec.downloadBaseUrl.set(null as String?)
+    }
+}
+
+internal fun Project.pinNpmPackages(multiplatform: MultiplatformExtension) {
+    val resolutions = multiplatform.npmResolutions.getOrElse(emptyMap())
+    if (resolutions.isEmpty()) return
+
+    resolveIn(YarnPlugin::class.java, YarnRootExtension::class.java, resolutions)
+    resolveIn(WasmYarnPlugin::class.java, WasmYarnRootExtension::class.java, resolutions)
+}
+
+private fun <E : BaseYarnRootExtension> Project.resolveIn(
+    pluginType: Class<out Plugin<Project>>,
+    extensionType: Class<E>,
+    resolutions: Map<String, String>
+) {
+    plugins.withType(pluginType).configureEach {
+        val yarn = extensions.getByType(extensionType)
+        resolutions.forEach { (name, version) -> yarn.resolution(name, version) }
     }
 }

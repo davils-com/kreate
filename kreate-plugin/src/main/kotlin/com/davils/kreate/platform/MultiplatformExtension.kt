@@ -18,6 +18,7 @@ package com.davils.kreate.platform
 
 import com.davils.kreate.cinterop.CInteropExtension
 import org.gradle.api.Action
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Nested
 import javax.inject.Inject
@@ -59,6 +60,23 @@ public abstract class MultiplatformExtension @Inject constructor() {
      * @since 5.1.0
      */
     public abstract val toolsFromSettingsRepositories: Property<Boolean>
+
+    /**
+     * Versions that npm packages of the JavaScript and Wasm toolchain resolve to, by package name,
+     * such as `"serialize-javascript" to "7.1.3"`. Empty by default.
+     *
+     * The Kotlin plugin installs the packages its test runner needs, Mocha among them, through Yarn
+     * and records them in `kotlin-js-store/yarn.lock` and `kotlin-js-store/wasm/yarn.lock`. When a
+     * scan finds a vulnerability in one of them, an entry here becomes a Yarn resolution of the
+     * JavaScript and of the Wasm toolchain and pins the fixed version, even outside the range the
+     * package that depends on it asks for. Kreate does not check that the pinned version still works
+     * with that package; the tests that run on JavaScript and Wasm do. The Kotlin plugin installs the
+     * packages of every project in the root project, so the root project of a multi-project build sets
+     * the same entries.
+     *
+     * @since 5.2.0
+     */
+    public abstract val npmResolutions: MapProperty<String, String>
 
     /**
      * Configures the targets Kreate declares, and declares them right away on a project with the
