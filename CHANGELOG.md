@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.1.0
+
+### Fixed
+
+- **Kotest runs on the JVM targets of a multiplatform project.** A suite with Kotest enabled got the
+  Kotest engine but not the JUnit Platform runner, so its JVM task failed with `Cannot create
+  Launcher without at least one TestEngine`. The runner now goes to the suite source set of every
+  JVM target.
+
 ## 5.0.2
 
 ### Fixed

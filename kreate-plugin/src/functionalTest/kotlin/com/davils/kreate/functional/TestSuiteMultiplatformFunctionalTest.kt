@@ -117,6 +117,37 @@ class TestSuiteMultiplatformFunctionalTest : FunSpec({
             fixture.reportsOf("jvmUnitTest") shouldContain "Aggregated"
         }
 
+        test("runs the Kotest specs of the shared source set on the JVM target") {
+            val fixture = newBuild()
+            fixture.write(
+                "src/commonUnitTest/kotlin/com/example/KotestSuiteRan.kt",
+                """
+                package com.example
+
+                import io.kotest.core.spec.style.FunSpec
+                import io.kotest.matchers.shouldBe
+
+                class KotestSuiteRan : FunSpec({
+                    test("counts the characters") {
+                        CommonMainSample().length("ab") shouldBe 2
+                    }
+                })
+                """.trimIndent()
+            )
+            fixture.writeTestingBuild(
+                testsBlock = """
+                    kotest {
+                        enabled = true
+                    }
+                """.trimIndent()
+            )
+
+            val result = fixture.build("jvmUnitTest")
+
+            result.task(":jvmUnitTest")?.outcome shouldBe TaskOutcome.SUCCESS
+            fixture.reportsOf("jvmUnitTest") shouldContain "KotestSuiteRan"
+        }
+
         test("check runs the unit suite and leaves the integration suite alone") {
             val fixture = newBuild()
             fixture.writeSuiteTest("commonUnitTest", "OnCheck")

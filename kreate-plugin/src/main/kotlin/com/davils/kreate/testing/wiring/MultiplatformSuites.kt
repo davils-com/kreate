@@ -84,6 +84,7 @@ internal fun Project.wireMultiplatformSuite(
     return suite.applicableTargets(kotlin).map { target ->
         val compilation = target.compilations.getByName(sourceSetName)
         associateSuiteCompilation(suite, target, compilation)
+        addKotestJvmRunner(suite, compilation.defaultSourceSet.implementationConfigurationName)
         registerSuiteJvmTest(suite, target, compilation)
     }
 }
