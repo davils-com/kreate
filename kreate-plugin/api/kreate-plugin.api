@@ -789,6 +789,7 @@ public abstract class com/davils/kreate/platform/MultiplatformExtension {
 	public fun <init> ()V
 	public final fun cInterop (Lorg/gradle/api/Action;)V
 	public abstract fun getCInterop ()Lcom/davils/kreate/cinterop/CInteropExtension;
+	public abstract fun getNpmResolutions ()Lorg/gradle/api/provider/MapProperty;
 	public abstract fun getTargets ()Lcom/davils/kreate/platform/MultiplatformTargetsExtension;
 	public abstract fun getToolsFromSettingsRepositories ()Lorg/gradle/api/provider/Property;
 	public final fun targets (Lorg/gradle/api/Action;)V

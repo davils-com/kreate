@@ -148,6 +148,24 @@ class MultiplatformTargetsFunctionalTest : FunSpec({
             result.task(":compileKotlinWasmJs")?.outcome shouldBe TaskOutcome.SUCCESS
         }
 
+        test("pins npm packages of the JavaScript and Wasm toolchain to the versions it names") {
+            val fixture = newBuild()
+            fixture.writeTargetsBuild(
+                kreateBlock = """
+                    platform {
+                        multiplatform {
+                            npmResolutions = mapOf("serialize-javascript" to "7.1.3")
+                        }
+                    }
+                """.trimIndent()
+            )
+
+            fixture.build("rootPackageJson", "wasmRootPackageJson")
+
+            fixture.file("build/js/package.json").readText() shouldContain "\"serialize-javascript\": \"7.1.3\""
+            fixture.file("build/wasm/package.json").readText() shouldContain "\"serialize-javascript\": \"7.1.3\""
+        }
+
         test("fails when a project with the Kotlin JVM plugin asks for targets") {
             val fixture = newBuild()
             fixture.writeSettings()

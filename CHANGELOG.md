@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 5.2.0
 
+### Added
+
+- **Pinned npm packages of the JavaScript and Wasm toolchain.** `platform { multiplatform {
+  npmResolutions = mapOf("serialize-javascript" to "7.1.3") } }` turns each entry into a Yarn
+  resolution of the JavaScript and the Wasm toolchain, so a vulnerable package that the test runner
+  of the Kotlin plugin pulls in, such as a dependency of Mocha, resolves to its fixed version.
+
 ### Fixed
 
 - **Kotest specs compile on JavaScript and Wasm under extra warnings.** The entry point that the Kotest

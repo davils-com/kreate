@@ -111,6 +111,31 @@ dependencyResolutionManagement {
 The Kotlin plugin installs the npm packages of every project in the root project, so the root project
 of a multi-project build sets `toolsFromSettingsRepositories = true` as well.
 
+## Pinning npm packages
+
+The Kotlin plugin runs the tests of JavaScript and Wasm through Mocha, which it installs with Yarn
+and records in `kotlin-js-store/yarn.lock` and `kotlin-js-store/wasm/yarn.lock`. A Trivy scan of
+the repository reads those lock files. When it finds a vulnerable package there, pin its fixed
+version:
+
+```kotlin
+kreate {
+    platform {
+        multiplatform {
+            npmResolutions = mapOf(
+                "serialize-javascript" to "7.1.3",
+                "glob" to "14.0.2",
+            )
+        }
+    }
+}
+```
+
+Each entry becomes a Yarn resolution of both toolchains and wins over the range the depending
+package asks for, so run the JavaScript and Wasm tests after pinning a new major version. Set the
+same entries on the root project of a multi-project build, where the Kotlin plugin installs the
+packages, and refresh the lock files with `kotlinUpgradeYarnLock` and `kotlinWasmUpgradeYarnLock`.
+
 <seealso>
     <category ref="platform">
         <a href="Platform-Overview.md">Platform overview</a>
