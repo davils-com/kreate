@@ -16,6 +16,10 @@
 
 pluginManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -25,6 +29,10 @@ dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.PREFER_SETTINGS
 
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
         gradlePluginPortal()
     }

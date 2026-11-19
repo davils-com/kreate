@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.0
+
+### Changed
+
+- **Kreate builds on Kore 2.1.1.** The plugin depends on `com.davils:kore-core` again, the
+  foundation library of Davils, and uses its semantic versions, its escaping of untrusted text, its
+  rules for names and its close matches instead of copies of its own. 4.0.0 had dropped the
+  predecessor `davilsx-kore` to carry one dependency less; Kore 2 is small, has a single runtime
+  dependency, `kotlinx-coroutines-core`, which Ktor already brings, and is published, signed and
+  verified like Kreate itself. It comes from `https://repo.davils.com/releases`, which a build that
+  applies Kreate already declares for the `com.davils` group. Kore needs the Kotlin 2.4.21 standard
+  library, the one Gradle 9.9.0 embeds, so the minimum Gradle stays where it is.
+
 ## 5.2.0
 
 ### Added

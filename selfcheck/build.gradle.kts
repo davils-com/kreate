@@ -36,6 +36,7 @@ kreate {
     assurance {
         enabled = true
         runOnCheck = false
+        internalGroups = setOf("com.davils")
 
         advisories {
             enabled = true

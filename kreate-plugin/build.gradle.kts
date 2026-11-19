@@ -48,12 +48,15 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(gradleTestKit())
     testImplementation(libs.bundles.kreate.test)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kore.testing)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 kotlin {
     compilerOptions {
         optIn.add("com.davils.kreate.settings.InternalKreateApi")
+        optIn.add("com.davils.kore.core.annotation.DavilsInternal")
     }
 }
 

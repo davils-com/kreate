@@ -16,6 +16,9 @@ publish = "0.37.0"
 detekt = "2.0.0-alpha.6"
 kover = "0.9.11"
 jacoco = "0.8.16"
+# Needs the stdlib 2.4.21, which Gradle 9.9.0, Kreate's minimum, embeds exactly. A Kore that needs a
+# newer stdlib waits for the minimum to move.
+kore = "2.1.1"
 
 # test & tooling
 junit = "6.1.3"
@@ -28,6 +31,8 @@ ksp = "2.3.14"
 
 [libraries]
 poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
+
+kore-core = { module = "com.davils:kore-core", version.ref = "kore" }
 
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
@@ -62,6 +67,8 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
+kotest-property = { module = "io.kotest:kotest-property-jvm", version.ref = "kotest" }
+kore-testing = { module = "com.davils:kore-testing", version.ref = "kore" }
 
 # actual plugins, but needed as dependencies in build-logic
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -93,6 +100,7 @@ build-logic = [
 
 kreate-plugin = [
     "poet-core",
+    "kore-core",
     "serialization-json",
     "ktor-client-core",
     "ktor-client-java",
