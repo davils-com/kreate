@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a line of the log or hide part of itself behind a bidirectional override. Every tag, prefix and
   version the guard shows is now escaped and put in double quotes. A release version is checked by
   Kore, which also refuses version numbers above `Int.MAX_VALUE`.
+- **Reports escape every invisible character.** The escaping of finding titles, descriptions and
+  snippets let lone surrogates, Hangul and Khmer fillers, Mongolian variation selectors, the
+  combining grapheme joiner and combining marks without a base character through, which can hide
+  or disguise text in a report. It now follows Kore's `SafeText`: a line break is shown as `\n`, a
+  tab as `\t` and every other such code point as `\u{XXXX}`, and a shortened snippet ends with the
+  number of characters left out, such as `…(+40 chars)`.
 
 ## 5.2.0
 
