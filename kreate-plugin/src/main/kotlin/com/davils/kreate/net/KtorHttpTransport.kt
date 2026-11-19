@@ -16,6 +16,7 @@
 
 package com.davils.kreate.net
 
+import com.davils.kore.core.parseLongOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
@@ -93,7 +94,7 @@ internal class KtorHttpTransport(
     private fun isContentType(name: String): Boolean = name.equals(HttpHeaders.ContentType, ignoreCase = true)
 
     private suspend fun readResponse(request: TransportRequest, response: HttpResponse): TransportResponse {
-        val declaredLength = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
+        val declaredLength = response.headers[HttpHeaders.ContentLength]?.let { length -> parseLongOrNull(length) }
         val carriesBody = request.method != HttpMethod.HEAD
         val bodyLength = declaredLength?.takeIf { carriesBody }
         if (bodyLength != null) checkDeclaredLength(request, bodyLength)

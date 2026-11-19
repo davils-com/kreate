@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   schema and the nodes of a DOT graph reached a message as they were. They are now escaped. A
   reflected configuration accessor that fails with a `VirtualMachineError` or a cancellation is no
   longer wrapped into an `IllegalStateException`.
+- **Numbers from servers and reports are read strictly.** A `Retry-After` or `Content-Length`
+  header and the counts of a coverage report are read as plain ASCII numbers; `+12`, `NaN`,
+  `Infinity` and the digits of other scripts no longer pass as numbers, so a hostile server cannot
+  slip a value past the checks that bound it.
 - **`kreateExplain` suggests rules by their spelling.** Besides the rules that contain the given
   text, an unknown `--rule` now also suggests the rules a few edits away from it, so
   `--rule=FRESH_PAKCAGE` suggests `FRESH_PACKAGE`.

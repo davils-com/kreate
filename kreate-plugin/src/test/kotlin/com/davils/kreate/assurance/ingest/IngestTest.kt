@@ -63,6 +63,14 @@ class IngestTest : FunSpec({
             CoverageIngest.findingsOf(75.0, null).shouldBeEmpty()
         }
 
+        test("with counts that are no finite decimal numbers gives nothing") {
+            listOf("NaN", "Infinity", "+75", "\u0667\u0665").forEach { covered ->
+                val report = """<report><counter type="LINE" missed="25" covered="$covered"/></report>"""
+
+                CoverageIngest.lineCoverageOf(report.toByteArray()).shouldBeNull()
+            }
+        }
+
         test("does not resolve external entities") {
             val hostile = "<!DOCTYPE r [<!ENTITY e SYSTEM \"file:///etc/passwd\">]><report>&e;</report>"
 

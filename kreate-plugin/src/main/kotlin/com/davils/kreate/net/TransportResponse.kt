@@ -16,6 +16,7 @@
 
 package com.davils.kreate.net
 
+import com.davils.kore.core.parseLongOrNull
 import java.net.URI
 import java.time.Duration
 import java.time.Instant
@@ -46,7 +47,8 @@ internal class TransportResponse(
 
     val retryAfter: Duration?
         get() {
-            val seconds = header("retry-after")?.toLongOrNull() ?: return null
+            val text = header("retry-after") ?: return null
+            val seconds = parseLongOrNull(text) ?: return null
             if (seconds < 0) return null
             return Duration.ofSeconds(seconds)
         }
