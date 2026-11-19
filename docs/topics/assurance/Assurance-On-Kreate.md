@@ -67,6 +67,27 @@ Before it reached this state, the gate changed Kreate:
 - The semantic versioning check, run against 3.4.0, reports 145 breaking and 110 additive changes, so
   4.0.0 is a major release for a reason: every public type moved to a feature package.
 
+## The standards Kreate follows
+
+Kreate reads and writes formats other people define, so `:selfcheck` declares them as well:
+
+```kotlin
+standards {
+    enabled = true
+    reviewEvery = Duration.ofDays(730)
+    github("semver/semver")
+    github("olivierlacan/keep-a-changelog")
+    github("ossf/osv-schema")
+    github("oasis-tcs/sarif-spec") { tags = "^sarif-" }
+    document("FIRST CVSS 3.1") { reviewEvery = Duration.ofDays(365) }
+    document("Conventional Commits 1.0.0") { reviewEvery = Duration.ofDays(365) }
+}
+```
+
+Their first review on 19 November 2026 is in `selfcheck/standards.lock`. It records, for example,
+that the newest tag of the SARIF specification is a working draft of SARIF 2.2, while the report
+writes 2.1.0: when the committee publishes the next draft or the standard, the weekly run reports it.
+
 ## How the repository holds itself to it
 
 - Every dependency of the build is verified against a SHA-256 in `gradle/verification-metadata.xml`,
