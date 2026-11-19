@@ -16,6 +16,8 @@
 
 package com.davils.kreate.jni.signature
 
+import com.davils.kore.core.collection.duplicatesBy
+
 private const val ARRAY_MARKER: Char = '['
 
 private const val REFERENCE_MARKER: Char = 'L'
@@ -30,9 +32,7 @@ private const val UNICODE_ESCAPE_FORMAT: String = "_0%04x"
 
 internal object JniSignatures {
     fun renderDeclarations(methods: List<NativeMethod>): List<String> {
-        val overloadedNames = methods.groupBy { it.name }
-            .filterValues { it.size > 1 }
-            .keys
+        val overloadedNames = methods.duplicatesBy { method -> method.name }
 
         return methods.map { method -> renderDeclaration(method, isOverloaded = method.name in overloadedNames) }
     }

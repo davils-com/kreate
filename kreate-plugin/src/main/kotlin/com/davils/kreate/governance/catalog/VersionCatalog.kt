@@ -85,7 +85,7 @@ internal class VersionCatalog(private val text: String) {
     }
 
     fun withLibrary(alias: String, group: String, name: String, version: String): String {
-        require(CatalogNames.isAlias(alias)) { "$alias is no valid catalog alias." }
+        CatalogNames.requireAlias(alias)
         val isModule = CatalogNames.isCoordinatePart(group) && CatalogNames.isCoordinatePart(name)
         require(isModule) { "$group:$name is no module." }
         require(CatalogNames.isExactVersion(version)) { "$version is not an exact version." }
