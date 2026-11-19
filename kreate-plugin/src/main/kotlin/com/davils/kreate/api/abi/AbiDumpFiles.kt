@@ -16,14 +16,11 @@
 
 package com.davils.kreate.api.abi
 
+import com.davils.kore.core.text.LineBreak
+import com.davils.kore.core.text.withLineBreaks
 import java.io.File
-
-private const val WINDOWS_LINE_SEPARATOR = "\r\n"
-private const val CARRIAGE_RETURN = '\r'
-private const val LINE_FEED = '\n'
 
 internal fun readAbiDump(file: File): String {
     val text = file.readText()
-    val withoutWindowsSeparators = text.replace(WINDOWS_LINE_SEPARATOR, LINE_FEED.toString())
-    return withoutWindowsSeparators.replace(CARRIAGE_RETURN, LINE_FEED)
+    return text.withLineBreaks(LineBreak.Lf)
 }

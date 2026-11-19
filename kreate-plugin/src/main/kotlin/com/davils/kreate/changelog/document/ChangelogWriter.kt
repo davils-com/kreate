@@ -15,13 +15,16 @@
  */
 package com.davils.kreate.changelog.document
 
+import com.davils.kore.core.text.LineBreak
+import com.davils.kore.core.text.withLineBreaks
+
 private const val DEFAULT_HEADER: String = "# Changelog\n"
 
 internal object ChangelogWriter {
     fun insert(text: String, version: String, section: String): String {
         val document = ChangelogDocument.parse(text)
         require(document.find(version) == null) { "The changelog already has a section for $version." }
-        val lines = text.replace("\r\n", "\n").split('\n')
+        val lines = text.withLineBreaks(LineBreak.Lf).split('\n')
         val releases = document.headings.filterNot { heading -> heading.isUnreleased }
         val anchor = releases.firstOrNull()?.line
         if (text.isBlank()) return DEFAULT_HEADER + "\n" + section

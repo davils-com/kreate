@@ -73,6 +73,7 @@ class IngestTest : FunSpec({
     context("an API dump") {
         test("that differs from the code is reported, line endings aside") {
             ApiDumpIngest.findingsOf("a\r\nb\n", "a\nb", "api/app.api").shouldBeEmpty()
+            ApiDumpIngest.findingsOf("a\rb\r", "a\nb", "api/app.api").shouldBeEmpty()
             ApiDumpIngest.findingsOf("a\n", "b\n", "api/app.api").single().location?.path shouldBe "api/app.api"
             ApiDumpIngest.findingsOf("a\n", null, "api/app.api").shouldBeEmpty()
         }

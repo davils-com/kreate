@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.assurance.ingest
 
+import com.davils.kore.core.text.LineBreak
+import com.davils.kore.core.text.withLineBreaks
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.SourceLocation
 import com.davils.kreate.assurance.policy.REPORT_ONLY_ATTRIBUTE
@@ -29,5 +31,5 @@ internal object ApiDumpIngest {
         return listOf(finding.copy(location = SourceLocation(dumpPath)))
     }
 
-    private fun normalized(text: String): String = text.replace("\r\n", "\n").trimEnd()
+    private fun normalized(text: String): String = text.withLineBreaks(LineBreak.Lf).trimEnd()
 }
