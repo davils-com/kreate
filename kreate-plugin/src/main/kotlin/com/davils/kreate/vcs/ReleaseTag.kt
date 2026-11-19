@@ -15,11 +15,13 @@
  */
 package com.davils.kreate.vcs
 
+import com.davils.kore.core.version.SemanticVersion
+
 internal data class ReleaseTag(val name: String, val version: SemanticVersion) {
     companion object {
         fun parse(name: String, prefix: String): ReleaseTag? {
             if (!name.startsWith(prefix)) return null
-            val version = SemanticVersion.parse(name.removePrefix(prefix)) ?: return null
+            val version = semanticVersionOf(name.removePrefix(prefix)) ?: return null
             return ReleaseTag(name, version)
         }
     }

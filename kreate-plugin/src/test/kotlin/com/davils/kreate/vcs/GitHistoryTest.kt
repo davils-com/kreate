@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.vcs
 
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.tooling.ToolOutput
 import com.davils.kreate.tooling.ToolResult
 import com.davils.kreate.tooling.ToolRunner
@@ -41,7 +42,9 @@ class GitHistoryTest : FunSpec({
         test("pick the highest version with the prefix") {
             val runner = RecordingRunner { resultOf(0, "v1.2.0\nv1.10.0\nother\nv2.0.0-rc.1\n1.9.0\n") }
 
-            historyOf(runner).latestTag("v") shouldBe ReleaseTag("v2.0.0-rc.1", SemanticVersion(2, 0, 0, "rc.1"))
+            val expected = ReleaseTag("v2.0.0-rc.1", SemanticVersion(2, 0, 0, listOf("rc", "1")))
+
+            historyOf(runner).latestTag("v") shouldBe expected
         }
 
         test("are none in a repository without tags") {

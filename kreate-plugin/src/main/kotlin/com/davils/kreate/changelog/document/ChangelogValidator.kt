@@ -15,7 +15,9 @@
  */
 package com.davils.kreate.changelog.document
 
-import com.davils.kreate.vcs.SemanticVersion
+import com.davils.kore.core.text.SafeText
+import com.davils.kore.core.version.SemanticVersion
+import com.davils.kreate.vcs.semanticVersionOf
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
@@ -52,9 +54,10 @@ internal object ChangelogValidator {
             problems += ChangelogProblem(""""## ${heading.text}" is no release heading. $HEADING_FORMS""", heading.line)
             return null
         }
-        val parsed = SemanticVersion.parse(version)
+        val parsed = semanticVersionOf(version)
         if (parsed == null) {
-            problems += ChangelogProblem(""""$version" is no semantic version such as 1.2.3.""", heading.line)
+            val shown = SafeText.quoted(version)
+            problems += ChangelogProblem("$shown is no semantic version such as 1.2.3.", heading.line)
         }
         val date = heading.date
         if (date != null && !isDate(date)) {

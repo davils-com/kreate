@@ -15,13 +15,20 @@
  */
 package com.davils.kreate.vcs
 
+import com.davils.kore.core.version.SemanticVersion
+
+internal fun semanticVersionOf(text: String): SemanticVersion? {
+    val version = SemanticVersion.parseOrNull(text.trim()) ?: return null
+    return version.withoutBuild()
+}
+
 internal fun releaseVersionOf(text: String?): SemanticVersion? {
-    val version = text?.let(SemanticVersion::parse) ?: return null
-    if (version.preRelease != null) return null
+    val version = text?.let(::semanticVersionOf) ?: return null
+    if (version.isPreRelease) return null
     return version
 }
 
 internal fun coreVersionOf(text: String?): SemanticVersion? {
-    val version = text?.let(SemanticVersion::parse) ?: return null
-    return version.core
+    val version = text?.let(::semanticVersionOf) ?: return null
+    return version.release()
 }

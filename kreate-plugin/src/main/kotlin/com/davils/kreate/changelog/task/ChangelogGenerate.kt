@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.changelog.task
 
+import com.davils.kore.core.text.SafeText
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.changelog.build.ChangelogBuilder
 import com.davils.kreate.changelog.build.ChangelogChanges
 import com.davils.kreate.changelog.build.ChangelogRenderer
@@ -27,9 +29,9 @@ import com.davils.kreate.tooling.ExecutableResolver
 import com.davils.kreate.tooling.ExternalTool
 import com.davils.kreate.vcs.GitHistory
 import com.davils.kreate.vcs.ReleaseTag
-import com.davils.kreate.vcs.SemanticVersion
 import com.davils.kreate.vcs.VersionBump
 import com.davils.kreate.vcs.coreVersionOf
+import com.davils.kreate.vcs.semanticVersionOf
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -100,8 +102,8 @@ internal abstract class ChangelogGenerate @Inject constructor(private val exec: 
     private fun versionOf(latest: ReleaseTag?, changes: ChangelogChanges): SemanticVersion {
         val requested = release.orNull
         if (requested != null) {
-            return SemanticVersion.parse(requested)
-                ?: throw InvalidUserDataException("'$requested' is no semantic version such as 1.2.3.")
+            return semanticVersionOf(requested)
+                ?: throw InvalidUserDataException("${SafeText.quoted(requested)} is no semantic version such as 1.2.3.")
         }
         val declared = coreVersionOf(projectVersion.orNull)
         if (latest == null) {

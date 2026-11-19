@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   verified like Kreate itself. It comes from `https://repo.davils.com/releases`, which a build that
   applies Kreate already declares for the `com.davils` group. Kore needs the Kotlin 2.4.21 standard
   library, the one Gradle 9.9.0 embeds, so the minimum Gradle stays where it is.
+- **Versions are read strictly by Semantic Versioning 2.0.0.** The changelog, the API semver check
+  and release tags read versions through Kore, which refuses leading zeros such as `01.2.3` or
+  `1.2.3-01` that Kreate accepted before. A version with build metadata is still read without it.
 
 ## 5.2.0
 
