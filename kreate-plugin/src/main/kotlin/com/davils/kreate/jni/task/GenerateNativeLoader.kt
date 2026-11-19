@@ -16,6 +16,7 @@
 
 package com.davils.kreate.jni.task
 
+import com.davils.kore.core.text.SafeText
 import com.davils.kreate.host.AARCH64_ID
 import com.davils.kreate.host.X86_64_ID
 import com.davils.kreate.task.KreateTask
@@ -72,13 +73,14 @@ internal abstract class GenerateNativeLoader : KreateTask(
         val name = packageName.get()
         if (PACKAGE_NAME_PATTERN.matches(name)) return name
 
-        throw GradleException("'$name' is not a valid package name for the generated native loader.")
+        throw GradleException("${SafeText.quoted(name)} is not a valid package name for the generated native loader.")
     }
 
     private fun kotlinLiteral(value: String): String {
         val hasControlCharacter = value.any { character -> character.isISOControl() }
         if (hasControlCharacter) {
-            throw GradleException("A value of the generated native loader contains a control character: $value")
+            val shown = SafeText.quoted(value)
+            throw GradleException("A value of the generated native loader contains a control character: $shown")
         }
 
         return CodeBlock.of(STRING_LITERAL_FORMAT, value).toString()

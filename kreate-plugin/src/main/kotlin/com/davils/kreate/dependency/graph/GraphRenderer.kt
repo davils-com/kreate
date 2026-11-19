@@ -15,6 +15,9 @@
  */
 package com.davils.kreate.dependency.graph
 
+import com.davils.kore.core.Limits
+import com.davils.kore.core.text.SafeText
+
 private const val INDENT: String = "    "
 
 private const val BRANCH: String = "|   "
@@ -68,8 +71,5 @@ internal object GraphRenderer {
         return edges.distinct().sortedBy { edge -> edge.from + edge.to }
     }
 
-    private fun quoted(node: String): String {
-        val escaped = node.replace("\\", "\\\\").replace("\"", "\\\"")
-        return "\"$escaped\""
-    }
+    private fun quoted(node: String): String = SafeText.quoted(node, Limits.MAX_MESSAGE_LENGTH)
 }

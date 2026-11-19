@@ -34,6 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or disguise text in a report. It now follows Kore's `SafeText`: a line break is shown as `\n`, a
   tab as `\t` and every other such code point as `\u{XXXX}`, and a shortened snippet ends with the
   number of characters left out, such as `…(+40 chars)`.
+- **Messages escape the text they show.** The name of an unknown operating system or architecture,
+  a platform id, a package name and a value of the native loader, the failure of a configuration
+  schema and the nodes of a DOT graph reached a message as they were. They are now escaped. A
+  reflected configuration accessor that fails with a `VirtualMachineError` or a cancellation is no
+  longer wrapped into an `IllegalStateException`.
+- **`kreateExplain` suggests rules by their spelling.** Besides the rules that contain the given
+  text, an unknown `--rule` now also suggests the rules a few edits away from it, so
+  `--rule=FRESH_PAKCAGE` suggests `FRESH_PACKAGE`.
 
 ## 5.2.0
 

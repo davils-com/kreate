@@ -36,6 +36,12 @@ class GraphRendererTest : FunSpec({
             GraphRenderer.render(listOf(MODEL), GraphFormat.DOT) shouldContain "    \":core\" -> \"a:b:1\";"
         }
 
+        test("escapes quotes and control characters in DOT nodes") {
+            val hostile = DependencyGraphModel("runtimeClasspath", ":app", listOf(GraphEdge(":app", "a\"b\n:c:1")))
+
+            GraphRenderer.render(listOf(hostile), GraphFormat.DOT) shouldContain "\"a\\\"b\\n:c:1\""
+        }
+
         test("renders as Mermaid with stable ids") {
             val text = GraphRenderer.render(listOf(MODEL), GraphFormat.MERMAID)
 

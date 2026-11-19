@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.assurance.task
 
+import com.davils.kore.core.text.SafeText
+import com.davils.kore.core.text.closeMatches
 import com.davils.kreate.assurance.rule.RuleCatalog
 import com.davils.kreate.assurance.rule.RuleInfo
 import com.davils.kreate.task.KreateTask
@@ -45,13 +47,20 @@ internal abstract class AssuranceExplain : KreateTask(
         val known = RuleCatalog.find(id)
         if (known != null) return logger.lifecycle(describe(known))
         if (ADVISORY_ID.matches(id)) return logger.lifecycle("$id is an advisory. Its record: $ADVISORY_URL$id")
-        val matching = RuleCatalog.rules.filter { candidate -> candidate.id.contains(id) }
-        val similar = matching.map { candidate -> candidate.id }
+        val similar = similarRules(id)
         val hint = similar.takeIf { names -> names.isNotEmpty() }?.let { names ->
             " Did you mean ${names.joinToString()}?"
         }
-        val message = "No rule $id is known.${hint.orEmpty()} Run without --rule to list all rules."
-        throw InvalidUserDataException(message)
+        val unknown = "No rule ${SafeText.quoted(id)} is known."
+        throw InvalidUserDataException("$unknown${hint.orEmpty()} Run without --rule to list all rules.")
+    }
+
+    private fun similarRules(id: String): List<String> {
+        val ids = RuleCatalog.rules.map { candidate -> candidate.id }
+        val containing = ids.filter { candidate -> candidate.contains(id) }
+        val close = closeMatches(id, ids, MAX_SUGGESTIONS, ignoreCase = true)
+        val similar = containing + close
+        return similar.distinct()
     }
 
     private fun list() {
@@ -78,5 +87,7 @@ internal abstract class AssuranceExplain : KreateTask(
         const val ID_WIDTH: Int = 30
 
         const val SEVERITY_WIDTH: Int = 8
+
+        const val MAX_SUGGESTIONS: Int = 3
     }
 }
