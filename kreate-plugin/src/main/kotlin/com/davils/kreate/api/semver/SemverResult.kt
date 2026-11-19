@@ -15,7 +15,7 @@
  */
 package com.davils.kreate.api.semver
 
-import com.davils.kreate.vcs.SemanticVersion
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.vcs.VersionBump
 
 internal data class SemverResult(

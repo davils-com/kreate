@@ -66,6 +66,13 @@ class TyposquatDetectorTest : FunSpec({
             rulesOf("jakarta.annotatlon", "jakarta.annotation-api") shouldBe listOf("TYPOSQUAT_GROUP")
         }
 
+        test("longer than an edit distance can measure is not compared") {
+            val longGroup = "com." + "g".repeat(300)
+            val longName = "guava" + "x".repeat(300)
+
+            rulesOf(longGroup, longName).shouldBeEmpty()
+        }
+
         test("names the group it imitates") {
             val finding = findingsOf("com.goog1e", "guava").single()
 

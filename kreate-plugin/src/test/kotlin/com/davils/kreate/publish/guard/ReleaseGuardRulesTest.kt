@@ -50,7 +50,7 @@ class ReleaseGuardRulesTest : FunSpec({
         test("must be what the build resolved") {
             val problems = ReleaseGuardRules.problemsOf(candidate(resolved = "9.9.9-SNAPSHOT"))
 
-            problems.single() shouldContain "resolved the version '9.9.9', but the build declares '1.2.0'"
+            problems.single() shouldContain "resolved the version \"9.9.9\", but the build declares \"1.2.0\""
         }
 
         test("must exist") {
@@ -72,20 +72,20 @@ class ReleaseGuardRulesTest : FunSpec({
         test("refuses a tag without the prefix") {
             val tagged = candidate(resolved = "1.2.0", tag = "1.2.0", prefix = "v")
 
-            ReleaseGuardRules.problemsOf(tagged).single() shouldContain "does not start with 'v'"
+            ReleaseGuardRules.problemsOf(tagged).single() shouldContain "does not start with \"v\""
         }
 
         test("refuses a tag that names another version") {
             val problems = ReleaseGuardRules.problemsOf(candidate(resolved = "1.2.0", tag = "1.3.0"))
 
-            problems.single() shouldContain "does not match the version '1.2.0'"
+            problems.single() shouldContain "does not match the version \"1.2.0\""
         }
 
         test("refuses a snapshot, even when its tag names it") {
             val problems = ReleaseGuardRules.problemsOf(candidate(tag = "1.2.0-SNAPSHOT"))
 
             problems shouldHaveSize 1
-            problems.single() shouldContain "cannot publish the snapshot '1.2.0-SNAPSHOT'"
+            problems.single() shouldContain "cannot publish the snapshot \"1.2.0-SNAPSHOT\""
         }
 
         test("refuses a version that is no Semantic Versioning release") {
@@ -108,6 +108,12 @@ class ReleaseGuardRulesTest : FunSpec({
             listOf("0.0.1", "1.0.0", "1.2.3-rc.1", "1.0.0-alpha-1.x").forEach { version ->
                 ReleaseGuardRules.isRelease(version) shouldBe true
             }
+        }
+
+        test("is escaped where the guard shows it") {
+            val problems = ReleaseGuardRules.problemsOf(candidate(resolved = "1.2.0", tag = "1.2.0\u202E\n"))
+
+            problems.single() shouldContain "\"1.2.0\\u{202E}\\n\""
         }
 
         test("has no leading zeros, build metadata or missing parts") {

@@ -69,7 +69,16 @@ class HostPlatformTest : FunSpec({
                 HostPlatform("Plan 9", AMD64).requireOperatingSystem("the test target")
             }
 
-            failure.message shouldBe "Cannot determine the test target: unsupported operating system 'Plan 9'."
+            failure.message shouldBe "Cannot determine the test target: unsupported operating system \"Plan 9\"."
+        }
+
+        test("escapes the reported name") {
+            val failure = shouldThrow<GradleException> {
+                HostPlatform("Plan\u202E9\n", AMD64).requireOperatingSystem("the test target")
+            }
+
+            failure.message shouldBe
+                "Cannot determine the test target: unsupported operating system \"Plan\\u{202E}9\\n\"."
         }
 
         test("returns the known operating system when required") {
@@ -102,7 +111,7 @@ class HostPlatformTest : FunSpec({
                 HostPlatform(LINUX, "riscv64").requireArchitecture("the test target")
             }
 
-            failure.message shouldBe "Cannot determine the test target: unsupported architecture 'riscv64'."
+            failure.message shouldBe "Cannot determine the test target: unsupported architecture \"riscv64\"."
         }
 
         test("returns the known architecture when required") {
@@ -127,14 +136,14 @@ class HostPlatformTest : FunSpec({
             val failure = shouldThrow<GradleException> { HostPlatform("Plan 9", AMD64).platformId() }
 
             failure.message shouldContain "the native platform"
-            failure.message shouldContain "unsupported operating system 'Plan 9'"
+            failure.message shouldContain "unsupported operating system \"Plan 9\""
         }
 
         test("fails with a Gradle exception on an unknown architecture") {
             val failure = shouldThrow<GradleException> { HostPlatform(LINUX, "riscv64").platformId() }
 
             failure.message shouldContain "the native platform"
-            failure.message shouldContain "unsupported architecture 'riscv64'"
+            failure.message shouldContain "unsupported architecture \"riscv64\""
         }
     }
 

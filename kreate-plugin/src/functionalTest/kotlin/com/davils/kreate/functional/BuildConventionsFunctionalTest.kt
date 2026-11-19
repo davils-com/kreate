@@ -160,7 +160,7 @@ class BuildConventionsFunctionalTest : FunSpec({
 
             val result = fixture.buildAndFail("kreateReleaseGuard")
 
-            result.output shouldContain "The release tag '1.0.1' does not match the version '1.0.0'"
+            result.output shouldContain "The release tag \"1.0.1\" does not match the version \"1.0.0\""
         }
 
         test("refuses a tag on a commit that is not part of main") {
@@ -183,7 +183,7 @@ class BuildConventionsFunctionalTest : FunSpec({
 
             val result = fixture.buildAndFail("kreateReleaseGuard")
 
-            result.output shouldContain "resolved the version '6.6.6', but the build declares '1.0.0'"
+            result.output shouldContain "resolved the version \"6.6.6\", but the build declares \"1.0.0\""
         }
     }
 

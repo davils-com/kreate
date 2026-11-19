@@ -47,6 +47,7 @@
 
     <toc-element toc-title="Software assurance">
         <toc-element topic="Assurance-Overview.md"/>
+        <toc-element topic="Assurance-Standards.md"/>
         <toc-element topic="Assurance-On-Kreate.md"/>
     </toc-element>
 

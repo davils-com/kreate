@@ -15,7 +15,7 @@
  */
 package com.davils.kreate.api.semver
 
-import com.davils.kreate.vcs.SemanticVersion
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.vcs.VersionBump
 
 internal object SemverEvaluator {
@@ -31,7 +31,7 @@ internal object SemverEvaluator {
         val bump = bumpOf(changes)
         val required = bump.apply(baselineVersion)
         val problems = mutableListOf<String>()
-        if (bump != VersionBump.PATCH && version.core < required) {
+        if (bump != VersionBump.PATCH && version.release() < required) {
             problems += "The API changed in a way that needs version $required or higher, but the version is $version."
         }
         if (bump == VersionBump.MAJOR && breakingAnnounced == false) {

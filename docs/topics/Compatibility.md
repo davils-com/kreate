@@ -62,6 +62,10 @@ the plugin's own repository; it fails at *runtime*, on a consumer's machine, wit
 `NoSuchMethodError` that names an internal Gradle class. Building against the floor of the
 supported range is what turns that into a compile error here instead.
 
+The same rule holds for the libraries %product% carries onto your build classpath. Kore, the Davils
+foundation library %product% builds on, needs the Kotlin %kotlin_api% standard library, the one
+the minimum Gradle embeds; a Kore release that needs a newer one waits until the minimum moves.
+
 <note>
 This constrains %product%, not you. Your build is free to use any newer Kotlin or Java version;
 the <code>platform { javaVersion }</code> setting controls what <i>your</i> code targets.

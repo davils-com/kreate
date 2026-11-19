@@ -36,7 +36,13 @@ private val URL_PROPERTIES: List<String> = listOf(
     "kreate.network.osvUrl",
     "kreate.network.depsDevUrl",
     "kreate.trivy.downloadBaseUrl",
-    "kreate.trivy.dbRepository"
+    "kreate.trivy.dbRepository",
+    "kreate.network.rfcEditorUrl",
+    "kreate.network.datatrackerUrl",
+    "kreate.network.w3cApiUrl",
+    "kreate.network.githubApiUrl",
+    "kreate.network.unicodeUrl",
+    "kreate.network.isoOpenDataUrl"
 )
 
 internal fun Project.registerAssuranceTools(extension: KreateExtension, rules: List<IgnoreRuleInput>) {
@@ -111,6 +117,9 @@ internal fun configValues(assurance: AssuranceExtension, trivy: TrivyExtension):
         "dependencyPolicy.maxMajorBehind" to assurance.dependencyPolicy.maxMajorBehind,
         "dependencyPolicy.maxLibyears" to assurance.dependencyPolicy.maxLibyears,
         "workspace.enabled" to assurance.workspace.enabled,
+        "standards.enabled" to assurance.standards.enabled,
+        "standards.reviewEvery" to assurance.standards.reviewEvery,
+        "standards.inventory.enabled" to assurance.standards.inventory.enabled,
         "trivy.enabled" to trivy.enabled,
         "trivy.version" to trivy.version,
         "trivy.useInstalled" to trivy.useInstalled

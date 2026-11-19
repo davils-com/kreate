@@ -35,7 +35,12 @@ private const val SECURITY_SEVERITY_LOW: String = "2.0"
 
 private const val SECURITY_SEVERITY_UNKNOWN: String = "1.0"
 
-private val MAINTAINABILITY_SOURCES: Set<FindingSource> = setOf(FindingSource.QUALITY, FindingSource.CONFIG)
+private val MAINTAINABILITY_SOURCES: Set<FindingSource> = setOf(
+    FindingSource.QUALITY,
+    FindingSource.CONFIG,
+    FindingSource.STANDARDS,
+    FindingSource.STANDARDS_INVENTORY
+)
 
 internal object SarifRules {
     fun textOf(text: String): JsonObject = buildJsonObject { put("text", text) }

@@ -40,13 +40,13 @@ class RustTargetsTest : FunSpec({
         test("rejects an operating system Kreate does not recognise") {
             val failure = shouldThrow<GradleException> { hostRustTarget(HostPlatform("Plan 9", "amd64")) }
 
-            failure.message shouldBe "Cannot determine the Rust target: unsupported operating system 'Plan 9'."
+            failure.message shouldBe "Cannot determine the Rust target: unsupported operating system \"Plan 9\"."
         }
 
         test("rejects a Linux architecture Kreate does not recognise with a Gradle exception") {
             val failure = shouldThrow<GradleException> { hostRustTarget(HostPlatform(LINUX, "riscv64")) }
 
-            failure.message shouldBe "Cannot determine the Rust target: unsupported architecture 'riscv64'."
+            failure.message shouldBe "Cannot determine the Rust target: unsupported architecture \"riscv64\"."
         }
     }
 })

@@ -21,15 +21,31 @@ import io.kotest.matchers.string.shouldEndWith
 
 class SnippetSanitizerTest : FunSpec({
     context("escaping") {
-        test("keeps ordinary text and tabs") {
-            SnippetSanitizer.escape("val a\t= 1") shouldBe "val a\t= 1"
+        test("keeps ordinary text") {
+            SnippetSanitizer.escape("val a = 1") shouldBe "val a = 1"
+        }
+
+        test("shows tabs and line breaks by their names") {
+            SnippetSanitizer.escape("a\tb\nc\rd") shouldBe "a\\tb\\nc\\rd"
+        }
+
+        test("keeps a combining mark on its base and shows a loose one") {
+            SnippetSanitizer.escape("e\u0301") shouldBe "e\u0301"
+            SnippetSanitizer.escape("\u0301e") shouldBe "\\u{0301}e"
+        }
+
+        test("shows a lone surrogate and an invisible filler") {
+            SnippetSanitizer.escape("a\uD800b\u3164") shouldBe "a\\u{D800}b\\u{3164}"
+        }
+
+        test("is not shortened") {
+            SnippetSanitizer.escape("a".repeat(5000)).length shouldBe 5000
         }
 
         mapOf(
             "a right-to-left override" to ("\u202E" to "\\u{202E}"),
             "a zero width space" to ("\u200B" to "\\u{200B}"),
             "an escape character" to ("\u001B" to "\\u{001B}"),
-            "a line break" to ("\n" to "\\u{000A}"),
             "a tag character" to (String(Character.toChars(0xE0041)) to "\\u{E0041}")
         ).forEach { (name, case) ->
             test("makes $name visible") {
@@ -46,7 +62,7 @@ class SnippetSanitizerTest : FunSpec({
 
     context("snippets") {
         test("are cut to a readable length") {
-            SnippetSanitizer.sanitize("a".repeat(200)) shouldEndWith "a\u2026"
+            SnippetSanitizer.sanitize("a".repeat(200)) shouldEndWith "a\u2026(+40 chars)"
         }
 
         test("are trimmed") {

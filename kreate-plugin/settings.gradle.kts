@@ -25,6 +25,10 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        exclusiveContent {
+            forRepository { maven("https://repo.davils.com/releases") }
+            filter { includeGroupAndSubgroups("com.davils") }
+        }
         mavenCentral()
         gradlePluginPortal()
     }

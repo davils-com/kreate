@@ -65,6 +65,13 @@ class ConfigLinterTest : FunSpec({
 
             rulesOf(nothing) shouldContainExactlyInAnyOrder listOf("CONFIG_TRIVY_DISABLED", "CONFIG_NO_SOURCES")
         }
+
+        test("with only the standards as a source is no gate without sources") {
+            val withoutScanners = SOUND + ("trivy.enabled" to "false") + ("advisories.enabled" to "false")
+            val standards = withoutScanners + ("standards.enabled" to "true")
+
+            rulesOf(standards) shouldContainExactlyInAnyOrder listOf("CONFIG_TRIVY_DISABLED")
+        }
     }
 
     context("ignore rules") {

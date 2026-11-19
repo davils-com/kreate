@@ -15,9 +15,15 @@
  */
 package com.davils.kreate.governance.catalog
 
+import com.davils.kore.core.naming.NameRule
+import com.davils.kore.core.naming.nameRule
 import com.davils.kreate.governance.policy.VersionKinds
 
-private val ALIAS: Regex = Regex("^[a-z][a-z0-9]*([-_.][a-z0-9]+)*$")
+private val ALIAS: NameRule = nameRule {
+    separators = "-_."
+    isStrict = true
+    example = "kotlin-stdlib"
+}
 
 private val COORDINATE_PART: Regex = Regex("^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
 
@@ -27,6 +33,8 @@ private val INVALID_ALIAS_CHARACTERS: Regex = Regex("[^a-z0-9]+")
 
 internal object CatalogNames {
     fun isAlias(alias: String): Boolean = ALIAS.matches(alias)
+
+    fun requireAlias(alias: String): String = ALIAS.requireValid(alias, "catalog alias")
 
     fun isCoordinatePart(part: String): Boolean = COORDINATE_PART.matches(part)
 

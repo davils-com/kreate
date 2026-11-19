@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.3.0
+
+### Added
+
+- **Standards a project implements are declared and kept in view.** `assurance { standards {
+  enabled = true; rfc(9562); iso("ISO 8601-1"); w3c("webauthn-3"); din("DIN 5008") { reviewEvery =
+  Duration.ofDays(365) } } }` declares the RFCs, Internet-Drafts, ISO, W3C, WHATWG, Unicode and DIN
+  standards, specifications on GitHub and other documents a project implements. The reviewed state
+  of each lives in the checked-in `standards.lock`. `kreateStandardsInventory` feeds the gate with
+  `STANDARD_UNREVIEWED` for a standard without a review, `STANDARD_REVIEW_OVERDUE` once its
+  `reviewEvery` has passed, `STANDARD_LOCK_ORPHANED` for a review of a standard no longer declared,
+  and `STANDARD_UNDECLARED` for a standard the files of the project name, such as `RFC 7396` or a
+  link to `w3.org/TR/`, without declaring it, with the file and line of its first mention.
+- **The audit reports when a standard changes.** `kreateStandardsAudit` asks the issuing body of
+  every declared standard what it publishes today and compares it with `standards.lock`:
+  `STANDARD_OBSOLETED` for a standard that was replaced or withdrawn, `STANDARD_UPDATED`,
+  `STANDARD_REVISED` and `STANDARD_STATUS_CHANGED` for an update, a new edition, version or
+  revision and a new maturity, `STANDARD_ERRATA` and `STANDARD_ERRATA_REPORTED` for new errata,
+  `STANDARD_CHANGED` for a watched page of a DIN standard or another document that changed, and
+  `STANDARD_UNKNOWN` for a standard its body does not know. Answers are cached for a day under
+  `caches/kreate/standards` in the Gradle user home and revalidated with `ETag` and
+  `Last-Modified`; when a service fails, the last answer is used with its age, which
+  `maxAdvisoryAge` bounds. Offline, or when a body cannot be reached, the audit is incomplete.
+  `kreateStandardsReview --standard=rfc:9562 --note="..."`, or `--all`, records a review with
+  what the body publishes today, and `--prune` removes the reviews of standards no longer declared.
+- **The standards take part in the tooling of the gate.** `kreateExplain --rule=rfc:9562` shows
+  the page of a standard and how to review or accept it, and the `STANDARD_*` rules explain
+  themselves. `kreateDoctor` probes the RFC Editor, the IETF Datatracker, the W3C API, the GitHub
+  API, Unicode and the open data of ISO once the root project checks standards; their addresses
+  can be moved to a mirror with `kreate.network.rfcEditorUrl`, `datatrackerUrl`, `w3cApiUrl`,
+  `githubApiUrl`, `unicodeUrl` and `isoOpenDataUrl`, which the configuration lint checks like the
+  others. An organisation policy can demand reviews at least as often as it sets with
+  `standards.reviewEvery`. SARIF reports file standards findings under maintainability, never as
+  security alerts.
+
+### Changed
+
+- **Kreate builds on Kore 2.1.1.** The plugin depends on `com.davils:kore-core` again, the
+  foundation library of Davils, and uses its semantic versions, its escaping of untrusted text, its
+  rules for names and its close matches instead of copies of its own. 4.0.0 had dropped the
+  predecessor `davilsx-kore` to carry one dependency less; Kore 2 is small, has a single runtime
+  dependency, `kotlinx-coroutines-core`, which Ktor already brings, and is published, signed and
+  verified like Kreate itself. It comes from `https://repo.davils.com/releases`, which a build that
+  applies Kreate already declares for the `com.davils` group. Kore needs the Kotlin 2.4.21 standard
+  library, the one Gradle 9.9.0 embeds, so the minimum Gradle stays where it is.
+- **Versions are read strictly by Semantic Versioning 2.0.0.** The changelog, the API semver check
+  and release tags read versions through Kore, which refuses leading zeros such as `01.2.3` or
+  `1.2.3-01` that Kreate accepted before. A version with build metadata is still read without it.
+
+### Fixed
+
+- **The release guard escapes what it shows.** A release tag comes from `GITHUB_REF_NAME` or
+  `CI_COMMIT_TAG` and reached the messages of `kreateReleaseGuard` as it was, so a tag could forge
+  a line of the log or hide part of itself behind a bidirectional override. Every tag, prefix and
+  version the guard shows is now escaped and put in double quotes. A release version is checked by
+  Kore, which also refuses version numbers above `Int.MAX_VALUE`.
+- **Reports escape every invisible character.** The escaping of finding titles, descriptions and
+  snippets let lone surrogates, Hangul and Khmer fillers, Mongolian variation selectors, the
+  combining grapheme joiner and combining marks without a base character through, which can hide
+  or disguise text in a report. It now follows Kore's `SafeText`: a line break is shown as `\n`, a
+  tab as `\t` and every other such code point as `\u{XXXX}`, and a shortened snippet ends with the
+  number of characters left out, such as `…(+40 chars)`.
+- **Messages escape the text they show.** The name of an unknown operating system or architecture,
+  a platform id, a package name and a value of the native loader, the failure of a configuration
+  schema and the nodes of a DOT graph reached a message as they were. They are now escaped. A
+  reflected configuration accessor that fails with a `VirtualMachineError` or a cancellation is no
+  longer wrapped into an `IllegalStateException`.
+- **Numbers from servers and reports are read strictly.** A `Retry-After` or `Content-Length`
+  header and the counts of a coverage report are read as plain ASCII numbers; `+12`, `NaN`,
+  `Infinity` and the digits of other scripts no longer pass as numbers, so a hostile server cannot
+  slip a value past the checks that bound it.
+- **`kreateExplain` suggests rules by their spelling.** Besides the rules that contain the given
+  text, an unknown `--rule` now also suggests the rules a few edits away from it, so
+  `--rule=FRESH_PAKCAGE` suggests `FRESH_PACKAGE`.
+
 ## 5.2.0
 
 ### Added

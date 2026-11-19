@@ -34,6 +34,17 @@ private val DEFAULT_ENDPOINTS: Map<String, Pair<String, String>> = mapOf(
     "Trivy releases" to ("kreate.trivy.downloadBaseUrl" to "https://github.com/aquasecurity/trivy/releases")
 )
 
+private const val ISO_OPEN_DATA: String = "https://isopublicstorageprod.blob.core.windows.net/opendata/_latest/"
+
+private val STANDARDS_ENDPOINTS: Map<String, Pair<String, String>> = mapOf(
+    "RFC Editor" to ("kreate.network.rfcEditorUrl" to "https://www.rfc-editor.org/rfc/rfc9562.json"),
+    "IETF Datatracker" to ("kreate.network.datatrackerUrl" to "https://datatracker.ietf.org/doc/rfc9562/doc.json"),
+    "W3C API" to ("kreate.network.w3cApiUrl" to "https://api.w3.org/"),
+    "GitHub API" to ("kreate.network.githubApiUrl" to "https://api.github.com/"),
+    "Unicode" to ("kreate.network.unicodeUrl" to "https://www.unicode.org/Public/UCD/latest/ReadMe.txt"),
+    "ISO Open Data" to ("kreate.network.isoOpenDataUrl" to ISO_OPEN_DATA)
+)
+
 internal object DoctorFeature : KreateFeature {
     override val phase: FeaturePhase = FeaturePhase.ASSURANCE
 
@@ -41,6 +52,8 @@ internal object DoctorFeature : KreateFeature {
         if (project.path != ROOT_PATH) return
         val trivy = extension.trivy
         val owner = project
+        val assurance = extension.assurance
+        val isCheckingStandards = assurance.enabled.get() && assurance.standards.enabled.get()
 
         project.tasks.register<DoctorTask>(DoctorTaskNames.DOCTOR) {
             gradleVersion.set(owner.gradle.gradleVersion)
@@ -54,12 +67,15 @@ internal object DoctorFeature : KreateFeature {
             proxyHost.set(owner.providers.systemProperty("https.proxyHost"))
             proxyPort.set(owner.providers.systemProperty("https.proxyPort"))
             offline.set(owner.gradle.startParameter.isOffline)
-            endpoints.set(owner.provider { owner.endpoints() })
+            endpoints.set(owner.provider { owner.endpoints(isCheckingStandards) })
         }
     }
 
-    private fun Project.endpoints(): Map<String, String> = DEFAULT_ENDPOINTS.mapValues { (_, source) ->
-        val (property, fallback) = source
-        providers.gradleProperty(property).orNull?.takeIf { property.isNotEmpty() } ?: fallback
+    private fun Project.endpoints(isCheckingStandards: Boolean): Map<String, String> {
+        val probed = DEFAULT_ENDPOINTS + STANDARDS_ENDPOINTS.takeIf { isCheckingStandards }.orEmpty()
+        return probed.mapValues { (_, source) ->
+            val (property, fallback) = source
+            providers.gradleProperty(property).orNull?.takeIf { property.isNotEmpty() } ?: fallback
+        }
     }
 }

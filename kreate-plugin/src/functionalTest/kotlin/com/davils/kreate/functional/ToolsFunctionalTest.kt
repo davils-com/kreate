@@ -196,6 +196,8 @@ class ToolsFunctionalTest : FunSpec({
             fixture.build("kreateExplain", "--rule=GHSA-abcd-efgh-ijkl").output shouldContain
                 "https://osv.dev/vulnerability/GHSA-ABCD-EFGH-IJKL"
             fixture.buildAndFail("kreateExplain", "--rule=FRESH").output shouldContain "Did you mean"
+            fixture.buildAndFail("kreateExplain", "--rule=FRESH_PAKCAGE").output shouldContain
+                "Did you mean FRESH_PACKAGE"
             fixture.build("kreateExplain").output shouldContain "TYPOSQUAT_GROUP"
         }
 

@@ -192,6 +192,14 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
     public abstract val reports: AssuranceReportsExtension
 
     /**
+     * Configuration of the standards the project implements and of the checks for their changes.
+     *
+     * @since 5.3.0
+     */
+    @get:Nested
+    public abstract val standards: AssuranceStandardsExtension
+
+    /**
      * Accepts the findings with the given rule id, advisory id or alias. Every call declares a rule of
      * its own, so one id can be accepted for several modules, each with its own reason and expiry.
      *
@@ -293,6 +301,16 @@ public abstract class AssuranceExtension @Inject constructor(factory: ObjectFact
      */
     public fun reports(action: Action<AssuranceReportsExtension>) {
         action.execute(reports)
+    }
+
+    /**
+     * Configures the standards the project implements and the checks for their changes.
+     *
+     * @param action The configuration action.
+     * @since 5.3.0
+     */
+    public fun standards(action: Action<AssuranceStandardsExtension>) {
+        action.execute(standards)
     }
 
     internal fun declaredIgnoreRules(): List<Pair<String, AssuranceIgnoreSpec>> = ignoreRules.toList()

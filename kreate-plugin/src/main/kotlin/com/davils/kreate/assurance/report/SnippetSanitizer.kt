@@ -15,51 +15,39 @@
  */
 package com.davils.kreate.assurance.report
 
+import com.davils.kore.core.text.SafeText
+
 private const val MAX_SNIPPET_LENGTH: Int = 160
 
-private const val ELLIPSIS: String = "\u2026"
-
-private const val HEX_RADIX: Int = 16
-
-private const val MIN_HEX_DIGITS: Int = 4
-
-private val UNSAFE_CODE_POINTS: List<IntRange> = listOf(
-    0x0000..0x0008,
-    0x000A..0x001F,
-    0x007F..0x009F,
-    0x00AD..0x00AD,
-    0x061C..0x061C,
-    0x180E..0x180E,
-    0x200B..0x200F,
-    0x2028..0x202E,
-    0x2060..0x206F,
-    0xE000..0xF8FF,
-    0xFE00..0xFE0F,
-    0xFEFF..0xFEFF,
-    0xE0000..0xE0FFF,
-    0xF0000..0x10FFFF
+private val COMBINING_MARKS: Set<Int> = setOf(
+    Character.NON_SPACING_MARK.toInt(),
+    Character.ENCLOSING_MARK.toInt(),
+    Character.COMBINING_SPACING_MARK.toInt()
 )
 
 internal object SnippetSanitizer {
-    fun sanitize(text: String): String {
-        val escaped = escape(text).trim()
-        if (escaped.length <= MAX_SNIPPET_LENGTH) return escaped
-        return escaped.take(MAX_SNIPPET_LENGTH) + ELLIPSIS
-    }
+    fun sanitize(text: String): String = SafeText.text(text.trim(), MAX_SNIPPET_LENGTH)
 
-    fun escape(text: String): String = buildString {
-        text.codePoints().forEach { codePoint -> appendSafely(codePoint) }
-    }
-
-    private fun StringBuilder.appendSafely(codePoint: Int) {
-        val isUnsafe = UNSAFE_CODE_POINTS.any { range -> codePoint in range }
-        if (!isUnsafe) {
-            appendCodePoint(codePoint)
-            return
+    fun escape(text: String): String {
+        val escaped = StringBuilder(text.length)
+        var isAttached = false
+        var index = 0
+        while (index < text.length) {
+            val codePoint = text.codePointAt(index)
+            val piece = pieceOf(codePoint, isAttached)
+            escaped.append(piece)
+            val width = Character.charCount(codePoint)
+            isAttached = SafeText.isSafe(codePoint) && piece.length == width
+            index += width
         }
+        return escaped.toString()
+    }
 
-        val hex = codePoint.toString(HEX_RADIX).uppercase()
-        val digits = hex.padStart(MIN_HEX_DIGITS, '0')
-        append("\\u{$digits}")
+    private fun pieceOf(codePoint: Int, isAttached: Boolean): String {
+        val character = String(Character.toChars(codePoint))
+        val isLooseMark = !isAttached && Character.getType(codePoint) in COMBINING_MARKS
+        if (isLooseMark) return SafeText.text(character)
+        if (SafeText.isSafe(codePoint)) return character
+        return SafeText.text(character)
     }
 }

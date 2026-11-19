@@ -61,6 +61,12 @@ class TransportResponseTest : FunSpec({
         response.retryAfter shouldBe Duration.ofSeconds(Long.MAX_VALUE)
     }
 
+    test("ignores a Retry-After that is no plain number") {
+        listOf("+12", "1e3", "\u0661\u0662", "12 ").forEach { value ->
+            responseOf(429, headers = mapOf("Retry-After" to value)).retryAfter.shouldBeNull()
+        }
+    }
+
     test("has no Retry-After without the header") {
         responseOf(429).retryAfter.shouldBeNull()
     }

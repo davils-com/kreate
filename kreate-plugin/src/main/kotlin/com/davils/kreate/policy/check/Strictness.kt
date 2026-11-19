@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.policy.check
 
+import com.davils.kore.core.parseDecimalOrNull
 import com.davils.kreate.assurance.Severity
 import java.time.Duration
 import java.time.format.DateTimeParseException
@@ -40,7 +41,7 @@ internal enum class Strictness {
     private fun severityRank(text: String): Double? =
         Severity.entries.firstOrNull { severity -> severity.name == text.uppercase() }?.ordinal?.toDouble()
 
-    private fun numberOf(text: String): Double? = text.toDoubleOrNull()
+    private fun numberOf(text: String): Double? = parseDecimalOrNull(text)
 
     private fun secondsOf(text: String): Double? = try {
         Duration.parse(text).seconds.toDouble()
@@ -61,7 +62,8 @@ internal enum class Strictness {
             "trust.freshReleaseHours" to HIGHER_NUMBER,
             "trust.minScorecard" to HIGHER_NUMBER,
             "dependencyPolicy.maxMajorBehind" to LOWER_NUMBER,
-            "dependencyPolicy.maxLibyears" to LOWER_NUMBER
+            "dependencyPolicy.maxLibyears" to LOWER_NUMBER,
+            "standards.reviewEvery" to SHORTER_DURATION
         )
     }
 }

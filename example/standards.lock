@@ -1,0 +1,17 @@
+{
+    "schemaVersion": 1,
+    "standards": [
+        {
+            "id": "document:keep-a-changelog-1.1.0",
+            "reviewedOn": "2026-11-19",
+            "note": "The example declares the one standard it follows.",
+            "snapshot": {
+                "title": "document:keep-a-changelog-1.1.0",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        }
+    ]
+}

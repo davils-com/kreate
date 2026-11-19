@@ -16,6 +16,7 @@
 
 package com.davils.kreate.host
 
+import com.davils.kore.core.text.SafeText
 import org.gradle.api.GradleException
 
 private const val PLATFORM_ID_SEPARATOR: Char = '-'
@@ -32,9 +33,10 @@ internal fun requireKnownPlatform(platformId: String, context: String): String {
         return platformId
     }
 
+    val shownId = SafeText.quoted(platformId)
     throw GradleException(
         """
-            '$platformId' is not a platform Kreate knows ($context).
+            $shownId is not a platform Kreate knows ($context).
 
             A platform identifier is the directory name inside the JAR and the suffix of the
             published artifact id, and the generated loader derives it at runtime from the

@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.changelog.commit
 
+import com.davils.kore.core.text.LineBreak
+import com.davils.kore.core.text.withLineBreaks
 import com.davils.kreate.vcs.GitCommit
 
 private val HEADER: Regex = Regex("""^([A-Za-z][A-Za-z0-9-]*)(?:\(([^()\r\n]+)\))?(!)?: (\S.*)$""")
@@ -37,7 +39,8 @@ private const val DESCRIPTION: Int = 4
 
 internal object ConventionalCommitParser {
     fun parse(commit: GitCommit): ConventionalCommit {
-        val lines = commit.message.replace("\r\n", "\n").split('\n')
+        val message = commit.message
+        val lines = message.withLineBreaks(LineBreak.Lf).split('\n')
         val subject = lines.first().trim()
         val body = lines.drop(1)
         val notes = breakingNotesOf(body)

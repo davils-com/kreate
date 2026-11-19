@@ -26,7 +26,9 @@ internal enum class FindingSource(val id: String) {
     CONFIG("config"),
     QUALITY("quality"),
     EXTERNAL("external"),
-    POLICY("policy");
+    POLICY("policy"),
+    STANDARDS("standards"),
+    STANDARDS_INVENTORY("standards-inventory");
 
     companion object {
         fun parse(id: String): FindingSource? = entries.firstOrNull { source -> source.id == id }

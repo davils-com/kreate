@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.provenance.typosquat
 
+import com.davils.kore.core.Limits
+import com.davils.kore.core.text.editDistance
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.rule.ruleFinding
 import com.davils.kreate.dependency.ModuleCoordinate
@@ -70,7 +72,7 @@ internal class TyposquatDetector(popular: Set<String>, private val allow: Set<St
         val isUnderDomains = startsWithTopLevelDomain(owner) && startsWithTopLevelDomain(popular)
         if (name == popularName && owner != popular && isUnderDomains) return true
         if (normalised(owner) == normalised(popular)) return true
-        val distance = boundedEditDistance(owner, popular, FAR)
+        val distance = distanceOf(owner, popular, FAR)
         if (distance == NEAR) return name.length >= MIN_NEAR_LENGTH
         if (distance == FAR) return name.length >= MIN_FAR_LENGTH
         return false
@@ -86,7 +88,13 @@ internal class TyposquatDetector(popular: Set<String>, private val allow: Set<St
 
     private fun isNearArtifact(artifact: String, popular: String): Boolean {
         if (popular in GENERIC_ARTIFACTS || popular.length < MIN_ARTIFACT_LENGTH) return false
-        return boundedEditDistance(artifact, popular, NEAR) <= NEAR
+        return distanceOf(artifact, popular, NEAR) <= NEAR
+    }
+
+    private fun distanceOf(first: String, second: String, limit: Int): Int {
+        val longest = maxOf(first.length, second.length)
+        if (longest > Limits.MAX_EDIT_DISTANCE_LENGTH) return limit + 1
+        return editDistance(first, second, limit)
     }
 
     private fun artifactOf(coordinate: String): String = coordinate.substringAfter(':')

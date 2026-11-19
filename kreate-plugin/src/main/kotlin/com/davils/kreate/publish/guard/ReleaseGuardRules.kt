@@ -16,13 +16,10 @@
 
 package com.davils.kreate.publish.guard
 
+import com.davils.kore.core.text.SafeText
+import com.davils.kore.core.version.SemanticVersion
+
 internal const val SNAPSHOT_SUFFIX: String = "-SNAPSHOT"
-
-private const val IDENTIFIER: String = """(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"""
-
-private const val CORE: String = """(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"""
-
-private val RELEASE_VERSION: Regex = Regex("""^$CORE(?:-($IDENTIFIER(?:\.$IDENTIFIER)*))?$""")
 
 internal object ReleaseGuardRules {
     fun problemsOf(candidate: ReleaseCandidate): List<String> {
@@ -32,32 +29,42 @@ internal object ReleaseGuardRules {
         return releaseProblems(candidate, tag)
     }
 
-    fun isRelease(version: String): Boolean = RELEASE_VERSION.matches(version)
+    fun isRelease(version: String): Boolean {
+        val parsed = SemanticVersion.parseOrNull(version) ?: return false
+        return parsed.build.isEmpty()
+    }
 
     private fun declaredProblem(candidate: ReleaseCandidate): String? {
         val declared = candidate.declaredVersion
             ?: return "The build declares no version, so the guard cannot tell what it may publish."
         val resolved = candidate.resolvedVersion.removeSuffix(SNAPSHOT_SUFFIX)
         if (declared == resolved) return null
-        return "The build resolved the version '$resolved', but the build declares '$declared'. " +
+        return "The build resolved the version ${SafeText.quoted(resolved)}, but the build declares " +
+            "${SafeText.quoted(declared)}. " +
             "Change the declared version, never the environment."
     }
 
     private fun snapshotProblem(version: String): String? {
         if (version.endsWith(SNAPSHOT_SUFFIX)) return null
-        return "A build without a release tag must publish a snapshot, but it resolved '$version'."
+        return "A build without a release tag must publish a snapshot, but it resolved ${SafeText.quoted(version)}."
     }
 
     private fun releaseProblems(candidate: ReleaseCandidate, tag: String): List<String> {
         val prefix = candidate.tagPrefix
-        if (!tag.startsWith(prefix)) return listOf("The release tag '$tag' does not start with '$prefix'.")
+        val shownTag = SafeText.quoted(tag)
+        if (!tag.startsWith(prefix)) {
+            return listOf("The release tag $shownTag does not start with ${SafeText.quoted(prefix)}.")
+        }
         val tagged = tag.removePrefix(prefix)
         val version = candidate.resolvedVersion
-        if (version.endsWith(SNAPSHOT_SUFFIX)) return listOf("A tag build cannot publish the snapshot '$version'.")
+        val shownVersion = SafeText.quoted(version)
+        if (version.endsWith(SNAPSHOT_SUFFIX)) return listOf("A tag build cannot publish the snapshot $shownVersion.")
         val snapshots = candidate.tools.filterValues { tool -> tool.endsWith(SNAPSHOT_SUFFIX) }
+        val mismatch = "The release tag $shownTag does not match the version $shownVersion of the build."
+        val unreleased = "The release version $shownVersion is not a Semantic Versioning 2.0.0 release."
         return listOfNotNull(
-            "The release tag '$tag' does not match the version '$version' of the build.".takeIf { tagged != version },
-            "The release version '$version' is not a Semantic Versioning 2.0.0 release.".takeIf { !isRelease(version) },
+            mismatch.takeIf { tagged != version },
+            unreleased.takeIf { !isRelease(version) },
             toolProblem(snapshots)
         )
     }

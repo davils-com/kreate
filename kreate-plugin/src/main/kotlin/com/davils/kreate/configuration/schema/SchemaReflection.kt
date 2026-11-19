@@ -16,6 +16,8 @@
 
 package com.davils.kreate.configuration.schema
 
+import com.davils.kore.core.failure.rethrowIfFatal
+import com.davils.kore.core.text.SafeText
 import java.io.File
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -123,8 +125,10 @@ internal class SchemaReflection(classpath: Collection<File>) : AutoCloseable {
             method.invoke(receiver, *arguments)
         } catch (thrown: InvocationTargetException) {
             val cause = thrown.cause ?: thrown
+            cause.rethrowIfFatal()
+            val shownCause = SafeText.text(cause.toString())
             throw IllegalStateException(
-                "'${method.declaringClass.name}.${method.name}' threw while Kreate read it: $cause",
+                "'${method.declaringClass.name}.${method.name}' threw while Kreate read it: $shownCause",
                 cause
             )
         }

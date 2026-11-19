@@ -15,6 +15,7 @@
  */
 
 import com.davils.kreate.assurance.ReportFormat
+import java.time.Duration
 
 plugins {
     alias(libs.plugins.kotlinJvm)
@@ -36,6 +37,7 @@ kreate {
     assurance {
         enabled = true
         runOnCheck = false
+        internalGroups = setOf("com.davils")
 
         advisories {
             enabled = true
@@ -64,6 +66,33 @@ kreate {
 
         reports {
             formats = ReportFormat.entries.toSet()
+        }
+
+        standards {
+            enabled = true
+            reviewEvery = Duration.ofDays(730)
+
+            github("semver/semver") {
+                note = "The release guard, the API check and the changelog read Semantic Versioning 2.0.0."
+            }
+            github("olivierlacan/keep-a-changelog") {
+                note = "The changelog tasks write and check Keep a Changelog 1.1.0."
+            }
+            github("ossf/osv-schema") {
+                note = "The advisory audit reads OSV records."
+            }
+            github("oasis-tcs/sarif-spec") {
+                note = "The SARIF report writes SARIF 2.1.0; a new committee draft is a reason to look."
+                tags = "^sarif-"
+            }
+            document("FIRST CVSS 3.1") {
+                note = "The severity of an advisory is computed from its CVSS 3 vector."
+                reviewEvery = Duration.ofDays(365)
+            }
+            document("Conventional Commits 1.0.0") {
+                note = "The changelog and the API check read conventional commits."
+                reviewEvery = Duration.ofDays(365)
+            }
         }
     }
 }

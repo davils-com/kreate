@@ -20,6 +20,7 @@ import com.davils.kreate.cinterop.NativeLanguage
 import com.davils.kreate.coverage.Grouping
 import com.davils.kreate.testing.KotestModule
 import com.davils.kreate.testing.LegacyTestPolicy
+import java.time.Duration
 import java.time.Year
 
 plugins {
@@ -89,6 +90,15 @@ kreate {
         enabled = true
         reports {
             formats = setOf(ReportFormat.JSON, ReportFormat.SARIF, ReportFormat.TEXT)
+        }
+
+        standards {
+            enabled = true
+
+            document("Keep a Changelog 1.1.0") {
+                note = "The changelog of the example follows it."
+                reviewEvery = Duration.ofDays(3650)
+            }
         }
     }
 

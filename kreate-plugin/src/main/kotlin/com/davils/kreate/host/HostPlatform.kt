@@ -16,6 +16,7 @@
 
 package com.davils.kreate.host
 
+import com.davils.kore.core.text.SafeText
 import org.gradle.api.GradleException
 
 private const val OS_NAME_PROPERTY: String = "os.name"
@@ -32,7 +33,7 @@ internal class HostPlatform(
     }
 
     fun requireOperatingSystem(purpose: String): OperatingSystem = operatingSystemOrNull()
-        ?: throw GradleException("Cannot determine $purpose: unsupported operating system '$osName'.")
+        ?: throw GradleException("Cannot determine $purpose: unsupported operating system ${shown(osName)}.")
 
     fun architectureOrNull(): Architecture? {
         val normalizedName = archName.orEmpty().lowercase()
@@ -40,13 +41,15 @@ internal class HostPlatform(
     }
 
     fun requireArchitecture(purpose: String): Architecture = architectureOrNull()
-        ?: throw GradleException("Cannot determine $purpose: unsupported architecture '$archName'.")
+        ?: throw GradleException("Cannot determine $purpose: unsupported architecture ${shown(archName)}.")
 
     fun platformId(): String {
         val purpose = "the native platform"
         val operatingSystem = requireOperatingSystem(purpose)
         return platformIdOf(operatingSystem, requireArchitecture(purpose))
     }
+
+    private fun shown(name: String?): String = SafeText.quoted(name.orEmpty())
 
     companion object {
         fun current(): HostPlatform {

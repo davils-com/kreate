@@ -15,21 +15,22 @@
  */
 package com.davils.kreate.vcs
 
+import com.davils.kore.core.version.SemanticVersion
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 
-private fun version(text: String): SemanticVersion = SemanticVersion.parse(text) ?: error("no version: $text")
+private fun version(text: String): SemanticVersion = SemanticVersion.parse(text)
 
-class SemanticVersionTest : FunSpec({
+class ProjectVersionsTest : FunSpec({
     context("a semantic version") {
         test("is read with its pre-release and without its build") {
-            SemanticVersion.parse("1.2.3-rc.1+build.5") shouldBe SemanticVersion(1, 2, 3, "rc.1")
+            semanticVersionOf(" 1.2.3-rc.1+build.5 ") shouldBe SemanticVersion(1, 2, 3, listOf("rc", "1"))
         }
 
-        listOf("1.2", "v1.2.3", "1.2.3.4", "01.2", "").forEach { text ->
+        listOf("1.2", "v1.2.3", "1.2.3.4", "01.2", "01.2.3", "1.2.3-01", "").forEach { text ->
             test("'$text' is none") {
-                SemanticVersion.parse(text).shouldBeNull()
+                semanticVersionOf(text).shouldBeNull()
             }
         }
 
@@ -55,6 +56,11 @@ class SemanticVersionTest : FunSpec({
 
         test("releases a pre-release") {
             VersionBump.PATCH.apply(version("2.0.0-beta.1")) shouldBe version("2.0.0")
+        }
+
+        test("passes a pre-release by a major or a minor step") {
+            VersionBump.MAJOR.apply(version("2.0.0-rc.1")) shouldBe version("3.0.0")
+            VersionBump.MINOR.apply(version("1.5.0-beta")) shouldBe version("1.6.0")
         }
     }
 

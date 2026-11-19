@@ -15,6 +15,8 @@
  */
 package com.davils.kreate.api.task
 
+import com.davils.kore.core.text.SafeText
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.api.semver.ApiChangeKind
 import com.davils.kreate.api.semver.SemverEvaluator
 import com.davils.kreate.api.semver.SemverResult
@@ -26,7 +28,7 @@ import com.davils.kreate.tooling.ExecutableResolver
 import com.davils.kreate.tooling.ExternalTool
 import com.davils.kreate.vcs.GitHistory
 import com.davils.kreate.vcs.ReleaseTag
-import com.davils.kreate.vcs.SemanticVersion
+import com.davils.kreate.vcs.semanticVersionOf
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -96,14 +98,14 @@ internal abstract class ApiSemverCheck @Inject constructor(private val exec: Exe
 
     private fun declaredVersion(): SemanticVersion {
         val declared = projectVersion.get()
-        return SemanticVersion.parse(declared)
-            ?: throw InvalidUserDataException("The version '$declared' is no semantic version.")
+        return semanticVersionOf(declared)
+            ?: throw InvalidUserDataException("The version ${SafeText.quoted(declared)} is no semantic version.")
     }
 
     private fun baselineOf(git: GitHistory): ReleaseTag? {
         val explicit = baseline.orNull ?: return git.latestTag(tagPrefix.get())
-        val version = ReleaseTag.parse(explicit, tagPrefix.get())?.version ?: SemanticVersion.parse(explicit)
-            ?: throw InvalidUserDataException("The baseline '$explicit' names no semantic version.")
+        val version = ReleaseTag.parse(explicit, tagPrefix.get())?.version ?: semanticVersionOf(explicit)
+            ?: throw InvalidUserDataException("The baseline ${SafeText.quoted(explicit)} names no semantic version.")
         return ReleaseTag(explicit, version)
     }
 

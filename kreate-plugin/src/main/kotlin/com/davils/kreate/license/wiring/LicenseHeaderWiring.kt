@@ -16,6 +16,7 @@
 
 package com.davils.kreate.license.wiring
 
+import com.davils.kreate.gradle.GENERATED_PATHS
 import com.davils.kreate.license.LicenseHeaderExtension
 import com.davils.kreate.license.LicenseHeaderTaskNames
 import com.davils.kreate.license.task.LicenseHeaderCheck
@@ -26,16 +27,6 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 private const val REPORT: String = "kreate/license/headers.txt"
 
-private val GENERATED: Set<String> = setOf(
-    "**/build/**",
-    "**/.gradle/**",
-    "**/.kotlin/**",
-    "**/.idea/**",
-    "**/.git/**",
-    "gradle/wrapper/**",
-    "gradle/gradle-daemon-jvm.properties",
-)
-
 internal fun Project.registerLicenseHeaderCheck(licenseHeader: LicenseHeaderExtension) {
     if (!licenseHeader.notice.isPresent) {
         throw InvalidUserDataException(
@@ -45,7 +36,7 @@ internal fun Project.registerLicenseHeaderCheck(licenseHeader: LicenseHeaderExte
     }
     val owner = this
     val includes = licenseHeader.includes.get()
-    val excludes = GENERATED + licenseHeader.excludes.get()
+    val excludes = GENERATED_PATHS + licenseHeader.excludes.get()
     val selected = fileTree(layout.projectDirectory) {
         include(includes)
         exclude(excludes)

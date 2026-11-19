@@ -15,6 +15,9 @@
  */
 package com.davils.kreate.changelog.document
 
+import com.davils.kore.core.text.LineBreak
+import com.davils.kore.core.text.withLineBreaks
+
 private val RELEASE: Regex = Regex("""^\[?([^\]\s]+)]?(?:\s+-\s+(\S+))?\s*$""")
 
 private val UNRELEASED: Regex = Regex("""^\[?unreleased]?$""", RegexOption.IGNORE_CASE)
@@ -38,7 +41,7 @@ internal class ChangelogDocument private constructor(
 
     companion object {
         fun parse(text: String): ChangelogDocument {
-            val lines = text.replace("\r\n", "\n").split('\n')
+            val lines = text.withLineBreaks(LineBreak.Lf).split('\n')
             val fenced = fencedLines(lines)
             val headings = lines.indices.filter { index -> index !in fenced && lines[index].startsWith(LEVEL_TWO) }
             return ChangelogDocument(lines, headings.map { index -> headingOf(index + 1, lines[index]) })

@@ -85,7 +85,14 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "advisory/version",
     "trivy/provision",
     "trivy/report",
-    "publish/routing"
+    "publish/routing",
+    "standard/model",
+    "standard/lock",
+    "standard/rule",
+    "standard/inventory",
+    "standard/fetch",
+    "standard/drift",
+    "standard/provider"
 )
 
 private val GRADLE_FREE_TOOLING_TYPES: List<String> = listOf(

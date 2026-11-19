@@ -15,6 +15,9 @@
  */
 package com.davils.kreate.vcs
 
+import com.davils.kore.core.version.SemanticVersion
+import com.davils.kore.core.version.nextPatch
+
 internal enum class VersionBump {
     PATCH,
     MINOR,
@@ -23,21 +26,16 @@ internal enum class VersionBump {
     fun apply(current: SemanticVersion): SemanticVersion = when (this) {
         MAJOR -> majorOf(current)
         MINOR -> minorOf(current)
-        PATCH -> patchOf(current)
+        PATCH -> current.nextPatch()
     }
 
     private fun majorOf(current: SemanticVersion): SemanticVersion {
-        if (!current.isStable) return SemanticVersion(0, current.minor + 1, 0)
-        return SemanticVersion(current.major + 1, 0, 0)
+        if (current.major == 0) return SemanticVersion(major = 0, minor = current.minor + 1)
+        return SemanticVersion(major = current.major + 1)
     }
 
     private fun minorOf(current: SemanticVersion): SemanticVersion {
-        if (!current.isStable) return patchOf(current)
-        return SemanticVersion(current.major, current.minor + 1, 0)
-    }
-
-    private fun patchOf(current: SemanticVersion): SemanticVersion {
-        if (current.preRelease != null) return current.core
-        return SemanticVersion(current.major, current.minor, current.patch + 1)
+        if (current.major == 0) return current.nextPatch()
+        return SemanticVersion(major = current.major, minor = current.minor + 1)
     }
 }

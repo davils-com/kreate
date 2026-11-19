@@ -15,7 +15,7 @@
  */
 package com.davils.kreate.api.semver
 
-import com.davils.kreate.vcs.SemanticVersion
+import com.davils.kore.core.version.SemanticVersion
 import com.davils.kreate.vcs.VersionBump
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -112,7 +112,7 @@ class ApiChangeClassifierTest : FunSpec({
         }
 
         test("accepts the major release") {
-            val result = evaluate(removed, SemanticVersion(2, 0, 0, "SNAPSHOT"), true)
+            val result = evaluate(removed, SemanticVersion(2, 0, 0, listOf("SNAPSHOT")), true)
 
             result.isValid shouldBe true
         }

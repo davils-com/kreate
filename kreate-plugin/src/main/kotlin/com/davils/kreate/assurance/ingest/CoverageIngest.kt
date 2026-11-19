@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.assurance.ingest
 
+import com.davils.kore.core.parseDecimalOrNull
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.policy.REPORT_ONLY_ATTRIBUTE
 import com.davils.kreate.assurance.rule.ruleFinding
@@ -38,8 +39,8 @@ internal object CoverageIngest {
         val report = parse(xml) ?: return null
         val counters = childrenOf(report).filter { element -> element.tagName == "counter" }
         val lines = counters.firstOrNull { counter -> counter.getAttribute("type") == "LINE" } ?: return null
-        val missed = lines.getAttribute("missed").toDoubleOrNull() ?: return null
-        val covered = lines.getAttribute("covered").toDoubleOrNull() ?: return null
+        val missed = parseDecimalOrNull(lines.getAttribute("missed")) ?: return null
+        val covered = parseDecimalOrNull(lines.getAttribute("covered")) ?: return null
         val total = missed + covered
         if (total == 0.0) return null
         return covered / total * PERCENT
