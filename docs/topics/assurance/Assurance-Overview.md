@@ -362,10 +362,29 @@ uncommitted and untracked files included, with every project depending on them, 
 `kreateDependencyGraph` the resolved dependencies of one project, as `--format=text`, `dot` or
 `mermaid`.
 
+## Standards
+
+```kotlin
+assurance {
+    standards {
+        enabled = true
+        rfc(9562)
+        iso("ISO 8601-1")
+        din("DIN 5008") { reviewEvery = Duration.ofDays(365) }
+    }
+}
+```
+
+The project declares the standards it implements, reviews each once with `kreateStandardsReview`,
+and `kreateStandardsAudit` reports from then on when a standard is obsoleted, updated, revised or
+corrected. `kreateStandardsInventory` reports standards that were never reviewed, reviews that are
+due and standards the code names without declaring them. See [Standards](Assurance-Standards.md).
+
 ## Explaining rules and checking the configuration
 
 `kreateExplain --rule=FRESH_RELEASE` explains a rule of the catalog, and without `--rule` lists all
-of them. An advisory id such as `GHSA-...` points to its record on OSV.dev.
+of them. An advisory id such as `GHSA-...` points to its record on OSV.dev, and a standard id such as
+`rfc:9562` to the page of the standard and how to review or accept it.
 
 `kreateAssuranceConfig` prints the effective configuration and marks with `*` what differs from the
 defaults. `kreateAssuranceConfigLint` feeds the gate with what weakens it: `reportOnly`
@@ -397,9 +416,9 @@ organisation therefore publishes a policy as a versioned artifact, and CI names 
 
 - `require` fixes options to a value; the names are those `kreateAssuranceConfig` prints.
 - `minimum` sets the weakest allowed value of an option with an order: `failOn`, `minSeverity` and
-  `baseline.maxSeverity`, where a less severe value is stricter; `maxAdvisoryAge` and `reuseVerdictFor`,
-  where shorter is stricter; and the thresholds of the inspection, the trust assessment and the
-  dependency policy.
+  `baseline.maxSeverity`, where a less severe value is stricter; `maxAdvisoryAge`, `reuseVerdictFor`
+  and `standards.reviewEvery`, where shorter is stricter; and the thresholds of the inspection, the
+  trust assessment and the dependency policy.
 - `forbidIgnoreOf` adds severities that no ignore rule may hide, `ignoreRulesNeedExpiry` and
   `maxIgnoreDays` limit ignore rules, and `denied` forbids modules, also transitively.
 

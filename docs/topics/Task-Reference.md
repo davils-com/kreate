@@ -217,6 +217,24 @@ Registered when `assurance.enabled` is `true`. See [Software assurance](Assuranc
         <td>The resolved dependency graph, lock file, verification metadata, wrapper properties</td>
     </tr>
     <tr>
+        <td><code>kreateStandardsInventory</code></td>
+        <td>Checks that every declared standard was reviewed, that no review is due and that the files name no
+            undeclared standard. Only with <code>standards { enabled }</code>.</td>
+        <td>The declarations, <code>standards.lock</code>, the files of the project</td>
+    </tr>
+    <tr>
+        <td><code>kreateStandardsAudit</code></td>
+        <td>Compares the reviewed state of every declared standard with what its body publishes today. Only
+            with <code>standards { enabled }</code>.</td>
+        <td>The declarations, <code>standards.lock</code>, the services of the issuing bodies</td>
+    </tr>
+    <tr>
+        <td><code>kreateStandardsReview</code></td>
+        <td>Records the review of standards in <code>standards.lock</code>; <code>--standard</code>,
+            <code>--all</code>, <code>--note</code>, <code>--prune</code>.</td>
+        <td>The snapshots of <code>kreateStandardsAudit</code></td>
+    </tr>
+    <tr>
         <td><code>kreateDependencyOutdated</code></td>
         <td>Measures how far the direct dependencies lag behind, through deps.dev. Only with
             <code>dependencyPolicy { checkOutdated }</code>.</td>

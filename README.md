@@ -162,6 +162,9 @@ Kreate reacts to the Kotlin plugin you applied rather than guessing at your proj
 - **Supply chain**: advisories from OSV.dev, an inspection of what dependency jars contain, their age
   and maintenance through deps.dev, typosquatting and dependency confusion, and a dependency policy
   that also checks locking, verification and the wrapper.
+- **Standards**: declare the RFCs, ISO and DIN standards, W3C, WHATWG and Unicode specifications a
+  project implements, review each once into `standards.lock`, and learn when one is obsoleted,
+  updated, revised or corrected, or when the code names a standard it does not declare.
 - **Organisation policy**: CI names a versioned policy artifact that a build cannot weaken.
 - **Workspace**: cycles, forbidden dependencies and misaligned versions across projects, the projects
   a change affects, and one report over all of them, safe under Isolated Projects.
@@ -342,6 +345,8 @@ kreate {
 | `assurance.dependencyPolicy`      | `enabled`                  | Dependency policy and build hardening      | `false`      |
 | `assurance.workspace`             | `enabled`                  | Checks across the projects of a build      | `false`      |
 | `assurance.aggregate`             | `enabled`                  | One report over all projects               | `false`      |
+| `assurance.standards`             | `enabled`                  | Track the standards a project implements   | `false`      |
+| `assurance.standards`             | `reviewEvery`              | Interval after which a review falls due    | absent       |
 | `trivy`                           | `enabled`                  | Security and compliance scanning           | `false`      |
 
 ---
