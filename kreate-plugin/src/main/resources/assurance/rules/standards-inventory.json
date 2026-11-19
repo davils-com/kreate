@@ -1,0 +1,33 @@
+{
+  "source": "standards-inventory",
+  "rules": [
+    {
+      "id": "STANDARD_UNREVIEWED",
+      "severity": "HIGH",
+      "category": "review",
+      "summary": "A declared standard was never reviewed",
+      "explanation": "The standard is declared in assurance { standards { } }, but standards.lock records no review of it, so nothing can tell whether it changed. Review the standard and run kreateStandardsReview --standard=<id> --note=\"...\" to record what its body publishes about it today."
+    },
+    {
+      "id": "STANDARD_REVIEW_OVERDUE",
+      "severity": "MEDIUM",
+      "category": "review",
+      "summary": "The review of a standard is due",
+      "explanation": "The interval set with reviewEvery has passed since the last review. For a standard that no service checks, such as a DIN standard, this is the only reminder that it may have changed. Review it and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_UNDECLARED",
+      "severity": "MEDIUM",
+      "category": "inventory",
+      "summary": "The code names a standard it does not declare",
+      "explanation": "A file of the project refers to a standard, such as RFC 7396 or a specification on w3.org/TR, that assurance { standards { } } does not declare, so nobody notices when it changes. Declare it, or accept the reference with an ignore rule whose module is the id of the standard when the project only mentions it."
+    },
+    {
+      "id": "STANDARD_LOCK_ORPHANED",
+      "severity": "LOW",
+      "category": "review",
+      "summary": "standards.lock records a standard that is no longer declared",
+      "explanation": "The project no longer declares the standard, but standards.lock still records its review. Run kreateStandardsReview --prune to remove the record, or declare the standard again."
+    }
+  ]
+}

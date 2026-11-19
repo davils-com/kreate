@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 5.3.0
 
+### Added
+
+- **Standards a project implements are declared and kept in view.** `assurance { standards {
+  enabled = true; rfc(9562); iso("ISO 8601-1"); w3c("webauthn-3"); din("DIN 5008") { reviewEvery =
+  Duration.ofDays(365) } } }` declares the RFCs, Internet-Drafts, ISO, W3C, WHATWG, Unicode and DIN
+  standards, specifications on GitHub and other documents a project implements. The reviewed state
+  of each lives in the checked-in `standards.lock`. `kreateStandardsInventory` feeds the gate with
+  `STANDARD_UNREVIEWED` for a standard without a review, `STANDARD_REVIEW_OVERDUE` once its
+  `reviewEvery` has passed, `STANDARD_LOCK_ORPHANED` for a review of a standard no longer declared,
+  and `STANDARD_UNDECLARED` for a standard the files of the project name, such as `RFC 7396` or a
+  link to `w3.org/TR/`, without declaring it, with the file and line of its first mention.
+
 ### Changed
 
 - **Kreate builds on Kore 2.1.1.** The plugin depends on `com.davils:kore-core` again, the

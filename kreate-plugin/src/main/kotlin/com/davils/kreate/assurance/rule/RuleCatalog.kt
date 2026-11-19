@@ -30,7 +30,9 @@ private val CATALOG_RESOURCES: Map<FindingSource, String> = mapOf(
     FindingSource.CONFIG to "/assurance/rules/config.json",
     FindingSource.WORKSPACE to "/assurance/rules/workspace.json",
     FindingSource.POLICY to "/assurance/rules/policy.json",
-    FindingSource.QUALITY to "/assurance/rules/quality.json"
+    FindingSource.QUALITY to "/assurance/rules/quality.json",
+    FindingSource.STANDARDS to "/assurance/rules/standards.json",
+    FindingSource.STANDARDS_INVENTORY to "/assurance/rules/standards-inventory.json"
 )
 
 internal object RuleCatalog {

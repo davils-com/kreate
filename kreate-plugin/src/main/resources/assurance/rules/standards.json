@@ -1,0 +1,61 @@
+{
+  "source": "standards",
+  "rules": [
+    {
+      "id": "STANDARD_OBSOLETED",
+      "severity": "HIGH",
+      "category": "lifecycle",
+      "summary": "The standard was obsoleted, replaced or withdrawn",
+      "explanation": "The body that issues the standard replaced or withdrew it, so code that follows it implements what others no longer do. Read the replacement the finding names, decide what the code has to change, change it, and record the review with kreateStandardsReview. Until then the finding blocks the gate."
+    },
+    {
+      "id": "STANDARD_UNKNOWN",
+      "severity": "HIGH",
+      "category": "declaration",
+      "summary": "The issuing body does not know the standard",
+      "explanation": "The body answered that it has no standard of this name. The declaration is most likely misspelt, or the standard was renamed. Correct the declaration in assurance { standards { } }."
+    },
+    {
+      "id": "STANDARD_UPDATED",
+      "severity": "MEDIUM",
+      "category": "lifecycle",
+      "summary": "Another document updates the standard",
+      "explanation": "An RFC that updates it, or an amendment or corrigendum of an ISO standard, changes what conforming code has to do without replacing the standard. Read the update, adapt the code and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_REVISED",
+      "severity": "MEDIUM",
+      "category": "lifecycle",
+      "summary": "A new edition, version or revision of the standard exists",
+      "explanation": "The body published a new edition of an ISO standard, a new version of a W3C specification or of Unicode, a new revision of a draft or a Unicode report, a new review draft of a WHATWG standard or a new release of a specification on GitHub. Compare it with the reviewed one, adapt the code and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_STATUS_CHANGED",
+      "severity": "MEDIUM",
+      "category": "lifecycle",
+      "summary": "The status of the standard changed",
+      "explanation": "The maturity of the standard changed, such as a Proposed Standard that became an Internet Standard, a Candidate Recommendation that became a Recommendation or an ISO standard that is to be revised. A change of status often comes with changes of content. Review it and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_ERRATA",
+      "severity": "MEDIUM",
+      "category": "errata",
+      "summary": "The standard has new confirmed errata",
+      "explanation": "The body verified errata of the standard, or holds them for its next update, since it was reviewed. An erratum corrects what the standard says, so code written to the uncorrected text may be wrong. Read the errata the finding names, adapt the code and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_CHANGED",
+      "severity": "MEDIUM",
+      "category": "fingerprint",
+      "summary": "The watched page of the standard changed",
+      "explanation": "The page at the url of a din() or document() standard no longer reads as it did at the review. No service reports changes of these standards, so a changed page is the only hint. Look at the page, adapt the code if the standard changed and record the review with kreateStandardsReview."
+    },
+    {
+      "id": "STANDARD_ERRATA_REPORTED",
+      "severity": "LOW",
+      "category": "errata",
+      "summary": "The standard has new reported errata",
+      "explanation": "Someone reported errata of the standard that the body has not decided on yet. They may be wrong, but they point at text that readers find unclear. Read them and record the review with kreateStandardsReview once they no longer concern the code."
+    }
+  ]
+}

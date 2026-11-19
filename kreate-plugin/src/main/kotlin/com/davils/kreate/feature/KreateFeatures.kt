@@ -45,6 +45,7 @@ import com.davils.kreate.project.wiring.RepositoriesFeature
 import com.davils.kreate.project.wiring.VersionFeature
 import com.davils.kreate.provenance.wiring.ProvenanceFeature
 import com.davils.kreate.publish.wiring.PublishFeature
+import com.davils.kreate.standard.wiring.StandardsFeature
 import com.davils.kreate.testing.wiring.TestingFeature
 import com.davils.kreate.trivy.wiring.TrivyFeature
 import com.davils.kreate.workspace.wiring.WorkspaceFeature
@@ -79,6 +80,7 @@ internal object KreateFeatures {
         ProvenanceFeature,
         GovernanceFeature,
         WorkspaceFeature,
+        StandardsFeature,
         AssuranceFeature,
         GitHookFeature,
         DoctorFeature,
