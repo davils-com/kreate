@@ -18,6 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `reviewEvery` has passed, `STANDARD_LOCK_ORPHANED` for a review of a standard no longer declared,
   and `STANDARD_UNDECLARED` for a standard the files of the project name, such as `RFC 7396` or a
   link to `w3.org/TR/`, without declaring it, with the file and line of its first mention.
+- **The audit reports when a standard changes.** `kreateStandardsAudit` asks the issuing body of
+  every declared standard what it publishes today and compares it with `standards.lock`:
+  `STANDARD_OBSOLETED` for a standard that was replaced or withdrawn, `STANDARD_UPDATED`,
+  `STANDARD_REVISED` and `STANDARD_STATUS_CHANGED` for an update, a new edition, version or
+  revision and a new maturity, `STANDARD_ERRATA` and `STANDARD_ERRATA_REPORTED` for new errata,
+  `STANDARD_CHANGED` for a watched page of a DIN standard or another document that changed, and
+  `STANDARD_UNKNOWN` for a standard its body does not know. Answers are cached for a day under
+  `caches/kreate/standards` in the Gradle user home and revalidated with `ETag` and
+  `Last-Modified`; when a service fails, the last answer is used with its age, which
+  `maxAdvisoryAge` bounds. Offline, or when a body cannot be reached, the audit is incomplete.
+  `kreateStandardsReview --standard=rfc:9562 --note="..."`, or `--all`, records a review with
+  what the body publishes today, and `--prune` removes the reviews of standards no longer declared.
 
 ### Changed
 

@@ -15,10 +15,17 @@
  */
 package com.davils.kreate.functional
 
+import com.sun.net.httpserver.HttpServer
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import java.net.InetAddress
+import java.net.InetSocketAddress
+
+private const val HTTP_OK: Int = 200
+
+private const val HTTP_UNAVAILABLE: Int = 503
 
 private const val REVIEWED_LOCK: String = """
 {
@@ -35,6 +42,26 @@ private const val REVIEWED_LOCK: String = """
 
 class StandardsFunctionalTest : FunSpec({
     val workspace = kreateWorkspace()
+    val server = HttpServer.create(InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0)
+    val pages = listOf("/ecma-404" to "The JSON syntax.", "/ecma-404-2" to "The JSON syntax, second edition.")
+    pages.forEach { (path, text) ->
+        server.createContext(path) { exchange ->
+            val body = text.toByteArray()
+            exchange.sendResponseHeaders(HTTP_OK, body.size.toLong())
+            exchange.responseBody.use { stream -> stream.write(body) }
+        }
+    }
+    server.createContext("/down") { exchange ->
+        exchange.sendResponseHeaders(HTTP_UNAVAILABLE, -1)
+        exchange.close()
+    }
+    server.start()
+    afterSpec { server.stop(0) }
+
+    val base = "http://${server.address.address.hostAddress}:${server.address.port}"
+
+    fun watched(path: String): String =
+        """document("ECMA-404") { reviewEvery = Duration.ofDays(3650); url = "$base$path" }"""
 
     fun newBuild(standardsBlock: String, assuranceBlock: String = ""): KreateBuildFixture {
         val fixture = KreateBuildFixture.createIn(workspace)
@@ -117,13 +144,56 @@ class StandardsFunctionalTest : FunSpec({
             result.output shouldContain "Kreate assurance [PASSED]"
         }
 
+        test("record a review that lets the gate pass, and report a changed watched page") {
+            val fixture = newBuild(watched("/ecma-404"))
+
+            val review = fixture.build("kreateStandardsReview", "--all", "--note=Read the first edition.")
+
+            review.output shouldContain "Recorded 1 review(s)"
+            fixture.file("standards.lock").readText() shouldContain "sha256:"
+            fixture.build("kreateAssurance").output shouldContain "Kreate assurance [PASSED]"
+
+            val script = fixture.file("build.gradle.kts").readText()
+            fixture.write("build.gradle.kts", script.replace("/ecma-404\"", "/ecma-404-2\""))
+            val changed = fixture.build("kreateAssurance")
+
+            changed.output shouldContain "MEDIUM STANDARD_CHANGED: The watched page of document:ecma-404 changed"
+        }
+
+        test("need a note and a known standard to record a review") {
+            val fixture = newBuild(watched("/ecma-404"))
+
+            fixture.buildAndFail("kreateStandardsReview", "--all").output shouldContain "--note"
+            val misspelt = fixture.buildAndFail("kreateStandardsReview", "--standard=document:ecma-40", "--note=x")
+
+            misspelt.output shouldContain "Did you mean document:ecma-404?"
+        }
+
+        test("refuse to review a standard whose page cannot be read") {
+            val fixture = newBuild(watched("/down"))
+
+            val result = fixture.buildAndFail("kreateStandardsReview", "--all", "--note=Read it.")
+
+            result.output shouldContain "Cannot review document:ecma-404"
+        }
+
+        test("are incomplete in offline mode") {
+            val fixture = newBuild(watched("/ecma-404"))
+
+            val result = fixture.buildAndFail("kreateAssurance", "--offline")
+
+            result.output shouldContain "Standards cannot be checked in offline mode."
+            result.output shouldContain "Kreate assurance [INCOMPLETE]"
+        }
+
         test("are cached while nothing they read changes") {
             val fixture = newBuild("")
 
-            fixture.build("kreateStandardsInventory")
-            val second = fixture.build("kreateStandardsInventory")
+            fixture.build("kreateStandardsInventory", "kreateStandardsAudit")
+            val second = fixture.build("kreateStandardsInventory", "kreateStandardsAudit")
 
             second.task(":kreateStandardsInventory")?.outcome?.name shouldBe "UP_TO_DATE"
+            second.task(":kreateStandardsAudit")?.outcome?.name shouldBe "UP_TO_DATE"
         }
     }
 })
