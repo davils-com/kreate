@@ -1,0 +1,84 @@
+{
+    "schemaVersion": 1,
+    "standards": [
+        {
+            "id": "document:conventional-commits-1.0.0",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "document:conventional-commits-1.0.0",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        },
+        {
+            "id": "document:first-cvss-3.1",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "document:first-cvss-3.1",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        },
+        {
+            "id": "github:oasis-tcs/sarif-spec",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "oasis-tcs/sarif-spec",
+                "revision": "sarif-v2.2-wd20250807-dev",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        },
+        {
+            "id": "github:olivierlacan/keep-a-changelog",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "olivierlacan/keep-a-changelog",
+                "revision": "v1.1.1",
+                "published": "2023-03-06",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        },
+        {
+            "id": "github:ossf/osv-schema",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "ossf/osv-schema",
+                "revision": "v1.9.2",
+                "published": "2026-10-13",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        },
+        {
+            "id": "github:semver/semver",
+            "reviewedOn": "2026-11-19",
+            "note": "First review of the standards Kreate implements.",
+            "snapshot": {
+                "title": "semver/semver",
+                "revision": "v2.0.0",
+                "published": "2023-12-19",
+                "withdrawn": false,
+                "replacedBy": [],
+                "updatedBy": [],
+                "errata": {}
+            }
+        }
+    ]
+}
