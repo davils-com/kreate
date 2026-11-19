@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `maxAdvisoryAge` bounds. Offline, or when a body cannot be reached, the audit is incomplete.
   `kreateStandardsReview --standard=rfc:9562 --note="..."`, or `--all`, records a review with
   what the body publishes today, and `--prune` removes the reviews of standards no longer declared.
+- **The standards take part in the tooling of the gate.** `kreateExplain --rule=rfc:9562` shows
+  the page of a standard and how to review or accept it, and the `STANDARD_*` rules explain
+  themselves. `kreateDoctor` probes the RFC Editor, the IETF Datatracker, the W3C API, the GitHub
+  API, Unicode and the open data of ISO once the root project checks standards; their addresses
+  can be moved to a mirror with `kreate.network.rfcEditorUrl`, `datatrackerUrl`, `w3cApiUrl`,
+  `githubApiUrl`, `unicodeUrl` and `isoOpenDataUrl`, which the configuration lint checks like the
+  others. An organisation policy can demand reviews at least as often as it sets with
+  `standards.reviewEvery`. SARIF reports file standards findings under maintainability, never as
+  security alerts.
 
 ### Changed
 

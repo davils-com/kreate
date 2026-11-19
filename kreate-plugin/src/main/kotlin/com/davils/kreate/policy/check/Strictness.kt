@@ -62,7 +62,8 @@ internal enum class Strictness {
             "trust.freshReleaseHours" to HIGHER_NUMBER,
             "trust.minScorecard" to HIGHER_NUMBER,
             "dependencyPolicy.maxMajorBehind" to LOWER_NUMBER,
-            "dependencyPolicy.maxLibyears" to LOWER_NUMBER
+            "dependencyPolicy.maxLibyears" to LOWER_NUMBER,
+            "standards.reviewEvery" to SHORTER_DURATION
         )
     }
 }

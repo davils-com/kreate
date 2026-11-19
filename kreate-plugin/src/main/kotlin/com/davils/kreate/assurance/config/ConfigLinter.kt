@@ -33,7 +33,8 @@ private val SOURCE_SWITCHES: List<String> = listOf(
     "trust.enabled",
     "confusion.enabled",
     "dependencyPolicy.enabled",
-    "workspace.enabled"
+    "workspace.enabled",
+    "standards.enabled"
 )
 
 internal object ConfigLinter {

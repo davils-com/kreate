@@ -186,6 +186,18 @@ class StandardsFunctionalTest : FunSpec({
             result.output shouldContain "Kreate assurance [INCOMPLETE]"
         }
 
+        test("are explained by their id") {
+            val fixture = newBuild("rfc(9562)")
+
+            val standard = fixture.build("kreateExplain", "--rule=RFC:9562")
+            val rule = fixture.build("kreateExplain", "--rule=standard_obsoleted")
+
+            standard.output shouldContain "rfc:9562 is a standard of the kind rfc."
+            standard.output shouldContain "https://www.rfc-editor.org/info/rfc9562"
+            standard.output shouldContain "kreateStandardsReview --standard=rfc:9562"
+            rule.output shouldContain "STANDARD_OBSOLETED (HIGH, standards/lifecycle)"
+        }
+
         test("are cached while nothing they read changes") {
             val fixture = newBuild("")
 
