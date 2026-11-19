@@ -77,7 +77,10 @@ snapshot:
     enabled: true
     project-dir: .github/smoke
     tasks: [detekt]
-    args: ["-PkreateVersion={version}", "-PkreateRepository={repository}"]
+    args:
+      - "-PkreateVersion={version}"
+      - "-PkreateRepository={repository}"
+      - "-PkreateReleasesRepository={releases-repository}"
 
 release:
   publications:
