@@ -123,7 +123,8 @@ internal abstract class StandardsAudit : FindingCollectTask(
         val serviceEndpoints = ServiceEndpoints(endpoints.get())
         val token = githubToken.orNull?.takeIf { value -> value.isNotBlank() }
         val context = ProviderContext(serviceEndpoints, cache, { transport.value }, { bulkTransport.value }, token)
-        return StandardsAuditor({ StandardProviders.all(context) }, { cache.oldestAnswer }, clock)
+        val declared = declarations.get()
+        return StandardsAuditor({ StandardProviders.all(context, declared) }, { cache.oldestAnswer }, clock)
     }
 
     private fun readLock(): StandardsLock {

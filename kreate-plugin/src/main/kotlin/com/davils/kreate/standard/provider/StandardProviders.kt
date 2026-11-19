@@ -15,10 +15,25 @@
  */
 package com.davils.kreate.standard.provider
 
+import com.davils.kreate.standard.model.StandardDeclaration
 import com.davils.kreate.standard.provider.document.DocumentProvider
+import com.davils.kreate.standard.provider.github.GitHubProvider
+import com.davils.kreate.standard.provider.github.WhatwgProvider
+import com.davils.kreate.standard.provider.ietf.DraftProvider
+import com.davils.kreate.standard.provider.ietf.RfcProvider
+import com.davils.kreate.standard.provider.iso.IsoProvider
+import com.davils.kreate.standard.provider.unicode.UnicodeProvider
+import com.davils.kreate.standard.provider.w3c.W3cProvider
 
 internal object StandardProviders {
-    fun all(context: ProviderContext): List<StandardProvider> = listOf(
+    fun all(context: ProviderContext, declarations: List<StandardDeclaration>): List<StandardProvider> = listOf(
+        RfcProvider(context),
+        DraftProvider(context),
+        IsoProvider(context, declarations),
+        W3cProvider(context),
+        WhatwgProvider(context),
+        UnicodeProvider(context),
+        GitHubProvider(context),
         DocumentProvider(context)
     )
 }
