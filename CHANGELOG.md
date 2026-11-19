@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and release tags read versions through Kore, which refuses leading zeros such as `01.2.3` or
   `1.2.3-01` that Kreate accepted before. A version with build metadata is still read without it.
 
+### Fixed
+
+- **The release guard escapes what it shows.** A release tag comes from `GITHUB_REF_NAME` or
+  `CI_COMMIT_TAG` and reached the messages of `kreateReleaseGuard` as it was, so a tag could forge
+  a line of the log or hide part of itself behind a bidirectional override. Every tag, prefix and
+  version the guard shows is now escaped and put in double quotes. A release version is checked by
+  Kore, which also refuses version numbers above `Int.MAX_VALUE`.
+
 ## 5.2.0
 
 ### Added

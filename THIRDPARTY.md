@@ -12,4 +12,3 @@ This document contains a list of third-party software used in this project.
 - [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) - JSON parsing and writing, licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 - [Ktor](https://github.com/ktorio/ktor) - The HTTP client, licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 - [Kore](https://github.com/davils-com/kore) - The Davils foundation library: semantic versions, escaping of untrusted text, names, close matches and outcomes, licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-- [Semantic Versioning 2.0.0](https://semver.org) - The regular expression of a release version that the release guard accepts, without build metadata, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
