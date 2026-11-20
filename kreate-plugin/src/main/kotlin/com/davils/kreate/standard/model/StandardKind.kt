@@ -23,6 +23,7 @@ internal enum class StandardKind(val id: String, val example: String, val isMach
     WHATWG("whatwg", "url", isMachineChecked = true),
     UNICODE("unicode", "UAX #31", isMachineChecked = true),
     GITHUB("github", "yaml/yaml-spec", isMachineChecked = true),
+    SUITE("suite", "xmlconf", isMachineChecked = true),
     DIN("din", "DIN 5008", isMachineChecked = false),
     DOCUMENT("document", "ECMA-404", isMachineChecked = false);
 

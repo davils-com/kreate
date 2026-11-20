@@ -68,6 +68,34 @@ class DriftDetectorTest : FunSpec({
         rulesOf(REVIEWED.copy(status = "INTERNET STANDARD")) shouldBe listOf("STANDARD_STATUS_CHANGED")
     }
 
+    test("reports a vendored suite whose files changed since the review") {
+        val suite = StandardDeclaration(StandardIds.suite("xmlconf"))
+        val reviewed = StandardSnapshot(title = "xmlts.tar.gz", contentDigest = "sha256:aa")
+
+        val findings = DriftDetector(suite, reviewed, reviewed.copy(contentDigest = "sha256:bb")).findings()
+
+        val finding = findings.single()
+
+        finding.ruleId shouldBe "STANDARD_SUITE_MODIFIED"
+        finding.severity shouldBe Severity.HIGH
+        finding.title shouldBe "The vendored copy of suite:xmlconf changed since its review"
+        finding.attributes shouldBe mapOf("reviewed" to "sha256:aa", "current" to "sha256:bb")
+        val unchanged = DriftDetector(suite, reviewed, reviewed).findings()
+        unchanged.shouldBeEmpty()
+    }
+
+    test("links new errata of a W3C specification to where they are published") {
+        val xml = StandardDeclaration(StandardIds.w3c("xml"), errata = "https://github.com/w3c/xml/issues")
+        val reviewed = StandardSnapshot(title = "XML", errata = mapOf("#1" to ErratumState.REPORTED))
+        val current = reviewed.copy(errata = mapOf("#1" to ErratumState.VERIFIED, "#2" to ErratumState.REPORTED))
+
+        val findings = DriftDetector(xml, reviewed, current).findings()
+
+        findings.map { finding -> finding.ruleId } shouldBe listOf("STANDARD_ERRATA", "STANDARD_ERRATA_REPORTED")
+        findings.map { finding -> finding.url }.distinct() shouldBe listOf("https://github.com/w3c/xml/issues")
+        findings.first().title shouldBe "w3c:xml has 1 new confirmed errata: #1"
+    }
+
     test("tells confirmed errata from reported ones and only reports new ones") {
         val errata = REVIEWED.errata + mapOf("5000" to ErratumState.HELD, "5001" to ErratumState.REPORTED)
 

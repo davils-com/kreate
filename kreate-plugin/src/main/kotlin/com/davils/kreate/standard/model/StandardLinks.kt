@@ -27,10 +27,18 @@ internal object StandardLinks {
         StandardKind.WHATWG -> "https://${id.name}.spec.whatwg.org/"
         StandardKind.UNICODE -> unicodeUrlOf(id)
         StandardKind.GITHUB -> "https://github.com/${id.name}"
-        StandardKind.DIN, StandardKind.DOCUMENT -> declaredUrl
+        StandardKind.DIN, StandardKind.DOCUMENT, StandardKind.SUITE -> declaredUrl
     }
 
-    fun erratumUrlOf(id: StandardId): String? {
+    fun infoUrlOf(declaration: StandardDeclaration): String? {
+        val suite = declaration.suite ?: return infoUrlOf(declaration.id, declaration.url)
+        val repository = suite.github?.let { name -> "https://github.com/$name" }
+        return suite.watch ?: repository ?: suite.archive
+    }
+
+    fun erratumUrlOf(declaration: StandardDeclaration): String? {
+        val id = declaration.id
+        if (id.kind == StandardKind.W3C) return declaration.errata ?: infoUrlOf(id)
         if (id.kind != StandardKind.RFC) return null
         return "https://www.rfc-editor.org/errata/rfc${id.name}"
     }

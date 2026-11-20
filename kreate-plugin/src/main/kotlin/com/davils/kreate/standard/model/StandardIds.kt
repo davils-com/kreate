@@ -57,6 +57,8 @@ internal object StandardIds {
 
     fun w3c(shortname: String): StandardId = idOf(StandardKind.W3C, shortname.trim().lowercase(), shortname)
 
+    fun suite(name: String): StandardId = idOf(StandardKind.SUITE, name.trim().lowercase(), name)
+
     fun whatwg(name: String): StandardId = idOf(StandardKind.WHATWG, name.trim().lowercase(), name)
 
     fun unicode(report: String?): StandardId {
@@ -84,9 +86,9 @@ internal object StandardIds {
         }
         return StandardId(kind, name)
     }
+}
 
-    private fun slugOf(text: String): String {
-        val separated = text.replace(SLUG_SEPARATORS, "-")
-        return separated.trim('-', '.')
-    }
+private fun slugOf(text: String): String {
+    val separated = text.replace(SLUG_SEPARATORS, "-")
+    return separated.trim('-', '.')
 }

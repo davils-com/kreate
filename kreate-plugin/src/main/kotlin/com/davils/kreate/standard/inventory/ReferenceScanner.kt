@@ -19,6 +19,7 @@ import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.finding.SourceLocation
 import com.davils.kreate.standard.model.StandardId
 import com.davils.kreate.standard.model.StandardLinks
+import com.davils.kreate.standard.model.W3cShortnames
 import com.davils.kreate.standard.rule.StandardFindings
 import com.davils.kreate.standard.rule.StandardRules
 import java.io.File
@@ -37,9 +38,28 @@ private const val NUL: Byte = 0
 internal class ReferenceScanner(private val declared: Set<StandardId>) {
     fun findingsOf(files: List<ScannedFile>): List<Finding> {
         val references = files.sortedBy { file -> file.path }.flatMap { file -> referencesIn(file) }
-        val undeclared = references.filterNot { reference -> reference.id in declared }
+        val (versionless, versioned) = references.partition { reference -> isVersionless(reference.id) }
+        val undeclared = versioned.filterNot { reference -> reference.id in declared }
         val byId = undeclared.groupBy { reference -> reference.id }
-        return byId.keys.sorted().map { id -> findingOf(id, byId.getValue(id)) }
+        val ambiguous = versionless.groupBy { reference -> reference.id }
+        val undeclaredFindings = byId.keys.sorted().map { id -> findingOf(id, byId.getValue(id)) }
+        val ambiguousFindings = ambiguous.keys.sorted().map { id -> ambiguousFindingOf(id, ambiguous.getValue(id)) }
+        return undeclaredFindings + ambiguousFindings
+    }
+
+    private fun isVersionless(id: StandardId): Boolean = W3cShortnames.versionsOf(id).isNotEmpty()
+
+    private fun ambiguousFindingOf(id: StandardId, references: List<Reference>): Finding {
+        val first = references.first()
+        val versions = W3cShortnames.versionsOf(id).joinToString(" or ")
+        return StandardFindings.findingOf(
+            ruleId = StandardRules.VERSIONLESS_RULE,
+            id = id,
+            title = "${first.path} links $id, which names no version; link and declare $versions",
+            url = StandardLinks.infoUrlOf(id),
+            attributes = mapOf("occurrences" to references.size.toString(), "versions" to versions),
+            location = SourceLocation(first.path, first.line)
+        )
     }
 
     private fun referencesIn(file: ScannedFile): List<Reference> {

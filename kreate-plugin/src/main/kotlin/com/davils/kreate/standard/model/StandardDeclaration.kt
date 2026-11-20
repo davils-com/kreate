@@ -22,7 +22,9 @@ internal data class StandardDeclaration(
     val note: String? = null,
     val reviewEverySeconds: Long? = null,
     val tags: String? = null,
-    val url: String? = null
+    val url: String? = null,
+    val errata: String? = null,
+    val suite: SuiteSource? = null
 ) : Serializable {
     private companion object {
         private const val serialVersionUID: Long = 1L

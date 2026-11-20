@@ -76,6 +76,7 @@ internal object StandardIdGrammar {
         StandardKind.WHATWG -> KEBAB_NAME.matches(name)
         StandardKind.UNICODE -> name == UNICODE_DATABASE || UNICODE_REPORT.matches(name)
         StandardKind.GITHUB -> isRepository(name)
+        StandardKind.SUITE -> DOTTED_NAME.matches(name)
         StandardKind.DIN, StandardKind.DOCUMENT -> DOTTED_NAME.matches(name)
     }
 

@@ -54,6 +54,20 @@ class StandardsLockJsonTest : FunSpec({
         }
     }
 
+    test("reads back the revision and the content digest of a suite, and a lock written without them") {
+        val suite = StandardSnapshot(title = "xmlts.tar.gz", revision = "sha256:9b61", contentDigest = "sha256:0a1b")
+        val lock = StandardsLock(listOf(LockEntry(StandardIds.suite("xmlconf"), LocalDate.parse("2026-11-20"), suite)))
+
+        val text = StandardsLockJson.render(lock)
+
+        text shouldContain "\"contentDigest\": \"sha256:0a1b\""
+        text shouldContain "\"schemaVersion\": 1"
+        val read = StandardsLockJson.parse(text, "standards.lock")
+        val older = StandardsLockJson.parse(lockWith("suite:xmlconf", "2026-11-20"), "standards.lock")
+        read.entries.single().snapshot shouldBe suite
+        older.entries.single().snapshot.contentDigest shouldBe null
+    }
+
     test("writes sorted, stable JSON") {
         val text = StandardsLockJson.render(StandardsLock(listOf(ENTRY)))
 

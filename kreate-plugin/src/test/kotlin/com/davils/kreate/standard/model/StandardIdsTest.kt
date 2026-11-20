@@ -49,6 +49,12 @@ class StandardIdsTest : FunSpec({
             StandardIdGrammar.isoReferenceOf(StandardIds.iso("ISO 8601-1")) shouldBe "ISO 8601-1"
         }
 
+        test("of a test suite is its name") {
+            StandardIds.suite("XMLConf").toString() shouldBe "suite:xmlconf"
+            StandardIdGrammar.parse("suite:xsdtests") shouldBe StandardIds.suite("xsdtests")
+            shouldThrow<IllegalArgumentException> { StandardIds.suite("w3c/xsdtests") }
+        }
+
         test("of a Unicode report accepts the usual spellings") {
             StandardIds.unicode("UAX #31").toString() shouldBe "unicode:uax-31"
             StandardIds.unicode("uts39").toString() shouldBe "unicode:uts-39"
@@ -126,7 +132,26 @@ class StandardIdsTest : FunSpec({
                 "https://www.iso.org/search.html?q=ISO+8601-1"
             StandardLinks.infoUrlOf(StandardIds.din("DIN 5008"), "https://example.org/5008") shouldBe
                 "https://example.org/5008"
-            StandardLinks.erratumUrlOf(StandardIds.rfc(9562)) shouldBe "https://www.rfc-editor.org/errata/rfc9562"
+            StandardLinks.erratumUrlOf(StandardDeclaration(StandardIds.rfc(9562))) shouldBe
+                "https://www.rfc-editor.org/errata/rfc9562"
+        }
+
+        test("of a W3C specification points at its errata, of a suite at where it comes from") {
+            val xml = StandardDeclaration(StandardIds.w3c("xml"))
+            val overridden = xml.copy(errata = "https://github.com/w3c/xml/issues")
+            val archive = SuiteSource(vendored = "x", archive = "https://www.w3.org/XML/Test/xmlts.tar.gz")
+            val repository = SuiteSource(vendored = "x", github = "w3c/xsdtests")
+            val watched = archive.copy(watch = "https://www.w3.org/XML/Test/")
+
+            StandardLinks.erratumUrlOf(xml) shouldBe "https://www.w3.org/TR/xml/"
+            StandardLinks.erratumUrlOf(overridden) shouldBe "https://github.com/w3c/xml/issues"
+            StandardLinks.erratumUrlOf(StandardDeclaration(StandardIds.iso("ISO 8601-1"))).shouldBeNull()
+            StandardLinks.infoUrlOf(StandardDeclaration(StandardIds.suite("a"), suite = archive)) shouldBe
+                "https://www.w3.org/XML/Test/xmlts.tar.gz"
+            StandardLinks.infoUrlOf(StandardDeclaration(StandardIds.suite("a"), suite = repository)) shouldBe
+                "https://github.com/w3c/xsdtests"
+            StandardLinks.infoUrlOf(StandardDeclaration(StandardIds.suite("a"), suite = watched)) shouldBe
+                "https://www.w3.org/XML/Test/"
         }
     }
 })

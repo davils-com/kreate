@@ -17,15 +17,7 @@ package com.davils.kreate.standard.model
 
 import com.davils.kore.core.collection.duplicatesBy
 import com.davils.kore.core.text.SafeText
-import java.net.URI
-import java.net.URISyntaxException
 import java.util.regex.PatternSyntaxException
-
-private const val SECURE_SCHEME: String = "https"
-
-private const val PLAIN_SCHEME: String = "http"
-
-private val LOOPBACK_HOSTS: Set<String> = setOf("localhost", "127.0.0.1", "[::1]", "::1")
 
 private val MANUAL_KINDS: Set<StandardKind> = setOf(StandardKind.DIN, StandardKind.DOCUMENT)
 
@@ -46,12 +38,15 @@ internal object DeclarationValidator {
         val isManual = id.kind in MANUAL_KINDS
         val unchecked = "$id needs reviewEvery, because nothing can check it for changes."
         val negative = "$id needs a positive reviewEvery."
-        return listOfNotNull(
+        val problems = listOfNotNull(
             unchecked.takeIf { isManual && interval == null },
             negative.takeIf { isNotPositive(declaration.reviewEverySeconds) },
             tagsProblem(declaration),
-            urlProblem(declaration, isManual)
+            urlProblem(declaration, isManual),
+            errataProblem(declaration),
+            versionProblem(declaration)
         )
+        return problems + SuiteValidator.problemsOf(declaration)
     }
 
     private fun isNotPositive(seconds: Long?): Boolean = seconds != null && seconds <= 0
@@ -72,19 +67,23 @@ internal object DeclarationValidator {
     private fun urlProblem(declaration: StandardDeclaration, isManual: Boolean): String? {
         val url = declaration.url ?: return null
         if (!isManual) return "${declaration.id} takes no url; only din() and document() do."
-        if (isWatchable(url)) return null
+        if (WatchableAddresses.isWatchable(url)) return null
         return "${declaration.id} has the url ${SafeText.quoted(url)}, which is neither HTTPS nor a loopback address."
     }
 
-    private fun isWatchable(url: String): Boolean {
-        val uri = try {
-            URI(url)
-        } catch (_: URISyntaxException) {
-            return false
-        }
-        val scheme = uri.scheme?.lowercase() ?: return false
-        if (uri.host == null || uri.userInfo != null) return false
-        if (scheme == SECURE_SCHEME) return true
-        return scheme == PLAIN_SCHEME && uri.host in LOOPBACK_HOSTS
+    private fun errataProblem(declaration: StandardDeclaration): String? {
+        val errata = declaration.errata ?: return null
+        if (declaration.id.kind != StandardKind.W3C) return "${declaration.id} takes no errata; only w3c() does."
+        if (ErrataAddress.parse(errata) != null) return null
+        val quoted = SafeText.quoted(errata)
+        return "${declaration.id} has the errata address $quoted, which is neither an HTTPS page on w3.org " +
+            "nor the issues of a repository on github.com."
+    }
+
+    private fun versionProblem(declaration: StandardDeclaration): String? {
+        val versions = W3cShortnames.versionsOf(declaration.id)
+        if (versions.isEmpty()) return null
+        val listed = versions.joinToString(" or ") { version -> version.name }
+        return "${declaration.id} names no version, and the W3C answers with its latest one; declare $listed."
     }
 }

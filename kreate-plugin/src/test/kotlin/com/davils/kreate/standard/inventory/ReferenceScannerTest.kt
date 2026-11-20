@@ -52,6 +52,14 @@ class ReferenceScannerTest : FunSpec({
             idsIn("Letters follow DIN 5008 and DIN EN ISO 9001.") shouldBe listOf("din:5008", "din:en-iso-9001")
         }
 
+        test("names W3C specifications by their old and dated addresses") {
+            idsIn("https://www.w3.org/TR/REC-xml/#sec-white-space") shouldBe listOf("w3c:xml")
+            idsIn("http://www.w3.org/TR/REC-xml-names/") shouldBe listOf("w3c:xml-names")
+            idsIn("https://www.w3.org/TR/xml-c14n") shouldBe listOf("w3c:xml-c14n10")
+            idsIn("https://www.w3.org/TR/2006/REC-xml11-20060816/") shouldBe listOf("w3c:xml11")
+            idsIn("https://www.w3.org/TR/xpath") shouldBe listOf("w3c:xpath")
+        }
+
         test("passes over charsets and numbers that name no standard") {
             idsIn("val charset = \"ISO-8859-1\"; RFC 0; RFC 123456; draft-07").shouldBeEmpty()
         }
@@ -80,6 +88,31 @@ class ReferenceScannerTest : FunSpec({
             finding.location?.path shouldBe "README.md"
             finding.location?.line shouldBe 1
             finding.attributes shouldBe mapOf("occurrences" to "2", "files" to "2")
+        }
+
+        test("report a link without a version even when one of its versions is declared") {
+            val directory = tempdir()
+            val docs = File(directory, "xpath.md")
+            docs.writeText("See https://www.w3.org/TR/xpath and w3.org/TR/xpath/\n")
+            val scanner = ReferenceScanner(setOf(StandardIds.w3c("xpath-10")))
+
+            val finding = scanner.findingsOf(listOf(ScannedFile("docs/xpath.md", docs))).single()
+
+            finding.ruleId shouldBe "STANDARD_VERSIONLESS"
+            finding.module shouldBe "w3c:xpath"
+            finding.title shouldBe "docs/xpath.md links w3c:xpath, which names no version; " +
+                "link and declare w3c:xpath-10 or w3c:xpath-31"
+            finding.attributes shouldBe mapOf("occurrences" to "1", "versions" to "w3c:xpath-10 or w3c:xpath-31")
+        }
+
+        test("count an old address of a declared specification as declared") {
+            val readme = File(tempdir(), "README.md").apply { writeText("https://www.w3.org/TR/REC-xml/\n") }
+
+            val scanner = ReferenceScanner(setOf(StandardIds.w3c("xml")))
+
+            val findings = scanner.findingsOf(listOf(ScannedFile("README.md", readme)))
+
+            findings.shouldBeEmpty()
         }
 
         test("pass over binary files") {
