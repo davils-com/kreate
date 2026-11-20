@@ -53,4 +53,16 @@ public class AssuranceStandardSpec internal constructor() {
      * @since 5.3.0
      */
     public var url: String? = null
+
+    /**
+     * Where the errata of a `w3c()` specification are published, overriding the errata link of its
+     * latest version in the W3C API. An HTTPS page on `w3.org`, whose anchors count as confirmed
+     * errata, or the issues of a repository on `github.com`, such as
+     * `https://github.com/w3c/xmlschema/issues?q=label:erratum`, where an open issue counts as a
+     * reported erratum, a completed one as a confirmed erratum and one closed as not planned as a
+     * rejected erratum.
+     *
+     * @since 5.4.0
+     */
+    public var errata: String? = null
 }

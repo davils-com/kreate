@@ -93,7 +93,7 @@ internal class RevalidatingCache(
             uri = request.uri,
             headers = request.headers + validators,
             maxBytes = request.maxBytes,
-            allowedHosts = setOf(host),
+            allowedHosts = request.redirectHosts + host,
             downloadTo = temporary
         )
     }

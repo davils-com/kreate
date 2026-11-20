@@ -40,6 +40,7 @@ private val STANDARDS_ENDPOINTS: Map<String, Pair<String, String>> = mapOf(
     "RFC Editor" to ("kreate.network.rfcEditorUrl" to "https://www.rfc-editor.org/rfc/rfc9562.json"),
     "IETF Datatracker" to ("kreate.network.datatrackerUrl" to "https://datatracker.ietf.org/doc/rfc9562/doc.json"),
     "W3C API" to ("kreate.network.w3cApiUrl" to "https://api.w3.org/"),
+    "W3C" to ("kreate.network.w3cUrl" to "https://www.w3.org/"),
     "GitHub API" to ("kreate.network.githubApiUrl" to "https://api.github.com/"),
     "Unicode" to ("kreate.network.unicodeUrl" to "https://www.unicode.org/Public/UCD/latest/ReadMe.txt"),
     "ISO Open Data" to ("kreate.network.isoOpenDataUrl" to ISO_OPEN_DATA)

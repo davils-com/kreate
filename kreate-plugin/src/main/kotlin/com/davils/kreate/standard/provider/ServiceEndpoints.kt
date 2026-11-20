@@ -27,6 +27,9 @@ internal class ServiceEndpoints(private val urls: Map<String, String>) {
     val w3cApi: URI
         get() = baseOf(W3C_API)
 
+    val w3c: URI
+        get() = baseOf(W3C)
+
     val githubApi: URI
         get() = baseOf(GITHUB_API)
 
@@ -53,6 +56,8 @@ internal class ServiceEndpoints(private val urls: Map<String, String>) {
 
         const val W3C_API: String = "w3cApiUrl"
 
+        const val W3C: String = "w3cUrl"
+
         const val GITHUB_API: String = "githubApiUrl"
 
         const val UNICODE: String = "unicodeUrl"
@@ -63,6 +68,7 @@ internal class ServiceEndpoints(private val urls: Map<String, String>) {
             RFC_EDITOR to "https://www.rfc-editor.org",
             DATATRACKER to "https://datatracker.ietf.org",
             W3C_API to "https://api.w3.org",
+            W3C to "https://www.w3.org",
             GITHUB_API to "https://api.github.com",
             UNICODE to "https://www.unicode.org",
             ISO_OPEN_DATA to "https://isopublicstorageprod.blob.core.windows.net/opendata/_latest"

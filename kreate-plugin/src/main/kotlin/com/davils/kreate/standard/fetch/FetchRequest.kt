@@ -23,5 +23,6 @@ internal class FetchRequest(
     val uri: URI,
     val maxBytes: Int = DEFAULT_MAX_BYTES,
     val headers: Map<String, String> = emptyMap(),
-    val isBulk: Boolean = false
+    val isBulk: Boolean = false,
+    val redirectHosts: Set<String> = emptySet()
 )

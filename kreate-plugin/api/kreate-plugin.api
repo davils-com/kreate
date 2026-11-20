@@ -161,10 +161,12 @@ public abstract class com/davils/kreate/assurance/AssuranceReportsExtension {
 }
 
 public final class com/davils/kreate/assurance/AssuranceStandardSpec {
+	public final fun getErrata ()Ljava/lang/String;
 	public final fun getNote ()Ljava/lang/String;
 	public final fun getReviewEvery ()Ljava/time/Duration;
 	public final fun getTags ()Ljava/lang/String;
 	public final fun getUrl ()Ljava/lang/String;
+	public final fun setErrata (Ljava/lang/String;)V
 	public final fun setNote (Ljava/lang/String;)V
 	public final fun setReviewEvery (Ljava/time/Duration;)V
 	public final fun setTags (Ljava/lang/String;)V

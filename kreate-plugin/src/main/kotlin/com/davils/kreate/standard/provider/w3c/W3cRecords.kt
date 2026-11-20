@@ -49,6 +49,13 @@ internal object W3cRecords {
         )
     }
 
+    fun latestVersionOf(specification: JsonObject): String? {
+        val href = linkOf(specification, "latest-version")?.text(HREF) ?: return null
+        return URI(href).path
+    }
+
+    fun errataOf(version: JsonObject): String? = version.text("errata")
+
     fun seriesOf(specification: JsonObject): String? {
         val href = linkOf(specification, "series")?.text(HREF) ?: return null
         return URI(href).path

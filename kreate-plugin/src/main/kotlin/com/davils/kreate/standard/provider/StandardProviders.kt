@@ -30,7 +30,7 @@ internal object StandardProviders {
         RfcProvider(context),
         DraftProvider(context),
         IsoProvider(context, declarations),
-        W3cProvider(context),
+        W3cProvider(context, declarations),
         WhatwgProvider(context),
         UnicodeProvider(context),
         GitHubProvider(context),

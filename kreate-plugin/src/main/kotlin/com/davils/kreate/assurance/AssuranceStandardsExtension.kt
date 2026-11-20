@@ -159,7 +159,7 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
     }
 
     /**
-     * Declares a specification of the W3C, checked through the W3C API.
+     * Declares a specification of the W3C, checked through the W3C API together with its errata.
      *
      * @param shortname The short name of the specification, such as `webauthn-3`.
      * @throws IllegalArgumentException If [shortname] is no short name of a specification.
@@ -170,7 +170,7 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
     }
 
     /**
-     * Declares a specification of the W3C, checked through the W3C API.
+     * Declares a specification of the W3C, checked through the W3C API together with its errata.
      *
      * @param shortname The short name of the specification, such as `webauthn-3`.
      * @param action The configuration of the standard.
@@ -327,6 +327,7 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
     private fun declare(id: StandardId, action: Action<AssuranceStandardSpec>) {
         val spec = AssuranceStandardSpec()
         action.execute(spec)
-        standards += StandardDeclaration(id, spec.note, spec.reviewEvery?.seconds, spec.tags, spec.url)
+        val seconds = spec.reviewEvery?.seconds
+        standards += StandardDeclaration(id, spec.note, seconds, spec.tags, spec.url, spec.errata?.trim())
     }
 }
