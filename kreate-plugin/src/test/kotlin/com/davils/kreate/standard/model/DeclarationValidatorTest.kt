@@ -23,6 +23,10 @@ import io.kotest.matchers.string.shouldContain
 
 private const val YEAR: Long = 365L * 24 * 60 * 60
 
+private const val SHA: String = "9b61db9f5dbffa545f4b8d78422167083a8568c59bd1129f94138f936cf6fc1f"
+
+private const val COMMIT: String = "7bc3365c652a322f3d762021b3879eb92dae7e30"
+
 class DeclarationValidatorTest : FunSpec({
     test("accepts declarations a body can check without an interval") {
         val declarations = listOf(StandardDeclaration(StandardIds.rfc(9562)), StandardDeclaration(StandardIds.w3c("x")))
@@ -60,6 +64,60 @@ class DeclarationValidatorTest : FunSpec({
         val github = StandardDeclaration(StandardIds.github("a/b"), tags = "v(")
 
         DeclarationValidator.problemsOf(listOf(github), null).single() shouldContain "no regular expression"
+    }
+
+    test("takes an errata address only for a W3C specification, on w3.org or github.com") {
+        fun problemsOf(id: StandardId, errata: String): List<String> =
+            DeclarationValidator.problemsOf(listOf(StandardDeclaration(id, errata = errata)), null)
+
+        problemsOf(StandardIds.w3c("xml"), "https://www.w3.org/XML/xml-V10-5e-errata").shouldBeEmpty()
+        problemsOf(StandardIds.w3c("xml"), "https://github.com/w3c/xml/issues?q=label:erratum").shouldBeEmpty()
+        problemsOf(StandardIds.w3c("xml"), "http://www.w3.org/XML/xml-V10-5e-errata").single() shouldContain
+            "neither an HTTPS page on w3.org"
+        problemsOf(StandardIds.w3c("xml"), "https://example.org/errata") shouldHaveSize 1
+        problemsOf(StandardIds.rfc(1), "https://www.w3.org/errata").single() shouldContain "only w3c() does"
+    }
+
+    test("refuses a W3C name without a version") {
+        val xpath = StandardDeclaration(StandardIds.w3c("xpath"))
+        val c14n = StandardDeclaration(StandardIds.w3c("xml-c14n"))
+
+        DeclarationValidator.problemsOf(listOf(xpath), null).single() shouldContain "declare xpath-10 or xpath-31"
+        DeclarationValidator.problemsOf(listOf(c14n), null).single() shouldContain "xml-c14n10 or xml-c14n11"
+    }
+
+    test("takes a suite from a pinned archive or a pinned commit, vendored inside the project") {
+        fun problemsOf(suite: SuiteSource): List<String> =
+            DeclarationValidator.problemsOf(listOf(StandardDeclaration(StandardIds.suite("s"), suite = suite)), null)
+
+        val archive = SuiteSource(vendored = "src/xmlconf", archive = "https://a.example/t.tar.gz", sha256 = SHA)
+        val github = SuiteSource(vendored = "tests", github = "w3c/xsdtests", commit = COMMIT)
+
+        problemsOf(archive).shouldBeEmpty()
+        problemsOf(archive.copy(watch = "https://www.w3.org/XML/Test/", root = "xmlconf")).shouldBeEmpty()
+        problemsOf(github).shouldBeEmpty()
+        problemsOf(archive.copy(sha256 = "abc")).single() shouldContain "64 hexadecimal digits"
+        problemsOf(archive.copy(commit = COMMIT)).single() shouldContain "commit only with a github"
+        problemsOf(archive.copy(archive = "http://a.example/t.tar.gz")).single() shouldContain "neither HTTPS"
+        problemsOf(archive.copy(github = "w3c/xsdtests")).single() shouldContain "not both"
+        problemsOf(SuiteSource(vendored = "x")).single() shouldContain "needs an archive"
+        problemsOf(github.copy(commit = "main")).single() shouldContain "40 hexadecimal digits"
+        problemsOf(github.copy(github = "xsdtests")).single() shouldContain "not of the form owner/name"
+        problemsOf(github.copy(sha256 = SHA)).single() shouldContain "sha256 only with an archive"
+        problemsOf(github.copy(vendored = null)).single() shouldContain "needs vendored"
+        problemsOf(github.copy(vendored = "../elsewhere")).single() shouldContain "no relative path"
+        problemsOf(github.copy(vendored = "/etc")).single() shouldContain "no relative path"
+        problemsOf(github.copy(vendored = " ")).single() shouldContain "no relative path"
+        problemsOf(github.copy(root = "../x")).single() shouldContain "the root"
+        problemsOf(github.copy(watch = "file:///etc/passwd")).single() shouldContain "the watch"
+    }
+
+    test("needs a suite for suite() and takes one nowhere else") {
+        val bare = StandardDeclaration(StandardIds.suite("s"))
+        val misplaced = StandardDeclaration(StandardIds.rfc(1), suite = SuiteSource(vendored = "x"))
+
+        DeclarationValidator.problemsOf(listOf(bare), null).single() shouldContain "needs a suite"
+        DeclarationValidator.problemsOf(listOf(misplaced), null).single() shouldContain "only suite() does"
     }
 
     test("watches only HTTPS and loopback addresses") {

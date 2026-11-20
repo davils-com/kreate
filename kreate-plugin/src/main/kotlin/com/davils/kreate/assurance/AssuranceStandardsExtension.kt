@@ -18,6 +18,7 @@ package com.davils.kreate.assurance
 import com.davils.kreate.standard.model.StandardDeclaration
 import com.davils.kreate.standard.model.StandardId
 import com.davils.kreate.standard.model.StandardIds
+import com.davils.kreate.standard.model.SuiteSource
 import org.gradle.api.Action
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -29,7 +30,8 @@ import javax.inject.Inject
 
 /**
  * Configuration of the standards a project implements, such as RFCs, ISO and DIN standards, W3C,
- * WHATWG and Unicode specifications, and of the checks that report when one of them changes.
+ * WHATWG and Unicode specifications, the test suites it vendors, and of the checks that report
+ * when one of them changes.
  *
  * Every declared standard has to be reviewed once with `kreateStandardsReview`, which records what
  * the issuing body publishes about it in [lockFile]. `kreateStandardsAudit` compares that record
@@ -159,7 +161,7 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
     }
 
     /**
-     * Declares a specification of the W3C, checked through the W3C API.
+     * Declares a specification of the W3C, checked through the W3C API together with its errata.
      *
      * @param shortname The short name of the specification, such as `webauthn-3`.
      * @throws IllegalArgumentException If [shortname] is no short name of a specification.
@@ -170,7 +172,7 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
     }
 
     /**
-     * Declares a specification of the W3C, checked through the W3C API.
+     * Declares a specification of the W3C, checked through the W3C API together with its errata.
      *
      * @param shortname The short name of the specification, such as `webauthn-3`.
      * @param action The configuration of the standard.
@@ -322,11 +324,39 @@ public abstract class AssuranceStandardsExtension @Inject constructor(factory: O
         declare(StandardIds.document(name), action)
     }
 
+    /**
+     * Declares a test suite the project vendors, such as the W3C XML Conformance Test Suite, taken
+     * from an archive pinned by its SHA-256 or from a GitHub repository pinned by a commit. The
+     * audit checks that the vendored files are unchanged and byte for byte those of the pinned
+     * archive or commit, and reports newer versions upstream.
+     *
+     * @param name The name of the suite, such as `xmlconf`.
+     * @param action The configuration of the suite: where it comes from and where it is vendored.
+     * @throws IllegalArgumentException If [name] gives no name.
+     * @since 5.4.0
+     */
+    public fun suite(name: String, action: Action<AssuranceStandardSuiteSpec>) {
+        val spec = AssuranceStandardSuiteSpec()
+        action.execute(spec)
+        val source = SuiteSource(
+            vendored = spec.vendored?.trim(),
+            archive = spec.archive?.trim(),
+            sha256 = spec.sha256?.trim()?.lowercase(),
+            github = spec.github?.trim()?.lowercase(),
+            commit = spec.commit?.trim()?.lowercase(),
+            watch = spec.watch?.trim(),
+            root = spec.root?.trim()
+        )
+        val id = StandardIds.suite(name)
+        standards += StandardDeclaration(id, spec.note, spec.reviewEvery?.seconds, suite = source)
+    }
+
     internal fun declaredStandards(): List<StandardDeclaration> = standards.toList()
 
     private fun declare(id: StandardId, action: Action<AssuranceStandardSpec>) {
         val spec = AssuranceStandardSpec()
         action.execute(spec)
-        standards += StandardDeclaration(id, spec.note, spec.reviewEvery?.seconds, spec.tags, spec.url)
+        val seconds = spec.reviewEvery?.seconds
+        standards += StandardDeclaration(id, spec.note, seconds, spec.tags, spec.url, spec.errata?.trim())
     }
 }

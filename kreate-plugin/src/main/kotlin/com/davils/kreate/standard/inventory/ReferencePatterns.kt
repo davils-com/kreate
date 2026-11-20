@@ -19,6 +19,7 @@ import com.davils.kore.core.parseIntOrNull
 import com.davils.kreate.standard.model.MAX_RFC_NUMBER
 import com.davils.kreate.standard.model.StandardId
 import com.davils.kreate.standard.model.StandardIds
+import com.davils.kreate.standard.model.W3cShortnames
 
 private val RFC_TEXT: Regex = Regex("""\bRFC[ -]?(\d{1,5})\b""")
 
@@ -35,7 +36,7 @@ private val ISO_TEXT: Regex = Regex("""(?<![A-Z]{2,4} )\bISO(?:/(?:IEC|IEEE|TS|T
 
 private const val CHARSET_PREFIX: String = "ISO-8859"
 
-private val W3C_LINK: Regex = Regex("""\bw3\.org/TR/([A-Za-z][A-Za-z0-9.-]*[A-Za-z0-9])""")
+private val W3C_LINK: Regex = Regex("""\bw3\.org/TR/(?:[0-9]{4}/)?([A-Za-z][A-Za-z0-9.-]*[A-Za-z0-9])""")
 
 private val WHATWG_LINK: Regex = Regex("""\b([a-z]+)\.spec\.whatwg\.org\b""")
 
@@ -48,7 +49,7 @@ internal object ReferencePatterns {
         val rfcs = (RFC_TEXT.findAll(line) + RFC_LINK.findAll(line)).mapNotNull { match -> rfcOf(match) }
         val drafts = DRAFT_NAME.findAll(line).mapNotNull { match -> draftOf(match.groupValues[1]) }
         val isos = ISO_TEXT.findAll(line).mapNotNull { match -> isoOf(match.value) }
-        val w3c = W3C_LINK.findAll(line).mapNotNull { match -> idOrNull { StandardIds.w3c(match.groupValues[1]) } }
+        val w3c = W3C_LINK.findAll(line).mapNotNull { match -> idOrNull { W3cShortnames.linked(match.groupValues[1]) } }
         val whatwg = WHATWG_LINK.findAll(line).mapNotNull { match -> whatwgOf(match.groupValues[1]) }
         val unicode = UNICODE_TEXT.findAll(line).mapNotNull { match -> idOrNull { StandardIds.unicode(match.value) } }
         val din = DIN_TEXT.findAll(line).mapNotNull { match -> idOrNull { StandardIds.din(match.value) } }

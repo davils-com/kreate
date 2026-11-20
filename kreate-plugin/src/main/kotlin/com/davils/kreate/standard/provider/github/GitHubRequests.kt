@@ -25,15 +25,17 @@ import kotlinx.serialization.json.JsonElement
 
 private const val SECURE_SCHEME: String = "https"
 
+private const val DEFAULT_MAX_BYTES: Int = 8 * 1024 * 1024
+
 private val BASE_HEADERS: Map<String, String> = mapOf(
     "Accept" to "application/vnd.github+json",
     "X-GitHub-Api-Version" to "2022-11-28"
 )
 
 internal class GitHubRequests(private val context: ProviderContext) {
-    fun jsonAt(path: String): Outcome<JsonElement, LookupFailure> {
+    fun jsonAt(path: String, maxBytes: Int = DEFAULT_MAX_BYTES): Outcome<JsonElement, LookupFailure> {
         val uri = context.endpoints.resolve(context.endpoints.githubApi, path)
-        val fetched = context.fetch(FetchRequest(uri, headers = headers()))
+        val fetched = context.fetch(FetchRequest(uri, maxBytes, headers()))
         return fetched.flatMap { document ->
             val json = JsonRecords.elementOf(document.text())
             json?.let { found -> Outcome.Success(found) }

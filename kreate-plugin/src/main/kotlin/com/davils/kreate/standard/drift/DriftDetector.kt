@@ -48,7 +48,8 @@ internal class DriftDetector(
         statusChanged(),
         errata(confirmed = true),
         errata(confirmed = false),
-        changed()
+        changed(),
+        modified()
     )
 
     private fun obsoleted(): Finding? {
@@ -93,7 +94,8 @@ internal class DriftDetector(
         val listed = listed(ordered)
         val title = "$id has ${fresh.size} new ${kindOf(confirmed)} errata: $listed"
         val attributes = mapOf("errata" to listed, "states" to statesOf(fresh))
-        return StandardFindings.findingOf(ruleOf(confirmed), id, title, StandardLinks.erratumUrlOf(id), attributes)
+        val url = StandardLinks.erratumUrlOf(declaration)
+        return StandardFindings.findingOf(ruleOf(confirmed), id, title, url, attributes)
     }
 
     private fun changed(): Finding? {
@@ -104,8 +106,16 @@ internal class DriftDetector(
         return findingOf(StandardRules.CHANGED_RULE, title, mapOf(REVIEWED to before, CURRENT to fingerprint))
     }
 
+    private fun modified(): Finding? {
+        val digest = current.contentDigest ?: return null
+        if (digest == reviewed.contentDigest) return null
+        val before = reviewed.contentDigest ?: NONE
+        val title = "The vendored copy of $id changed since its review"
+        return findingOf(StandardRules.SUITE_MODIFIED_RULE, title, mapOf(REVIEWED to before, CURRENT to digest))
+    }
+
     private fun findingOf(rule: String, title: String, attributes: Map<String, String>): Finding {
-        val url = StandardLinks.infoUrlOf(id, declaration.url)
+        val url = StandardLinks.infoUrlOf(declaration)
         return StandardFindings.findingOf(rule, id, title, url, attributes)
     }
 

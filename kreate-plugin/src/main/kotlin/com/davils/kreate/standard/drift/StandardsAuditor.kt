@@ -100,7 +100,7 @@ internal class StandardsAuditor(
         lock: StandardsLock
     ): List<Finding> = when (outcome) {
         is Outcome.Success -> driftOf(declaration, outcome.value, lock)
-        is Outcome.Failure -> listOfNotNull(unknownFinding(declaration, outcome.failure))
+        is Outcome.Failure -> listOfNotNull(failureFinding(declaration, outcome.failure))
     }
 
     private fun driftOf(
@@ -112,16 +112,34 @@ internal class StandardsAuditor(
         return DriftDetector(declaration, reviewed.snapshot, current).findings()
     }
 
-    private fun unknownFinding(declaration: StandardDeclaration, failure: LookupFailure): Finding? {
-        if (failure !is LookupFailure.Unknown) return null
-        return StandardFindings.findingOf(
-            ruleId = StandardRules.UNKNOWN_RULE,
-            id = declaration.id,
-            title = "The issuing body does not know ${declaration.id}",
-            url = StandardLinks.infoUrlOf(declaration.id, declaration.url),
-            attributes = mapOf("reason" to failure.reason)
+    private fun failureFinding(declaration: StandardDeclaration, failure: LookupFailure): Finding? = when (failure) {
+        is LookupFailure.Unknown -> failureFinding(
+            declaration,
+            StandardRules.UNKNOWN_RULE,
+            "The issuing body does not know ${declaration.id}",
+            failure
         )
+        is LookupFailure.Mismatch -> failureFinding(
+            declaration,
+            StandardRules.SUITE_MISMATCH_RULE,
+            "The vendored copy of ${declaration.id} does not match what it pins",
+            failure
+        )
+        is LookupFailure.Unavailable -> null
     }
+
+    private fun failureFinding(
+        declaration: StandardDeclaration,
+        ruleId: String,
+        title: String,
+        failure: LookupFailure
+    ): Finding = StandardFindings.findingOf(
+        ruleId = ruleId,
+        id = declaration.id,
+        title = title,
+        url = StandardLinks.infoUrlOf(declaration),
+        attributes = mapOf("reason" to failure.reason)
+    )
 
     private fun unavailableReason(outcome: Outcome<StandardSnapshot, LookupFailure>): String? {
         val failure = (outcome as? Outcome.Failure)?.failure ?: return null

@@ -22,6 +22,7 @@ import com.davils.kreate.standard.provider.github.WhatwgProvider
 import com.davils.kreate.standard.provider.ietf.DraftProvider
 import com.davils.kreate.standard.provider.ietf.RfcProvider
 import com.davils.kreate.standard.provider.iso.IsoProvider
+import com.davils.kreate.standard.provider.suite.SuiteProvider
 import com.davils.kreate.standard.provider.unicode.UnicodeProvider
 import com.davils.kreate.standard.provider.w3c.W3cProvider
 
@@ -30,10 +31,11 @@ internal object StandardProviders {
         RfcProvider(context),
         DraftProvider(context),
         IsoProvider(context, declarations),
-        W3cProvider(context),
+        W3cProvider(context, declarations),
         WhatwgProvider(context),
         UnicodeProvider(context),
         GitHubProvider(context),
+        SuiteProvider(context),
         DocumentProvider(context)
     )
 }

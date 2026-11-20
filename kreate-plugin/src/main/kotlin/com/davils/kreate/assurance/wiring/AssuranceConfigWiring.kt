@@ -40,6 +40,7 @@ private val URL_PROPERTIES: List<String> = listOf(
     "kreate.network.rfcEditorUrl",
     "kreate.network.datatrackerUrl",
     "kreate.network.w3cApiUrl",
+    "kreate.network.w3cUrl",
     "kreate.network.githubApiUrl",
     "kreate.network.unicodeUrl",
     "kreate.network.isoOpenDataUrl"

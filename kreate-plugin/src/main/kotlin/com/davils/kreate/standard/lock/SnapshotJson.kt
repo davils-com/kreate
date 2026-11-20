@@ -51,6 +51,8 @@ private const val FIELD_ERRATA: String = "errata"
 
 private const val FIELD_FINGERPRINT: String = "fingerprint"
 
+private const val FIELD_CONTENT_DIGEST: String = "contentDigest"
+
 private val SNAPSHOT_FIELDS: Set<String> = setOf(
     FIELD_TITLE,
     FIELD_STATUS,
@@ -60,7 +62,8 @@ private val SNAPSHOT_FIELDS: Set<String> = setOf(
     FIELD_REPLACED_BY,
     FIELD_UPDATED_BY,
     FIELD_ERRATA,
-    FIELD_FINGERPRINT
+    FIELD_FINGERPRINT,
+    FIELD_CONTENT_DIGEST
 )
 
 internal object SnapshotJson {
@@ -74,6 +77,7 @@ internal object SnapshotJson {
         put(FIELD_UPDATED_BY, textsOf(snapshot.updatedBy))
         put(FIELD_ERRATA, errataOf(snapshot.errata))
         snapshot.fingerprint?.let { fingerprint -> put(FIELD_FINGERPRINT, fingerprint) }
+        snapshot.contentDigest?.let { digest -> put(FIELD_CONTENT_DIGEST, digest) }
     }
 
     fun read(element: JsonElement, location: String): StandardSnapshot {
@@ -88,7 +92,8 @@ internal object SnapshotJson {
             replacedBy = textsIn(json, FIELD_REPLACED_BY, location),
             updatedBy = textsIn(json, FIELD_UPDATED_BY, location),
             errata = errataIn(json, location),
-            fingerprint = json.optionalText(FIELD_FINGERPRINT, location)
+            fingerprint = json.optionalText(FIELD_FINGERPRINT, location),
+            contentDigest = json.optionalText(FIELD_CONTENT_DIGEST, location)
         )
     }
 

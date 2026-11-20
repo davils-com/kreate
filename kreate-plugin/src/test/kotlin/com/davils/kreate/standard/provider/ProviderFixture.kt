@@ -31,13 +31,13 @@ import java.io.File
 import java.time.Clock
 import java.time.Duration
 
-internal class ProviderFixture(directory: File, token: String? = null) : AutoCloseable {
+internal class ProviderFixture(directory: File, token: String? = null, project: File? = null) : AutoCloseable {
     val server: LoopbackServer = LoopbackServer.http()
 
     private val transport: HttpTransport =
         HttpTransports.create(NetworkSettings("test"), Clock.systemUTC(), Sleeper { }, RetryPolicy(maxAttempts = 1))
 
-    val context: ProviderContext = contextOf(directory, token)
+    val context: ProviderContext = contextOf(directory, token, project)
 
     fun json(path: String, body: String) {
         server.respond(path, LoopbackServer.HTTP_OK, mapOf("Content-Type" to "application/json"), body.toByteArray())
@@ -52,11 +52,15 @@ internal class ProviderFixture(directory: File, token: String? = null) : AutoClo
         server.close()
     }
 
-    private fun contextOf(directory: File, token: String?): ProviderContext {
+    fun bytes(path: String, body: ByteArray) {
+        server.respond(path, LoopbackServer.HTTP_OK, body = body)
+    }
+
+    private fun contextOf(directory: File, token: String?, project: File?): ProviderContext {
         val base = server.uri("").toString()
         val urls = ServiceEndpoints.DEFAULTS.keys.associateWith { base }
         val cache = RevalidatingCache(directory.toPath(), Duration.ofHours(1), Clock.systemUTC())
-        return ProviderContext(ServiceEndpoints(urls), cache, { transport }, { transport }, token)
+        return ProviderContext(ServiceEndpoints(urls), cache, { transport }, { transport }, token, project?.toPath())
     }
 }
 

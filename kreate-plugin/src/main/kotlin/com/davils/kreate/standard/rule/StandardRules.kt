@@ -39,4 +39,10 @@ internal object StandardRules {
     const val UNDECLARED_RULE: String = "STANDARD_UNDECLARED"
 
     const val ORPHANED_RULE: String = "STANDARD_LOCK_ORPHANED"
+
+    const val VERSIONLESS_RULE: String = "STANDARD_VERSIONLESS"
+
+    const val SUITE_MODIFIED_RULE: String = "STANDARD_SUITE_MODIFIED"
+
+    const val SUITE_MISMATCH_RULE: String = "STANDARD_SUITE_MISMATCH"
 }

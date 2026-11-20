@@ -24,5 +24,6 @@ internal data class StandardSnapshot(
     val replacedBy: List<String> = emptyList(),
     val updatedBy: List<String> = emptyList(),
     val errata: Map<String, ErratumState> = emptyMap(),
-    val fingerprint: String? = null
+    val fingerprint: String? = null,
+    val contentDigest: String? = null
 )

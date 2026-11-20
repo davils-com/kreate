@@ -21,13 +21,15 @@ import com.davils.kreate.standard.fetch.FetchRequest
 import com.davils.kreate.standard.fetch.FetchedDocument
 import com.davils.kreate.standard.fetch.RevalidatingCache
 import com.davils.kreate.standard.model.LookupFailure
+import java.nio.file.Path
 
 internal class ProviderContext(
     val endpoints: ServiceEndpoints,
     private val cache: RevalidatingCache,
     private val transport: () -> HttpTransport,
     private val bulkTransport: () -> HttpTransport,
-    val githubToken: String? = null
+    val githubToken: String? = null,
+    val projectDirectory: Path? = null
 ) {
     fun fetch(request: FetchRequest): Outcome<FetchedDocument, LookupFailure> {
         if (request.isBulk) return cache.fetch(request, bulkTransport())

@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.0
+
+### Added
+
+- **The errata of W3C specifications are audited.** `kreateStandardsAudit` reads the errata link of
+  the latest version of every `w3c()` specification from the W3C API. On an errata page of `w3.org`
+  every anchor is an erratum and the fingerprint of the page is kept; on the issues of a GitHub
+  repository an open issue is reported, an issue closed as completed confirmed and one closed as not
+  planned rejected. New errata report `STANDARD_ERRATA` and `STANDARD_ERRATA_REPORTED` as for RFCs,
+  a changed page `STANDARD_CHANGED`. `w3c("xml") { errata = "https://..." }` names the errata where
+  the API links none, on `w3.org` or `github.com` only; redirects stay on these hosts and pages and
+  searches are bounded. Errata pages are read from `kreate.network.w3cUrl`, `https://www.w3.org` by
+  default, which `kreateDoctor` probes. A `standards.lock` reviewed with 5.3 records no errata of
+  W3C specifications, so the audit reports the errata published so far once; review them with
+  `kreateStandardsReview`.
+- **Vendored test suites are declared and checked.** `suite("xmlconf") { archive = "..."; sha256 =
+  "..."; vendored = "src/test/resources/xmlconf"; watch = "https://www.w3.org/XML/Test/" }` or
+  `suite("xsdtests") { github = "w3c/xsdtests"; commit = "..."; vendored = "..." }` declares a test
+  suite a project vendors. The audit checks that the archive still has the pinned SHA-256 and that
+  every vendored file is byte for byte a file of the archive or a blob of the pinned commit, reading
+  `.tar.gz`, `.tar` and `.zip` archives within a budget and refusing paths that leave the archive,
+  and reports `STANDARD_SUITE_MISMATCH` otherwise. A review records a digest of the vendored files
+  over their sorted paths and raw bytes as `contentDigest` in `standards.lock`, and a later change of
+  them, such as a checkout that converted line endings, reports `STANDARD_SUITE_MODIFIED`. Both block
+  the gate. A changed `watch` page reports `STANDARD_CHANGED`, a new commit upstream
+  `STANDARD_REVISED`. The vendored files are inputs of the audit, and the inventory does not search
+  them. `standards.lock` stays at `schemaVersion` 1.
+- **The inventory knows the old addresses of the W3C.** `w3.org/TR/REC-xml` counts as `w3c:xml`,
+  `w3.org/TR/REC-xml-names` as `w3c:xml-names`, `w3.org/TR/xml-c14n` as `w3c:xml-c14n10`, and a dated
+  address such as `w3.org/TR/2006/REC-xml11-20060816/` as `w3c:xml11`. A link without a version that
+  the W3C sends to its latest level, such as `w3.org/TR/xpath`, reports `STANDARD_VERSIONLESS` and
+  names the versions to link instead, and `w3c("xpath")` or `w3c("xml-c14n")` fail the configuration.
+
+### Changed
+
+- **A newer level of a W3C series the build declares is no update.** `w3c("xml")` together with
+  `w3c("xml11")` no longer reports `STANDARD_UPDATED` for XML 1.0; a successor the build does not
+  declare still does.
+
 ## 5.3.0
 
 ### Added

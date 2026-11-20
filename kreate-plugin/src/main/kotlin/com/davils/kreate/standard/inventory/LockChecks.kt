@@ -47,7 +47,7 @@ internal class LockChecks(
             ruleId = StandardRules.OVERDUE_RULE,
             id = declaration.id,
             title = "The review of ${declaration.id} from ${entry.reviewedOn} was due on $due",
-            url = StandardLinks.infoUrlOf(declaration.id, declaration.url),
+            url = StandardLinks.infoUrlOf(declaration),
             attributes = mapOf("reviewedOn" to entry.reviewedOn.toString(), "due" to due.toString()),
             location = SourceLocation(lockPath)
         )
@@ -57,7 +57,7 @@ internal class LockChecks(
         ruleId = StandardRules.UNREVIEWED_RULE,
         id = declaration.id,
         title = "${declaration.id} is declared but was never reviewed",
-        url = StandardLinks.infoUrlOf(declaration.id, declaration.url),
+        url = StandardLinks.infoUrlOf(declaration),
         location = SourceLocation(lockPath)
     )
 

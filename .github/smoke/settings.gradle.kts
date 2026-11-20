@@ -16,22 +16,26 @@
 
 pluginManagement {
     val kreateRepository = providers.gradleProperty("kreateRepository").getOrElse("https://repo.davils.com/releases")
+    val releasesRepository = providers.gradleProperty("kreateReleasesRepository")
+        .getOrElse("https://repo.davils.com/releases")
     val kreateVersion = providers.gradleProperty("kreateVersion").get()
     val tokenName = providers.environmentVariable("DAVILS_MAVEN_NAME").orNull
     val tokenSecret = providers.environmentVariable("DAVILS_MAVEN_SECRET").orNull
 
     repositories {
-        exclusiveContent {
-            forRepository {
-                maven(kreateRepository) {
-                    if (tokenName != null && tokenSecret != null) {
-                        credentials {
-                            username = tokenName
-                            password = tokenSecret
-                        }
+        val davilsUrls = listOf(kreateRepository, releasesRepository).distinct()
+        val davils = davilsUrls.map { url ->
+            maven(url) {
+                if (tokenName != null && tokenSecret != null) {
+                    credentials {
+                        username = tokenName
+                        password = tokenSecret
                     }
                 }
             }
+        }
+        exclusiveContent {
+            forRepositories(*davils.toTypedArray())
             filter {
                 includeGroupAndSubgroups("com.davils")
             }
@@ -48,21 +52,25 @@ pluginManagement {
 
 dependencyResolutionManagement {
     val kreateRepository = providers.gradleProperty("kreateRepository").getOrElse("https://repo.davils.com/releases")
+    val releasesRepository = providers.gradleProperty("kreateReleasesRepository")
+        .getOrElse("https://repo.davils.com/releases")
     val tokenName = providers.environmentVariable("DAVILS_MAVEN_NAME").orNull
     val tokenSecret = providers.environmentVariable("DAVILS_MAVEN_SECRET").orNull
 
     repositories {
-        exclusiveContent {
-            forRepository {
-                maven(kreateRepository) {
-                    if (tokenName != null && tokenSecret != null) {
-                        credentials {
-                            username = tokenName
-                            password = tokenSecret
-                        }
+        val davilsUrls = listOf(kreateRepository, releasesRepository).distinct()
+        val davils = davilsUrls.map { url ->
+            maven(url) {
+                if (tokenName != null && tokenSecret != null) {
+                    credentials {
+                        username = tokenName
+                        password = tokenSecret
                     }
                 }
             }
+        }
+        exclusiveContent {
+            forRepositories(*davils.toTypedArray())
             filter {
                 includeGroupAndSubgroups("com.davils")
             }

@@ -19,8 +19,10 @@ import com.davils.kore.core.outcome.Outcome
 import com.davils.kore.core.outcome.flatMap
 import com.davils.kore.core.outcome.map
 import com.davils.kreate.standard.fetch.FetchRequest
+import com.davils.kreate.standard.model.ErrataAddress
 import com.davils.kreate.standard.model.LookupFailure
 import com.davils.kreate.standard.model.StandardDeclaration
+import com.davils.kreate.standard.model.StandardId
 import com.davils.kreate.standard.model.StandardKind
 import com.davils.kreate.standard.model.StandardSnapshot
 import com.davils.kreate.standard.provider.JsonRecords
@@ -29,14 +31,29 @@ import com.davils.kreate.standard.provider.StandardProvider
 import kotlinx.serialization.json.JsonObject
 import java.net.URI
 
-internal class W3cProvider(private val context: ProviderContext) : StandardProvider {
+internal class W3cProvider(
+    private val context: ProviderContext,
+    declarations: List<StandardDeclaration> = emptyList()
+) : StandardProvider {
+    private val declared: Set<StandardId> = declarations.map { declaration -> declaration.id }.toSet()
+
+    private val errata: W3cErrata = W3cErrata(context)
+
     override fun accepts(declaration: StandardDeclaration): Boolean = declaration.id.kind == StandardKind.W3C
 
     override fun snapshotOf(declaration: StandardDeclaration): Outcome<StandardSnapshot, LookupFailure> {
         val name = declaration.id.name
         val uri = context.endpoints.resolve(context.endpoints.w3cApi, "specifications/$name")
         val record = jsonAt(uri, "the W3C specification $name")
-        return record.flatMap { specification -> withSeries(name, specification) }
+        return record.flatMap { specification -> snapshotOf(declaration, specification) }
+    }
+
+    private fun snapshotOf(
+        declaration: StandardDeclaration,
+        specification: JsonObject
+    ): Outcome<StandardSnapshot, LookupFailure> {
+        val snapshot = withSeries(declaration.id.name, specification)
+        return snapshot.flatMap { found -> withErrata(declaration, specification, found) }
     }
 
     private fun withSeries(name: String, specification: JsonObject): Outcome<StandardSnapshot, LookupFailure> {
@@ -47,7 +64,36 @@ internal class W3cProvider(private val context: ProviderContext) : StandardProvi
         return seriesRecord.map { found ->
             val current = W3cRecords.currentOf(found)
             val newer = current?.takeIf { shortname -> !shortname.equals(name, ignoreCase = true) }
-            snapshot.copy(updatedBy = listOfNotNull(newer?.let { shortname -> "w3c:${shortname.lowercase()}" }))
+            val successor = newer?.let { shortname -> StandardId(StandardKind.W3C, shortname.lowercase()) }
+            val undeclared = successor?.takeIf { id -> id !in declared }
+            snapshot.copy(updatedBy = listOfNotNull(undeclared?.toString()))
+        }
+    }
+
+    private fun withErrata(
+        declaration: StandardDeclaration,
+        specification: JsonObject,
+        snapshot: StandardSnapshot
+    ): Outcome<StandardSnapshot, LookupFailure> {
+        val address = errataAddressOf(declaration, specification)
+        return address.flatMap { found ->
+            val record = found?.let(errata::read) ?: Outcome.Success(ErrataRecord(emptyMap()))
+            record.map { read -> snapshot.copy(errata = read.errata, fingerprint = read.fingerprint) }
+        }
+    }
+
+    private fun errataAddressOf(
+        declaration: StandardDeclaration,
+        specification: JsonObject
+    ): Outcome<ErrataAddress?, LookupFailure> {
+        val declared = declaration.errata
+        if (declared != null) return Outcome.Success(ErrataAddress.parse(declared))
+        val version = W3cRecords.latestVersionOf(specification) ?: return Outcome.Success(null)
+        val uri = context.endpoints.resolve(context.endpoints.w3cApi, version)
+        val record = jsonAt(uri, "the latest version of the W3C specification ${declaration.id.name}")
+        return record.map { found ->
+            val link = W3cRecords.errataOf(found)
+            link?.let { text -> ErrataAddress.parse(text, upgradesPlainHttp = true) }
         }
     }
 

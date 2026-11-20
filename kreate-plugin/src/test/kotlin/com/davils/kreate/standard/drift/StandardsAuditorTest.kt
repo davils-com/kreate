@@ -105,6 +105,19 @@ class StandardsAuditorTest : FunSpec({
         result.document.findings.single().ruleId shouldBe "STANDARD_UNKNOWN"
     }
 
+    test("reports a vendored suite that does not match what it pins, and records no snapshot of it") {
+        val mismatch = LookupFailure.Mismatch("The vendored file a.xml differs from the archive.")
+        val provider = FixedProvider(mapOf("rfc:7386" to Outcome.Failure(mismatch)))
+
+        val result = auditorOf(provider).audit(listOf(RFC), StandardsLock(), offline = false)
+
+        result.document.status shouldBe DocumentStatus.COMPLETE
+        val finding = result.document.findings.single()
+        finding.ruleId shouldBe "STANDARD_SUITE_MISMATCH"
+        finding.attributes shouldBe mapOf("reason" to "The vendored file a.xml differs from the archive.")
+        result.snapshots.containsKey(RFC.id) shouldBe false
+    }
+
     test("is incomplete and says why when a body cannot be reached") {
         val provider = FixedProvider(mapOf("rfc:7386" to Outcome.Failure(LookupFailure.Unavailable("HTTP 503"))))
 

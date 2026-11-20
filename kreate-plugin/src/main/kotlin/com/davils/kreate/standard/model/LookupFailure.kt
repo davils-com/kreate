@@ -19,4 +19,6 @@ internal sealed class LookupFailure(val reason: String) {
     class Unknown(reason: String) : LookupFailure(reason)
 
     class Unavailable(reason: String) : LookupFailure(reason)
+
+    class Mismatch(reason: String) : LookupFailure(reason)
 }
