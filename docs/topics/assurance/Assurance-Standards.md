@@ -59,6 +59,10 @@ other source of findings.
 Every declaration has a canonical id. The id names the standard in `standards.lock`, in findings, in
 `kreateStandardsReview --standard=<id>`, in `kreateExplain --rule=<id>` and in ignore rules.
 
+An ISO standard published jointly with IEC or IEEE keeps one id however it is cited: `iso("ISO 10646")`,
+`ISO-10646` in a source and `iso("ISO/IEC 10646")` all name `iso:iec-10646`. This holds for the joint
+standards that are often cited without IEC, such as ISO/IEC 646, 8859, 9899, 10646, 14882 and 27001.
+
 <table>
     <tr><td>Declaration</td><td>Id</td><td>Checked through</td></tr>
     <tr><td><code>rfc(9562)</code></td><td><code>rfc:9562</code></td><td>The RFC Editor: status, obsoleting and updating RFCs, errata</td></tr>
