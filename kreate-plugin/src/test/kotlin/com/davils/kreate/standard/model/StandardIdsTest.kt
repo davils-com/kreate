@@ -44,6 +44,15 @@ class StandardIdsTest : FunSpec({
             StandardIds.iso("8601-2") shouldBe StandardIds.iso("ISO 8601-2:2019")
         }
 
+        test("of an ISO standard names the bodies that publish it jointly") {
+            StandardIds.iso("ISO 10646").toString() shouldBe "iso:iec-10646"
+            StandardIds.iso("ISO-10646:2020") shouldBe StandardIds.iso("ISO/IEC 10646")
+            StandardIds.iso("ISO 8859-1").toString() shouldBe "iso:iec-8859-1"
+            StandardIds.iso("ISO 42010").toString() shouldBe "iso:iec-ieee-42010"
+            StandardIds.iso("ISO/IEEE 11073-10101").toString() shouldBe "iso:ieee-11073-10101"
+            StandardIds.iso("ISO 106460").toString() shouldBe "iso:106460"
+        }
+
         test("of an ISO standard gives back its reference") {
             StandardIdGrammar.isoReferenceOf(StandardIds.iso("iso/iec/ieee 42010")) shouldBe "ISO/IEC/IEEE 42010"
             StandardIdGrammar.isoReferenceOf(StandardIds.iso("ISO 8601-1")) shouldBe "ISO 8601-1"

@@ -46,6 +46,7 @@ class ReferenceScannerTest : FunSpec({
 
         test("names ISO, W3C, WHATWG, Unicode and DIN standards") {
             idsIn("Dates follow ISO 8601-1:2019 and ISO/IEC 27001.") shouldBe listOf("iso:8601-1", "iso:iec-27001")
+            idsIn("val ucs4 = \"ISO-10646-UCS-4\" // ISO 10646") shouldBe listOf("iso:iec-10646")
             idsIn("<a href=\"https://www.w3.org/TR/WCAG22/\">") shouldBe listOf("w3c:wcag22")
             idsIn("https://url.spec.whatwg.org/#concept-url") shouldBe listOf("whatwg:url")
             idsIn("Identifiers follow UAX #31 and UTS #39.") shouldBe listOf("unicode:uax-31", "unicode:uts-39")
