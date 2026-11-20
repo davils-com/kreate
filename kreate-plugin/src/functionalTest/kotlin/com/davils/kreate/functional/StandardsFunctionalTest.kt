@@ -20,8 +20,13 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
+import java.io.ByteArrayOutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.security.MessageDigest
+import java.util.HexFormat
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 private const val HTTP_OK: Int = 200
 
@@ -40,6 +45,44 @@ private const val REVIEWED_LOCK: String = """
 }
 """
 
+private val SUITE_FILES: Map<String, String> = mapOf(
+    "a.xml" to "<a/>\n",
+    "b.xml" to "<b/>\n",
+    "refs.txt" to "The suite cites RFC 7396.\n"
+)
+
+private fun suiteArchive(): ByteArray {
+    val bytes = ByteArrayOutputStream()
+    ZipOutputStream(bytes).use { zip ->
+        SUITE_FILES.forEach { (path, text) ->
+            zip.putNextEntry(ZipEntry("xmlconf/$path"))
+            zip.write(text.toByteArray())
+            zip.closeEntry()
+        }
+    }
+    return bytes.toByteArray()
+}
+
+private fun sha256Of(bytes: ByteArray): String {
+    val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+    return HexFormat.of().formatHex(digest)
+}
+
+private fun specification(shortname: String): String = """
+    {"shortname": "$shortname", "title": "XML $shortname", "_links": {
+      "latest-version": {
+        "href": "https://api.w3.org/specifications/$shortname/versions/20081126", "title": "Recommendation"},
+      "series": {"href": "https://api.w3.org/specification-series/xml"}}}
+""".trimIndent()
+
+private fun version(shortname: String): String =
+    """{"status": "Recommendation", "errata": "https://www.w3.org/XML/$shortname-errata"}"""
+
+private const val XML_SERIES: String =
+    """{"_links": {"current-specification": {"href": "https://api.w3.org/specifications/xml11"}}}"""
+
+private const val ERRATA_PAGE: String = """<html><body><h3><a name="S01">S01</a></h3></body></html>"""
+
 class StandardsFunctionalTest : FunSpec({
     val workspace = kreateWorkspace()
     val server = HttpServer.create(InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0)
@@ -47,6 +90,24 @@ class StandardsFunctionalTest : FunSpec({
     pages.forEach { (path, text) ->
         server.createContext(path) { exchange ->
             val body = text.toByteArray()
+            exchange.sendResponseHeaders(HTTP_OK, body.size.toLong())
+            exchange.responseBody.use { stream -> stream.write(body) }
+        }
+    }
+    val archive = suiteArchive()
+    val routes = mapOf(
+        "/suite/xmlconf.zip" to archive,
+        "/suite/" to "<h1>XML Test Suite</h1>".toByteArray(),
+        "/api/specifications/xml" to specification("xml").toByteArray(),
+        "/api/specifications/xml11" to specification("xml11").toByteArray(),
+        "/api/specifications/xml/versions/20081126" to version("xml").toByteArray(),
+        "/api/specifications/xml11/versions/20081126" to version("xml11").toByteArray(),
+        "/api/specification-series/xml" to XML_SERIES.toByteArray(),
+        "/w3c/XML/xml-errata" to ERRATA_PAGE.toByteArray(),
+        "/w3c/XML/xml11-errata" to ERRATA_PAGE.toByteArray()
+    )
+    routes.forEach { (path, body) ->
+        server.createContext(path) { exchange ->
             exchange.sendResponseHeaders(HTTP_OK, body.size.toLong())
             exchange.responseBody.use { stream -> stream.write(body) }
         }
@@ -59,6 +120,17 @@ class StandardsFunctionalTest : FunSpec({
     afterSpec { server.stop(0) }
 
     val base = "http://${server.address.address.hostAddress}:${server.address.port}"
+
+    val w3c = arrayOf("-Pkreate.network.w3cApiUrl=$base/api", "-Pkreate.network.w3cUrl=$base/w3c")
+
+    val suite = """
+        suite("xmlconf") {
+            archive = "$base/suite/xmlconf.zip"
+            sha256 = "${sha256Of(archive)}"
+            vendored = "src/test/resources/xmlconf"
+            watch = "$base/suite/"
+        }
+    """.trimIndent()
 
     fun watched(path: String): String =
         """document("ECMA-404") { reviewEvery = Duration.ofDays(3650); url = "$base$path" }"""
@@ -206,6 +278,48 @@ class StandardsFunctionalTest : FunSpec({
 
             second.task(":kreateStandardsInventory")?.outcome?.name shouldBe "UP_TO_DATE"
             second.task(":kreateStandardsAudit")?.outcome?.name shouldBe "UP_TO_DATE"
+        }
+
+        test("check a vendored suite against its pinned archive and report what changed since the review") {
+            val fixture = newBuild(suite)
+            listOf("a.xml", "refs.txt").forEach { path ->
+                fixture.write("src/test/resources/xmlconf/$path", SUITE_FILES.getValue(path))
+            }
+
+            fixture.build("kreateStandardsReview", "--all", "--note=Vendored xmlts.")
+
+            fixture.file("standards.lock").readText() shouldContain "\"contentDigest\": \"sha256:"
+            fixture.build("kreateAssurance").output shouldContain "Kreate assurance [PASSED]"
+
+            fixture.file("src/test/resources/xmlconf/a.xml").writeText("<a/>\r\n")
+            val converted = fixture.buildAndFail("kreateAssurance")
+
+            converted.output shouldContain
+                "HIGH STANDARD_SUITE_MISMATCH: The vendored copy of suite:xmlconf does not match what it pins"
+
+            fixture.write("src/test/resources/xmlconf/a.xml", SUITE_FILES.getValue("a.xml"))
+            fixture.write("src/test/resources/xmlconf/b.xml", SUITE_FILES.getValue("b.xml"))
+            val added = fixture.buildAndFail("kreateAssurance")
+
+            added.output shouldContain
+                "HIGH STANDARD_SUITE_MODIFIED: The vendored copy of suite:xmlconf changed since its review"
+            added.output shouldNotContain "STANDARD_UNDECLARED"
+        }
+
+        test("read the errata of W3C specifications and take a declared newer level for no update") {
+            val fixture = newBuild("""w3c("xml"); w3c("xml11")""")
+            fixture.write("docs/xml.md", "See https://www.w3.org/TR/REC-xml/ and https://www.w3.org/TR/xpath.\n")
+
+            fixture.build("kreateStandardsReview", "--all", "--note=Read XML.", *w3c)
+
+            val lock = fixture.file("standards.lock").readText()
+            lock shouldContain "\"S01\": \"VERIFIED\""
+            lock shouldNotContain "\"w3c:xml11\"\n"
+            val gate = fixture.build("kreateAssurance", *w3c)
+
+            gate.output shouldContain "MEDIUM STANDARD_VERSIONLESS: docs/xml.md links w3c:xpath, which names no version"
+            gate.output shouldNotContain "STANDARD_UNDECLARED"
+            gate.output shouldContain "Kreate assurance [PASSED]"
         }
     }
 })

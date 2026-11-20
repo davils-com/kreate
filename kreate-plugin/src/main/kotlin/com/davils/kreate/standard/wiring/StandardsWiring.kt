@@ -82,6 +82,8 @@ private fun Project.registerAudit(
         httpsProxy.set(owner.providers.environmentVariable(HTTPS_PROXY_VARIABLE))
         noProxy.set(owner.providers.environmentVariable(NO_PROXY_VARIABLE))
         githubToken.set(owner.providers.environmentVariable(GITHUB_TOKEN_VARIABLE))
+        vendoredFiles.from(vendoredDirectoriesOf(declarations))
+        projectDirectory.set(owner.layout.projectDirectory)
         snapshotsFile.set(owner.layout.buildDirectory.file(SNAPSHOTS_FILE))
         documentFile.set(owner.layout.buildDirectory.file(AUDIT_DOCUMENT))
     }
@@ -122,9 +124,12 @@ private fun Project.validatedDeclarations(standards: AssuranceStandardsExtension
     throw InvalidUserDataException("assurance { standards { } } of $path is invalid:\n$listed")
 }
 
+private fun vendoredDirectoriesOf(declarations: List<StandardDeclaration>): List<String> =
+    declarations.mapNotNull { declaration -> declaration.suite?.vendored }
+
 private fun Project.registerInventory(standards: AssuranceStandardsExtension, declarations: List<StandardDeclaration>) {
     val owner = this
-    val scanned = scannedFiles(standards)
+    val scanned = scannedFiles(standards, vendoredDirectoriesOf(declarations))
     tasks.register<StandardsInventory>(StandardsTaskNames.INVENTORY) {
         this.declarations.set(declarations)
         defaultReviewEverySeconds.set(standards.reviewEvery.map { duration -> duration.seconds })
@@ -138,12 +143,13 @@ private fun Project.registerInventory(standards: AssuranceStandardsExtension, de
     }
 }
 
-private fun Project.scannedFiles(standards: AssuranceStandardsExtension): FileTree {
+private fun Project.scannedFiles(standards: AssuranceStandardsExtension, vendored: List<String>): FileTree {
     val inventory = standards.inventory
     val lock = standards.lockFile.get().asFile
     val lockPattern = lockPathOf(this, lock)
     val includes = inventory.includes.get()
-    val excludes = GENERATED_PATHS + inventory.excludes.get() + lockPattern
+    val suites = vendored.map { directory -> directory.trimEnd('/') + "/**" }
+    val excludes = GENERATED_PATHS + inventory.excludes.get() + lockPattern + suites
     return fileTree(layout.projectDirectory) {
         include(includes)
         exclude(excludes)

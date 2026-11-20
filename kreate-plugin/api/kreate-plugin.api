@@ -173,6 +173,27 @@ public final class com/davils/kreate/assurance/AssuranceStandardSpec {
 	public final fun setUrl (Ljava/lang/String;)V
 }
 
+public final class com/davils/kreate/assurance/AssuranceStandardSuiteSpec {
+	public final fun getArchive ()Ljava/lang/String;
+	public final fun getCommit ()Ljava/lang/String;
+	public final fun getGithub ()Ljava/lang/String;
+	public final fun getNote ()Ljava/lang/String;
+	public final fun getReviewEvery ()Ljava/time/Duration;
+	public final fun getRoot ()Ljava/lang/String;
+	public final fun getSha256 ()Ljava/lang/String;
+	public final fun getVendored ()Ljava/lang/String;
+	public final fun getWatch ()Ljava/lang/String;
+	public final fun setArchive (Ljava/lang/String;)V
+	public final fun setCommit (Ljava/lang/String;)V
+	public final fun setGithub (Ljava/lang/String;)V
+	public final fun setNote (Ljava/lang/String;)V
+	public final fun setReviewEvery (Ljava/time/Duration;)V
+	public final fun setRoot (Ljava/lang/String;)V
+	public final fun setSha256 (Ljava/lang/String;)V
+	public final fun setVendored (Ljava/lang/String;)V
+	public final fun setWatch (Ljava/lang/String;)V
+}
+
 public abstract class com/davils/kreate/assurance/AssuranceStandardsExtension {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/ProjectLayout;)V
 	public final fun din (Ljava/lang/String;)V
@@ -192,6 +213,7 @@ public abstract class com/davils/kreate/assurance/AssuranceStandardsExtension {
 	public final fun iso (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun rfc (I)V
 	public final fun rfc (ILorg/gradle/api/Action;)V
+	public final fun suite (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun unicode ()V
 	public final fun unicode (Ljava/lang/String;)V
 	public final fun unicode (Ljava/lang/String;Lorg/gradle/api/Action;)V

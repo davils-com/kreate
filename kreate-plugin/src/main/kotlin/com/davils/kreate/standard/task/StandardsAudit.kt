@@ -42,6 +42,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -94,6 +95,14 @@ internal abstract class StandardsAudit : FindingCollectTask(
     @get:Internal
     public abstract val githubToken: Property<String>
 
+    @get:InputFiles
+    @get:IgnoreEmptyDirectories
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    public abstract val vendoredFiles: ConfigurableFileCollection
+
+    @get:Internal
+    public abstract val projectDirectory: DirectoryProperty
+
     @get:OutputFile
     public abstract val snapshotsFile: RegularFileProperty
 
@@ -122,7 +131,15 @@ internal abstract class StandardsAudit : FindingCollectTask(
         val cache = RevalidatingCache(cacheDirectory.get().asFile.toPath(), TIME_TO_LIVE, clock)
         val serviceEndpoints = ServiceEndpoints(endpoints.get())
         val token = githubToken.orNull?.takeIf { value -> value.isNotBlank() }
-        val context = ProviderContext(serviceEndpoints, cache, { transport.value }, { bulkTransport.value }, token)
+        val project = projectDirectory.get().asFile.toPath()
+        val context = ProviderContext(
+            endpoints = serviceEndpoints,
+            cache = cache,
+            transport = { transport.value },
+            bulkTransport = { bulkTransport.value },
+            githubToken = token,
+            projectDirectory = project
+        )
         val declared = declarations.get()
         return StandardsAuditor({ StandardProviders.all(context, declared) }, { cache.oldestAnswer }, clock)
     }
