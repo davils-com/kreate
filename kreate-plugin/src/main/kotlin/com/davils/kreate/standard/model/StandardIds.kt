@@ -51,8 +51,8 @@ internal object StandardIds {
         val lowered = reference.trim().lowercase()
         val withoutYear = lowered.replace(ISO_YEAR, "")
         val withoutPrefix = withoutYear.removePrefix(ISO_PREFIX)
-        val separated = withoutPrefix.replace(SEPARATOR_RUNS, "-")
-        return idOf(StandardKind.ISO, separated.trim('-'), reference)
+        val separated = withoutPrefix.replace(SEPARATOR_RUNS, "-").trim('-')
+        return idOf(StandardKind.ISO, IsoJointNumbers.qualified(separated), reference)
     }
 
     fun w3c(shortname: String): StandardId = idOf(StandardKind.W3C, shortname.trim().lowercase(), shortname)

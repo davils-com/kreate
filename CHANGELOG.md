@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.4.1
+
+### Fixed
+
+- **ISO standards published jointly with IEC or IEEE get one id however they are cited.** `ISO 10646`,
+  `ISO-10646-UCS-4` in a source and `iso("ISO 10646")` in the build now all name `iso:iec-10646`, as
+  `iso("ISO/IEC 10646")` does, so the inventory no longer reports such a standard as undeclared when
+  the build declares it with its full name. This holds for the joint standards that are often cited
+  without IEC, among them ISO/IEC 646, 8859, 9899, 10646, 14882 and 27001, and for ISO/IEC/IEEE 9945,
+  12207, 15288 and 42010. A declaration that named only ISO was looked up under a reference ISO does
+  not publish; it now finds its editions, and its id in `standards.lock` changes, so review it once
+  with `kreateStandardsReview`.
+
 ## 5.4.0
 
 ### Added
