@@ -45,6 +45,12 @@ internal class GitHistory(private val runner: ToolRunner, private val git: Strin
         return File(result.stdout.text.trim())
     }
 
+    fun head(): String? {
+        val result = run(REV_PARSE, "--verify", "HEAD")
+        if (!result.isSuccess()) return null
+        return result.stdout.text.trim()
+    }
+
     fun latestTag(prefix: String): ReleaseTag? {
         val result = run("tag", "--merged", "HEAD", "--list")
         if (!result.isSuccess()) return null

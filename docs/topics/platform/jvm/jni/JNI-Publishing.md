@@ -123,6 +123,133 @@ conditions rather than whatever the publishing runner happened to compile.
 Where they come from is up to you: a second runner, a mirrored pipeline on another CI provider, a
 colleague's machine, or a release archive.
 
+## Releasing from several runners
+
+A release that carries every platform is built where each platform is native and published from one
+place. Every runner stages what it built; one publishing job collects the stages and uploads the
+library together with every platform artifact in a single Gradle run.
+
+```bash
+./gradlew kreateJniStage
+```
+
+`kreateJniStage` builds the host library and writes it to
+`build/kreate/jni-stage/<artifact>/<os>-<arch>/` of the root project, next to a `native.properties`:
+
+```properties
+format=1
+platform=windows-x86_64
+group=com.example
+artifact=mylib
+version=1.4.0
+revision=3f2c9e0d7b5a41c6e8f0a9b1c2d3e4f5a6b7c8d9
+sha256.mylib.dll=6d1b6f6e...
+```
+
+The publishing job points the build at the merged stages:
+
+```bash
+./gradlew publish \
+    -Pkreate.jni.stage=natives \
+    -Pkreate.jni.publishPlatforms=linux-x86_64,linux-aarch64,windows-x86_64,windows-aarch64,macos-x86_64,macos-aarch64
+```
+
+The path is resolved against the root project. With `-Pkreate.jni.stage` every platform comes from
+the stage, including the one the publishing machine runs on: the job neither needs CMake nor builds
+anything native.
+
+### What the publishing build checks
+
+Before a platform artifact is packaged, `kreateJniVerifyPlatforms` reads the `native.properties` of
+every staged platform and refuses the release when
+
+- the stage was made for another platform, group, artifact or version;
+- a listed file is missing, a file is not listed, or a file's SHA-256 differs from the manifest;
+- the stage holds a directory, whose content would ship unchecked;
+- for a release, the natives were built from another commit than the one being published. A
+  snapshot only warns.
+
+A staged platform without a `native.properties`, such as one laid out by hand under
+`stagingDirectory`, is still published, with a warning that Kreate cannot tell which build produced
+it.
+
+### GitHub Actions
+
+```yaml
+jobs:
+  natives:
+    strategy:
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, windows-2025, windows-11-arm, macos-15-intel, macos-15]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 25 }
+      - run: ./gradlew kreateJniStage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natives-${{ matrix.runner }}
+          path: build/kreate/jni-stage/
+
+  publish:
+    needs: natives
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 25 }
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: natives-*
+          path: natives
+          merge-multiple: true
+      - run: >
+          ./gradlew publish -Pkreate.jni.stage=natives
+          -Pkreate.jni.publishPlatforms=linux-x86_64,linux-aarch64,windows-x86_64,windows-aarch64,macos-x86_64,macos-aarch64
+```
+
+Every job checks out the same commit, so the revision check holds. On GitLab the same shape is a
+`parallel: matrix:` job on runners tagged per platform, whose `build/kreate/jni-stage/` is an
+artifact the publish job `needs`.
+
+## How it stays a plain Maven artifact
+
+Nothing about the per-platform layout needs a plugin on the consumer side. A release of `mylib`
+publishes seven ordinary coordinates:
+
+```
+com.example:mylib:1.4.0                  classes, a normal POM and Gradle module metadata
+com.example:mylib-linux-x86_64:1.4.0     native/linux-x86_64/libmylib.so
+com.example:mylib-linux-aarch64:1.4.0
+com.example:mylib-windows-x86_64:1.4.0   native/windows-x86_64/mylib.dll
+com.example:mylib-windows-aarch64:1.4.0
+com.example:mylib-macos-x86_64:1.4.0     native/macos-x86_64/libmylib.dylib
+com.example:mylib-macos-aarch64:1.4.0
+```
+
+<deflist type="wide">
+    <def title="Every platform artifact is a regular JAR">
+        It has its own POM without dependencies, its own <code>maven-metadata.xml</code>, the
+        checksums Gradle writes for every upload, and a <code>.asc</code> signature whenever the
+        target signs. Maven, Gradle, sbt and every repository manager treat it like any other JAR.
+    </def>
+    <def title="The library does not depend on its platforms">
+        Its POM names none of them, so no consumer receives six binaries or the wrong one. The
+        consumer picks its platform, and at runtime the loader finds
+        <code>native/&lt;os&gt;-&lt;arch&gt;/</code> on the classpath, whichever JAR provides it.
+    </def>
+    <def title="The platforms are uploaded first">
+        Every <code>publishKreateNative…</code> upload runs before the upload of the library itself.
+        A repository without staging, such as Reposilite, never serves a library whose platform
+        artifacts are missing, even when an upload breaks off halfway.
+    </def>
+    <def title="Signing covers every artifact">
+        A target with <code>signPublications = true</code>, and Maven Central, signs each platform
+        publication with the same GPG key as the library.
+    </def>
+</deflist>
+
 ## GitLab CI with Linux only
 
 This is a complete pipeline, not a stopgap:
@@ -158,6 +285,35 @@ all, so there is nothing for Gradle to match on. The declaration is explicit, or
 plugin in the <i>consumer's</i> build that detects the OS and assembles the artifact id.
 </warning>
 
+A Maven consumer declares the artifact the same way, or lets a profile pick it per machine:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.example</groupId>
+        <artifactId>mylib</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+</dependencies>
+
+<profiles>
+    <profile>
+        <id>linux-x86_64</id>
+        <activation><os><family>unix</family><name>Linux</name><arch>amd64</arch></os></activation>
+        <dependencies>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>mylib-linux-x86_64</artifactId>
+                <version>1.0.0</version>
+                <scope>runtime</scope>
+            </dependency>
+        </dependencies>
+    </profile>
+    <!-- one profile per platform: aarch64 on Linux, amd64 and aarch64 on Windows,
+         x86_64 and aarch64 on macOS (family "mac") -->
+</profiles>
+```
+
 A consumer who forgets it gets a message that says exactly what to add:
 
 ```
@@ -180,7 +336,8 @@ The last line is the one that saves an afternoon: it separates "you forgot the d
 Central rejects any artifact published without a sources and a javadoc JAR. A resource-only
 artifact has neither to give, so %product% attaches empty ones to each platform publication when
 `mavenCentral` is enabled. Signing is handled by `signAllPublications()`, which covers every
-publication in the project.
+publication in the project, the platform publications included. Central receives all of them in one
+deployment.
 
 The GitLab Package Registry asks for none of this, and the empty JARs are not produced for it.
 

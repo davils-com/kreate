@@ -20,20 +20,24 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.gradle.GradlePluginId
 import com.davils.kreate.gradle.configurePom
 import com.davils.kreate.host.platformTaskSuffix
+import com.davils.kreate.jni.task.VerifyNativePlatforms
 import com.davils.kreate.publish.PublishExtension
 import com.davils.kreate.task.KreateTaskGroup
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.publish.PublicationContainer
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 
 private const val PUBLISHING_EXTENSION_NAME: String = "publishing"
 
 private const val NATIVE_PUBLICATION_PREFIX: String = "kreateNative"
+
+private const val NATIVE_PUBLISH_TASK_PREFIX: String = "publishKreateNative"
 
 private const val SOURCES_JAR_TASK_NAME: String = "kreateJniNativeSourcesJar"
 
@@ -49,7 +53,8 @@ internal fun Project.registerNativePublications(
     extension: KreateExtension,
     projectName: String,
     platforms: List<String>,
-    jars: List<TaskProvider<Jar>>
+    jars: List<TaskProvider<Jar>>,
+    verify: TaskProvider<VerifyNativePlatforms>
 ) {
     val publishConfig = extension.project.publish
     if (!publishConfig.enabled.get()) return
@@ -68,38 +73,42 @@ internal fun Project.registerNativePublications(
     val documentationJars = registerDocumentationJars(publishConfig, artifactBase)
 
     extensions.configure<PublishingExtension>(PUBLISHING_EXTENSION_NAME) {
-        requireMainPublication(publications)
+        requireMainPublicationLater(publications, verify)
 
         platforms.forEachIndexed { index, platformId ->
             val nativeArtifact = NativePlatformArtifact(platformId, artifactBase, projectDescription, jars[index])
             registerNativePublication(publications, publishConfig, nativeArtifact, documentationJars)
         }
     }
+
+    uploadPlatformArtifactsFirst()
 }
 
-private fun Project.requireMainPublication(publications: PublicationContainer) {
-    val hasMainPublication = publications.withType(MavenPublication::class.java).isNotEmpty()
-    if (hasMainPublication) return
+private fun Project.requireMainPublicationLater(
+    publications: PublicationContainer,
+    verify: TaskProvider<VerifyNativePlatforms>
+) {
+    val mainPublications = provider { mainPublicationNamesOf(publications) }
+    verify.configure {
+        requiresMainPublication.set(true)
+        this.mainPublications.set(mainPublications)
+    }
+}
 
-    throw GradleException(
-        """
-            Kreate's per-platform native publishing is enabled for project '$path', but
-            the project has no publication for the library itself.
+private fun mainPublicationNamesOf(publications: PublicationContainer): List<String> {
+    val mavenPublications = publications.withType(MavenPublication::class.java)
+    val names = mavenPublications.names
+    return names.filterNot { name -> name.startsWith(NATIVE_PUBLICATION_PREFIX) }
+}
 
-            Publishing only the platform artifacts would produce a release containing
-            native binaries and no code to call them.
-
-            Enable a publishing target so that the main artifact is published too:
-
-                kreate { project { publish { repositories {
-                    gitlab { enabled = true }        // or
-                    mavenCentral { enabled = true }  // or
-                    maven { releases = "https://repo.example.com/releases" }
-                } } } }
-
-            Or declare a MavenPublication of your own.
-        """.trimIndent()
-    )
+private fun Project.uploadPlatformArtifactsFirst() {
+    val publishTasks = tasks.withType<PublishToMavenRepository>()
+    val platformUploads = publishTasks.matching { task -> task.name.startsWith(NATIVE_PUBLISH_TASK_PREFIX) }
+    publishTasks.configureEach {
+        val isPlatformUpload = name.startsWith(NATIVE_PUBLISH_TASK_PREFIX)
+        if (isPlatformUpload) return@configureEach
+        mustRunAfter(platformUploads)
+    }
 }
 
 private fun Project.registerNativePublication(

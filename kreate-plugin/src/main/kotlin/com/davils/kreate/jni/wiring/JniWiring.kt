@@ -58,6 +58,8 @@ private const val CMAKE_CACHE_FILE_NAME: String = "CMakeCache.txt"
 
 private const val JVM_MAIN_SOURCE_SET_NAME: String = "jvmMain"
 
+private const val JAR_TASK_NAME: String = "jar"
+
 internal fun Project.initializeJni(extension: KreateExtension) {
     val jniConfig = extension.platform.jvm.jni
     if (!jniConfig.enabled.get()) return
@@ -191,6 +193,12 @@ private fun Project.distributeNativeLibraries(
     bundleIntoMainJar(libraryDir, manifest, resourcePath, platformId, buildTaskName)
 }
 
+private fun Project.mainJarTaskName(): String {
+    val multiplatform = extensions.findByType(KotlinMultiplatformExtension::class.java) ?: return JAR_TASK_NAME
+    val jvmTarget = multiplatform.targets.withType(KotlinJvmTarget::class.java).firstOrNull() ?: return JAR_TASK_NAME
+    return jvmTarget.artifactsTaskName
+}
+
 private fun Project.bundleIntoMainJar(
     libraryDir: Provider<out Directory>,
     manifest: TaskProvider<GenerateDigestManifest>?,
@@ -198,7 +206,9 @@ private fun Project.bundleIntoMainJar(
     platformId: String,
     buildTaskName: String
 ) {
-    tasks.withType<Jar>().configureEach {
+    val mainJarTaskName = mainJarTaskName()
+    val mainJars = tasks.withType<Jar>().matching { task -> task.name == mainJarTaskName }
+    mainJars.configureEach {
         dependsOn(buildTaskName)
         from(libraryDir) {
             into("$resourcePath/$platformId")

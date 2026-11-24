@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.5.0
+
+### Added
+
+- **A JNI library is released from several runners.** `kreateJniStage` writes the host library to
+  `build/kreate/jni-stage/<artifact>/<os>-<arch>/` of the root project together with a
+  `native.properties` naming its platform, group, artifact, version, Git commit and the SHA-256 of
+  every file. A publishing job that merges the stages of every runner publishes them with
+  `-Pkreate.jni.stage=<directory>`, without building anything native itself.
+- **Staged natives are checked before they are published.** `kreateJniVerifyPlatforms` refuses a
+  staged platform whose `native.properties` names another platform, group, artifact or version,
+  whose files differ from the listed SHA-256, are missing, unlisted or nested in a directory, and,
+  for a release, natives built from another commit. A snapshot only warns about the commit, and a
+  staged platform without a manifest is published with a warning.
+
+### Fixed
+
+- **Per-platform publishing works with Maven Central.** The check that the project publishes the
+  library next to its platform artifacts ran while the build was configured, before the Maven
+  Central plugin had registered the library's publication, so the build failed although it was
+  correct. The check now runs in `kreateJniVerifyPlatforms`.
+- **Platform artifacts are uploaded before the library.** Every upload of a platform publication
+  runs before the upload of the library to the same repository, so a repository without staging
+  never serves a library without its natives.
+- **Bundled natives go into the library JAR only.** With `packaging` enabled and per-platform
+  publishing off, the host library was added to every JAR of the project, sources and javadoc JARs
+  included. It now goes into `jar`, or the JVM JAR of a multiplatform project.
+
 ## 5.4.1
 
 ### Fixed

@@ -20,9 +20,11 @@ import com.davils.kreate.KreateExtension
 import com.davils.kreate.host.requireKnownPlatform
 import com.davils.kreate.jni.JniPublishingExtension
 import com.davils.kreate.jni.JniTaskNames
+import com.davils.kreate.jni.stage.STAGE_MANIFEST_FILE_NAME
 import com.davils.kreate.jni.task.DIGEST_MANIFEST_FILE_NAME
 import com.davils.kreate.jni.task.GenerateDigestManifest
 import com.davils.kreate.jni.task.PLATFORM_CANDIDATE_SEPARATOR
+import com.davils.kreate.jni.task.StageNativeLibraries
 import com.davils.kreate.jni.task.VerifyNativePlatforms
 import com.davils.kreate.task.KreateTaskGroup
 import org.gradle.api.Project
@@ -35,6 +37,10 @@ import org.gradle.kotlin.dsl.register
 import java.io.File
 
 internal const val PLATFORM_SELECTION_PROPERTY: String = "kreate.jni.publishPlatforms"
+
+internal const val STAGE_PROPERTY: String = "kreate.jni.stage"
+
+private const val STAGE_DIRECTORY: String = "build/kreate/jni-stage"
 
 private const val PLATFORM_LIST_SEPARATOR: Char = ','
 
@@ -52,19 +58,17 @@ internal fun Project.configureNativePublishing(
 ) {
     val publishing = extension.platform.jvm.jni.packaging.publishing
     val platforms = resolveSelectedPlatforms(publishing, hostPlatformId)
-    val sources = platforms.map { platformId ->
-        NativeSource(
-            platformId = platformId,
-            staged = publishing.stagingDirectory.takeIf { it.isPresent }?.map { it.dir(platformId) },
-            hostBuilt = hostLibraryDir.takeIf { platformId == hostPlatformId }
-        )
-    }
+    val artifactBase = extension.project.name.orNull ?: projectName
+    val host = HostLibrary(hostPlatformId, hostLibraryDir, buildTaskName)
+    val stageRoot = stageRootOf(artifactBase)
+    val sources = platforms.map { platformId -> nativeSourceOf(platformId, publishing, stageRoot, host) }
 
-    val verify = registerVerifyTask(sources, buildTaskName, hostPlatformId)
+    registerStageTask(artifactBase, host)
+    val verify = registerVerifyTask(sources, artifactBase, host)
     val writesDigests = extension.platform.jvm.jni.packaging.digestManifest.get()
     val jars = sources.map { source ->
         val digests = registerPlatformDigestManifest(source, verify, writesDigests)
-        registerNativeJar(source, digests, projectName, resourcePath, verify, buildTaskName, hostPlatformId)
+        registerNativeJar(source, digests, projectName, resourcePath, verify, buildTaskName)
     }
 
     tasks.register(JniTaskNames.NATIVE_JARS) {
@@ -73,7 +77,45 @@ internal fun Project.configureNativePublishing(
         dependsOn(jars)
     }
 
-    registerNativePublications(extension, projectName, sources.map { it.platformId }, jars)
+    registerNativePublications(extension, projectName, sources.map { it.platformId }, jars, verify)
+}
+
+private fun Project.stageRootOf(artifactBase: String): Directory? {
+    val stagePath = providers.gradleProperty(STAGE_PROPERTY).orNull?.takeIf { it.isNotBlank() } ?: return null
+    val stage = layout.settingsDirectory.dir(stagePath)
+    return stage.dir(artifactBase)
+}
+
+private fun Project.nativeSourceOf(
+    platformId: String,
+    publishing: JniPublishingExtension,
+    stageRoot: Directory?,
+    host: HostLibrary
+): NativeSource {
+    if (stageRoot != null) {
+        val staged = stageRoot.dir(platformId)
+        return NativeSource(platformId = platformId, staged = provider { staged }, hostBuilt = null)
+    }
+
+    return NativeSource(
+        platformId = platformId,
+        staged = publishing.stagingDirectory.takeIf { it.isPresent }?.map { it.dir(platformId) },
+        hostBuilt = host.directory.takeIf { platformId == host.platformId }
+    )
+}
+
+private fun Project.registerStageTask(artifactBase: String, host: HostLibrary) {
+    val stageDirectory = layout.settingsDirectory.dir("$STAGE_DIRECTORY/$artifactBase/${host.platformId}")
+    tasks.register<StageNativeLibraries>(JniTaskNames.STAGE) {
+        dependsOn(host.buildTaskName)
+        libraryDirectory.set(host.directory)
+        platformId.set(host.platformId)
+        artifactGroup.set(project.group.toString())
+        artifactName.set(artifactBase)
+        artifactVersion.set(project.version.toString())
+        projectDirectory.set(layout.projectDirectory)
+        this.stageDirectory.set(stageDirectory)
+    }
 }
 
 internal fun Project.resolveSelectedPlatforms(
@@ -98,18 +140,29 @@ private fun requireKnownPlatforms(platforms: List<String>, origin: String): List
 
 private fun Project.registerVerifyTask(
     sources: List<NativeSource>,
-    buildTaskName: String,
-    hostPlatformId: String
+    artifactBase: String,
+    host: HostLibrary
 ): TaskProvider<VerifyNativePlatforms> =
     tasks.register<VerifyNativePlatforms>(JniTaskNames.VERIFY_PLATFORMS) {
-        if (sources.any { it.platformId == hostPlatformId }) {
-            dependsOn(buildTaskName)
+        if (sources.any { source -> source.hostBuilt != null }) {
+            dependsOn(host.buildTaskName)
         }
 
         platforms.set(sources.map { it.platformId })
         searchedDirectories.from(sources.flatMap { it.directoriesByPrecedence() })
         candidatePaths.set(sources.map { source -> source.candidatePathEntry() })
+        stagedPaths.set(sources.mapNotNull { source -> source.stagedPathEntry() })
+        artifactGroup.set(project.group.toString())
+        artifactName.set(artifactBase)
+        artifactVersion.set(project.version.toString())
+        projectDirectory.set(layout.projectDirectory)
     }
+
+private fun NativeSource.stagedPathEntry(): String? {
+    val directory = staged ?: return null
+    val path = directory.get().asFile.absolutePath
+    return "$platformId$PLATFORM_CANDIDATE_SEPARATOR$path"
+}
 
 private fun NativeSource.candidatePathEntry(): String {
     val paths = directoriesByPrecedence().map { provider -> provider.get().asFile.absolutePath }
@@ -138,20 +191,22 @@ private fun Project.registerNativeJar(
     projectName: String,
     resourcePath: String,
     verify: TaskProvider<VerifyNativePlatforms>,
-    buildTaskName: String,
-    hostPlatformId: String
+    buildTaskName: String
 ): TaskProvider<Jar> =
     tasks.register<Jar>(JniTaskNames.nativeJar(source.platformId)) {
         group = KreateTaskGroup.JNI.label
         description = "Packages the ${source.platformId} native library of $projectName."
 
         dependsOn(verify)
-        if (source.platformId == hostPlatformId) {
+        if (source.hostBuilt != null) {
             dependsOn(buildTaskName)
         }
 
         source.directoriesByPrecedence().forEach { directory ->
-            from(directory) { into("$resourcePath/${source.platformId}") }
+            from(directory) {
+                into("$resourcePath/${source.platformId}")
+                exclude(STAGE_MANIFEST_FILE_NAME)
+            }
         }
         if (digests != null) {
             from(digests) { into(resourcePath) }
