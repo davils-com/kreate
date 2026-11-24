@@ -17,16 +17,33 @@
 package com.davils.kreate.jni.wiring
 
 import com.davils.kreate.jni.task.JNI_USE_LIBRARY_PATH_PROPERTY
+import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.process.CommandLineArgumentProvider
+import java.io.File
 
 internal class JavaLibraryPathArgumentProvider(
     @get:Input
-    val libraryPath: Provider<String>
+    @get:Optional
+    val libraryPath: Provider<String>,
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    val dependencyLibraries: FileCollection
 ) : CommandLineArgumentProvider {
-    override fun asArguments(): Iterable<String> = listOf(
-        "-Djava.library.path=${libraryPath.get()}",
-        "-D$JNI_USE_LIBRARY_PATH_PROPERTY=true"
-    )
+    override fun asArguments(): Iterable<String> {
+        val own = libraryPath.orNull?.takeIf { path -> path.isNotEmpty() }
+        val dependencies = dependencyLibraries.files.map { directory -> directory.absolutePath }
+        val paths = (listOfNotNull(own) + dependencies).distinct()
+        if (paths.isEmpty()) return emptyList()
+
+        return listOf(
+            "-Djava.library.path=${paths.joinToString(File.pathSeparator)}",
+            "-D$JNI_USE_LIBRARY_PATH_PROPERTY=true"
+        )
+    }
 }

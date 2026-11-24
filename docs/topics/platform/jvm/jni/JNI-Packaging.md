@@ -185,7 +185,8 @@ consults `java.library.path` only when no packaged copy exists and the JVM runs 
 `-Dkreate.jni.useLibraryPath=true`. That ordering matters: on Windows the library path normally
 includes the working directory and the `PATH`, so searching it first would load a planted DLL in
 place of the binary you shipped. Kreate sets the property on the test and run tasks of the project
-that builds the library, so local development keeps loading the freshly built binary.
+that builds the library, and of every project of the same build that depends on it, so local
+development keeps loading the freshly built binary.
 
 <deflist type="wide">
     <def title="Why generated source rather than a runtime library">

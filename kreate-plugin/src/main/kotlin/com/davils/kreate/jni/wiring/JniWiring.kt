@@ -62,7 +62,7 @@ private const val JAR_TASK_NAME: String = "jar"
 
 internal fun Project.initializeJni(extension: KreateExtension) {
     val jniConfig = extension.platform.jvm.jni
-    if (!jniConfig.enabled.get()) return
+    if (!jniConfig.enabled.get()) return applyDependencyLibraryPath()
 
     val projectName = resolveFeatureProjectName(extension, jniConfig.nameOverride)
     val rootDirectory = resolveFeatureRootDirectory(jniConfig.projectDirectory, JNI_DIRECTORY_NAME)
@@ -121,25 +121,26 @@ internal fun Project.initializeJni(extension: KreateExtension) {
         libraryOutputDirectory.set(libraryDir)
     }
 
-    applyRuntimeLibraryPath(jniConfig, libraryDir, build.name)
+    offerHostLibrary(libraryDir, build.name)
+    applyRuntimeLibraryPath(libraryDir.map { directory -> runtimeLibraryPath(directory, jniConfig) }, build.name)
     applyNativePackaging(extension, projectName, libraryDir, platformId, build.name)
 }
 
-private fun Project.applyRuntimeLibraryPath(
-    jniConfig: JniExtension,
-    libraryDir: Provider<out Directory>,
-    buildTaskName: String
-) {
-    val libraryPath = libraryDir.map { directory -> runtimeLibraryPath(directory, jniConfig) }
+private fun Project.applyDependencyLibraryPath() {
+    applyRuntimeLibraryPath(provider<String> { null }, buildTaskName = null)
+}
+
+private fun Project.applyRuntimeLibraryPath(libraryPath: Provider<String>, buildTaskName: String?) {
+    val dependencyLibraries = dependencyHostLibraries()
 
     tasks.withType<Test>().configureEach {
-        dependsOn(buildTaskName)
-        jvmArgumentProviders.add(JavaLibraryPathArgumentProvider(libraryPath))
+        if (buildTaskName != null) dependsOn(buildTaskName)
+        jvmArgumentProviders.add(JavaLibraryPathArgumentProvider(libraryPath, dependencyLibraries))
     }
 
     tasks.withType<JavaExec>().configureEach {
-        dependsOn(buildTaskName)
-        jvmArgumentProviders.add(JavaLibraryPathArgumentProvider(libraryPath))
+        if (buildTaskName != null) dependsOn(buildTaskName)
+        jvmArgumentProviders.add(JavaLibraryPathArgumentProvider(libraryPath, dependencyLibraries))
     }
 }
 

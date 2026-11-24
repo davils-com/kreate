@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.5.1
+
+### Fixed
+
+- **A project of the same build loads the library of a JNI project it depends on.** Only the test
+  and run tasks of the JNI project itself put its library on `java.library.path`. With
+  per-platform publishing its JAR carries no library, so the tests of another project of the build
+  that depends on it, such as an IPC client next to the JNI core, could not load it at all. The
+  `Test` and `JavaExec` tasks of a depending project now put the host library of every JNI project
+  its runtime classpath reaches on `java.library.path`, set `kreate.jni.useLibraryPath` and build
+  the library first. The JNI project offers the library as a variant no publication carries, and a
+  project that depends on no JNI project gets no argument.
+
 ## 5.5.0
 
 ### Added

@@ -16,8 +16,10 @@
 package com.davils.kreate.jni.wiring
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import org.gradle.testfixtures.ProjectBuilder
+import java.io.File
 
 class JavaLibraryPathArgumentProviderTest : FunSpec({
     context("JavaLibraryPathArgumentProvider") {
@@ -25,10 +27,48 @@ class JavaLibraryPathArgumentProviderTest : FunSpec({
             val project = ProjectBuilder.builder().build()
             val libraryPath = project.provider { "/build/lib" }
 
-            JavaLibraryPathArgumentProvider(libraryPath).asArguments() shouldContainExactly listOf(
+            JavaLibraryPathArgumentProvider(libraryPath, project.files()).asArguments() shouldContainExactly listOf(
                 "-Djava.library.path=/build/lib",
                 "-Dkreate.jni.useLibraryPath=true"
             )
+        }
+
+        test("adds the host libraries of the JNI projects a project depends on after its own") {
+            val project = ProjectBuilder.builder().build()
+            val libraryPath = project.provider { "/build/lib" }
+            val core = project.file("core/build/jni/lib")
+            val pipes = project.file("pipes/build/jni/lib")
+            val dependencies = project.files(core, pipes)
+
+            val arguments = JavaLibraryPathArgumentProvider(libraryPath, dependencies).asArguments()
+            val paths = listOf("/build/lib", core.absolutePath, pipes.absolutePath)
+            val joined = paths.joinToString(File.pathSeparator)
+
+            arguments shouldContainExactly listOf(
+                "-Djava.library.path=$joined",
+                "-Dkreate.jni.useLibraryPath=true"
+            )
+        }
+
+        test("puts only the host libraries of its JNI dependencies on the path of a project without JNI") {
+            val project = ProjectBuilder.builder().build()
+            val core = project.file("core/build/jni/lib")
+
+            val provider = JavaLibraryPathArgumentProvider(project.provider<String> { null }, project.files(core))
+
+            provider.asArguments() shouldContainExactly listOf(
+                "-Djava.library.path=${core.absolutePath}",
+                "-Dkreate.jni.useLibraryPath=true"
+            )
+        }
+
+        test("adds nothing to a project without JNI and without a JNI dependency") {
+            val project = ProjectBuilder.builder().build()
+
+            val provider = JavaLibraryPathArgumentProvider(project.provider<String> { null }, project.files())
+
+            val arguments = provider.asArguments()
+            arguments.toList().shouldBeEmpty()
         }
     }
 })
