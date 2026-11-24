@@ -171,6 +171,29 @@ jni {
 }
 ```
 
+### Projects of the same build
+
+A project that depends on a JNI project of the same build gets that project's host library the
+same way: its `Test` and `JavaExec` tasks put `build/jni/<os>-<arch>/lib` of the JNI project on
+`java.library.path`, set `-Dkreate.jni.useLibraryPath=true` and depend on its `kreateJniBuild`.
+
+```kotlin
+// ipc-client/build.gradle.kts
+dependencies {
+    implementation(project(":ipc-core"))   // a JNI project
+}
+```
+
+`./gradlew :ipc-client:integrationTest` builds the library of `:ipc-core` for the host and loads
+it. This matters once the library is [published per platform](JNI-Publishing.md): the JAR of
+`:ipc-core` then carries no library, so nothing on the test classpath would provide one.
+
+The JNI project offers the directory as a variant of its own, with the usage
+`kreate-jni-host-library`, which a runtime classpath of the depending project selects again for the
+projects of the build. No published component carries that variant, so POMs and module metadata do
+not change, and an external module never contributes to the path. A project that depends on no
+JNI project gets no argument at all and keeps the `java.library.path` of the JVM.
+
 ## Build types
 
 ```kotlin
