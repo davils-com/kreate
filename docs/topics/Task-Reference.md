@@ -61,9 +61,21 @@ for how they fit together.
         <td><code>build/generated/jni/kotlin/</code></td>
     </tr>
     <tr>
+        <td><code>kreateJniStage</code></td>
+        <td>
+            Stages the host library with a <code>native.properties</code> for a publishing build
+            on another machine. Registered only with
+            <a href="JNI-Publishing.md">per-platform publishing</a>.
+        </td>
+        <td>Built library, group, artifact, version, Git commit</td>
+        <td><code>build/kreate/jni-stage/&lt;artifact&gt;/&lt;os&gt;-&lt;arch&gt;/</code> of the root project</td>
+    </tr>
+    <tr>
         <td><code>kreateJniVerifyPlatforms</code></td>
         <td>
-            Fails when a platform selected for publishing has no binary. Registered only with
+            Fails when a platform selected for publishing has no binary, when a staged library
+            does not match its <code>native.properties</code>, or when the project publishes no
+            library next to its platform artifacts. Registered only with
             <a href="JNI-Publishing.md">per-platform publishing</a>.
         </td>
         <td>Selected platforms, staged and built libraries</td>

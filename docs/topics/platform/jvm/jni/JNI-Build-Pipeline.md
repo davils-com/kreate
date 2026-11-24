@@ -19,8 +19,12 @@ flowchart TD
     B --> T[test]
     B --> R[run / JavaExec]
     B --> J[jar]
+    B --> S[kreateJniStage]
     L[kreateJniLoader] --> K
 ```
+
+`kreateJniStage` exists with [per-platform publishing](JNI-Publishing.md#releasing-from-several-runners)
+and hands the library of one runner to the job that publishes the release.
 
 Two things about this graph are worth stating explicitly, because both differ from the obvious
 arrangement:
