@@ -63,6 +63,7 @@ private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "governance/fix",
     "governance/add",
     "vcs",
+    "jni/stage",
     "api/semver",
     "changelog/commit",
     "changelog/build",

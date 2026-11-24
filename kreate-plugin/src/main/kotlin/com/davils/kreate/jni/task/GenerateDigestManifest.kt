@@ -16,6 +16,8 @@
 
 package com.davils.kreate.jni.task
 
+import com.davils.kreate.jni.stage.LibraryDigest
+import com.davils.kreate.jni.stage.STAGE_MANIFEST_FILE_NAME
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
 import org.gradle.api.file.ConfigurableFileCollection
@@ -29,16 +31,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
-import java.security.MessageDigest
 
 internal const val DIGEST_MANIFEST_FILE_NAME: String = "digests.properties"
-
-private const val DIGEST_ALGORITHM: String = "SHA-256"
-private const val READ_BUFFER: Int = 64 * 1024
-private const val HEXADECIMAL: String = "0123456789abcdef"
-private const val NIBBLE: Int = 4
-private const val LOW_NIBBLE: Int = 0xF
-private const val BYTE_MASK: Int = 0xFF
 
 @CacheableTask
 internal abstract class GenerateDigestManifest : KreateTask(
@@ -58,7 +52,7 @@ internal abstract class GenerateDigestManifest : KreateTask(
     @TaskAction
     public fun execute() {
         val entries = libraryDirectories.files.flatMap { directory -> filesIn(directory) }
-        val libraries = entries.filter { file -> file.isFile }
+        val libraries = entries.filter { file -> file.isFile && file.name != STAGE_MANIFEST_FILE_NAME }
         val firstOfEachName = libraries.distinctBy { file -> file.name }
         val target = manifest.get().asFile
         target.parentFile.mkdirs()
@@ -79,32 +73,7 @@ internal abstract class GenerateDigestManifest : KreateTask(
         appendLine("# artifact as the binary it describes it proves nothing: whoever replaced one")
         appendLine("# replaced the other.")
         for (library in libraries.sortedBy { file -> file.name }) {
-            appendLine("${platformId.get()}/${library.name}=${digestOf(library)}")
+            appendLine("${platformId.get()}/${library.name}=${LibraryDigest.sha256Of(library)}")
         }
-    }
-
-    private fun digestOf(file: File): String {
-        val digest = MessageDigest.getInstance(DIGEST_ALGORITHM)
-        file.inputStream().use { source ->
-            val buffer = ByteArray(READ_BUFFER)
-            var read = source.read(buffer)
-            while (read >= 0) {
-                digest.update(buffer, 0, read)
-                read = source.read(buffer)
-            }
-        }
-
-        return toHexadecimal(digest.digest())
-    }
-
-    private fun toHexadecimal(digest: ByteArray): String {
-        val rendered = StringBuilder(digest.size * 2)
-        for (byte in digest) {
-            val value = byte.toInt() and BYTE_MASK
-            rendered.append(HEXADECIMAL[value ushr NIBBLE])
-            rendered.append(HEXADECIMAL[value and LOW_NIBBLE])
-        }
-
-        return rendered.toString()
     }
 }

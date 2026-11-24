@@ -80,6 +80,14 @@ public object JniTaskNames {
      */
     public const val VERIFY_PLATFORMS: String = "kreateJniVerifyPlatforms"
 
+    /**
+     * Stages the native library of the build host with a manifest, for a publishing build that
+     * collects the libraries of every platform to pick up with `-Pkreate.jni.stage`.
+     *
+     * @since 5.5.0
+     */
+    public const val STAGE: String = "kreateJniStage"
+
     private const val NATIVE_JAR_PREFIX: String = "kreateJniNativeJar"
 
     /**
