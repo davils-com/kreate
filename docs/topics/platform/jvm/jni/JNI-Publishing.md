@@ -57,6 +57,13 @@ Two things follow from `publishing { enabled = true }`:
         classifier would have worked too; a separate artifact id is what Maven tooling handles
         without special cases.
     </def>
+    <def title="The platform artifacts take the artifact id of the library">
+        The project <code>pipe-core</code> publishes <code>pipe-core-windows-x86_64</code>, also
+        when its native library is called <code>pipe_core</code>: the artifact id is the one of the
+        library, <code>project { name }</code> or else the Gradle project name. The native library
+        keeps its own name inside the JAR, <code>native/windows-x86_64/pipe_core.dll</code>, where
+        the loader looks for it.
+    </def>
 </deflist>
 
 <note>
@@ -134,7 +141,8 @@ library together with every platform artifact in a single Gradle run.
 ```
 
 `kreateJniStage` builds the host library and writes it to
-`build/kreate/jni-stage/<artifact>/<os>-<arch>/` of the root project, next to a `native.properties`:
+`build/kreate/jni-stage/<artifact>/<os>-<arch>/` of the root project, where `<artifact>` is the
+artifact id of the library, next to a `native.properties`:
 
 ```properties
 format=1

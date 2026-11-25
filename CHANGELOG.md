@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.5.2
+
+### Fixed
+
+- **The platform artifacts of a JNI library carry the artifact id of the library.** Without
+  `project { name }` they were named after the native library, so the project `konnect-ipc-core`
+  with the native library `konnect_ipc_core` published `konnect_ipc_core-windows-x86_64` next to
+  `konnect-ipc-core`. The platform artifacts, the stage directory and its manifest, the platform
+  JARs in `build/libs` and the dependency the generated loader asks for now take the artifact id
+  of the library, as its own publication does. The native library keeps its name in the JAR and
+  for the loader.
+
 ## 5.5.1
 
 ### Fixed
