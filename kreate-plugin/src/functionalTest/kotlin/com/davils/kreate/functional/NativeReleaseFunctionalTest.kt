@@ -17,6 +17,7 @@
 package com.davils.kreate.functional
 
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -47,12 +48,15 @@ private val ALL_PLATFORMS: List<String> = listOf(
 private val PLATFORMS_ARGUMENT: String = "-Pkreate.jni.publishPlatforms=${ALL_PLATFORMS.joinToString(",")}"
 
 private val LIBRARY_FILES: Map<String, String> = mapOf(
-    "linux" to "libsample.so",
-    "windows" to "sample.dll",
-    "macos" to "libsample.dylib"
+    "linux" to "lib%s.so",
+    "windows" to "%s.dll",
+    "macos" to "lib%s.dylib"
 )
 
-private fun libraryFileOf(platform: String): String = LIBRARY_FILES.getValue(platform.substringBefore('-'))
+private fun libraryFileOf(platform: String, library: String = "sample"): String {
+    val pattern = LIBRARY_FILES.getValue(platform.substringBefore('-'))
+    return pattern.format(library)
+}
 
 private fun sha256Of(file: File): String {
     val digest = MessageDigest.getInstance("SHA-256")
@@ -93,9 +97,11 @@ class NativeReleaseFunctionalTest : FunSpec({
         platform: String,
         version: String = RELEASE,
         revision: String? = null,
-        artifact: String = "sample"
+        artifact: String = "sample",
+        library: String = "sample"
     ): File {
-        val library = write("stage/sample/$platform/${libraryFileOf(platform)}", "native code of $platform")
+        val libraryPath = "stage/$artifact/$platform/${libraryFileOf(platform, library)}"
+        val libraryFile = write(libraryPath, "native code of $platform")
         val lines = listOfNotNull(
             "format=1",
             "platform=$platform",
@@ -103,22 +109,22 @@ class NativeReleaseFunctionalTest : FunSpec({
             "artifact=$artifact",
             "version=$version",
             revision?.let { value -> "revision=$value" },
-            "sha256.${library.name}=${sha256Of(library)}"
+            "sha256.${libraryFile.name}=${sha256Of(libraryFile)}"
         )
-        write("stage/sample/$platform/native.properties", lines.joinToString(separator = "\n"))
-        return library
+        write("stage/$artifact/$platform/native.properties", lines.joinToString(separator = "\n"))
+        return libraryFile
     }
 
     fun KreateBuildFixture.stageAll(version: String = RELEASE, revision: String? = null) {
         ALL_PLATFORMS.forEach { platform -> stage(platform, version, revision) }
     }
 
-    fun jniBlock(): String = """
+    fun jniBlock(nameOverride: String = """nameOverride = "sample""""): String = """
         platform {
             jvm {
                 jni {
                     enabled = true
-                    nameOverride = "sample"
+                    $nameOverride
 
                     packaging {
                         enabled = true
@@ -132,17 +138,19 @@ class NativeReleaseFunctionalTest : FunSpec({
         }
     """.trimIndent()
 
-    fun KreateBuildFixture.writeMavenTargetBuild(targetExtras: String = "") {
+    fun KreateBuildFixture.writeMavenTargetBuild(targetExtras: String = "", named: Boolean = true) {
+        val name = """name = "sample"""".takeIf { named }.orEmpty()
+        val nameOverride = """nameOverride = "sample"""".takeIf { named }.orEmpty()
         val releases = file("repository/releases").toURI()
         val snapshots = file("repository/snapshots").toURI()
         writeBuild(
             kreateBlock = """
                 ${KreateBuildFixture.platformBlock}
 
-                ${jniBlock()}
+                ${jniBlock(nameOverride)}
 
                 project {
-                    name = "sample"
+                    $name
                     description = "Fixture"
 
                     publish {
@@ -196,6 +204,33 @@ class NativeReleaseFunctionalTest : FunSpec({
                 )
                 val pom = fixture.releasedModule("sample-$platform").resolve("sample-$platform-$RELEASE.pom")
                 pom.readText() shouldNotContain "<dependencies>"
+            }
+        }
+
+        test("names the platform artifacts after the library's artifact, not after its native library") {
+            val fixture = KreateBuildFixture.createIn(workspace)
+            fixture.writeSettings(projectName = "pipe-core")
+            fixture.writeKotlin(
+                "com/example/Pipe.kt",
+                """
+                package com.example
+
+                class Pipe
+                """.trimIndent()
+            )
+            val platforms = listOf("linux-x86_64", "windows-x86_64")
+            platforms.forEach { platform -> fixture.stage(platform, artifact = "pipe-core", library = "pipe_core") }
+            fixture.writeMavenTargetBuild(named = false)
+
+            val selection = "-Pkreate.jni.publishPlatforms=${platforms.joinToString(",")}"
+            fixture.build(PUBLISH_TO_DAVILS, STAGE_ARGUMENT, selection, "-Pversion=$RELEASE")
+
+            fixture.releasedModule("pipe-core").isDirectory shouldBe true
+            platforms.forEach { platform ->
+                val module = fixture.releasedModule("pipe-core-$platform")
+                val jar = module.resolve("pipe-core-$platform-$RELEASE.jar")
+                jarEntries(jar) shouldContain "native/$platform/${libraryFileOf(platform, "pipe_core")}"
+                fixture.releasedModule("pipe_core-$platform").exists() shouldBe false
             }
         }
 
@@ -481,6 +516,31 @@ class NativeReleaseFunctionalTest : FunSpec({
                 "-Pversion=$RELEASE"
             )
             result.task(":kreateJniVerifyPlatforms")?.outcome shouldBe TaskOutcome.SUCCESS
+        }
+
+        test("stages under the library's artifact while the library keeps its native name") {
+            val fixture = KreateBuildFixture.createIn(workspace)
+            fixture.writeSettings(projectName = "pipe-core")
+            fixture.writeMavenTargetBuild(named = false)
+            fixture.writeKotlin(
+                "com/example/Native.kt",
+                """
+                package com.example
+
+                class Native {
+                    external fun greet(): String
+                }
+                """.trimIndent()
+            )
+
+            fixture.build("kreateJniStage", "-Pversion=$RELEASE")
+
+            val stageDirectory = fixture.file("build/kreate/jni-stage/pipe-core")
+            val stagedPlatforms = stageDirectory.listFiles().orEmpty()
+            val staged = stagedPlatforms.single()
+            staged.resolve(libraryFileOf(staged.name, "pipe_core")).isFile shouldBe true
+            staged.resolve("native.properties").readText() shouldContain "artifact=pipe-core"
+            fixture.file("build/kreate/jni-stage/pipe_core").exists() shouldBe false
         }
 
         test("bundles the natives into the library JAR only, never into its sources") {

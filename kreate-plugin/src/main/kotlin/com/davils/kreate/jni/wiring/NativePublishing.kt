@@ -17,6 +17,7 @@
 package com.davils.kreate.jni.wiring
 
 import com.davils.kreate.KreateExtension
+import com.davils.kreate.gradle.declaredProjectName
 import com.davils.kreate.host.requireKnownPlatform
 import com.davils.kreate.jni.JniPublishingExtension
 import com.davils.kreate.jni.JniTaskNames
@@ -50,7 +51,6 @@ private const val NATIVE_JAR_DIRECTORY: String = "libs"
 
 internal fun Project.configureNativePublishing(
     extension: KreateExtension,
-    projectName: String,
     hostLibraryDir: Provider<out Directory>,
     hostPlatformId: String,
     resourcePath: String,
@@ -58,7 +58,7 @@ internal fun Project.configureNativePublishing(
 ) {
     val publishing = extension.platform.jvm.jni.packaging.publishing
     val platforms = resolveSelectedPlatforms(publishing, hostPlatformId)
-    val artifactBase = extension.project.name.orNull ?: projectName
+    val artifactBase = declaredProjectName(extension)
     val host = HostLibrary(hostPlatformId, hostLibraryDir, buildTaskName)
     val stageRoot = stageRootOf(artifactBase)
     val sources = platforms.map { platformId -> nativeSourceOf(platformId, publishing, stageRoot, host) }
@@ -68,7 +68,7 @@ internal fun Project.configureNativePublishing(
     val writesDigests = extension.platform.jvm.jni.packaging.digestManifest.get()
     val jars = sources.map { source ->
         val digests = registerPlatformDigestManifest(source, verify, writesDigests)
-        registerNativeJar(source, digests, projectName, resourcePath, verify, buildTaskName)
+        registerNativeJar(source, digests, artifactBase, resourcePath, verify, buildTaskName)
     }
 
     tasks.register(JniTaskNames.NATIVE_JARS) {
@@ -77,7 +77,7 @@ internal fun Project.configureNativePublishing(
         dependsOn(jars)
     }
 
-    registerNativePublications(extension, projectName, sources.map { it.platformId }, jars, verify)
+    registerNativePublications(extension, sources.map { it.platformId }, jars, verify)
 }
 
 private fun Project.stageRootOf(artifactBase: String): Directory? {
@@ -188,14 +188,14 @@ private fun Project.registerPlatformDigestManifest(
 private fun Project.registerNativeJar(
     source: NativeSource,
     digests: TaskProvider<GenerateDigestManifest>?,
-    projectName: String,
+    artifactBase: String,
     resourcePath: String,
     verify: TaskProvider<VerifyNativePlatforms>,
     buildTaskName: String
 ): TaskProvider<Jar> =
     tasks.register<Jar>(JniTaskNames.nativeJar(source.platformId)) {
         group = KreateTaskGroup.JNI.label
-        description = "Packages the ${source.platformId} native library of $projectName."
+        description = "Packages the ${source.platformId} native library of $artifactBase."
 
         dependsOn(verify)
         if (source.hostBuilt != null) {
@@ -213,7 +213,7 @@ private fun Project.registerNativeJar(
         }
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-        archiveBaseName.set(projectName)
+        archiveBaseName.set(artifactBase)
         archiveAppendix.set(source.platformId)
         destinationDirectory.set(layout.buildDirectory.dir(NATIVE_JAR_DIRECTORY))
     }

@@ -123,7 +123,7 @@ internal fun Project.initializeJni(extension: KreateExtension) {
 
     offerHostLibrary(libraryDir, build.name)
     applyRuntimeLibraryPath(libraryDir.map { directory -> runtimeLibraryPath(directory, jniConfig) }, build.name)
-    applyNativePackaging(extension, projectName, libraryDir, platformId, build.name)
+    applyNativePackaging(extension, libraryDir, platformId, build.name)
 }
 
 private fun Project.applyDependencyLibraryPath() {
@@ -152,7 +152,6 @@ private fun Project.runtimeLibraryPath(libraryDirectory: Directory, jniConfig: J
 
 private fun Project.applyNativePackaging(
     extension: KreateExtension,
-    projectName: String,
     libraryDir: Provider<out Directory>,
     platformId: String,
     buildTaskName: String
@@ -160,16 +159,15 @@ private fun Project.applyNativePackaging(
     val packaging = extension.platform.jvm.jni.packaging
     if (!packaging.enabled.get()) return
 
-    distributeNativeLibraries(extension, projectName, libraryDir, platformId, buildTaskName)
+    distributeNativeLibraries(extension, libraryDir, platformId, buildTaskName)
 
     if (!packaging.generateLoader.get()) return
 
-    registerNativeLoader(extension, projectName, platformId)
+    registerNativeLoader(extension, platformId)
 }
 
 private fun Project.distributeNativeLibraries(
     extension: KreateExtension,
-    projectName: String,
     libraryDir: Provider<out Directory>,
     platformId: String,
     buildTaskName: String
@@ -182,7 +180,6 @@ private fun Project.distributeNativeLibraries(
     if (publishPerPlatform) {
         configureNativePublishing(
             extension = extension,
-            projectName = projectName,
             hostLibraryDir = libraryDir,
             hostPlatformId = platformId,
             resourcePath = resourcePath,
@@ -224,7 +221,6 @@ private fun Project.bundleIntoMainJar(
 
 private fun Project.registerNativeLoader(
     extension: KreateExtension,
-    projectName: String,
     platformId: String
 ) {
     val packaging = extension.platform.jvm.jni.packaging
@@ -234,7 +230,7 @@ private fun Project.registerNativeLoader(
     val loaderDir = layout.buildDirectory.dir("generated/jni/kotlin")
     val loaderPackage = resolveLoaderPackageName(extension)
     val platformsNamedInHint = platformsNamedInLoaderHint(publishing, publishPerPlatform, platformId)
-    val artifactName = extension.project.name.orNull ?: projectName
+    val artifactName = declaredProjectName(extension)
 
     val loader = tasks.register<GenerateNativeLoader>(JniTaskNames.LOADER) {
         packageName.set(loaderPackage)

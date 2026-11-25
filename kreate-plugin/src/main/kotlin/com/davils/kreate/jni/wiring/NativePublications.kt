@@ -19,6 +19,7 @@ package com.davils.kreate.jni.wiring
 import com.davils.kreate.KreateExtension
 import com.davils.kreate.gradle.GradlePluginId
 import com.davils.kreate.gradle.configurePom
+import com.davils.kreate.gradle.declaredProjectName
 import com.davils.kreate.host.platformTaskSuffix
 import com.davils.kreate.jni.task.VerifyNativePlatforms
 import com.davils.kreate.publish.PublishExtension
@@ -51,7 +52,6 @@ private const val DOCUMENTATION_JAR_DIRECTORY: String = "libs/native-docs"
 
 internal fun Project.registerNativePublications(
     extension: KreateExtension,
-    projectName: String,
     platforms: List<String>,
     jars: List<TaskProvider<Jar>>,
     verify: TaskProvider<VerifyNativePlatforms>
@@ -68,7 +68,7 @@ internal fun Project.registerNativePublications(
         return
     }
 
-    val artifactBase = extension.project.name.orNull ?: projectName
+    val artifactBase = declaredProjectName(extension)
     val projectDescription = extension.project.description.orNull
     val documentationJars = registerDocumentationJars(publishConfig, artifactBase)
 
