@@ -16,15 +16,10 @@
 
 package com.davils.kreate.host
 
-internal enum class OperatingSystem(
-    val id: String,
-    private val nameFragments: Set<String>
-) {
-    WINDOWS("windows", setOf("wind", "winnt")),
+internal enum class OperatingSystem(val id: String) {
+    WINDOWS("windows"),
 
-    LINUX("linux", setOf("nux", "sun", "bsd", "ubu", "cent", "deb")),
+    LINUX("linux"),
 
-    MACOS("macos", setOf("mac", "dar"));
-
-    fun matches(osName: String): Boolean = nameFragments.any { fragment -> fragment in osName }
+    MACOS("macos")
 }

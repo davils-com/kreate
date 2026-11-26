@@ -18,6 +18,8 @@ package com.davils.kreate.host
 
 import com.davils.kore.core.text.SafeText
 import org.gradle.api.GradleException
+import com.davils.knot.platform.Architecture as HostArchitecture
+import com.davils.knot.platform.OperatingSystem as HostSystem
 
 private const val OS_NAME_PROPERTY: String = "os.name"
 
@@ -28,16 +30,22 @@ internal class HostPlatform(
     private val archName: String?
 ) {
     fun operatingSystemOrNull(): OperatingSystem? {
-        val normalizedName = osName?.lowercase() ?: return null
-        return OperatingSystem.entries.firstOrNull { operatingSystem -> operatingSystem.matches(normalizedName) }
+        val name = osName ?: return null
+        return when (HostSystem.resolve(name)) {
+            HostSystem.Linux -> OperatingSystem.LINUX
+            HostSystem.MacOs -> OperatingSystem.MACOS
+            HostSystem.Windows -> OperatingSystem.WINDOWS
+            HostSystem.Wasm, null -> null
+        }
     }
 
     fun requireOperatingSystem(purpose: String): OperatingSystem = operatingSystemOrNull()
         ?: throw GradleException("Cannot determine $purpose: unsupported operating system ${shown(osName)}.")
 
-    fun architectureOrNull(): Architecture? {
-        val normalizedName = archName.orEmpty().lowercase()
-        return Architecture.entries.firstOrNull { architecture -> architecture.matches(normalizedName) }
+    fun architectureOrNull(): Architecture? = when (HostArchitecture.resolve(archName.orEmpty())) {
+        HostArchitecture.X64 -> Architecture.X64
+        HostArchitecture.Arm64 -> Architecture.ARM64
+        null -> null
     }
 
     fun requireArchitecture(purpose: String): Architecture = architectureOrNull()

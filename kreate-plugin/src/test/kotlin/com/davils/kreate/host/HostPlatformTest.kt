@@ -48,8 +48,6 @@ class HostPlatformTest : FunSpec({
             "Windows 11" to OperatingSystem.WINDOWS,
             "Windows Server 2022" to OperatingSystem.WINDOWS,
             LINUX to OperatingSystem.LINUX,
-            "FreeBSD" to OperatingSystem.LINUX,
-            "SunOS" to OperatingSystem.LINUX,
             "Mac OS X" to OperatingSystem.MACOS,
             "Darwin" to OperatingSystem.MACOS
         ) { (osName, expected) ->
@@ -58,6 +56,12 @@ class HostPlatformTest : FunSpec({
 
         test("reports no operating system for an unknown name") {
             HostPlatform("Plan 9", AMD64).operatingSystemOrNull() shouldBe null
+        }
+
+        test("reports no operating system for a Unix Kreate builds nothing for") {
+            listOf("FreeBSD", "SunOS").forEach { osName ->
+                HostPlatform(osName, AMD64).operatingSystemOrNull() shouldBe null
+            }
         }
 
         test("reports no operating system when the name is missing") {
@@ -148,23 +152,25 @@ class HostPlatformTest : FunSpec({
     }
 
     context("OperatingSystem") {
-        test("recognises the names the JVM reports") {
-            OperatingSystem.WINDOWS.matches("windows 11") shouldBe true
-            OperatingSystem.LINUX.matches("linux") shouldBe true
-            OperatingSystem.MACOS.matches("mac os x") shouldBe true
+        test("recognises the names the JVM reports, through Knot") {
+            HostPlatform("windows 11", AMD64).operatingSystemOrNull() shouldBe OperatingSystem.WINDOWS
+            HostPlatform("linux", AMD64).operatingSystemOrNull() shouldBe OperatingSystem.LINUX
+            HostPlatform("mac os x", AMD64).operatingSystemOrNull() shouldBe OperatingSystem.MACOS
         }
 
-        test("does not claim a name of another operating system") {
-            OperatingSystem.MACOS.matches("linux") shouldBe false
+        test("uses the wire format identifiers") {
+            OperatingSystem.entries.map { system -> system.id } shouldBe listOf("windows", "linux", "macos")
         }
     }
 
     context("Architecture") {
-        test("recognises both spellings of each architecture") {
-            Architecture.X64.matches("amd64") shouldBe true
-            Architecture.X64.matches("x86_64") shouldBe true
-            Architecture.ARM64.matches("aarch64") shouldBe true
-            Architecture.ARM64.matches("arm64") shouldBe true
+        test("recognises both spellings of each architecture, through Knot") {
+            listOf("amd64", "x86_64").forEach { name ->
+                HostPlatform(LINUX, name).architectureOrNull() shouldBe Architecture.X64
+            }
+            listOf("aarch64", "arm64").forEach { name ->
+                HostPlatform(LINUX, name).architectureOrNull() shouldBe Architecture.ARM64
+            }
         }
 
         test("uses the wire format identifiers") {
