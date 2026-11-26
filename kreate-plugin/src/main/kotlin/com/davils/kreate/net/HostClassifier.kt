@@ -16,30 +16,15 @@
 
 package com.davils.kreate.net
 
-import java.net.InetAddress
-import java.net.UnknownHostException
+import com.davils.konnect.internetprotocol.address.IpAddress
+import com.davils.konnect.internetprotocol.address.Ipv6Address
+import com.davils.konnect.internetprotocol.network.IpNetwork
 
 private const val LOCALHOST: String = "localhost"
 
-private const val OCTET: String = """(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"""
+private val CANONICAL_IPV4_SHAPE: Regex = Regex("""\d{1,3}(\.\d{1,3}){3}""")
 
-private const val BYTE_MASK: Int = 0xFF
-
-private const val CARRIER_GRADE_NAT_FIRST_OCTET: Int = 100
-
-private const val CARRIER_GRADE_NAT_MASK: Int = 0xC0
-
-private const val CARRIER_GRADE_NAT_PREFIX: Int = 0x40
-
-private const val UNIQUE_LOCAL_MASK: Int = 0xFE
-
-private const val UNIQUE_LOCAL_PREFIX: Int = 0xFC
-
-private const val IPV4_LENGTH: Int = 4
-
-private const val IPV6_LENGTH: Int = 16
-
-private val CANONICAL_IPV4: Regex = Regex("$OCTET(\\.$OCTET){3}")
+private val SITE_LOCAL: IpNetwork = IpNetwork.parse("fec0::/10")
 
 private val NUMERIC_LABEL: Regex = Regex("""\d+|0[xX][0-9a-fA-F]*""")
 
@@ -56,38 +41,14 @@ internal object HostClassifier {
         return HostKind.PUBLIC
     }
 
-    private fun isAddressLiteral(host: String): Boolean = ':' in host || CANONICAL_IPV4.matches(host)
+    private fun isAddressLiteral(host: String): Boolean = ':' in host || CANONICAL_IPV4_SHAPE.matches(host)
 
     private fun classifyLiteral(literal: String): HostKind {
-        val address = try {
-            InetAddress.getByName(literal)
-        } catch (expected: UnknownHostException) {
-            return HostKind.AMBIGUOUS
-        }
-
-        if (address.isLoopbackAddress) return HostKind.LOOPBACK
-        if (isPrivate(address)) return HostKind.PRIVATE
-        return HostKind.PUBLIC
+        val parsed = IpAddress.parseOrNull(literal) ?: return HostKind.AMBIGUOUS
+        val address = (parsed as? Ipv6Address)?.toIpv4OrNull() ?: parsed
+        if (address.isLoopback) return HostKind.LOOPBACK
+        val isPublic = address.isPublic && address !in SITE_LOCAL
+        if (isPublic) return HostKind.PUBLIC
+        return HostKind.PRIVATE
     }
-
-    private fun isPrivate(address: InetAddress): Boolean {
-        val isLocalRange = address.isAnyLocalAddress || address.isSiteLocalAddress || address.isLinkLocalAddress
-        return isLocalRange || address.isMulticastAddress || isCarrierGradeNat(address) || isUniqueLocal(address)
-    }
-
-    private fun isCarrierGradeNat(address: InetAddress): Boolean {
-        val bytes = address.address
-        if (bytes.size != IPV4_LENGTH) return false
-
-        val isInFirstOctet = unsigned(bytes[0]) == CARRIER_GRADE_NAT_FIRST_OCTET
-        return isInFirstOctet && unsigned(bytes[1]) and CARRIER_GRADE_NAT_MASK == CARRIER_GRADE_NAT_PREFIX
-    }
-
-    private fun isUniqueLocal(address: InetAddress): Boolean {
-        val bytes = address.address
-        if (bytes.size != IPV6_LENGTH) return false
-        return unsigned(bytes[0]) and UNIQUE_LOCAL_MASK == UNIQUE_LOCAL_PREFIX
-    }
-
-    private fun unsigned(byte: Byte): Int = byte.toInt() and BYTE_MASK
 }
