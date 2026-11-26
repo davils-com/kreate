@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.6.0
+
+### Changed
+
+- **Kreate builds on Kore 2.5.0, Knot 1.2.0 and Konnect 1.1.0.** The operating system and the architecture of the
+  host are detected by Knot, and the address literals the network guard refuses are classified by Konnect, which
+  knows every special-purpose block, documentation, benchmarking and reserved ranges included. A host on FreeBSD or
+  SunOS is no longer taken for Linux: Kreate builds nothing for them and reports them as unsupported.
+- **The digest of a staged JNI library is written by `HexFormat` of the JDK.**
+- **Built with Gradle 9.9.2**, with Bouncy Castle 1.87.
+
 ## 5.5.2
 
 ### Fixed
