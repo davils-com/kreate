@@ -215,31 +215,31 @@ internal abstract class GenerateNativeLoader : KreateTask(
     }
 
     private fun renderPlatformHelpers(): String = """
-        |    private fun platformId(): String {
-        |        val osName = System.getProperty("os.name").lowercase()
-        |        val osId = when {
-        |            osName.contains("win") -> "windows"
-        |            osName.contains("mac") || osName.contains("darwin") -> "macos"
-        |            else -> "linux"
-        |        }
+        |    private fun platformId(): String = osId() + "-" + archId()
         |
-        |        val archName = System.getProperty("os.arch").lowercase()
-        |        val archId = if (archName.contains("aarch64") || archName.contains("arm64")) {
-        |            "$AARCH64_ID"
-        |        } else {
-        |            "$X86_64_ID"
-        |        }
-        |
-        |        return osId + "-" + archId
-        |    }
-        |
-        |    private fun fileName(name: String): String {
+        |    private fun osId(): String {
         |        val osName = System.getProperty("os.name").lowercase()
         |        return when {
-        |            osName.contains("win") -> name + ".dll"
-        |            osName.contains("mac") || osName.contains("darwin") -> "lib" + name + ".dylib"
-        |            else -> "lib" + name + ".so"
+        |            osName.startsWith("mac") || osName.startsWith("darwin") -> "macos"
+        |            osName.startsWith("windows") -> "windows"
+        |            osName.startsWith("linux") -> "linux"
+        |            else -> throw UnsatisfiedLinkError("No native library is packaged for the operating system " + osName)
         |        }
+        |    }
+        |
+        |    private fun archId(): String {
+        |        val archName = System.getProperty("os.arch").lowercase()
+        |        return when (archName) {
+        |            "aarch64", "arm64" -> "$AARCH64_ID"
+        |            "amd64", "x86_64", "x86-64" -> "$X86_64_ID"
+        |            else -> throw UnsatisfiedLinkError("No native library is packaged for the architecture " + archName)
+        |        }
+        |    }
+        |
+        |    private fun fileName(name: String): String = when (osId()) {
+        |        "windows" -> name + ".dll"
+        |        "macos" -> "lib" + name + ".dylib"
+        |        else -> "lib" + name + ".so"
         |    }
         |
     """.trimMargin()

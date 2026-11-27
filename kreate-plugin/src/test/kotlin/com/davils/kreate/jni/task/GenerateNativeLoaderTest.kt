@@ -129,6 +129,16 @@ class GenerateNativeLoaderTest : FunSpec({
             shouldThrow<GradleException> { task.execute() }
         }
 
+        test("tells macOS from Windows and refuses an unknown system or architecture instead of guessing") {
+            val loader = renderedLoader(loaderTask())
+
+            loader shouldContain "osName.startsWith(\"darwin\") -> \"macos\""
+            loader shouldContain "osName.startsWith(\"windows\") -> \"windows\""
+            loader shouldNotContain "contains(\"win\")"
+            loader shouldContain "No native library is packaged for the operating system"
+            loader shouldContain "No native library is packaged for the architecture"
+        }
+
         test("renders an empty hint for a build that publishes no platform artifacts") {
             val loader = renderedLoader(loaderTask(coordinate = ""))
 
