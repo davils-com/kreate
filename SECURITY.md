@@ -61,7 +61,7 @@ on Maven Central. Each release also carries a signed build
 provenance attestation and an SBOM attestation, made by the GitHub Actions run that built it:
 
 ```bash
-gh attestation verify kreate-5.6.2.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
+gh attestation verify kreate-5.6.3.jar --repo davils-com/kreate --signer-repo davils-com/kotlin-workflow
 ```
 
 From 4.2.0 on the release is built by the reusable pipeline of
