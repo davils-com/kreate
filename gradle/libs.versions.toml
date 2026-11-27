@@ -20,7 +20,8 @@ jacoco = "0.8.16"
 # release of them that needs a newer stdlib waits for the minimum to move.
 kore = "2.5.0"
 knot = "1.2.0"
-konnect = "1.1.0"
+konnect = "1.2.0"
+kxml = "1.0.1"
 
 # test & tooling
 junit = "6.1.3"
@@ -37,6 +38,7 @@ poet-core = { module = "com.squareup:kotlinpoet", version.ref = "poet" }
 kore-core = { module = "com.davils:kore-core", version.ref = "kore" }
 knot-platform = { module = "com.davils:knot-platform", version.ref = "knot" }
 konnect-internet-protocol = { module = "com.davils:konnect-internet-protocol", version.ref = "konnect" }
+kxml-core = { module = "com.davils:kxml-core", version.ref = "kxml" }
 
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
@@ -107,6 +109,7 @@ kreate-plugin = [
     "kore-core",
     "knot-platform",
     "konnect-internet-protocol",
+    "kxml-core",
     "serialization-json",
     "ktor-client-core",
     "ktor-client-java",
