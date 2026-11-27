@@ -19,28 +19,20 @@ import com.davils.kore.core.parseDecimalOrNull
 import com.davils.kreate.assurance.finding.Finding
 import com.davils.kreate.assurance.policy.REPORT_ONLY_ATTRIBUTE
 import com.davils.kreate.assurance.rule.ruleFinding
-import org.w3c.dom.Element
-import org.xml.sax.SAXException
-import java.io.ByteArrayInputStream
-import java.io.IOException
+import com.davils.kreate.xml.UntrustedXml
+import com.davils.kreate.xml.attributeValue
+import com.davils.kreate.xml.children
 import java.util.Locale
-import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
-
-private const val DISALLOW_DOCTYPE: String = "http://apache.org/xml/features/disallow-doctype-decl"
-
-private const val LOAD_EXTERNAL_DTD: String = "http://apache.org/xml/features/nonvalidating/load-external-dtd"
 
 private const val PERCENT: Double = 100.0
 
 internal object CoverageIngest {
     fun lineCoverageOf(xml: ByteArray): Double? {
-        val report = parse(xml) ?: return null
-        val counters = childrenOf(report).filter { element -> element.tagName == "counter" }
-        val lines = counters.firstOrNull { counter -> counter.getAttribute("type") == "LINE" } ?: return null
-        val missed = parseDecimalOrNull(lines.getAttribute("missed")) ?: return null
-        val covered = parseDecimalOrNull(lines.getAttribute("covered")) ?: return null
+        val report = UntrustedXml.rootOf(xml, isDoctypeAllowed = true) ?: return null
+        val counters = report.children("counter")
+        val lines = counters.firstOrNull { counter -> counter.attributeValue("type") == "LINE" } ?: return null
+        val missed = parseDecimalOrNull(lines.attributeValue("missed").orEmpty()) ?: return null
+        val covered = parseDecimalOrNull(lines.attributeValue("covered").orEmpty()) ?: return null
         val total = missed + covered
         if (total == 0.0) return null
         return covered / total * PERCENT
@@ -52,25 +44,5 @@ internal object CoverageIngest {
         val title = "Line coverage is $measured %, below the minimum of $minimum %"
         val attributes = mapOf(REPORT_ONLY_ATTRIBUTE to "true", "coverage" to measured, "minimum" to minimum.toString())
         return listOf(ruleFinding("COVERAGE_BELOW_MINIMUM", null, title, attributes))
-    }
-
-    private fun parse(xml: ByteArray): Element? = try {
-        val factory = DocumentBuilderFactory.newInstance()
-        factory.setFeature(LOAD_EXTERNAL_DTD, false)
-        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
-        factory.isXIncludeAware = false
-        factory.isExpandEntityReferences = false
-        factory.newDocumentBuilder().parse(ByteArrayInputStream(xml)).documentElement
-    } catch (_: ParserConfigurationException) {
-        null
-    } catch (_: SAXException) {
-        null
-    } catch (_: IOException) {
-        null
-    }
-
-    private fun childrenOf(element: Element): List<Element> {
-        val nodes = element.childNodes
-        return (0 until nodes.length).mapNotNull { index -> nodes.item(index) as? Element }
     }
 }

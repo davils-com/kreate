@@ -20,16 +20,10 @@ import com.davils.kreate.net.HttpTransport
 import com.davils.kreate.net.NetworkException
 import com.davils.kreate.net.TransportRequest
 import com.davils.kreate.net.TransportResponse
-import org.w3c.dom.Document
-import org.xml.sax.SAXException
-import java.io.ByteArrayInputStream
-import java.io.IOException
+import com.davils.kreate.xml.UntrustedXml
+import com.davils.kreate.xml.descendants
+import com.davils.kxml.core.node.XmlNode
 import java.net.URI
-import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
-
-private const val DISALLOW_DOCTYPE: String = "http://apache.org/xml/features/disallow-doctype-decl"
 
 private const val MAX_METADATA_BYTES: Int = 2 * 1024 * 1024
 
@@ -59,30 +53,17 @@ internal class MavenMetadataClient(private val transport: HttpTransport, baseUrl
         throw PublicRepositoryUnavailableException("The public repository could not be reached: $reason", cause)
     }
 
-    private fun parse(body: ByteArray): Document = try {
-        val factory = DocumentBuilderFactory.newInstance()
-        factory.setFeature(DISALLOW_DOCTYPE, true)
-        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
-        factory.isXIncludeAware = false
-        factory.isExpandEntityReferences = false
-        factory.newDocumentBuilder().parse(ByteArrayInputStream(body))
-    } catch (cause: ParserConfigurationException) {
-        throw PublicRepositoryUnavailableException("The metadata of the public repository cannot be read.", cause)
-    } catch (cause: SAXException) {
-        throw PublicRepositoryUnavailableException("The public repository answered with invalid metadata.", cause)
-    } catch (cause: IOException) {
-        throw PublicRepositoryUnavailableException("The metadata of the public repository cannot be read.", cause)
-    }
+    private fun parse(body: ByteArray): XmlNode.Element = UntrustedXml.rootOf(body)
+        ?: throw PublicRepositoryUnavailableException("The public repository answered with invalid metadata.")
 
-    private fun newestOf(document: Document): String? {
+    private fun newestOf(document: XmlNode.Element): String? {
         val names = listOf("release", "latest", "version")
         return names.firstNotNullOfOrNull { name -> lastTextOf(document, name) }
     }
 
-    private fun lastTextOf(document: Document, name: String): String? {
-        val nodes = document.getElementsByTagName(name)
-        if (nodes.length == 0) return null
-        val text = nodes.item(nodes.length - 1).textContent
+    private fun lastTextOf(document: XmlNode.Element, name: String): String? {
+        val nodes = document.descendants(name)
+        val text = nodes.lastOrNull()?.text ?: return null
         return text.trim().ifEmpty { null }
     }
 

@@ -18,18 +18,11 @@ package com.davils.kreate.jni.stage
 
 import java.io.File
 import java.security.MessageDigest
+import java.util.HexFormat
 
 private const val DIGEST_ALGORITHM: String = "SHA-256"
 
 private const val READ_BUFFER: Int = 64 * 1024
-
-private const val HEXADECIMAL: String = "0123456789abcdef"
-
-private const val NIBBLE: Int = 4
-
-private const val LOW_NIBBLE: Int = 0xF
-
-private const val BYTE_MASK: Int = 0xFF
 
 internal object LibraryDigest {
     fun sha256Of(file: File): String {
@@ -43,17 +36,6 @@ internal object LibraryDigest {
             }
         }
 
-        return toHexadecimal(digest.digest())
-    }
-
-    private fun toHexadecimal(digest: ByteArray): String {
-        val rendered = StringBuilder(digest.size * 2)
-        for (byte in digest) {
-            val value = byte.toInt() and BYTE_MASK
-            rendered.append(HEXADECIMAL[value ushr NIBBLE])
-            rendered.append(HEXADECIMAL[value and LOW_NIBBLE])
-        }
-
-        return rendered.toString()
+        return HexFormat.of().formatHex(digest.digest())
     }
 }

@@ -2,8 +2,16 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :kreate-plugin:dependencies --write-locks
-com.davils:kore-core-jvm:2.1.1=runtimeClasspath
-com.davils:kore-core:2.1.1=runtimeClasspath
+com.davils:knot-platform-jvm:1.2.0=runtimeClasspath
+com.davils:knot-platform:1.2.0=runtimeClasspath
+com.davils:konnect-core-jvm:1.2.0=runtimeClasspath
+com.davils:konnect-core:1.2.0=runtimeClasspath
+com.davils:konnect-internet-protocol-jvm:1.2.0=runtimeClasspath
+com.davils:konnect-internet-protocol:1.2.0=runtimeClasspath
+com.davils:kore-core-jvm:2.5.0=runtimeClasspath
+com.davils:kore-core:2.5.0=runtimeClasspath
+com.davils:kxml-core-jvm:1.0.1=runtimeClasspath
+com.davils:kxml-core:1.0.1=runtimeClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.23=runtimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.23.0=runtimeClasspath
 com.fasterxml.jackson.core:jackson-databind:2.23.0=runtimeClasspath

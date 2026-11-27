@@ -20,13 +20,8 @@ internal const val X86_64_ID: String = "x86_64"
 
 internal const val AARCH64_ID: String = "aarch64"
 
-internal enum class Architecture(
-    val id: String,
-    private val nameFragments: Set<String>
-) {
-    ARM64(AARCH64_ID, setOf("aarch64", "arm64")),
+internal enum class Architecture(val id: String) {
+    ARM64(AARCH64_ID),
 
-    X64(X86_64_ID, setOf("x86_64", "amd64"));
-
-    fun matches(archName: String): Boolean = nameFragments.any { fragment -> fragment in archName }
+    X64(X86_64_ID)
 }
