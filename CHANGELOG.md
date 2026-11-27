@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.6.3
+
+### Fixed
+
+- **The release builds again.** The verification metadata lacked the checksums of the POMs of Konnect 1.2.0 and kxml
+  1.0.1 that the self check of Kreate reads, so the pipelines of 5.6.1 and 5.6.2 stopped before anything was
+  published; neither was released, and 5.6.3 carries everything listed under 5.6.0, 5.6.1 and 5.6.2.
+
 ## 5.6.2
 
 ### Changed
