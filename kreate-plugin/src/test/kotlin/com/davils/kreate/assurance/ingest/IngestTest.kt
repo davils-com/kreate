@@ -31,6 +31,9 @@ private val SARIF: String = """
     ]}]}
 """.trimIndent()
 
+private const val JACOCO_DOCTYPE: String =
+    """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">"""
+
 private val COVERAGE: String = """
     <report name="app"><package name="a"><counter type="LINE" missed="1" covered="1"/></package>
     <counter type="INSTRUCTION" missed="10" covered="90"/><counter type="LINE" missed="25" covered="75"/></report>
@@ -55,6 +58,12 @@ class IngestTest : FunSpec({
     context("a coverage report") {
         test("gives the line coverage of the whole report") {
             CoverageIngest.lineCoverageOf(COVERAGE.toByteArray()) shouldBe (75.0 plusOrMinus 0.01)
+        }
+
+        test("reads a report that names the document type of JaCoCo without loading it") {
+            val declared = JACOCO_DOCTYPE + COVERAGE
+
+            CoverageIngest.lineCoverageOf(declared.toByteArray()) shouldBe (75.0 plusOrMinus 0.01)
         }
 
         test("below the minimum becomes a finding, at or above it none") {
