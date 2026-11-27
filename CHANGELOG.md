@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.6.1
+
+### Fixed
+
+- **The release builds again.** The verification metadata of 5.6.0 had lost the checksums of the build logic, so its
+  pipeline stopped before anything was published; 5.6.0 was never released, and 5.6.1 carries everything listed
+  under it.
+
 ## 5.6.0
 
 ### Fixed
