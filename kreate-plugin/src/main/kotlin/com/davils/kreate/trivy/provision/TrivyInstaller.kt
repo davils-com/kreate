@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.trivy.provision
 
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.net.HttpMethod
 import com.davils.kreate.net.HttpTransport
 import com.davils.kreate.net.TransportRequest
@@ -79,7 +80,7 @@ internal class TrivyInstaller(
     }
 
     private fun verify(archive: Path, expected: String) {
-        val actual = sha256Of(archive)
+        val actual = Sha256.hexOf(archive)
         if (actual.equals(expected, ignoreCase = true)) return
 
         throw TrivyUnavailableException(

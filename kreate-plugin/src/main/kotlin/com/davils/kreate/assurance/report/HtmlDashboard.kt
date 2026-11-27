@@ -15,14 +15,12 @@
  */
 package com.davils.kreate.assurance.report
 
-import java.security.MessageDigest
+import com.davils.kreate.digest.Sha256
 import java.util.Base64
 
 private const val STYLE_RESOURCE: String = "/assurance/html/dashboard.css"
 
 private const val SCRIPT_RESOURCE: String = "/assurance/html/dashboard.js"
-
-private const val HASH_ALGORITHM: String = "SHA-256"
 
 internal object HtmlDashboard {
     private val style: String by lazy { resourceOf(STYLE_RESOURCE) }
@@ -50,10 +48,7 @@ internal object HtmlDashboard {
         ).joinToString("\n", postfix = "\n")
     }
 
-    fun hashOf(content: String): String {
-        val digest = MessageDigest.getInstance(HASH_ALGORITHM).digest(content.toByteArray())
-        return "sha256-" + Base64.getEncoder().encodeToString(digest)
-    }
+    fun hashOf(content: String): String = "sha256-" + Base64.getEncoder().encodeToString(Sha256.digestOf(content))
 
     private fun resourceOf(name: String): String {
         val stream = HtmlDashboard::class.java.getResourceAsStream(name) ?: error("The resource $name is missing.")

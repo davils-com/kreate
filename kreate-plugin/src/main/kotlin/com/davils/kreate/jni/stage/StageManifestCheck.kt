@@ -17,6 +17,7 @@
 package com.davils.kreate.jni.stage
 
 import com.davils.kore.core.text.SafeText
+import com.davils.kreate.digest.Sha256
 import java.io.File
 
 internal object StageManifestCheck {
@@ -79,7 +80,7 @@ internal object StageManifestCheck {
 
     private fun isChanged(file: File, digests: Map<String, String>): Boolean {
         val expected = digests[file.name] ?: return false
-        return LibraryDigest.sha256Of(file) != expected
+        return Sha256.hexOf(file.toPath()) != expected
     }
 
     private fun entriesOf(directory: File): List<File> {

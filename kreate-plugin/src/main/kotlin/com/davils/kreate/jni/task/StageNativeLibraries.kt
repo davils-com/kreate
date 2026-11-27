@@ -16,7 +16,7 @@
 
 package com.davils.kreate.jni.task
 
-import com.davils.kreate.jni.stage.LibraryDigest
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.jni.stage.STAGE_MANIFEST_FILE_NAME
 import com.davils.kreate.jni.stage.StageManifest
 import com.davils.kreate.jni.stage.StageManifestFormat
@@ -80,7 +80,7 @@ internal abstract class StageNativeLibraries @Inject constructor(
             artifact = artifactName.get(),
             version = artifactVersion.get(),
             revision = headRevisionOrNull(exec, projectDirectory.get().asFile, logger),
-            digests = libraries.associate { library -> library.name to LibraryDigest.sha256Of(library) }
+            digests = libraries.associate { library -> library.name to Sha256.hexOf(library.toPath()) }
         )
         target.resolve(STAGE_MANIFEST_FILE_NAME).writeText(StageManifestFormat.render(manifest))
         logger.lifecycle("Staged ${libraries.size} native file(s) for ${platformId.get()} in ${target.absolutePath}")

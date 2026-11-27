@@ -45,6 +45,8 @@ private const val CONSTANT_METHOD_TYPE: Int = 16
 private val GRADLE_FREE_PACKAGES: List<String> = listOf(
     "net",
     "archive",
+    "digest",
+    "xml",
     "assurance/finding",
     "assurance/policy",
     "assurance/baseline",

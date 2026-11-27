@@ -38,7 +38,8 @@ skipping tests.
   - domain packages: internal logic without Gradle (`api.abi`, `benchmark.comparison`, ...).
 - Shared internals: `gradle` (plugin ids, source set names, task paths, project naming), `host`
   (the machine Kreate runs on), `tooling` (external executables), `net` (the HTTP transport),
-  `archive` (bounded ZIP and TAR reading), `dependency` (resolved graphs and coordinates) and `vcs`
+  `archive` (bounded ZIP and TAR reading, on the `WorkBudget` of Kore), `digest` (SHA-256), `xml` (untrusted XML
+  through kxml), `dependency` (resolved graphs and coordinates) and `vcs`
   (Git history through `tooling`, revisions checked before they reach Git). Shared internals and
   every domain package stay free of Gradle types; `GradleFreeGuardTest` lists them and enforces
   that.

@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.trivy.provision
 
+import com.davils.kreate.digest.Sha256
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.FileSystemException
 import java.nio.file.Files
@@ -32,7 +33,7 @@ internal class BinaryPublisher(
     private val move: (Path, Path) -> Unit = ::atomicMove
 ) {
     fun publish(binary: Path, target: Path): Path {
-        val digest = sha256Of(binary)
+        val digest = Sha256.hexOf(binary)
         record(binary, target, digest)
         if (holds(target, digest)) return target
 
@@ -66,7 +67,7 @@ internal class BinaryPublisher(
 
     private fun holds(target: Path, digest: String): Boolean {
         if (!Files.isRegularFile(target)) return false
-        return sha256Of(target) == digest
+        return Sha256.hexOf(target) == digest
     }
 
     companion object {

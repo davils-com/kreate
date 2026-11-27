@@ -16,10 +16,7 @@
 package com.davils.kreate.assurance.finding
 
 import com.davils.kreate.assurance.Severity
-import java.security.MessageDigest
-import java.util.HexFormat
-
-private const val FINGERPRINT_ALGORITHM: String = "SHA-256"
+import com.davils.kreate.digest.Sha256
 
 private val UNRATED_MEANS_SERIOUS: Set<FindingSource> = setOf(FindingSource.OSV, FindingSource.TRIVY)
 
@@ -58,9 +55,7 @@ internal data class Finding(
                 location?.path.orEmpty(),
                 location?.line?.toString().orEmpty()
             )
-            val digest = MessageDigest.getInstance(FINGERPRINT_ALGORITHM)
-            val hash = digest.digest(identity.joinToString("|").toByteArray())
-            return HexFormat.of().formatHex(hash)
+            return Sha256.hexOf(identity.joinToString("|"))
         }
 }
 
