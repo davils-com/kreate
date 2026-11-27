@@ -47,6 +47,25 @@ class ArchiveBudgetTest : FunSpec({
         shouldThrow<ArchiveException.LimitExceeded> { budget.chargeBytes(Long.MAX_VALUE) }
     }
 
+    test("refuses a negative size instead of crediting it") {
+        val budget = ArchiveBudget(ArchiveLimits(maxExtractedBytes = 10))
+        budget.chargeBytes(10)
+
+        shouldThrow<ArchiveException.Malformed> { budget.chargeBytes(-5) }
+
+        budget.extractedBytes shouldBe 10L
+        shouldThrow<ArchiveException.LimitExceeded> { budget.chargeBytes(1) }
+    }
+
+    test("counts no entry past the limit and stays exhausted") {
+        val budget = ArchiveBudget(ArchiveLimits(maxEntries = 1))
+        budget.chargeEntry()
+
+        shouldThrow<ArchiveException.LimitExceeded> { budget.chargeEntry() }
+
+        budget.entries shouldBe 1
+    }
+
     test("returns the result of a nested read") {
         ArchiveBudget().nested { 42 } shouldBe 42
     }

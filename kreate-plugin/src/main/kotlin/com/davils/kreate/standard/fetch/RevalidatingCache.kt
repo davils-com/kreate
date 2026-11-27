@@ -17,6 +17,7 @@ package com.davils.kreate.standard.fetch
 
 import com.davils.kore.core.outcome.Outcome
 import com.davils.kore.core.text.SafeText
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.net.HttpMethod
 import com.davils.kreate.net.HttpTransport
 import com.davils.kreate.net.NetworkException
@@ -29,14 +30,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.FileTime
-import java.security.MessageDigest
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import java.util.HexFormat
 import java.util.Properties
-
-private const val KEY_ALGORITHM: String = "SHA-256"
 
 private const val HTTP_NOT_MODIFIED: Int = 304
 
@@ -158,10 +155,7 @@ internal class RevalidatingCache(
 
     private fun metaOf(body: Path): Path = body.resolveSibling(body.fileName.toString().replace(".body", ".meta"))
 
-    private fun fileOf(uri: URI, suffix: String): Path {
-        val digest = MessageDigest.getInstance(KEY_ALGORITHM).digest(uri.toString().toByteArray())
-        return directory.resolve(HexFormat.of().formatHex(digest) + suffix)
-    }
+    private fun fileOf(uri: URI, suffix: String): Path = directory.resolve(Sha256.hexOf(uri.toString()) + suffix)
 
     private fun shown(uri: URI): String = SafeText.text(uri.toString())
 }

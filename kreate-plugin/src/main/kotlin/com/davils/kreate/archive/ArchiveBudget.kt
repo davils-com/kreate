@@ -14,31 +14,36 @@
  * limitations under the License.
  */
 
+@file:OptIn(DavilsInternal::class)
+
 package com.davils.kreate.archive
 
+import com.davils.kore.core.annotation.DavilsInternal
+import com.davils.kore.core.budget.WorkBudget
+
+private const val ENTRIES: String = "archive entries"
+private const val EXTRACTED_BYTES: String = "extracted archive bytes"
+
 internal class ArchiveBudget(private val limits: ArchiveLimits = ArchiveLimits()) {
-    var extractedBytes: Long = 0
-        private set
-
-    var entries: Int = 0
-        private set
-
+    private val entryBudget = WorkBudget(maximum = limits.maxEntries.toLong(), limit = ENTRIES)
+    private val byteBudget = WorkBudget(maximum = limits.maxExtractedBytes, limit = EXTRACTED_BYTES)
     private var nestingDepth: Int = 0
 
+    val extractedBytes: Long get() = byteBudget.spent
+
+    val entries: Int get() = entryBudget.spent.toInt()
+
     fun chargeEntry() {
-        entries++
-        if (entries <= limits.maxEntries) return
+        if (entryBudget.tryCharge()) return
         throw ArchiveException.LimitExceeded("The archive holds more than ${limits.maxEntries} entries.")
     }
 
     fun chargeBytes(bytes: Long) {
-        val remaining = limits.maxExtractedBytes - extractedBytes
-        if (bytes > remaining) {
-            throw ArchiveException.LimitExceeded(
-                "The archive expands to more than ${limits.maxExtractedBytes} bytes, nested archives included."
-            )
-        }
-        extractedBytes += bytes
+        if (bytes < 0L) throw ArchiveException.Malformed("An archive entry declares a negative size.")
+        if (byteBudget.tryCharge(bytes)) return
+        throw ArchiveException.LimitExceeded(
+            "The archive expands to more than ${limits.maxExtractedBytes} bytes, nested archives included."
+        )
     }
 
     fun <T> nested(read: () -> T): T {

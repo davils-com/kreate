@@ -16,6 +16,7 @@
 package com.davils.kreate.standard.provider.suite
 
 import com.davils.kore.core.outcome.Outcome
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.standard.model.LookupFailure
 import java.io.IOException
 import java.nio.file.Files
@@ -34,8 +35,6 @@ private const val MAX_TOTAL_BYTES: Long = 2L * 1024 * 1024 * 1024
 private const val BUFFER_BYTES: Int = 64 * 1024
 
 private const val SEPARATOR: Int = 0
-
-private const val SHA_256: String = "SHA-256"
 
 private const val SHA_1: String = "SHA-1"
 
@@ -64,7 +63,7 @@ internal class VendoredTree(val digest: String, val files: List<VendoredFile>) {
             val total = others.sumOf { file -> Files.size(file) }
             if (total > MAX_TOTAL_BYTES) return tooLarge(shown, "more than $MAX_TOTAL_BYTES bytes")
             val byPath = others.associateBy { file -> relativeOf(directory, file) }
-            val tree = MessageDigest.getInstance(SHA_256)
+            val tree = Sha256.digest()
             val files = byPath.keys.sorted().map { path -> fileOf(path, byPath.getValue(path), tree) }
             return Outcome.Success(VendoredTree("sha256:" + HexFormat.of().formatHex(tree.digest()), files))
         }
@@ -77,7 +76,7 @@ internal class VendoredTree(val digest: String, val files: List<VendoredFile>) {
 
         private fun fileOf(path: String, file: Path, tree: MessageDigest): VendoredFile {
             val size = Files.size(file)
-            val content = MessageDigest.getInstance(SHA_256)
+            val content = Sha256.digest()
             val blob = MessageDigest.getInstance(SHA_1)
             tree.update(path.toByteArray(Charsets.UTF_8))
             tree.update(SEPARATOR.toByte())

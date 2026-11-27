@@ -15,17 +15,14 @@
  */
 package com.davils.kreate.provenance.depsdev
 
+import com.davils.kreate.digest.Sha256
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.FileTime
-import java.security.MessageDigest
 import java.time.Clock
 import java.time.Duration
-import java.util.HexFormat
-
-private const val KEY_ALGORITHM: String = "SHA-256"
 
 internal class DepsDevCache(private val directory: Path, private val timeToLive: Duration, private val clock: Clock) {
     fun read(key: String): String? {
@@ -49,8 +46,5 @@ internal class DepsDevCache(private val directory: Path, private val timeToLive:
         }
     }
 
-    private fun fileOf(key: String): Path {
-        val digest = MessageDigest.getInstance(KEY_ALGORITHM).digest(key.toByteArray())
-        return directory.resolve(HexFormat.of().formatHex(digest) + ".json")
-    }
+    private fun fileOf(key: String): Path = directory.resolve(Sha256.hexOf(key) + ".json")
 }

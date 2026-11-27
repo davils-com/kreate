@@ -15,14 +15,8 @@
  */
 package com.davils.kreate.standard.provider.document
 
-import java.security.MessageDigest
-import java.util.HexFormat
-
-private const val ALGORITHM: String = "SHA-256"
+import com.davils.kreate.digest.Sha256
 
 internal object Fingerprints {
-    fun fingerprintOf(bytes: ByteArray): String {
-        val digest = MessageDigest.getInstance(ALGORITHM).digest(bytes)
-        return "sha256:" + HexFormat.of().formatHex(digest)
-    }
+    fun fingerprintOf(bytes: ByteArray): String = "sha256:" + Sha256.hexOf(bytes)
 }

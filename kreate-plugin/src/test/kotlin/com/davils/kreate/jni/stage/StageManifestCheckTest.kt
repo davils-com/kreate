@@ -16,6 +16,7 @@
 
 package com.davils.kreate.jni.stage
 
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.freshDirectory
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.engine.spec.tempdir
@@ -45,7 +46,7 @@ private fun stagedManifest(directory: File, version: String = "1.0.0", revision:
         artifact = "sample",
         version = version,
         revision = revision,
-        digests = mapOf(library.name to LibraryDigest.sha256Of(library))
+        digests = mapOf(library.name to Sha256.hexOf(library.toPath()))
     )
 }
 

@@ -22,23 +22,17 @@ import com.davils.kreate.archive.ArchiveEntry
 import com.davils.kreate.archive.ArchiveException
 import com.davils.kreate.archive.TarArchiveReader
 import com.davils.kreate.archive.ZipArchiveReader
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.standard.fetch.FetchRequest
 import com.davils.kreate.standard.fetch.FetchedDocument
 import com.davils.kreate.standard.model.LookupFailure
 import com.davils.kreate.standard.provider.ProviderContext
 import java.io.BufferedInputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.net.URI
 import java.nio.file.Files
-import java.security.DigestInputStream
-import java.security.MessageDigest
-import java.util.HexFormat
 
 private const val MAX_ARCHIVE_BYTES: Int = 512 * 1024 * 1024
-
-private const val SHA_256: String = "SHA-256"
 
 private const val MAGIC_BYTES: Int = 4
 
@@ -114,8 +108,7 @@ internal class ArchiveIndexer(private val context: ProviderContext) {
         }
         if (!entry.isFile) return
         val name = entry.name.removePrefix(CURRENT_DIRECTORY)
-        val digest = MessageDigest.getInstance(SHA_256).digest(entry.bytes)
-        digests[name] = HexFormat.of().formatHex(digest)
+        digests[name] = Sha256.hexOf(entry.bytes)
     }
 
     private fun forEachEntry(document: FetchedDocument, action: (ArchiveEntry) -> Unit) {
@@ -147,13 +140,5 @@ internal class ArchiveIndexer(private val context: ProviderContext) {
         return firstByte == first && secondByte == second
     }
 
-    private fun sha256Of(document: FetchedDocument): String {
-        val digest = MessageDigest.getInstance(SHA_256)
-        Files.newInputStream(document.path).use { raw -> drain(DigestInputStream(raw, digest)) }
-        return HexFormat.of().formatHex(digest.digest())
-    }
-
-    private fun drain(stream: InputStream) {
-        stream.transferTo(OutputStream.nullOutputStream())
-    }
+    private fun sha256Of(document: FetchedDocument): String = Sha256.hexOf(document.path)
 }

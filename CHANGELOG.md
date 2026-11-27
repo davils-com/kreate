@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 5.6.2
+
+### Changed
+
+- **The budget of an archive is counted by the `WorkBudget` of Kore.** The entries and the extracted bytes of a ZIP or
+  TAR archive, nested archives included, are charged against bounded budgets that stay exhausted once a limit is
+  reached; a negative size is refused as a malformed archive instead of being credited.
+- **Every SHA-256 of Kreate is computed by one helper**, for the fingerprints of findings and standards, the cache
+  keys, the digests of JNI libraries and of Trivy, and the integrity hashes of the dashboard. The digests are
+  unchanged.
+
 ## 5.6.1
 
 ### Fixed

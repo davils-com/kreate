@@ -15,6 +15,7 @@
  */
 package com.davils.kreate.trivy.provision
 
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.net.NetworkException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -44,7 +45,7 @@ internal class TrivyProvisioner(
     private fun cachedBinary(): Path? {
         val binary = binaryPath() ?: return null
         val recorded = recordedDigestOf(binary) ?: return null
-        if (sha256Of(binary) == recorded) return binary
+        if (Sha256.hexOf(binary) == recorded) return binary
         return null
     }
 

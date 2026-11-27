@@ -16,7 +16,7 @@
 
 package com.davils.kreate.jni.task
 
-import com.davils.kreate.jni.stage.LibraryDigest
+import com.davils.kreate.digest.Sha256
 import com.davils.kreate.jni.stage.STAGE_MANIFEST_FILE_NAME
 import com.davils.kreate.task.KreateTask
 import com.davils.kreate.task.KreateTaskGroup
@@ -73,7 +73,7 @@ internal abstract class GenerateDigestManifest : KreateTask(
         appendLine("# artifact as the binary it describes it proves nothing: whoever replaced one")
         appendLine("# replaced the other.")
         for (library in libraries.sortedBy { file -> file.name }) {
-            appendLine("${platformId.get()}/${library.name}=${LibraryDigest.sha256Of(library)}")
+            appendLine("${platformId.get()}/${library.name}=${Sha256.hexOf(library.toPath())}")
         }
     }
 }
